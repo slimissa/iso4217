@@ -4,7 +4,7 @@
 
 One JSON file. Zero dependencies. Works with every language.
 
-[![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
+[![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Schema Version](https://img.shields.io/badge/schema-1.0.0-green.svg)](./schema.json)
 [![Registry Version](https://img.shields.io/badge/registry-1.0.0-orange.svg)](./iso4217.json)
