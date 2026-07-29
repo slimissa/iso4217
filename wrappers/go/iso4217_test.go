@@ -9,7 +9,7 @@ import (
 // Test helpers
 // ---------------------------------------------------------------------------
 
-func registry(t *testing.T) *CurrencyRegistry {
+func testRegistry(t *testing.T) *CurrencyRegistry {
 	t.Helper()
 	r, err := Load()
 	if err != nil {
@@ -54,7 +54,7 @@ func TestMustLoad(t *testing.T) {
 }
 
 func TestLoadHasMetadata(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	if r.Version() == "" || r.Version() == "unknown" {
 		t.Error("Version is empty or unknown")
@@ -65,7 +65,7 @@ func TestLoadHasMetadata(t *testing.T) {
 }
 
 func TestLoadHasCurrencies(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	if r.ActiveCount() < 50 {
 		t.Errorf("Expected >50 active currencies, got %d", r.ActiveCount())
@@ -80,7 +80,7 @@ func TestLoadHasCurrencies(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestActiveUSD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 	if usd == nil {
 		t.Fatal("USD not found")
@@ -100,7 +100,7 @@ func TestActiveUSD(t *testing.T) {
 }
 
 func TestActiveCaseInsensitive(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	tests := []string{"usd", "Usd", "USD", "uSd"}
 	for _, code := range tests {
@@ -111,7 +111,7 @@ func TestActiveCaseInsensitive(t *testing.T) {
 }
 
 func TestActiveNotFound(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	if c := r.Active("XXX"); c != nil {
 		t.Errorf("Expected nil for 'XXX', got %v", c)
@@ -119,7 +119,7 @@ func TestActiveNotFound(t *testing.T) {
 }
 
 func TestCurrencyFindsActive(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	usd := r.Currency("USD")
 	if usd == nil {
@@ -128,7 +128,7 @@ func TestCurrencyFindsActive(t *testing.T) {
 }
 
 func TestCurrencyFindsWithdrawn(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	dem := r.Currency("DEM")
 	if dem == nil {
@@ -137,7 +137,7 @@ func TestCurrencyFindsWithdrawn(t *testing.T) {
 }
 
 func TestCurrencyFindsNonISO(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	btc := r.Currency("BTC")
 	if btc == nil {
@@ -146,7 +146,7 @@ func TestCurrencyFindsNonISO(t *testing.T) {
 }
 
 func TestCurrencyNotFound(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	if c := r.Currency("XXX"); c != nil {
 		t.Errorf("Expected nil for 'XXX', got %v", c)
@@ -154,7 +154,7 @@ func TestCurrencyNotFound(t *testing.T) {
 }
 
 func TestContains(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	tests := []struct {
 		code     string
@@ -180,7 +180,7 @@ func TestContains(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestJPYProperties(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	jpy := r.Active("JPY")
 	if jpy == nil {
 		t.Fatal("JPY not found")
@@ -195,7 +195,7 @@ func TestJPYProperties(t *testing.T) {
 }
 
 func TestKWDProperties(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	kwd := r.Active("KWD")
 	if kwd == nil {
 		t.Fatal("KWD not found")
@@ -207,7 +207,7 @@ func TestKWDProperties(t *testing.T) {
 }
 
 func TestCHFProperties(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	chf := r.Active("CHF")
 	if chf == nil {
 		t.Fatal("CHF not found")
@@ -219,7 +219,7 @@ func TestCHFProperties(t *testing.T) {
 }
 
 func TestBGNProperties(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	bgn := r.Active("BGN")
 	if bgn == nil {
 		t.Fatal("BGN not found")
@@ -235,7 +235,7 @@ func TestBGNProperties(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestToMinorUSD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	tests := []struct {
@@ -258,7 +258,7 @@ func TestToMinorUSD(t *testing.T) {
 }
 
 func TestFromMinorUSD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	tests := []struct {
@@ -279,7 +279,7 @@ func TestFromMinorUSD(t *testing.T) {
 }
 
 func TestToMinorJPY(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	jpy := r.Active("JPY")
 
 	if got := jpy.ToMinor(500.0); got != 500 {
@@ -288,7 +288,7 @@ func TestToMinorJPY(t *testing.T) {
 }
 
 func TestFromMinorJPY(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	jpy := r.Active("JPY")
 
 	if got := jpy.FromMinor(500); got != 500.0 {
@@ -297,7 +297,7 @@ func TestFromMinorJPY(t *testing.T) {
 }
 
 func TestToMinorKWD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	kwd := r.Active("KWD")
 
 	if got := kwd.ToMinor(1.500); got != 1500 {
@@ -306,7 +306,7 @@ func TestToMinorKWD(t *testing.T) {
 }
 
 func TestFromMinorKWD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	kwd := r.Active("KWD")
 
 	if got := kwd.FromMinor(1500); got != 1.5 {
@@ -315,7 +315,7 @@ func TestFromMinorKWD(t *testing.T) {
 }
 
 func TestToMinorBTC(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	btc := r.Currency("BTC")
 	if btc == nil {
 		t.Fatal("BTC not found")
@@ -327,7 +327,7 @@ func TestToMinorBTC(t *testing.T) {
 }
 
 func TestToMinorRoundTrip(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	tests := []float64{0.01, 0.50, 1.00, 100.50, 9999999.99}
@@ -345,7 +345,7 @@ func TestToMinorRoundTrip(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestToMinorNaNPanics(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	defer func() {
@@ -358,7 +358,7 @@ func TestToMinorNaNPanics(t *testing.T) {
 }
 
 func TestToMinorInfPanics(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	defer func() {
@@ -371,7 +371,7 @@ func TestToMinorInfPanics(t *testing.T) {
 }
 
 func TestToMinorNegInfPanics(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	defer func() {
@@ -388,7 +388,7 @@ func TestToMinorNegInfPanics(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestFormatUSD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	tests := []struct {
@@ -409,7 +409,7 @@ func TestFormatUSD(t *testing.T) {
 }
 
 func TestFormatJPY(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	jpy := r.Active("JPY")
 
 	if got := jpy.Format(500.0); got != "¥500" {
@@ -418,7 +418,7 @@ func TestFormatJPY(t *testing.T) {
 }
 
 func TestFormatEUR(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	eur := r.Active("EUR")
 
 	if got := eur.Format(1234.56); got != "€1234.56" {
@@ -431,7 +431,7 @@ func TestFormatEUR(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestAEDPeg(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	aed := r.Active("AED")
 	if aed == nil {
 		t.Fatal("AED not found")
@@ -464,7 +464,7 @@ func TestAEDPeg(t *testing.T) {
 }
 
 func TestDKPPeg(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	dkk := r.Active("DKK")
 	if dkk == nil {
 		t.Fatal("DKK not found")
@@ -485,7 +485,7 @@ func TestDKPPeg(t *testing.T) {
 }
 
 func TestUSDIndependent(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	if usd.IsPegged() {
@@ -497,7 +497,7 @@ func TestUSDIndependent(t *testing.T) {
 }
 
 func TestHKDIsPegged(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	hkd := r.Active("HKD")
 	if hkd == nil {
 		t.Fatal("HKD not found")
@@ -516,7 +516,7 @@ func TestHKDIsPegged(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestPeggedToUSD(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	pegged := r.PeggedTo("USD")
 
 	if len(pegged) == 0 {
@@ -537,7 +537,7 @@ func TestPeggedToUSD(t *testing.T) {
 }
 
 func TestPeggedToEUR(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	pegged := r.PeggedTo("EUR")
 
 	if len(pegged) == 0 {
@@ -562,7 +562,7 @@ func TestPeggedToEUR(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestIndependent(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	independent := r.Independent()
 
 	if len(independent) == 0 {
@@ -593,7 +593,7 @@ func TestIndependent(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestWithMinorUnits3(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	three := r.WithMinorUnits(3)
 
 	codes := make(map[string]bool)
@@ -610,7 +610,7 @@ func TestWithMinorUnits3(t *testing.T) {
 }
 
 func TestWithMinorUnits0(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	zero := r.WithMinorUnits(0)
 
 	codes := make(map[string]bool)
@@ -631,7 +631,7 @@ func TestWithMinorUnits0(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestWithdrawnDEM(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	dem := r.Withdrawn("DEM")
 	if dem == nil {
 		t.Fatal("DEM not found in withdrawn")
@@ -655,7 +655,7 @@ func TestWithdrawnDEM(t *testing.T) {
 }
 
 func TestWithdrawnFRF(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	frf := r.Withdrawn("FRF")
 	if frf == nil {
 		t.Fatal("FRF not found in withdrawn")
@@ -667,7 +667,7 @@ func TestWithdrawnFRF(t *testing.T) {
 }
 
 func TestWithdrawnITL(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	itl := r.Withdrawn("ITL")
 	if itl == nil {
 		t.Fatal("ITL not found in withdrawn")
@@ -683,7 +683,7 @@ func TestWithdrawnITL(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestNonISOBTC(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	btc := r.NonISO("BTC")
 	if btc == nil {
 		t.Fatal("BTC not found in non-ISO")
@@ -698,7 +698,7 @@ func TestNonISOBTC(t *testing.T) {
 }
 
 func TestNonISOETH(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	eth := r.NonISO("ETH")
 	if eth == nil {
 		t.Fatal("ETH not found in non-ISO")
@@ -710,7 +710,7 @@ func TestNonISOETH(t *testing.T) {
 }
 
 func TestNonISOXAU(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	xau := r.NonISO("XAU")
 	if xau == nil {
 		t.Fatal("XAU not found in non-ISO")
@@ -725,7 +725,7 @@ func TestNonISOXAU(t *testing.T) {
 }
 
 func TestNonISODAI(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	dai := r.NonISO("DAI")
 	if dai == nil {
 		t.Fatal("DAI not found in non-ISO")
@@ -744,7 +744,7 @@ func TestNonISODAI(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestUSDIssuingCountries(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	issuers := usd.IssuingCountries()
@@ -757,7 +757,7 @@ func TestUSDIssuingCountries(t *testing.T) {
 }
 
 func TestUSDAdoptingCountries(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	adopters := usd.AdoptingCountries()
@@ -779,7 +779,7 @@ func TestUSDAdoptingCountries(t *testing.T) {
 }
 
 func TestEURCountries(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	eur := r.Active("EUR")
 
 	if len(eur.Countries) < 19 {
@@ -800,7 +800,7 @@ func TestEURCountries(t *testing.T) {
 }
 
 func TestCHFCountries(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	chf := r.Active("CHF")
 
 	issuers := chf.IssuingCountries()
@@ -829,7 +829,7 @@ func TestCHFCountries(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestIssuedByCH(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	swiss := r.IssuedBy("CH")
 
 	codes := make(map[string]bool)
@@ -843,7 +843,7 @@ func TestIssuedByCH(t *testing.T) {
 }
 
 func TestUsedInLI(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	used := r.UsedIn("LI")
 
 	codes := make(map[string]bool)
@@ -861,7 +861,7 @@ func TestUsedInLI(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestAllActive(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	all := r.AllActive()
 
 	if len(all) != r.ActiveCount() {
@@ -870,7 +870,7 @@ func TestAllActive(t *testing.T) {
 }
 
 func TestAllWithdrawn(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	all := r.AllWithdrawn()
 
 	if len(all) != r.WithdrawnCount() {
@@ -879,7 +879,7 @@ func TestAllWithdrawn(t *testing.T) {
 }
 
 func TestAllCurrencies(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	all := r.AllCurrencies()
 
 	expected := r.ActiveCount() + r.WithdrawnCount() + r.NonISOCount()
@@ -893,7 +893,7 @@ func TestAllCurrencies(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestSummary(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	s := r.Summary()
 
 	if s.Version != r.Version() {
@@ -924,7 +924,7 @@ func TestSummary(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestCurrencyString(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 	usd := r.Active("USD")
 
 	s := usd.String()
@@ -934,7 +934,7 @@ func TestCurrencyString(t *testing.T) {
 }
 
 func TestRegistryString(t *testing.T) {
-	r := registry(t)
+	r := testRegistry(t)
 
 	s := r.String()
 	if s == "" {
