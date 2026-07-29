@@ -34,6 +34,7 @@ keywords = [
 ]
 categories = ["finance", "data-structures", "parsing"]
 authors = ["Le P'tit <https://github.com/slimissa>"]
+include = ["src/**/*", "iso4217.json", "README.md"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
