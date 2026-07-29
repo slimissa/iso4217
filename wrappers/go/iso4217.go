@@ -45,7 +45,7 @@ import (
 	"sync"
 )
 
-//go:embed ../../../iso4217.json
+//go:embed iso4217.json
 var registryJSON []byte
 
 // ---------------------------------------------------------------------------

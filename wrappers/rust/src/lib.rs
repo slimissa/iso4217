@@ -45,7 +45,7 @@ use std::fmt;
 ///
 /// This means the crate has zero runtime dependencies on file I/O.
 /// The registry data lives in the binary.
-const REGISTRY_JSON: &str = include_str!("../../../iso4217.json");
+const REGISTRY_JSON: &str = include_str!("../iso4217.json");
 
 // ---------------------------------------------------------------------------
 // Raw JSON structures (private — used only for deserialization)
