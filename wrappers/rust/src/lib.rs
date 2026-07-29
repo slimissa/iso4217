@@ -167,6 +167,8 @@ impl From<RawCountry> for Country {
 /// # Examples
 ///
 /// ```rust
+/// # use iso4217::CurrencyRegistry;
+/// # let registry = CurrencyRegistry::load().unwrap();
 /// let usd = registry.active("USD").unwrap();
 /// assert_eq!(usd.to_minor(100.50), 10050);
 /// assert_eq!(usd.from_minor(10050), 100.5);
@@ -248,6 +250,12 @@ impl Currency {
     /// # Examples
     ///
     /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
+    /// # let usd = registry.active("USD").unwrap();
+    /// # let jpy = registry.active("JPY").unwrap();
+    /// # let kwd = registry.active("KWD").unwrap();
+    /// # let btc = registry.non_iso("BTC").unwrap();
     /// assert_eq!(usd.to_minor(100.50), 10050);
     /// assert_eq!(jpy.to_minor(500.0), 500);
     /// assert_eq!(kwd.to_minor(1.500), 1500);
@@ -271,6 +279,10 @@ impl Currency {
     /// # Examples
     ///
     /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
+    /// # let usd = registry.active("USD").unwrap();
+    /// # let jpy = registry.active("JPY").unwrap();
     /// assert_eq!(usd.from_minor(10050), 100.5);
     /// assert_eq!(jpy.from_minor(500), 500.0);
     /// ```
@@ -284,6 +296,10 @@ impl Currency {
     /// # Examples
     ///
     /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
+    /// # let usd = registry.active("USD").unwrap();
+    /// # let jpy = registry.active("JPY").unwrap();
     /// assert_eq!(usd.format(100.50), "$100.50");
     /// assert_eq!(jpy.format(500.0), "¥500");
     /// ```
@@ -368,8 +384,7 @@ pub struct RegistrySummary {
 /// # Examples
 ///
 /// ```rust
-/// use iso4217::CurrencyRegistry;
-///
+/// # use iso4217::CurrencyRegistry;
 /// let registry = CurrencyRegistry::load().unwrap();
 /// let usd = registry.active("USD").unwrap();
 /// let pegged = registry.pegged_to("USD");
@@ -561,6 +576,8 @@ impl CurrencyRegistry {
     /// Find all active currencies pegged to a specific anchor currency.
     ///
     /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
     /// let usd_pegged = registry.pegged_to("USD");
     /// for c in usd_pegged {
     ///     println!("{} is pegged to USD", c.code);
@@ -590,6 +607,8 @@ impl CurrencyRegistry {
     /// Find all active currencies with a specific number of minor units.
     ///
     /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
     /// let three_decimal = registry.with_minor_units(3);
     /// // Returns BHD, JOD, KWD, LYD, OMR, TND, IQD
     /// ```
