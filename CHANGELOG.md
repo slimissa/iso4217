@@ -1,4 +1,3 @@
-```markdown
 # Changelog
 
 All notable changes to the ISO 4217 Currency Registry will be documented in this file.
@@ -130,4 +129,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Version | Date | Active | Withdrawn | Non-ISO | Wrappers |
 |---------|------|--------|-----------|---------|----------|
 | 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go |
-```
