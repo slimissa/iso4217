@@ -1,0 +1,55 @@
+[package]
+name = "iso4217"
+version = "1.0.0"
+edition = "2021"
+description = "Canonical ISO 4217 currency registry — machine-readable, versioned, language-agnostic. Rust crate with zero runtime dependencies."
+license = "Apache-2.0"
+repository = "https://github.com/slimissa/iso4217"
+homepage = "https://github.com/slimissa/iso4217"
+documentation = "https://docs.rs/iso4217"
+readme = "README.md"
+keywords = [
+    "currency",
+    "iso4217",
+    "finance",
+    "trading",
+    "forex",
+    "foreign-exchange",
+    "cryptocurrency",
+    "stablecoin",
+    "central-bank",
+    "monetary",
+    "exchange-rate",
+    "peg",
+    "minor-units",
+    "decimal-places",
+    "data",
+    "registry",
+    "canonical",
+    "machine-readable",
+    "json",
+    "tempus",
+    "quant",
+    "quantitative-finance",
+]
+categories = ["finance", "data-structures", "parsing"]
+authors = ["Le P'tit <https://github.com/slimissa>"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+
+[features]
+default = []
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+[package.metadata.docs.rs]
+all-features = false
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,0 +1,98 @@
+name: Validate Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'iso4217.json'
+      - 'schema.json'
+      - 'tools/validate.py'
+      - 'tests/**'
+      - '.github/workflows/validate.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'iso4217.json'
+      - 'schema.json'
+      - 'tools/validate.py'
+      - 'tests/**'
+      - '.github/workflows/validate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-json:
+    name: Validate iso4217.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install jsonschema pytest
+
+      - name: Validate registry
+        run: python3 tools/validate.py
+
+      - name: Run tests
+        run: python3 -m pytest tests/ -v
+
+  validate-wrappers:
+    name: Validate wrappers
+    runs-on: ubuntu-latest
+    needs: validate-json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test Python wrapper
+        run: |
+          pip install pytest
+          python3 -m pytest tests/test_wrappers.py -v
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Test JavaScript wrapper
+        run: |
+          cd wrappers/javascript
+          npm install
+          node -e "
+            const { CurrencyRegistry } = require('./index.js');
+            const registry = new CurrencyRegistry();
+            console.log('Loaded', registry.activeCount, 'active currencies');
+            const usd = registry.active('USD');
+            console.log('USD toMinor(100.50):', usd.toMinor(100.50));
+            console.log('JavaScript wrapper OK');
+          "
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Test Go wrapper
+        run: |
+          cd wrappers/go
+          go test ./... -v
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test Rust wrapper
+        run: |
+          cd wrappers/rust
+          cargo test

@@ -1,0 +1,483 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/slimissa/iso4217/v1.0.0/schema.json",
+  "title": "ISO 4217 Currency Registry Schema",
+  "description": "JSON Schema for the canonical ISO 4217 currency registry. Validates structure, types, patterns, and constraints for active ISO currencies, withdrawn currencies, and non-ISO financial instruments.",
+  "type": "object",
+  "required": ["meta", "source", "currencies"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["version", "updated", "schema_version", "description", "project", "license"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version of the registry data."
+        },
+        "updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last data update in ISO 8601 format."
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Version of this schema, decoupled from data version."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Human-readable description of the registry."
+        },
+        "project": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://github\\.com/",
+          "description": "URL of the project repository."
+        },
+        "license": {
+          "type": "string",
+          "enum": ["Apache-2.0"],
+          "description": "SPDX license identifier."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["standard", "maintenance_agency", "maintenance_agency_url", "last_amendment_applied", "last_amendment_date", "last_verified", "verified_against"],
+      "additionalProperties": false,
+      "properties": {
+        "standard": {
+          "type": "string",
+          "enum": ["ISO 4217:2015"]
+        },
+        "maintenance_agency": {
+          "type": "string",
+          "enum": ["SIX Group"]
+        },
+        "maintenance_agency_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "last_amendment_applied": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999
+        },
+        "last_amendment_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "last_verified": {
+          "type": "string",
+          "format": "date"
+        },
+        "verified_against": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 10
+          }
+        },
+        "crypto_source": {
+          "type": "string"
+        },
+        "stablecoin_source": {
+          "type": "string"
+        },
+        "commodity_source": {
+          "type": "string"
+        }
+      }
+    },
+    "currencies": {
+      "type": "object",
+      "required": ["active", "withdrawn"],
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/activeCurrency" }
+        },
+        "withdrawn": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/withdrawnCurrency" }
+        }
+      }
+    },
+    "non_iso": {
+      "type": "object",
+      "required": ["cryptocurrencies", "stablecoins", "commodities", "special_purpose"],
+      "additionalProperties": false,
+      "properties": {
+        "cryptocurrencies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/cryptocurrency" }
+        },
+        "stablecoins": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/stablecoin" }
+        },
+        "commodities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/commodity" }
+        },
+        "special_purpose": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/specialPurpose" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "countryReference": {
+      "type": "object",
+      "required": ["code", "name", "relationship"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Human-readable country or territory name."
+        },
+        "relationship": {
+          "type": "string",
+          "enum": ["issuing", "adopting", "territory", "parallel", "local_issue"],
+          "description": "Relationship of this country/territory to the currency."
+        }
+      }
+    },
+    "activeCurrency": {
+      "type": "object",
+      "required": ["code", "numeric", "name", "minor_units", "symbol", "entity", "central_bank", "pegged_to", "is_independent", "countries"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 alphabetic currency code. Always exactly 3 uppercase letters."
+        },
+        "numeric": {
+          "type": "string",
+          "pattern": "^\\d{3}$",
+          "description": "ISO 4217 numeric currency code. Stored as string to preserve leading zeros."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Official English name of the currency per ISO 4217."
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18,
+          "description": "Number of decimal places for the minor currency unit."
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 0,
+          "description": "Primary currency symbol for display purposes."
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 2,
+          "description": "The sovereign entity, monetary union, or organization that issues this currency."
+        },
+        "central_bank": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Official name of the central bank or monetary authority."
+        },
+        "pegged_to": {
+          "description": "ISO 4217 code of the anchor currency, description of basket peg, or null if floating.",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 3 }
+          ]
+        },
+        "pegged_since": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the peg was established."
+        },
+        "peg_rate": {
+          "description": "Official peg rate, or null for baskets/undisclosed pegs.",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "number", "minimum": 0 }
+          ]
+        },
+        "peg_band_pct": {
+          "description": "Allowed deviation from peg as percentage, or null.",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "number", "minimum": 0, "maximum": 100 }
+          ]
+        },
+        "is_independent": {
+          "type": "boolean",
+          "description": "true if the currency floats independently or managed float. false if hard-pegged."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional note for special cases."
+        },
+        "countries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/countryReference" },
+          "description": "Countries and territories where this currency is primary legal tender."
+        }
+      }
+    },
+    "withdrawnCurrency": {
+      "type": "object",
+      "required": ["code", "numeric", "name", "minor_units", "symbol", "entity", "withdrawn_date", "replaced_by", "conversion_rate"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{2,6}$",
+          "description": "ISO 4217 alphabetic code, or suffixed code for revaluations (e.g., MXN_OLD)."
+        },
+        "numeric": {
+          "type": "string",
+          "pattern": "^\\d{3}$",
+          "description": "ISO 4217 numeric code."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Official English name."
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 0
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 2
+        },
+        "withdrawn_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the currency ceased to be legal tender."
+        },
+        "replaced_by": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 code of the replacement currency."
+        },
+        "conversion_rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Official conversion rate: units of this currency per 1 unit of replacement."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional note for unusual withdrawal circumstances."
+        }
+      }
+    },
+    "cryptocurrency": {
+      "type": "object",
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "introduced", "market_cap_rank", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{2,10}$",
+          "description": "Ticker symbol."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "cryptocurrency"
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 2
+        },
+        "introduced": {
+          "type": "string",
+          "format": "date"
+        },
+        "market_cap_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "note": {
+          "type": "string",
+          "minLength": 10
+        }
+      }
+    },
+    "stablecoin": {
+      "type": "object",
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "introduced", "market_cap_rank", "pegged_to", "peg_mechanism", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{2,10}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "stablecoin"
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 2
+        },
+        "introduced": {
+          "type": "string",
+          "format": "date"
+        },
+        "market_cap_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pegged_to": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 code of the fiat currency this stablecoin tracks."
+        },
+        "peg_mechanism": {
+          "type": "string",
+          "enum": [
+            "Fiat-collateralized",
+            "Crypto-overcollateralized",
+            "Algorithmic",
+            "Commodity-collateralized",
+            "Hybrid"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 10
+        }
+      }
+    },
+    "commodity": {
+      "type": "object",
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^X[A-Z]{2}$",
+          "description": "ISO 4217-compatible commodity code. Convention: 'X' prefix."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Commodity name with standard trading unit."
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8,
+          "description": "Practical convention for price precision. Not standardized by ISO."
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Typically the code itself (XAU, XAG)."
+        },
+        "type": {
+          "type": "string",
+          "const": "commodity"
+        },
+        "entity": {
+          "type": "string",
+          "const": "N/A",
+          "description": "Commodities have no issuing entity."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Must clarify that minor_units is conventional and this is not a currency."
+        }
+      }
+    },
+    "specialPurpose": {
+      "type": "object",
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]{3,4}$",
+          "description": "Code for this special purpose instrument."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3
+        },
+        "minor_units": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["basket", "offshore", "unit_of_account", "other"],
+          "description": "Classification of this special purpose instrument."
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Organization or market defining this instrument."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Must explain relationship to ISO 4217 and usage context."
+        }
+      }
+    }
+  }
+}

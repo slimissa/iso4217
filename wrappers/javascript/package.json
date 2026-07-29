@@ -1,0 +1,63 @@
+{
+  "name": "iso4217-registry",
+  "version": "1.0.0",
+  "description": "Canonical ISO 4217 currency registry — machine-readable, versioned, language-agnostic. JavaScript/Node.js wrapper with zero dependencies.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "iso4217.json",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node test.js",
+    "lint": "eslint index.js",
+    "prepublishOnly": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slimissa/iso4217.git",
+    "directory": "wrappers/javascript"
+  },
+  "homepage": "https://github.com/slimissa/iso4217#readme",
+  "bugs": {
+    "url": "https://github.com/slimissa/iso4217/issues"
+  },
+  "keywords": [
+    "currency",
+    "iso4217",
+    "iso-4217",
+    "finance",
+    "trading",
+    "forex",
+    "foreign-exchange",
+    "cryptocurrency",
+    "stablecoin",
+    "central-bank",
+    "monetary",
+    "exchange-rate",
+    "peg",
+    "minor-units",
+    "decimal-places",
+    "data",
+    "registry",
+    "canonical",
+    "machine-readable",
+    "json",
+    "tempus",
+    "quant",
+    "quantitative-finance"
+  ],
+  "author": {
+    "name": "Le P’tit",
+    "url": "https://github.com/slimissa"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

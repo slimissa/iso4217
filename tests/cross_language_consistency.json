@@ -1,0 +1,225 @@
+{
+  "description": "Cross-language consistency test vectors for ISO 4217 wrappers. Every wrapper in every language must pass these assertions.",
+  "version": "1.0.0",
+  "test_vectors": [
+    {
+      "code": "USD",
+      "description": "US Dollar — standard 2 decimal places",
+      "minor_units": 2,
+      "is_independent": true,
+      "is_pegged": false,
+      "conversions": [
+        { "major": 100.50, "minor": 10050 },
+        { "major": 0.01, "minor": 1 },
+        { "major": 0.99, "minor": 99 },
+        { "major": 0.00, "minor": 0 },
+        { "major": 1.00, "minor": 100 }
+      ],
+      "formatting": [
+        { "major": 100.50, "formatted": "$100.50" },
+        { "major": 0.99, "formatted": "$0.99" },
+        { "major": 1000.00, "formatted": "$1,000.00" }
+      ]
+    },
+    {
+      "code": "JPY",
+      "description": "Japanese Yen — 0 decimal places",
+      "minor_units": 0,
+      "is_independent": true,
+      "is_pegged": false,
+      "conversions": [
+        { "major": 500.0, "minor": 500 },
+        { "major": 1.0, "minor": 1 },
+        { "major": 0.0, "minor": 0 }
+      ],
+      "formatting": [
+        { "major": 500.0, "formatted": "¥500" },
+        { "major": 1.0, "formatted": "¥1" }
+      ]
+    },
+    {
+      "code": "KWD",
+      "description": "Kuwaiti Dinar — 3 decimal places",
+      "minor_units": 3,
+      "is_independent": false,
+      "is_pegged": true,
+      "conversions": [
+        { "major": 1.500, "minor": 1500 },
+        { "major": 0.001, "minor": 1 },
+        { "major": 0.000, "minor": 0 }
+      ],
+      "formatting": [
+        { "major": 1.500, "formatted": "د.ك1.500" },
+        { "major": 0.345, "formatted": "د.ك0.345" }
+      ]
+    },
+    {
+      "code": "BHD",
+      "description": "Bahraini Dinar — 3 decimal places, pegged to USD",
+      "minor_units": 3,
+      "is_independent": false,
+      "is_pegged": true,
+      "pegged_to": "USD",
+      "conversions": [
+        { "major": 1.000, "minor": 1000 },
+        { "major": 0.376, "minor": 376 }
+      ],
+      "formatting": [
+        { "major": 1.000, "formatted": "ب.د1.000" }
+      ]
+    },
+    {
+      "code": "BTC",
+      "description": "Bitcoin — 8 decimal places, non-ISO",
+      "minor_units": 8,
+      "is_independent": true,
+      "is_pegged": false,
+      "conversions": [
+        { "major": 0.00000001, "minor": 1 },
+        { "major": 1.0, "minor": 100000000 },
+        { "major": 0.5, "minor": 50000000 }
+      ],
+      "formatting": [
+        { "major": 0.00000001, "formatted": "₿0.00000001" },
+        { "major": 1.0, "formatted": "₿1.00000000" }
+      ]
+    },
+    {
+      "code": "ETH",
+      "description": "Ethereum — 18 decimal places, non-ISO",
+      "minor_units": 18,
+      "is_independent": true,
+      "is_pegged": false,
+      "conversions": [
+        { "major": 0.000000000000000001, "minor": 1 },
+        { "major": 1.0, "minor": 1000000000000000000 }
+      ],
+      "formatting": [
+        { "major": 1.0, "formatted": "Ξ1.000000000000000000" }
+      ]
+    },
+    {
+      "code": "EUR",
+      "description": "Euro — standard 2 decimal places, independent",
+      "minor_units": 2,
+      "is_independent": true,
+      "is_pegged": false,
+      "conversions": [
+        { "major": 100.50, "minor": 10050 },
+        { "major": 0.01, "minor": 1 }
+      ],
+      "formatting": [
+        { "major": 100.50, "formatted": "€100.50" },
+        { "major": 1234.56, "formatted": "€1,234.56" }
+      ]
+    },
+    {
+      "code": "AED",
+      "description": "UAE Dirham — pegged to USD",
+      "minor_units": 2,
+      "is_independent": false,
+      "is_pegged": true,
+      "pegged_to": "USD",
+      "peg_rate": 3.6725,
+      "peg_band_pct": 0.0,
+      "conversions": [
+        { "major": 100.50, "minor": 10050 }
+      ],
+      "formatting": [
+        { "major": 100.50, "formatted": "د.إ100.50" }
+      ]
+    },
+    {
+      "code": "DKK",
+      "description": "Danish Krone — pegged to EUR with band",
+      "minor_units": 2,
+      "is_independent": false,
+      "is_pegged": true,
+      "pegged_to": "EUR",
+      "peg_band_pct": 2.25,
+      "conversions": [
+        { "major": 100.50, "minor": 10050 }
+      ],
+      "formatting": [
+        { "major": 100.50, "formatted": "kr100.50" }
+      ]
+    },
+    {
+      "code": "DEM",
+      "description": "German Mark — withdrawn, replaced by EUR",
+      "minor_units": 2,
+      "withdrawn": true,
+      "replaced_by": "EUR",
+      "conversion_rate": 1.95583,
+      "conversions": [
+        { "major": 100.0, "minor": 10000 }
+      ],
+      "formatting": [
+        { "major": 100.0, "formatted": "DM100.00" }
+      ]
+    }
+  ],
+  "lookup_tests": [
+    {
+      "description": "Case-insensitive active lookup",
+      "lookups": ["USD", "usd", "Usd", "uSd"],
+      "method": "active",
+      "expected_code": "USD"
+    },
+    {
+      "description": "Case-insensitive withdrawn lookup",
+      "lookups": ["DEM", "dem", "Dem"],
+      "method": "withdrawn",
+      "expected_code": "DEM"
+    },
+    {
+      "description": "Case-insensitive non-ISO lookup",
+      "lookups": ["BTC", "btc", "Btc"],
+      "method": "currency",
+      "expected_code": "BTC"
+    },
+    {
+      "description": "Nonexistent code returns null/nil/None",
+      "lookups": ["XXX", "NOTACURRENCY"],
+      "method": "active",
+      "expected_null": true
+    }
+  ],
+  "filter_tests": [
+    {
+      "description": "Currencies pegged to USD",
+      "method": "pegged_to",
+      "argument": "USD",
+      "argument_type": "string",
+      "expected_contains": ["AED", "SAR", "QAR", "HKD"]
+    },
+    {
+      "description": "Currencies with 3 minor units",
+      "method": "with_minor_units",
+      "argument": 3,
+      "argument_type": "integer",
+      "expected_contains": ["KWD", "BHD", "OMR", "JOD", "TND", "LYD", "IQD"]
+    },
+    {
+      "description": "Independent currencies",
+      "method": "independent",
+      "expected_contains": ["USD", "EUR", "JPY", "GBP", "CHF"],
+      "expected_not_contains": ["AED", "SAR", "HKD"]
+    }
+  ],
+  "summary_tests": [
+    {
+      "description": "Summary contains expected keys",
+      "expected_keys": [
+        "version",
+        "updated",
+        "active_currencies",
+        "withdrawn_currencies",
+        "non_iso_currencies",
+        "pegged_currencies",
+        "independent_currencies",
+        "minor_units_distribution"
+      ]
+    }
+  ]
+}
