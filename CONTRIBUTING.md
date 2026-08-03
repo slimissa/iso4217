@@ -113,9 +113,11 @@ go build ./...
 1. Edit `iso4217.json`
 2. Run `python3 tools/validate.py` — must pass with 0 errors
 3. Run `python3 -m pytest tests/ -v` — all 83+ tests must pass
-4. Update `CHANGELOG.md` under `[Unreleased]`
-5. If adding currencies, update `source.last_amendment_applied` and `source.last_verified`
-6. Commit with a descriptive message: `Add AFN, ALL, AMD to active currencies (ISO amendment 179)`
+4. Run `python3 tools/sync_wrappers.py` — copies the root `iso4217.json` into `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json`, which are compiled into those wrappers at build time (`go:embed`, `include_str!`) and do **not** update on their own. Skipping this step leaves Go and Rust silently running against stale data. CI will fail the build if these copies aren't in sync with root, but running it locally first saves you a failed PR.
+5. Update `CHANGELOG.md` under `[Unreleased]`
+6. If adding currencies, update `source.last_amendment_applied` and `source.last_verified`
+7. Commit `iso4217.json` together with the regenerated `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json` in the same commit
+8. Commit with a descriptive message: `Add AFN, ALL, AMD to active currencies (ISO amendment 179)`
 
 ### For Wrapper Changes
 
@@ -139,7 +141,7 @@ go build ./...
 1. Fork the repository
 2. Create a feature branch: `git checkout -b correction/usd-minor-units`
 3. Make your changes
-4. Run the full test suite and validator — **PRs with failing tests will not be reviewed**
+4. Run the full test suite, the validator, and (if you touched `iso4217.json`) `tools/sync_wrappers.py` — **PRs with failing tests, or with `wrappers/go/iso4217.json` / `wrappers/rust/iso4217.json` out of sync with root, will not be reviewed**
 5. Update `CHANGELOG.md` under `[Unreleased]`
 6. Submit a PR with a clear description:
    - What changed

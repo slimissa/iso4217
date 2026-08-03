@@ -7,6 +7,9 @@ on:
       - 'iso4217.json'
       - 'schema.json'
       - 'tools/validate.py'
+      - 'tools/sync_wrappers.py'
+      - 'wrappers/go/iso4217.json'
+      - 'wrappers/rust/iso4217.json'
       - 'tests/**'
       - '.github/workflows/validate.yml'
   pull_request:
@@ -15,11 +18,38 @@ on:
       - 'iso4217.json'
       - 'schema.json'
       - 'tools/validate.py'
+      - 'tools/sync_wrappers.py'
+      - 'wrappers/go/iso4217.json'
+      - 'wrappers/rust/iso4217.json'
       - 'tests/**'
       - '.github/workflows/validate.yml'
   workflow_dispatch:
 
 jobs:
+  check-wrapper-sync:
+    name: Check wrapper copies are in sync with root
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run sync_wrappers.py
+        run: python3 tools/sync_wrappers.py
+
+      - name: Fail if wrapper copies differ from root
+        run: |
+          git diff --exit-code -- wrappers/go/iso4217.json wrappers/rust/iso4217.json || {
+            echo "::error::wrappers/go/iso4217.json and/or wrappers/rust/iso4217.json are out of sync with root iso4217.json."
+            echo "::error::Run 'python3 tools/sync_wrappers.py' and commit the result."
+            exit 1
+          }
+
   validate-json:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
@@ -45,7 +75,7 @@ jobs:
   validate-wrappers:
     name: Validate wrappers
     runs-on: ubuntu-latest
-    needs: validate-json
+    needs: [validate-json, check-wrapper-sync]
 
     steps:
       - name: Checkout
