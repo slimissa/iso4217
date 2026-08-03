@@ -553,6 +553,24 @@ def validate_withdrawn_currencies(withdrawn: List[Dict]) -> List[ValidationError
     return errors
 
 
+# Phrases that count as a valid "this is not an ISO 4217 code" disclaimer.
+# Not an exhaustive NLP check — a literal substring match — so keep this list
+# in sync with whatever phrasing is actually used in iso4217.json. This exists
+# because "not an iso" alone missed "Not an official ISO 4217 code" (CNH's
+# actual wording), silently producing a false-positive warning.
+_NON_ISO_DISCLAIMER_PHRASES = (
+    "not an iso",
+    "not an official iso",
+    "not a currency",
+)
+
+
+def _has_non_iso_disclaimer(note: str) -> bool:
+    """True if `note` contains a recognized non-ISO-4217 disclaimer phrase."""
+    lowered = note.lower()
+    return any(phrase in lowered for phrase in _NON_ISO_DISCLAIMER_PHRASES)
+
+
 def validate_non_iso(non_iso: Dict) -> List[ValidationError]:
     """Validate non-ISO currencies section."""
     errors: List[ValidationError] = []
@@ -576,9 +594,42 @@ def validate_non_iso(non_iso: Dict) -> List[ValidationError]:
                     message=f"Non-ISO item {code} is missing 'type' field."
                 ))
 
-            # Must have note explaining non-ISO status
+            # Must have note explaining non-ISO status — but ONLY for items that
+            # actually are non-ISO. special_purpose is the one category that can
+            # legitimately hold genuine ISO 4217 codes (XDR, XUA, XSU are all
+            # real ISO fund/unit-of-account codes; they live in special_purpose
+            # because they're not tradable currencies, not because they lack ISO
+            # standing). cryptocurrencies, stablecoins, and commodities are never
+            # ISO 4217 codes, so they keep the original text-based check.
             note = item.get("note", "")
-            if "not an iso" not in note.lower() and "not a currency" not in note.lower():
+
+            if category == "special_purpose":
+                iso_status = item.get("iso_status")
+                if iso_status is None:
+                    # No ground-truth field to check against — schema validation
+                    # will already flag this as missing a required field, but
+                    # warn here too in case validate.py is ever run standalone
+                    # against data that skipped schema validation.
+                    errors.append(ValidationError(
+                        severity="warning",
+                        category="business_logic",
+                        field=f"{prefix}.iso_status",
+                        code="MISSING_ISO_STATUS",
+                        message=f"special_purpose item {code} has no 'iso_status' field, so its ISO 4217 status can't be verified.",
+                        suggestion="Set iso_status to 'iso_code', 'market_convention', or 'obsolete_iso'."
+                    ))
+                elif iso_status in ("market_convention", "obsolete_iso"):
+                    if not _has_non_iso_disclaimer(note):
+                        errors.append(ValidationError(
+                            severity="warning",
+                            category="business_logic",
+                            field=f"{prefix}.note",
+                            code="MISSING_NON_ISO_DISCLAIMER",
+                            message=f"special_purpose item {code} has iso_status='{iso_status}' but its note doesn't clarify that it is not an ISO 4217 code.",
+                            suggestion="Add note like: 'Not an ISO 4217 code. Included for [reason].'"
+                        ))
+                # iso_status == "iso_code": genuinely ISO-defined, no disclaimer needed.
+            elif not _has_non_iso_disclaimer(note):
                 errors.append(ValidationError(
                     severity="warning",
                     category="business_logic",

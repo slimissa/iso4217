@@ -442,13 +442,18 @@
     },
     "specialPurpose": {
       "type": "object",
-      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "note"],
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "iso_status", "note"],
       "additionalProperties": false,
       "properties": {
         "code": {
           "type": "string",
           "pattern": "^[A-Z0-9]{3,4}$",
           "description": "Code for this special purpose instrument."
+        },
+        "numeric": {
+          "type": "string",
+          "pattern": "^\\d{3}$",
+          "description": "ISO 4217 numeric code, if one exists. Only applicable when iso_status is 'iso_code' or 'obsolete_iso' — market_convention codes have no ISO numeric assignment and should omit this field."
         },
         "name": {
           "type": "string",
@@ -472,10 +477,15 @@
           "minLength": 2,
           "description": "Organization or market defining this instrument."
         },
+        "iso_status": {
+          "type": "string",
+          "enum": ["iso_code", "market_convention", "obsolete_iso"],
+          "description": "Ground truth for whether this code is officially defined in ISO 4217. 'iso_code': a currently-active code in the ISO 4217 standard (e.g. XDR, XUA, XSU) — not necessarily a tradable currency, but genuinely ISO-defined. 'market_convention': a code market participants use that is NOT part of ISO 4217 (e.g. CNH). 'obsolete_iso': was an ISO 4217 code but has since been withdrawn from the standard (distinct from currencies.withdrawn, which is for retired national currencies, not retired special-purpose codes). This field is authoritative — tools/validate.py uses it directly instead of inferring ISO status from the note text."
+        },
         "note": {
           "type": "string",
           "minLength": 10,
-          "description": "Must explain relationship to ISO 4217 and usage context."
+          "description": "Must explain relationship to ISO 4217 and usage context, consistent with iso_status."
         }
       }
     }

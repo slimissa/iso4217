@@ -1377,12 +1377,36 @@
     "special_purpose": [
       {
         "code": "XDR",
+        "numeric": "960",
         "name": "Special Drawing Rights",
         "minor_units": 0,
         "symbol": "XDR",
         "type": "basket",
         "entity": "International Monetary Fund",
-        "note": "ISO 4217 code for IMF Special Drawing Rights. Basket of USD, EUR, CNY, JPY, GBP. Not a tradable currency but used as a unit of account."
+        "iso_status": "iso_code",
+        "note": "Genuine ISO 4217 code (numeric 960) for IMF Special Drawing Rights. Basket of USD, EUR, CNY, JPY, GBP. It is in special_purpose because it is a unit of account, not a tradable currency — not because it lacks ISO standing."
+      },
+      {
+        "code": "XUA",
+        "numeric": "965",
+        "name": "ADB Unit of Account",
+        "minor_units": 0,
+        "symbol": "XUA",
+        "type": "unit_of_account",
+        "entity": "African Development Bank",
+        "iso_status": "iso_code",
+        "note": "Genuine ISO 4217 code (numeric 965) for the African Development Bank's unit of account. Used for accounting and capital subscriptions among AfDB member states, not as a circulating currency. It is in special_purpose because it is a unit of account, not because it lacks ISO standing."
+      },
+      {
+        "code": "XSU",
+        "numeric": "994",
+        "name": "SUCRE",
+        "minor_units": 0,
+        "symbol": "XSU",
+        "type": "unit_of_account",
+        "entity": "Unified System for Regional Compensation (SUCRE / ALBA)",
+        "iso_status": "iso_code",
+        "note": "Genuine ISO 4217 code (numeric 994) for the SUCRE, a regional unit of account for trade settlement among ALBA member states. Not a circulating currency. It is in special_purpose because it is a unit of account, not because it lacks ISO standing."
       },
       {
         "code": "CNH",
@@ -1391,6 +1415,7 @@
         "symbol": "¥",
         "type": "offshore",
         "entity": "China (offshore market)",
+        "iso_status": "market_convention",
         "note": "Not an official ISO 4217 code. Offshore deliverable yuan traded in Hong Kong and other offshore centers. Distinct from CNY in FX markets."
       }
     ]
