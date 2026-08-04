@@ -1266,7 +1266,7 @@
         "withdrawn_date": "1993-01-01",
         "replaced_by": "MXN",
         "conversion_rate": 1000,
-        "note": "The code MXN was reintroduced; this entry refers to the pre-1993 peso."
+        "note": "The code MXN was reintroduced; this entry refers to the pre-1993 peso. Numeric code 484 was reused by MXN after the 1993 revaluation. Do not use numeric code as a unique key across active + withdrawn."
       },
       {
         "code": "RUR",

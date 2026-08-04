@@ -789,6 +789,61 @@ def validate_cross_references(registry: Dict) -> List[ValidationError]:
             suggestion="A currency cannot be both active and withdrawn. Check the codes."
         ))
 
+    # Numeric code uniqueness. Unlike alphabetic codes, numeric codes CAN
+    # legitimately repeat between active and withdrawn — ISO 4217 has
+    # reused numeric codes after currency revaluations (e.g. MXN/MXN_OLD
+    # both use 484). That reuse is allowed and only warned on. Within a
+    # single category (active-only, withdrawn-only), a duplicate numeric
+    # code is always a data error — two currently-circulating or two
+    # historical currencies should never share one.
+    active_numeric: Dict[str, List[str]] = {}
+    for c in active:
+        numeric = c.get("numeric")
+        if numeric:
+            active_numeric.setdefault(numeric, []).append(c.get("code", "?"))
+
+    for numeric, codes in active_numeric.items():
+        if len(codes) > 1:
+            errors.append(ValidationError(
+                severity="error",
+                category="cross_reference",
+                field="currencies.active[*].numeric",
+                code="DUPLICATE_ACTIVE_NUMERIC",
+                message=f"Numeric code '{numeric}' is used by multiple active currencies: {sorted(codes)}.",
+                suggestion="Each active currency must have a unique numeric code."
+            ))
+
+    withdrawn_numeric: Dict[str, List[str]] = {}
+    for c in withdrawn:
+        numeric = c.get("numeric")
+        if numeric:
+            withdrawn_numeric.setdefault(numeric, []).append(c.get("code", "?"))
+
+    for numeric, codes in withdrawn_numeric.items():
+        if len(codes) > 1:
+            errors.append(ValidationError(
+                severity="error",
+                category="cross_reference",
+                field="currencies.withdrawn[*].numeric",
+                code="DUPLICATE_WITHDRAWN_NUMERIC",
+                message=f"Numeric code '{numeric}' is used by multiple withdrawn currencies: {sorted(codes)}.",
+                suggestion="Each withdrawn currency must have a unique numeric code."
+            ))
+
+    numeric_overlap = set(active_numeric.keys()) & set(withdrawn_numeric.keys())
+    if numeric_overlap:
+        affected = []
+        for numeric in sorted(numeric_overlap):
+            affected.append(f"{numeric} ({'/'.join(active_numeric[numeric])} active, {'/'.join(withdrawn_numeric[numeric])} withdrawn)")
+        errors.append(ValidationError(
+            severity="warning",
+            category="cross_reference",
+            field="currencies",
+            code="NUMERIC_CODE_REUSE",
+            message=f"Numeric code(s) shared between active and withdrawn currencies (historical reuse): {'; '.join(affected)}.",
+            suggestion="Expected for legitimate historical reuse (e.g. MXN/MXN_OLD share 484). Verify each case is intentional, and never use numeric code as a unique key spanning active + withdrawn."
+        ))
+
     # Non-ISO codes should not overlap with ISO codes
     all_iso_codes = set(active_codes.keys()) | set(withdrawn_codes.keys())
     non_iso_categories = ["cryptocurrencies", "stablecoins", "commodities", "special_purpose"]
