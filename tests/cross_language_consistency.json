@@ -39,10 +39,12 @@
     },
     {
       "code": "KWD",
-      "description": "Kuwaiti Dinar — 3 decimal places",
+      "description": "Kuwaiti Dinar — 3 decimal places, undisclosed basket peg",
       "minor_units": 3,
       "is_independent": false,
       "is_pegged": true,
+      "pegged_to": "Currency basket",
+      "peg_type": "undisclosed",
       "conversions": [
         { "major": 1.500, "minor": 1500 },
         { "major": 0.001, "minor": 1 },
@@ -60,6 +62,7 @@
       "is_independent": false,
       "is_pegged": true,
       "pegged_to": "USD",
+      "peg_type": "single",
       "conversions": [
         { "major": 1.000, "minor": 1000 },
         { "major": 0.376, "minor": 376 }
@@ -120,6 +123,7 @@
       "is_independent": false,
       "is_pegged": true,
       "pegged_to": "USD",
+      "peg_type": "single",
       "peg_rate": 3.6725,
       "peg_band_pct": 0.0,
       "conversions": [
@@ -130,12 +134,28 @@
       ]
     },
     {
+      "code": "MAD",
+      "description": "Moroccan Dirham — pegged to EUR+USD basket",
+      "minor_units": 2,
+      "is_independent": false,
+      "is_pegged": true,
+      "pegged_to": "EUR+USD basket",
+      "peg_type": "basket",
+      "conversions": [
+        { "major": 100.50, "minor": 10050 }
+      ],
+      "formatting": [
+        { "major": 100.50, "formatted": "د.م.100.50" }
+      ]
+    },
+    {
       "code": "DKK",
       "description": "Danish Krone — pegged to EUR with band",
       "minor_units": 2,
       "is_independent": false,
       "is_pegged": true,
       "pegged_to": "EUR",
+      "peg_type": "single",
       "peg_band_pct": 2.25,
       "conversions": [
         { "major": 100.50, "minor": 10050 }

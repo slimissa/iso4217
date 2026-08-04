@@ -21,6 +21,7 @@ Exit codes:
 """
 
 import json
+import re
 import sys
 import argparse
 from pathlib import Path
@@ -388,6 +389,61 @@ def validate_active_currencies(active: List[Dict]) -> List[ValidationError]:
                         code="MISSING_PEG_FIELD",
                         message=f"{code} is pegged but missing '{peg_field}' field."
                     ))
+
+        # peg_type consistency — peg_type tells consumers how to interpret
+        # pegged_to (parseable ISO code vs. free-text description). Without
+        # this check, a currency could be pegged with no peg_type (leaving
+        # consumers to guess), or peg_type could disagree with the actual
+        # shape of pegged_to (e.g. peg_type="single" but pegged_to is a
+        # basket description, or vice versa).
+        peg_type = currency.get("peg_type")
+        single_code_pattern = re.compile(r"^[A-Z]{3}$")
+
+        if pegged_to is not None and peg_type is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="business_logic",
+                field=f"{prefix}.peg_type",
+                code="MISSING_PEG_TYPE",
+                message=f"{code} is pegged to '{pegged_to}' but has no 'peg_type'.",
+                suggestion="Set peg_type to 'single', 'basket', or 'undisclosed'."
+            ))
+        elif pegged_to is None and peg_type is not None:
+            errors.append(ValidationError(
+                severity="error",
+                category="business_logic",
+                field=f"{prefix}.peg_type",
+                code="PEG_TYPE_WITHOUT_PEG",
+                message=f"{code} has peg_type='{peg_type}' but pegged_to is null.",
+                suggestion="Remove peg_type, or set pegged_to to describe the peg."
+            ))
+        elif peg_type is not None:
+            if peg_type not in ("single", "basket", "undisclosed"):
+                errors.append(ValidationError(
+                    severity="error",
+                    category="business_logic",
+                    field=f"{prefix}.peg_type",
+                    code="INVALID_PEG_TYPE",
+                    message=f"{code} has peg_type='{peg_type}', not one of 'single', 'basket', 'undisclosed'."
+                ))
+            elif peg_type == "single" and not single_code_pattern.match(pegged_to):
+                errors.append(ValidationError(
+                    severity="error",
+                    category="business_logic",
+                    field=f"{prefix}.pegged_to",
+                    code="PEG_TYPE_MISMATCH",
+                    message=f"{code} has peg_type='single' but pegged_to='{pegged_to}' is not a bare 3-letter code.",
+                    suggestion="Use peg_type='basket' or 'undisclosed' for free-text pegged_to values."
+                ))
+            elif peg_type in ("basket", "undisclosed") and single_code_pattern.match(pegged_to):
+                errors.append(ValidationError(
+                    severity="warning",
+                    category="business_logic",
+                    field=f"{prefix}.pegged_to",
+                    code="PEG_TYPE_MISMATCH",
+                    message=f"{code} has peg_type='{peg_type}' but pegged_to='{pegged_to}' looks like a bare currency code.",
+                    suggestion="If this is really a single-currency peg, use peg_type='single' instead."
+                ))
 
         # Countries validation
         countries = currency.get("countries", [])
@@ -769,10 +825,13 @@ def validate_cross_references(registry: Dict) -> List[ValidationError]:
                 suggestion="Each non-ISO code should appear in exactly one category."
             ))
 
-    # Validate peg targets exist in active currencies
+    # Validate peg targets exist in active currencies.
+    # Only meaningful for peg_type='single' — 'basket'/'undisclosed' pegs
+    # have a free-text pegged_to that isn't a currency reference at all.
     for c in active:
         pegged_to = c.get("pegged_to")
-        if pegged_to and isinstance(pegged_to, str) and len(pegged_to) == 3 and pegged_to.isupper():
+        peg_type = c.get("peg_type")
+        if pegged_to and peg_type == "single":
             if pegged_to not in active_codes:
                 errors.append(ValidationError(
                     severity="error",
@@ -856,10 +915,12 @@ def validate_statistics(registry: Dict) -> Tuple[List[ValidationError], Dict[str
     stats["pegged_count"] = pegged_count
     stats["independent_count"] = independent_count
 
-    # Most common peg targets
+    # Most common peg targets (peg_type='single' only — basket/undisclosed
+    # pegged_to values are descriptions, not currency codes, and shouldn't
+    # be counted as "targets").
     peg_targets = Counter(
         c.get("pegged_to") for c in active
-        if c.get("pegged_to") and isinstance(c.get("pegged_to"), str) and len(c.get("pegged_to", "")) == 3
+        if c.get("pegged_to") and c.get("peg_type") == "single"
     )
     stats["peg_targets"] = dict(peg_targets.most_common(10))
 

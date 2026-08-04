@@ -100,6 +100,7 @@ struct RawCurrency {
     central_bank: String,
     // Peg fields
     pegged_to: Option<String>,
+    peg_type: Option<String>,
     pegged_since: Option<String>,
     peg_rate: Option<f64>,
     peg_band_pct: Option<f64>,
@@ -197,6 +198,18 @@ pub struct Currency {
     pub central_bank: String,
     /// The currency or basket this currency is pegged to, or `None` if floating.
     pub pegged_to: Option<String>,
+    /// How to interpret `pegged_to`.
+    ///
+    /// - `"single"`: `pegged_to` is a parseable ISO 4217 code (e.g. AED -> `"USD"`).
+    /// - `"basket"`: `pegged_to` is a free-text description of a weighted
+    ///   basket peg (e.g. MAD -> `"EUR+USD basket"`).
+    /// - `"undisclosed"`: pegged, but the peg mechanism/composition is not
+    ///   public (e.g. KWD -> `"Currency basket"`).
+    /// - `None`: not pegged.
+    ///
+    /// Do not assume `pegged_to` is a parseable currency code without
+    /// checking `peg_type.as_deref() == Some("single")` first.
+    pub peg_type: Option<String>,
     /// Date the peg was established (ISO 8601), or `None`.
     pub pegged_since: Option<String>,
     /// Official peg rate (units of this currency per 1 unit of anchor), or `None`.
@@ -333,6 +346,7 @@ impl From<RawCurrency> for Currency {
             entity: raw.entity,
             central_bank: raw.central_bank,
             pegged_to: raw.pegged_to,
+            peg_type: raw.peg_type,
             pegged_since: raw.pegged_since,
             peg_rate: raw.peg_rate,
             peg_band_pct: raw.peg_band_pct,
@@ -575,6 +589,13 @@ impl CurrencyRegistry {
 
     /// Find all active currencies pegged to a specific anchor currency.
     ///
+    /// Only currencies with `peg_type == Some("single")` are considered — a
+    /// currency pegged to a basket or an undisclosed mix (e.g. MAD's
+    /// `"EUR+USD basket"`) is not "pegged to USD" just because `"USD"`
+    /// appears in its `pegged_to` description, even though the anchor is a
+    /// component of the basket. Use [`all_active`](Self::all_active) and
+    /// inspect `peg_type`/`pegged_to` directly for basket-aware search.
+    ///
     /// ```rust
     /// # use iso4217::CurrencyRegistry;
     /// # let registry = CurrencyRegistry::load().unwrap();
@@ -588,10 +609,11 @@ impl CurrencyRegistry {
         self.active
             .values()
             .filter(|c| {
-                c.pegged_to
-                    .as_ref()
-                    .map(|p| p.to_uppercase().contains(&anchor))
-                    .unwrap_or(false)
+                c.peg_type.as_deref() == Some("single")
+                    && c.pegged_to
+                        .as_ref()
+                        .map(|p| p.to_uppercase() == anchor)
+                        .unwrap_or(false)
             })
             .collect()
     }

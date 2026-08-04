@@ -152,6 +152,12 @@ def test_peg_properties():
                 f"expected {vector['pegged_to']!r}"
             )
 
+        if "peg_type" in vector:
+            assert currency.peg_type == vector["peg_type"], (
+                f"{code}.peg_type = {currency.peg_type!r}, "
+                f"expected {vector['peg_type']!r}"
+            )
+
         if "peg_rate" in vector:
             assert currency.peg_rate == vector["peg_rate"], (
                 f"{code}.peg_rate = {currency.peg_rate}, "

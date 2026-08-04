@@ -159,6 +159,26 @@ class Currency {
     return this._data.pegged_to || null;
   }
 
+  /**
+   * How to interpret `peggedTo`.
+   *
+   * - "single": peggedTo is a parseable ISO 4217 code (e.g. AED -> "USD").
+   * - "basket": peggedTo is a free-text description of a weighted basket
+   *   peg (e.g. MAD -> "EUR+USD basket").
+   * - "undisclosed": pegged, but the peg mechanism/composition is not
+   *   public (e.g. KWD -> "Currency basket").
+   * - null: not pegged.
+   *
+   * Do not assume `peggedTo` is a parseable currency code without checking
+   * `pegType === "single"` first — MAD and KWD have free-text peggedTo
+   * values that will not match a currency code.
+   *
+   * @returns {string|null}
+   */
+  get pegType() {
+    return this._data.peg_type || null;
+  }
+
   /** @returns {string|null} Date the peg was established in ISO 8601 format */
   get peggedSince() {
     return this._data.pegged_since || null;
@@ -537,6 +557,14 @@ class CurrencyRegistry {
    * @returns {Currency[]}
    *
    * @example
+   * Only currencies with pegType === "single" are considered — a currency
+   * pegged to a basket or an undisclosed mix (e.g. MAD's "EUR+USD basket")
+   * is not "pegged to USD" just because "USD" appears in its peggedTo
+   * description, even though the anchor is a component of the basket.
+   * Use `allActive()` and inspect `pegType`/`peggedTo` directly if you
+   * need basket-aware search.
+   *
+   * @example
    * registry.peggedTo("USD");
    * // [Currency { code: 'AED', ... }, Currency { code: 'SAR', ... }, ...]
    */
@@ -545,10 +573,8 @@ class CurrencyRegistry {
     const result = [];
 
     for (const c of this._active.values()) {
-      if (c.peggedTo !== null && typeof c.peggedTo === 'string') {
-        if (c.peggedTo.toUpperCase().includes(anchor)) {
-          result.push(c);
-        }
+      if (c.pegType === 'single' && c.peggedTo !== null && c.peggedTo.toUpperCase() === anchor) {
+        result.push(c);
       }
     }
 

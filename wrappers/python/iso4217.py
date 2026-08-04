@@ -132,6 +132,25 @@ class Currency:
         return self._data.get("pegged_to")
 
     @property
+    def peg_type(self) -> Optional[str]:
+        """
+        How to interpret `pegged_to`.
+
+        Returns:
+            "single" if pegged_to is a parseable ISO 4217 code (e.g. AED -> "USD").
+            "basket" if pegged_to is a free-text description of a weighted
+                basket peg (e.g. MAD -> "EUR+USD basket").
+            "undisclosed" if pegged, but the peg mechanism/composition is not
+                public (e.g. KWD -> "Currency basket").
+            None if not pegged.
+
+        Do not assume `pegged_to` is a parseable currency code without
+        checking `peg_type == "single"` first — MAD and KWD are pegged
+        with free-text `pegged_to` values that will not match a currency code.
+        """
+        return self._data.get("peg_type")
+
+    @property
     def pegged_since(self) -> Optional[str]:
         """Date the peg was established in ISO 8601 format, or None."""
         return self._data.get("pegged_since")
@@ -514,7 +533,15 @@ class CurrencyRegistry:
             anchor_code: ISO 4217 code of the anchor currency (e.g., "USD", "EUR").
 
         Returns:
-            List of Currency objects pegged to the given anchor.
+            List of Currency objects with peg_type == "single" and
+            pegged_to exactly matching the given anchor.
+
+        Only currencies with peg_type == "single" are considered — a
+        currency pegged to a basket or an undisclosed mix (e.g. MAD's
+        "EUR+USD basket") is not "pegged to USD" just because "USD"
+        appears in its pegged_to description, even though the anchor
+        is a component of the basket. Use `all_active()` and inspect
+        `peg_type` / `pegged_to` directly if you need basket-aware search.
 
         Examples:
             >>> registry.pegged_to("USD")
@@ -523,9 +550,9 @@ class CurrencyRegistry:
         anchor = anchor_code.upper()
         return [
             c for c in self._active.values()
-            if c.pegged_to is not None
-            and isinstance(c.pegged_to, str)
-            and anchor in c.pegged_to.upper()
+            if c.peg_type == "single"
+            and c.pegged_to is not None
+            and c.pegged_to.upper() == anchor
         ]
 
     def independent(self) -> List[Currency]:

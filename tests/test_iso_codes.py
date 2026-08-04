@@ -129,6 +129,7 @@ class TestPegs:
         aed = _active(r, "AED")
         assert aed is not None
         assert aed["pegged_to"] == "USD"
+        assert aed["peg_type"] == "single"
         assert aed["is_independent"] is False
         assert aed["peg_rate"] == 3.6725
         assert aed["peg_band_pct"] == 0.0
@@ -138,6 +139,7 @@ class TestPegs:
         sar = _active(r, "SAR")
         assert sar is not None
         assert sar["pegged_to"] == "USD"
+        assert sar["peg_type"] == "single"
         assert sar["peg_rate"] == 3.75
 
     def test_qar_pegged_to_usd(self):
@@ -145,6 +147,7 @@ class TestPegs:
         qar = _active(r, "QAR")
         assert qar is not None
         assert qar["pegged_to"] == "USD"
+        assert qar["peg_type"] == "single"
         assert qar["peg_rate"] == 3.64
 
     def test_hkd_pegged_to_usd(self):
@@ -152,6 +155,7 @@ class TestPegs:
         hkd = _active(r, "HKD")
         assert hkd is not None
         assert hkd["pegged_to"] == "USD"
+        assert hkd["peg_type"] == "single"
         assert hkd["peg_rate"] == 7.80
 
     def test_jod_pegged_to_usd(self):
@@ -159,24 +163,28 @@ class TestPegs:
         jod = _active(r, "JOD")
         assert jod is not None
         assert jod["pegged_to"] == "USD"
+        assert jod["peg_type"] == "single"
 
     def test_bhd_pegged_to_usd(self):
         r = _registry()
         bhd = _active(r, "BHD")
         assert bhd is not None
         assert bhd["pegged_to"] == "USD"
+        assert bhd["peg_type"] == "single"
 
     def test_omr_pegged_to_usd(self):
         r = _registry()
         omr = _active(r, "OMR")
         assert omr is not None
         assert omr["pegged_to"] == "USD"
+        assert omr["peg_type"] == "single"
 
     def test_dkk_pegged_to_eur(self):
         r = _registry()
         dkk = _active(r, "DKK")
         assert dkk is not None
         assert dkk["pegged_to"] == "EUR"
+        assert dkk["peg_type"] == "single"
         assert dkk["peg_band_pct"] == 2.25
 
     def test_bgn_pegged_to_eur(self):
@@ -184,6 +192,7 @@ class TestPegs:
         bgn = _active(r, "BGN")
         assert bgn is not None
         assert bgn["pegged_to"] == "EUR"
+        assert bgn["peg_type"] == "single"
         assert bgn["peg_band_pct"] == 0.0
         assert bgn["is_independent"] is False
 
@@ -193,6 +202,7 @@ class TestPegs:
         assert mad is not None
         # MAD is pegged to EUR+USD basket
         assert mad["pegged_to"] is not None
+        assert mad["peg_type"] == "basket"
         assert "basket" in mad["pegged_to"].lower() or "EUR" in str(mad["pegged_to"])
 
     def test_kwd_pegged_to_basket(self):
@@ -200,7 +210,41 @@ class TestPegs:
         kwd = _active(r, "KWD")
         assert kwd is not None
         assert kwd["pegged_to"] is not None
+        assert kwd["peg_type"] == "undisclosed"
         assert "basket" in kwd["pegged_to"].lower()
+
+    def test_peg_type_not_a_parseable_code_for_basket_and_undisclosed_pegs(self):
+        """
+        Regression test for the bug this field exists to prevent: code that
+        assumes pegged_to is always a 3-letter ISO code will break on MAD
+        and KWD. This test asserts the discriminator (peg_type) actually
+        lets you tell them apart programmatically.
+        """
+        r = _registry()
+        active = r["currencies"]["active"]
+        for c in active:
+            pegged_to = c.get("pegged_to")
+            peg_type = c.get("peg_type")
+            if pegged_to is None:
+                assert peg_type is None, (
+                    f"{c['code']}: peg_type should be absent/null when pegged_to is null"
+                )
+                continue
+            assert peg_type in ("single", "basket", "undisclosed"), (
+                f"{c['code']}: peg_type must be set to a known value when pegged_to is set"
+            )
+            if peg_type == "single":
+                assert len(pegged_to) == 3 and pegged_to.isupper(), (
+                    f"{c['code']}: peg_type='single' but pegged_to='{pegged_to}' "
+                    "is not a bare 3-letter code"
+                )
+            else:
+                assert not (len(pegged_to) == 3 and pegged_to.isupper()), (
+                    f"{c['code']}: peg_type='{peg_type}' but pegged_to='{pegged_to}' "
+                    "looks like a bare currency code — should probably be 'single'"
+                )
+
+
 
 
 # ---------------------------------------------------------------------------

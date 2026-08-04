@@ -90,6 +90,7 @@ type rawCurrency struct {
 	Entity      string       `json:"entity"`
 	CentralBank string       `json:"central_bank"`
 	PeggedTo    *string      `json:"pegged_to"`
+	PegType     *string      `json:"peg_type"`
 	PeggedSince *string      `json:"pegged_since"`
 	PegRate     *float64     `json:"peg_rate"`
 	PegBandPct  *float64     `json:"peg_band_pct"`
@@ -153,6 +154,14 @@ type Currency struct {
 	CentralBank string `json:"central_bank"`
 	// The currency or basket this currency is pegged to, or nil if floating.
 	PeggedTo *string `json:"pegged_to"`
+	// How to interpret PeggedTo: "single" (a parseable ISO 4217 code, e.g.
+	// AED -> "USD"), "basket" (free-text weighted-basket description, e.g.
+	// MAD -> "EUR+USD basket"), "undisclosed" (pegged but mechanism not
+	// public, e.g. KWD -> "Currency basket"), or nil if not pegged.
+	//
+	// Do not assume PeggedTo is a parseable currency code without checking
+	// PegType != nil && *PegType == "single" first.
+	PegType *string `json:"peg_type"`
 	// Date the peg was established (ISO 8601), or nil.
 	PeggedSince *string `json:"pegged_since"`
 	// Official peg rate (units of this currency per 1 unit of anchor), or nil.
@@ -421,6 +430,7 @@ func newCurrency(raw rawCurrency) *Currency {
 		Entity:         raw.Entity,
 		CentralBank:    raw.CentralBank,
 		PeggedTo:       raw.PeggedTo,
+		PegType:        raw.PegType,
 		PeggedSince:    raw.PeggedSince,
 		PegRate:        raw.PegRate,
 		PegBandPct:     raw.PegBandPct,
@@ -542,11 +552,18 @@ func (r *CurrencyRegistry) AllCurrencies() []*Currency {
 // ---------------------------------------------------------------------------
 
 // PeggedTo returns all active currencies pegged to a specific anchor currency.
+//
+// Only currencies with PegType == "single" are considered — a currency
+// pegged to a basket or an undisclosed mix (e.g. MAD's "EUR+USD basket")
+// is not "pegged to USD" just because "USD" appears in its PeggedTo
+// description, even though the anchor is a component of the basket.
+// Use AllActive and inspect PegType/PeggedTo directly for basket-aware search.
 func (r *CurrencyRegistry) PeggedTo(anchorCode string) []*Currency {
 	anchor := strings.ToUpper(anchorCode)
 	var result []*Currency
 	for _, c := range r.active {
-		if c.PeggedTo != nil && strings.Contains(strings.ToUpper(*c.PeggedTo), anchor) {
+		if c.PegType != nil && *c.PegType == "single" &&
+			c.PeggedTo != nil && strings.ToUpper(*c.PeggedTo) == anchor {
 			result = append(result, c)
 		}
 	}

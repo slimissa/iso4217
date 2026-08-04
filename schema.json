@@ -201,10 +201,17 @@
           "description": "Official name of the central bank or monetary authority."
         },
         "pegged_to": {
-          "description": "ISO 4217 code of the anchor currency, description of basket peg, or null if floating.",
+          "description": "ISO 4217 code of the anchor currency (only when peg_type is 'single'), free-text description of a basket/undisclosed peg, or null if floating.",
           "oneOf": [
             { "type": "null" },
             { "type": "string", "minLength": 3 }
+          ]
+        },
+        "peg_type": {
+          "description": "Classification of how pegged_to should be interpreted. 'single': pegged_to is a parseable ISO 4217 code (^[A-Z]{3}$). 'basket': pegged_to is a free-text description of a weighted-basket peg. 'undisclosed': pegged, but the peg mechanism/composition is not public — pegged_to is a free-text description. null/absent: not pegged. Required whenever pegged_to is non-null; consumers must check peg_type before assuming pegged_to is a parseable currency code.",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "enum": ["single", "basket", "undisclosed"] }
           ]
         },
         "pegged_since": {
@@ -240,7 +247,40 @@
           "items": { "$ref": "#/definitions/countryReference" },
           "description": "Countries and territories where this currency is primary legal tender."
         }
-      }
+      },
+      "allOf": [
+        {
+          "$comment": "If pegged_to is a string (i.e. the currency is pegged to something), peg_type must be present and non-null so consumers know how to interpret pegged_to.",
+          "if": {
+            "properties": { "pegged_to": { "type": "string" } },
+            "required": ["pegged_to"]
+          },
+          "then": {
+            "required": ["peg_type"],
+            "properties": { "peg_type": { "type": "string" } }
+          }
+        },
+        {
+          "$comment": "If peg_type is 'single', pegged_to must be a bare 3-letter ISO 4217 code, not a basket/undisclosed description.",
+          "if": {
+            "properties": { "peg_type": { "const": "single" } },
+            "required": ["peg_type"]
+          },
+          "then": {
+            "properties": { "pegged_to": { "type": "string", "pattern": "^[A-Z]{3}$" } }
+          }
+        },
+        {
+          "$comment": "If peg_type is 'basket' or 'undisclosed', pegged_to must NOT look like a bare 3-letter code — it must read as a description, catching cases where someone mislabels a real code as a basket/undisclosed peg or vice versa.",
+          "if": {
+            "properties": { "peg_type": { "enum": ["basket", "undisclosed"] } },
+            "required": ["peg_type"]
+          },
+          "then": {
+            "properties": { "pegged_to": { "type": "string", "not": { "pattern": "^[A-Z]{3}$" } } }
+          }
+        }
+      ]
     },
     "withdrawnCurrency": {
       "type": "object",
