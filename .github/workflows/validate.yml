@@ -1,5 +1,40 @@
 name: Validate Registry
 
+# --- What triggers this workflow, and why ------------------------------
+#
+# GitHub Actions only supports path filters at the workflow level, not
+# per-job — so every path listed below triggers ALL THREE jobs
+# (check-wrapper-sync, validate-json, validate-wrappers), not just the
+# job whose name matches. The `needs:` chain inside the jobs still
+# controls what actually runs and in what order once triggered.
+#
+# Paths grouped by what they logically belong to:
+#   - iso4217.json, schema.json                     -> the registry data itself
+#   - tools/validate.py, tools/sync_wrappers.py      -> validation/sync tooling
+#   - wrappers/go/iso4217.json, wrappers/rust/iso4217.json
+#                                                     -> the two local data copies
+#                                                        that can drift from root
+#                                                        (see check-wrapper-sync)
+#   - wrappers/**/*.py, .js, .go, .rs                -> wrapper SOURCE CODE. Without
+#                                                        these, a wrapper bug fix or
+#                                                        regression could be pushed
+#                                                        and merged without CI ever
+#                                                        running that wrapper's tests.
+#   - wrappers/**/Cargo.toml, go.mod, package.json   -> wrapper dependency/build
+#                                                        manifests — a bad version
+#                                                        bump here can break the
+#                                                        build the same way a code
+#                                                        change can, and previously
+#                                                        wouldn't trigger CI either.
+#   - tests/**                                       -> the test suites themselves
+#   - .github/workflows/validate.yml                 -> so changes to this file
+#                                                        are validated against
+#                                                        themselves
+#
+# NOTE: wrappers/**/*.json (e.g. wrappers/go/iso4217.json) is intentionally
+# listed explicitly above rather than merged into a wrapper source glob —
+# it's data, not code, and check-wrapper-sync treats it differently.
+
 on:
   push:
     branches: [main]
@@ -10,6 +45,13 @@ on:
       - 'tools/sync_wrappers.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
+      - 'wrappers/**/*.py'
+      - 'wrappers/**/*.js'
+      - 'wrappers/**/*.go'
+      - 'wrappers/**/*.rs'
+      - 'wrappers/**/Cargo.toml'
+      - 'wrappers/**/go.mod'
+      - 'wrappers/**/package.json'
       - 'tests/**'
       - '.github/workflows/validate.yml'
   pull_request:
@@ -21,11 +63,21 @@ on:
       - 'tools/sync_wrappers.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
+      - 'wrappers/**/*.py'
+      - 'wrappers/**/*.js'
+      - 'wrappers/**/*.go'
+      - 'wrappers/**/*.rs'
+      - 'wrappers/**/Cargo.toml'
+      - 'wrappers/**/go.mod'
+      - 'wrappers/**/package.json'
       - 'tests/**'
       - '.github/workflows/validate.yml'
   workflow_dispatch:
 
 jobs:
+  # Triggered by any path above. Regenerates wrappers/go/iso4217.json and
+  # wrappers/rust/iso4217.json from root iso4217.json and fails the build
+  # if the committed copies don't match — catches drift, not wrapper code bugs.
   check-wrapper-sync:
     name: Check wrapper copies are in sync with root
     runs-on: ubuntu-latest
@@ -50,6 +102,8 @@ jobs:
             exit 1
           }
 
+  # Triggered by any path above. Runs schema/business-logic validation
+  # against iso4217.json and the full pytest suite.
   validate-json:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
@@ -72,6 +126,10 @@ jobs:
       - name: Run tests
         run: python3 -m pytest tests/ -v
 
+  # Triggered by any path above — this is the job the wrapper-source path
+  # filters above exist for. Before this fix, editing wrappers/**/*.py, .js,
+  # .go, or .rs did not trigger the workflow at all, so this job (and the
+  # wrapper tests inside it) could be skipped entirely on a wrapper-only PR.
   validate-wrappers:
     name: Validate wrappers
     runs-on: ubuntu-latest
@@ -100,14 +158,7 @@ jobs:
         run: |
           cd wrappers/javascript
           npm install
-          node -e "
-            const { CurrencyRegistry } = require('./index.js');
-            const registry = new CurrencyRegistry();
-            console.log('Loaded', registry.activeCount, 'active currencies');
-            const usd = registry.active('USD');
-            console.log('USD toMinor(100.50):', usd.toMinor(100.50));
-            console.log('JavaScript wrapper OK');
-          "
+          npm test
 
       - name: Set up Go
         uses: actions/setup-go@v5

@@ -41,6 +41,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -250,13 +251,49 @@ func (c *Currency) FromMinor(minorAmount int64) float64 {
 //
 // Examples:
 //
-//	usd.Format(100.50)  // "$100.50"
-//	jpy.Format(500.0)   // "¥500"
+//	usd.Format(100.50)   // "$100.50"
+//	usd.Format(1000.00)  // "$1,000.00"
+//	jpy.Format(500.0)    // "¥500"
 func (c *Currency) Format(majorAmount float64) string {
 	if c.MinorUnits == 0 {
 		return fmt.Sprintf("%s%d", c.Symbol, int64(math.Round(majorAmount)))
 	}
-	return fmt.Sprintf("%s%.*f", c.Symbol, c.MinorUnits, majorAmount)
+	return c.Symbol + formatWithThousands(majorAmount, c.MinorUnits)
+}
+
+// formatWithThousands formats a float with the given number of decimal
+// places and comma thousands separators on the integer part, matching the
+// behavior of Python's f"{x:,.Nf}" and JS's Number.toLocaleString('en-US', ...).
+// Go's fmt package has no built-in thousands-grouping verb.
+func formatWithThousands(amount float64, decimals int) string {
+	raw := strconv.FormatFloat(amount, 'f', decimals, 64)
+
+	negative := strings.HasPrefix(raw, "-")
+	if negative {
+		raw = raw[1:]
+	}
+
+	intPart := raw
+	fracPart := ""
+	if dot := strings.IndexByte(raw, '.'); dot != -1 {
+		intPart = raw[:dot]
+		fracPart = raw[dot:]
+	}
+
+	var grouped strings.Builder
+	n := len(intPart)
+	for i, digit := range intPart {
+		if i > 0 && (n-i)%3 == 0 {
+			grouped.WriteByte(',')
+		}
+		grouped.WriteRune(digit)
+	}
+
+	result := grouped.String() + fracPart
+	if negative {
+		result = "-" + result
+	}
+	return result
 }
 
 // String returns a human-readable string representation.

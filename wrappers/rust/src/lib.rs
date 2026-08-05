@@ -314,15 +314,49 @@ impl Currency {
     /// # let usd = registry.active("USD").unwrap();
     /// # let jpy = registry.active("JPY").unwrap();
     /// assert_eq!(usd.format(100.50), "$100.50");
+    /// assert_eq!(usd.format(1000.00), "$1,000.00");
     /// assert_eq!(jpy.format(500.0), "¥500");
     /// ```
     pub fn format(&self, major_amount: f64) -> String {
         if self.minor_units == 0 {
             format!("{}{}", self.symbol, major_amount.round() as i64)
         } else {
-            format!("{}{:.prec$}", self.symbol, major_amount, prec = self.minor_units as usize)
+            format!("{}{}", self.symbol, format_with_thousands(major_amount, self.minor_units as usize))
         }
     }
+}
+
+/// Formats a float with the given number of decimal places and comma
+/// thousands separators on the integer part, matching Python's
+/// `f"{x:,.Nf}"` and JS's `Number.toLocaleString('en-US', ...)`. Rust's
+/// standard formatting has no built-in thousands-grouping flag.
+fn format_with_thousands(amount: f64, decimals: usize) -> String {
+    let raw = format!("{:.prec$}", amount, prec = decimals);
+    let (negative, raw) = match raw.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, raw.as_str()),
+    };
+
+    let (int_part, frac_part) = match raw.split_once('.') {
+        Some((i, f)) => (i, format!(".{}", f)),
+        None => (raw, String::new()),
+    };
+
+    let mut grouped = String::new();
+    let digits: Vec<char> = int_part.chars().collect();
+    let n = digits.len();
+    for (i, digit) in digits.iter().enumerate() {
+        if i > 0 && (n - i) % 3 == 0 {
+            grouped.push(',');
+        }
+        grouped.push(*digit);
+    }
+
+    let mut result = grouped + &frac_part;
+    if negative {
+        result = format!("-{}", result);
+    }
+    result
 }
 
 impl fmt::Display for Currency {
@@ -835,6 +869,7 @@ mod tests {
         let usd = reg.active("USD").unwrap();
         assert_eq!(usd.format(100.50), "$100.50");
         assert_eq!(usd.format(0.99), "$0.99");
+        assert_eq!(usd.format(1000.00), "$1,000.00");
     }
 
     #[test]
@@ -953,5 +988,348 @@ mod tests {
         assert!(codes.contains(&"EC")); // Ecuador
         assert!(codes.contains(&"PA")); // Panama
         assert!(codes.contains(&"SV")); // El Salvador
+    }
+
+    // -----------------------------------------------------------------
+    // Cross-language consistency (issue #4)
+    //
+    // Ports tests/cross_language_consistency.json — the same file
+    // tests/test_wrappers.py checks for the Python wrapper — so a
+    // divergence between wrappers shows up here instead of only in
+    // Python. Path is relative to the crate root (wrappers/rust), which
+    // is `cargo test`'s working directory.
+    // -----------------------------------------------------------------
+
+    #[derive(Deserialize)]
+    struct ClcConversion {
+        major: f64,
+        minor: i64,
+        #[serde(default)]
+        lossy: bool,
+    }
+
+    #[derive(Deserialize)]
+    struct ClcFormatting {
+        major: f64,
+        formatted: String,
+    }
+
+    #[derive(Deserialize)]
+    struct ClcTestVector {
+        code: String,
+        minor_units: u8,
+        #[serde(default)]
+        is_independent: Option<bool>,
+        #[serde(default)]
+        is_pegged: Option<bool>,
+        #[serde(default)]
+        pegged_to: Option<String>,
+        #[serde(default)]
+        peg_type: Option<String>,
+        #[serde(default)]
+        peg_rate: Option<f64>,
+        #[serde(default)]
+        peg_band_pct: Option<f64>,
+        #[serde(default)]
+        withdrawn: bool,
+        #[serde(default)]
+        replaced_by: Option<String>,
+        #[serde(default)]
+        conversion_rate: Option<f64>,
+        #[serde(default)]
+        conversions: Vec<ClcConversion>,
+        #[serde(default)]
+        formatting: Vec<ClcFormatting>,
+    }
+
+    #[derive(Deserialize)]
+    struct ClcLookupTest {
+        method: String,
+        lookups: Vec<String>,
+        #[serde(default)]
+        expected_code: Option<String>,
+        #[serde(default)]
+        expected_null: bool,
+    }
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum ClcArgument {
+        Str(String),
+        Num(f64),
+    }
+
+    #[derive(Deserialize)]
+    struct ClcFilterTest {
+        method: String,
+        #[serde(default)]
+        argument: Option<ClcArgument>,
+        #[serde(default)]
+        expected_contains: Vec<String>,
+        #[serde(default)]
+        expected_not_contains: Vec<String>,
+    }
+
+    #[derive(Deserialize)]
+    struct ClcSummaryTest {
+        expected_keys: Vec<String>,
+    }
+
+    #[derive(Deserialize)]
+    struct CrossLanguageConsistency {
+        test_vectors: Vec<ClcTestVector>,
+        #[serde(default)]
+        lookup_tests: Vec<ClcLookupTest>,
+        #[serde(default)]
+        filter_tests: Vec<ClcFilterTest>,
+        #[serde(default)]
+        summary_tests: Vec<ClcSummaryTest>,
+    }
+
+    fn load_consistency_vectors() -> CrossLanguageConsistency {
+        let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
+            .expect("failed to read cross_language_consistency.json");
+        serde_json::from_str(&raw).expect("failed to parse cross_language_consistency.json")
+    }
+
+    // Rust-idiom translation of the JSON's "method" field for lookup_tests.
+    // Method names ("active", "withdrawn", "currency") happen to already
+    // be valid Rust identifiers, but Rust has no dynamic dispatch by
+    // string, so this is an explicit match rather than reflection.
+    fn clc_lookup<'a>(reg: &'a CurrencyRegistry, method: &str, code: &str) -> Option<&'a Currency> {
+        match method {
+            "active" => reg.active(code),
+            "withdrawn" => reg.withdrawn(code),
+            "currency" => reg.currency(code),
+            other => panic!("no Rust mapping for lookup method '{other}'"),
+        }
+    }
+
+    // Rust-idiom translation of the JSON's "method" field for filter_tests
+    // ("pegged_to", "with_minor_units", "independent").
+    fn clc_filter<'a>(reg: &'a CurrencyRegistry, test: &ClcFilterTest) -> Vec<&'a Currency> {
+        match test.method.as_str() {
+            "pegged_to" => {
+                let arg = match &test.argument {
+                    Some(ClcArgument::Str(s)) => s,
+                    _ => panic!("pegged_to argument is not a string"),
+                };
+                reg.pegged_to(arg)
+            }
+            "with_minor_units" => {
+                let arg = match &test.argument {
+                    Some(ClcArgument::Num(n)) => *n as u8,
+                    _ => panic!("with_minor_units argument is not a number"),
+                };
+                reg.with_minor_units(arg)
+            }
+            "independent" => reg.independent(),
+            other => panic!("no Rust mapping for filter method '{other}'"),
+        }
+    }
+
+    // RegistrySummary's field names are already snake_case and match the
+    // JSON's expected_keys verbatim (unlike Go's PascalCase field names
+    // requiring a json-tag reflection check, or JS's intentionally
+    // camelCase summary() requiring a key-name map — see those wrappers'
+    // tests for that divergence). Because Rust field access is checked at
+    // compile time, listing the real field names here means a rename that
+    // breaks this contract fails the build, not just this assertion.
+    fn clc_summary_has_key(key: &str) -> bool {
+        matches!(
+            key,
+            "version"
+                | "updated"
+                | "active_currencies"
+                | "withdrawn_currencies"
+                | "non_iso_currencies"
+                | "pegged_currencies"
+                | "independent_currencies"
+                | "minor_units_distribution"
+        )
+    }
+
+    #[test]
+    fn test_cross_language_consistency_conversion_vectors() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            for conv in &v.conversions {
+                let result = c.to_minor(conv.major);
+                assert_eq!(result, conv.minor, "{}.to_minor({}) = {}, expected {}", v.code, conv.major, result, conv.minor);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_conversion_round_trip() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            for conv in &v.conversions {
+                // "lossy" entries are rounding-boundary values not exactly
+                // representable in integer minor units (e.g. USD 100.005
+                // rounds to 10001, whose true inverse is 100.01, not the
+                // original 100.005).
+                if conv.lossy {
+                    continue;
+                }
+                let back = c.from_minor(conv.minor);
+                assert_eq!(back, conv.major, "{} round-trip failed: {} -> {} -> {}", v.code, conv.major, conv.minor, back);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_conversion_handles_zero() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            assert_eq!(c.to_minor(0.0), 0, "{}.to_minor(0.0) should be 0", v.code);
+            assert_eq!(c.from_minor(0), 0.0, "{}.from_minor(0) should be 0.0", v.code);
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_formatting_vectors() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            for fmt_vec in &v.formatting {
+                let result = c.format(fmt_vec.major);
+                assert_eq!(
+                    result, fmt_vec.formatted,
+                    "{}.format({}) = '{}', expected '{}'",
+                    v.code, fmt_vec.major, result, fmt_vec.formatted
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_minor_units_values() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            assert_eq!(c.minor_units, v.minor_units, "{}.minor_units = {}, expected {}", v.code, c.minor_units, v.minor_units);
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_peg_properties() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+
+            if let Some(expected) = v.is_independent {
+                assert_eq!(c.is_independent, expected, "{}.is_independent = {}, expected {}", v.code, c.is_independent, expected);
+            }
+            if let Some(expected) = v.is_pegged {
+                assert_eq!(c.is_pegged(), expected, "{}.is_pegged() = {}, expected {}", v.code, c.is_pegged(), expected);
+            }
+            if let Some(expected) = &v.pegged_to {
+                assert_eq!(c.pegged_to.as_deref(), Some(expected.as_str()), "{}.pegged_to mismatch", v.code);
+            }
+            if let Some(expected) = &v.peg_type {
+                assert_eq!(c.peg_type.as_deref(), Some(expected.as_str()), "{}.peg_type mismatch", v.code);
+            }
+            if let Some(expected) = v.peg_rate {
+                assert_eq!(c.peg_rate, Some(expected), "{}.peg_rate mismatch", v.code);
+            }
+            if let Some(expected) = v.peg_band_pct {
+                assert_eq!(c.peg_band_pct, Some(expected), "{}.peg_band_pct mismatch", v.code);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_withdrawn_properties() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            if !v.withdrawn {
+                continue;
+            }
+            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            if let Some(expected) = &v.replaced_by {
+                assert_eq!(c.replaced_by.as_deref(), Some(expected.as_str()), "{}.replaced_by mismatch", v.code);
+            }
+            if let Some(expected) = v.conversion_rate {
+                assert_eq!(c.conversion_rate, Some(expected), "{}.conversion_rate mismatch", v.code);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_case_insensitive_lookup() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for t in &vectors.lookup_tests {
+            if t.expected_null {
+                for code in &t.lookups {
+                    let result = clc_lookup(&reg, &t.method, code);
+                    assert!(result.is_none(), "{}('{}') should return None", t.method, code);
+                }
+            } else {
+                let expected_code = t.expected_code.as_deref().expect("expected_code missing");
+                for code in &t.lookups {
+                    let result = clc_lookup(&reg, &t.method, code);
+                    let result = result.unwrap_or_else(|| panic!("{}('{}') returned None", t.method, code));
+                    assert_eq!(result.code, expected_code, "{}('{}').code mismatch", t.method, code);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_filter_vectors() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for t in &vectors.filter_tests {
+            let results = clc_filter(&reg, t);
+            let result_codes: std::collections::HashSet<&str> = results.iter().map(|c| c.code.as_str()).collect();
+
+            for expected in &t.expected_contains {
+                assert!(result_codes.contains(expected.as_str()), "{}() should contain {}", t.method, expected);
+            }
+            for excluded in &t.expected_not_contains {
+                assert!(!result_codes.contains(excluded.as_str()), "{}() should NOT contain {}", t.method, excluded);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_summary_has_expected_keys() {
+        let vectors = load_consistency_vectors();
+        for t in &vectors.summary_tests {
+            for key in &t.expected_keys {
+                assert!(clc_summary_has_key(key), "RegistrySummary missing field '{}'", key);
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_registry_contains_all_test_vector_codes() {
+        let reg = registry();
+        let vectors = load_consistency_vectors();
+        for v in &vectors.test_vectors {
+            assert!(reg.currency(&v.code).is_some(), "{} from test vectors not found in registry", v.code);
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_negative_amounts() {
+        let reg = registry();
+        let usd = reg.currency("USD").unwrap();
+        assert_eq!(usd.to_minor(-100.50), -10050);
+        assert_eq!(usd.to_minor(-0.01), -1);
+        assert_eq!(usd.from_minor(-10050), -100.5);
+        assert_eq!(usd.from_minor(-1), -0.01);
     }
 }

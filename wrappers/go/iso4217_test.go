@@ -1,7 +1,11 @@
 package iso4217
 
 import (
+	"encoding/json"
 	"math"
+	"os"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -397,7 +401,7 @@ func TestFormatUSD(t *testing.T) {
 	}{
 		{100.50, "$100.50"},
 		{0.99, "$0.99"},
-		{1000.00, "$1000.00"},
+		{1000.00, "$1,000.00"},
 		{0.00, "$0.00"},
 	}
 
@@ -421,8 +425,8 @@ func TestFormatEUR(t *testing.T) {
 	r := testRegistry(t)
 	eur := r.Active("EUR")
 
-	if got := eur.Format(1234.56); got != "€1234.56" {
-		t.Errorf("EUR.Format(1234.56) = %q, want '€1234.56'", got)
+	if got := eur.Format(1234.56); got != "€1,234.56" {
+		t.Errorf("EUR.Format(1234.56) = %q, want '€1,234.56'", got)
 	}
 }
 
@@ -1011,4 +1015,391 @@ func BenchmarkSummary(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		r.Summary()
 	}
+}
+// ---------------------------------------------------------------------------
+// Cross-language consistency (issue #4)
+//
+// Ports tests/cross_language_consistency.json — the same file
+// tests/test_wrappers.py checks for the Python wrapper — so a divergence
+// between wrappers shows up here instead of only in Python. Path is
+// relative to this package directory (wrappers/go), which is also the
+// working directory `go test` runs from.
+// ---------------------------------------------------------------------------
+
+type clcConversion struct {
+	Major float64 `json:"major"`
+	Minor int64   `json:"minor"`
+	Lossy bool    `json:"lossy"`
+}
+
+type clcFormatting struct {
+	Major     float64 `json:"major"`
+	Formatted string  `json:"formatted"`
+}
+
+type clcTestVector struct {
+	Code           string           `json:"code"`
+	Description    string           `json:"description"`
+	MinorUnits     int              `json:"minor_units"`
+	IsIndependent  *bool            `json:"is_independent"`
+	IsPegged       *bool            `json:"is_pegged"`
+	PeggedTo       *string          `json:"pegged_to"`
+	PegType        *string          `json:"peg_type"`
+	PegRate        *float64         `json:"peg_rate"`
+	PegBandPct     *float64         `json:"peg_band_pct"`
+	Withdrawn      bool             `json:"withdrawn"`
+	ReplacedBy     *string          `json:"replaced_by"`
+	ConversionRate *float64         `json:"conversion_rate"`
+	Conversions    []clcConversion  `json:"conversions"`
+	Formatting     []clcFormatting  `json:"formatting"`
+}
+
+type clcLookupTest struct {
+	Description  string   `json:"description"`
+	Lookups      []string `json:"lookups"`
+	Method       string   `json:"method"`
+	ExpectedCode string   `json:"expected_code"`
+	ExpectedNull bool     `json:"expected_null"`
+}
+
+type clcFilterTest struct {
+	Description         string      `json:"description"`
+	Method              string      `json:"method"`
+	Argument            interface{} `json:"argument"`
+	ArgumentType        string      `json:"argument_type"`
+	ExpectedContains    []string    `json:"expected_contains"`
+	ExpectedNotContains []string    `json:"expected_not_contains"`
+}
+
+type clcSummaryTest struct {
+	Description  string   `json:"description"`
+	ExpectedKeys []string `json:"expected_keys"`
+}
+
+type crossLanguageConsistency struct {
+	Description  string          `json:"description"`
+	Version      string          `json:"version"`
+	TestVectors  []clcTestVector `json:"test_vectors"`
+	LookupTests  []clcLookupTest `json:"lookup_tests"`
+	FilterTests  []clcFilterTest `json:"filter_tests"`
+	SummaryTests []clcSummaryTest `json:"summary_tests"`
+}
+
+func loadConsistencyVectors(t *testing.T) crossLanguageConsistency {
+	t.Helper()
+	data, err := os.ReadFile("../../tests/cross_language_consistency.json")
+	if err != nil {
+		t.Fatalf("failed to read cross_language_consistency.json: %v", err)
+	}
+	var v crossLanguageConsistency
+	if err := json.Unmarshal(data, &v); err != nil {
+		t.Fatalf("failed to parse cross_language_consistency.json: %v", err)
+	}
+	return v
+}
+
+// clcLookup is the Go-idiom translation of the JSON's "method" field for
+// lookup_tests. The JSON's method names ("active", "withdrawn", "currency")
+// happen to match Go's exported method names case-insensitively, but Go
+// requires an explicit switch rather than dynamic dispatch by string.
+func clcLookup(t *testing.T, r *CurrencyRegistry, methodName, code string) *Currency {
+	t.Helper()
+	switch methodName {
+	case "active":
+		return r.Active(code)
+	case "withdrawn":
+		return r.Withdrawn(code)
+	case "currency":
+		return r.Currency(code)
+	default:
+		t.Fatalf("no Go mapping for lookup method %q", methodName)
+		return nil
+	}
+}
+
+// clcFilter is the Go-idiom translation of the JSON's "method" field for
+// filter_tests ("pegged_to" -> PeggedTo, "with_minor_units" -> WithMinorUnits,
+// "independent" -> Independent).
+func clcFilter(t *testing.T, r *CurrencyRegistry, test clcFilterTest) []*Currency {
+	t.Helper()
+	switch test.Method {
+	case "pegged_to":
+		arg, ok := test.Argument.(string)
+		if !ok {
+			t.Fatalf("pegged_to argument is not a string: %v", test.Argument)
+		}
+		return r.PeggedTo(arg)
+	case "with_minor_units":
+		// encoding/json unmarshals JSON numbers into float64 when the
+		// target is interface{}.
+		argF, ok := test.Argument.(float64)
+		if !ok {
+			t.Fatalf("with_minor_units argument is not a number: %v", test.Argument)
+		}
+		return r.WithMinorUnits(int(argF))
+	case "independent":
+		return r.Independent()
+	default:
+		t.Fatalf("no Go mapping for filter method %q", test.Method)
+		return nil
+	}
+}
+
+// clcSummaryHasKey checks the RegistrySummary struct's json tags — the
+// wire-format contract — rather than requiring a Go-idiom field-name map,
+// since Go's json tags on RegistrySummary already match the JSON file's
+// snake_case keys verbatim (unlike the JS wrapper's summary(), which
+// intentionally uses camelCase — see wrappers/javascript/test.js for that
+// divergence).
+func clcSummaryHasKey(key string) bool {
+	rt := reflect.TypeOf(RegistrySummary{})
+	for i := 0; i < rt.NumField(); i++ {
+		tag := rt.Field(i).Tag.Get("json")
+		name := strings.Split(tag, ",")[0]
+		if name == key {
+			return true
+		}
+	}
+	return false
+}
+
+func TestCrossLanguageConsistency(t *testing.T) {
+	r := testRegistry(t)
+	vectors := loadConsistencyVectors(t)
+
+	t.Run("ConversionVectors", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found in registry", v.Code)
+			}
+			for _, conv := range v.Conversions {
+				result := c.ToMinor(conv.Major)
+				if result != conv.Minor {
+					t.Errorf("%s.ToMinor(%v) = %d, expected %d", v.Code, conv.Major, result, conv.Minor)
+				}
+			}
+		}
+	})
+
+	t.Run("ConversionVectorsRoundTrip", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found in registry", v.Code)
+			}
+			for _, conv := range v.Conversions {
+				// "lossy" entries are rounding-boundary values not exactly
+				// representable in integer minor units (e.g. USD 100.005
+				// rounds to 10001, whose true inverse is 100.01, not the
+				// original 100.005).
+				if conv.Lossy {
+					continue
+				}
+				back := c.FromMinor(conv.Minor)
+				if back != conv.Major {
+					t.Errorf("%s round-trip failed: %v -> %d -> %v", v.Code, conv.Major, conv.Minor, back)
+				}
+			}
+		}
+	})
+
+	t.Run("ConversionVectorsHandleZero", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found", v.Code)
+			}
+			if c.ToMinor(0.0) != 0 {
+				t.Errorf("%s.ToMinor(0.0) should be 0", v.Code)
+			}
+			if c.FromMinor(0) != 0.0 {
+				t.Errorf("%s.FromMinor(0) should be 0.0", v.Code)
+			}
+		}
+	})
+
+	t.Run("FormattingVectors", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found in registry", v.Code)
+			}
+			for _, fmtVec := range v.Formatting {
+				result := c.Format(fmtVec.Major)
+				if result != fmtVec.Formatted {
+					t.Errorf("%s.Format(%v) = %q, expected %q", v.Code, fmtVec.Major, result, fmtVec.Formatted)
+				}
+			}
+		}
+	})
+
+	t.Run("MinorUnitsValues", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found", v.Code)
+			}
+			if c.MinorUnits != v.MinorUnits {
+				t.Errorf("%s.MinorUnits = %d, expected %d", v.Code, c.MinorUnits, v.MinorUnits)
+			}
+		}
+	})
+
+	t.Run("PegProperties", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found", v.Code)
+			}
+			if v.IsIndependent != nil && c.IsIndependent != *v.IsIndependent {
+				t.Errorf("%s.IsIndependent = %v, expected %v", v.Code, c.IsIndependent, *v.IsIndependent)
+			}
+			if v.IsPegged != nil && c.IsPegged() != *v.IsPegged {
+				t.Errorf("%s.IsPegged() = %v, expected %v", v.Code, c.IsPegged(), *v.IsPegged)
+			}
+			if v.PeggedTo != nil {
+				if c.PeggedTo == nil {
+					t.Errorf("%s.PeggedTo is nil, expected %q", v.Code, *v.PeggedTo)
+				} else if *c.PeggedTo != *v.PeggedTo {
+					t.Errorf("%s.PeggedTo = %q, expected %q", v.Code, *c.PeggedTo, *v.PeggedTo)
+				}
+			}
+			if v.PegType != nil {
+				if c.PegType == nil {
+					t.Errorf("%s.PegType is nil, expected %q", v.Code, *v.PegType)
+				} else if *c.PegType != *v.PegType {
+					t.Errorf("%s.PegType = %q, expected %q", v.Code, *c.PegType, *v.PegType)
+				}
+			}
+			if v.PegRate != nil {
+				if c.PegRate == nil {
+					t.Errorf("%s.PegRate is nil, expected %v", v.Code, *v.PegRate)
+				} else if *c.PegRate != *v.PegRate {
+					t.Errorf("%s.PegRate = %v, expected %v", v.Code, *c.PegRate, *v.PegRate)
+				}
+			}
+			if v.PegBandPct != nil {
+				if c.PegBandPct == nil {
+					t.Errorf("%s.PegBandPct is nil, expected %v", v.Code, *v.PegBandPct)
+				} else if *c.PegBandPct != *v.PegBandPct {
+					t.Errorf("%s.PegBandPct = %v, expected %v", v.Code, *c.PegBandPct, *v.PegBandPct)
+				}
+			}
+		}
+	})
+
+	t.Run("WithdrawnProperties", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			if !v.Withdrawn {
+				continue
+			}
+			c := r.Currency(v.Code)
+			if c == nil {
+				t.Fatalf("%s not found", v.Code)
+			}
+			if v.ReplacedBy != nil {
+				if c.ReplacedBy == nil {
+					t.Errorf("%s.ReplacedBy is nil, expected %q", v.Code, *v.ReplacedBy)
+				} else if *c.ReplacedBy != *v.ReplacedBy {
+					t.Errorf("%s.ReplacedBy = %q, expected %q", v.Code, *c.ReplacedBy, *v.ReplacedBy)
+				}
+			}
+			if v.ConversionRate != nil {
+				if c.ConversionRate == nil {
+					t.Errorf("%s.ConversionRate is nil, expected %v", v.Code, *v.ConversionRate)
+				} else if *c.ConversionRate != *v.ConversionRate {
+					t.Errorf("%s.ConversionRate = %v, expected %v", v.Code, *c.ConversionRate, *v.ConversionRate)
+				}
+			}
+		}
+	})
+
+	t.Run("CaseInsensitiveLookup", func(t *testing.T) {
+		for _, test := range vectors.LookupTests {
+			if test.ExpectedNull {
+				for _, code := range test.Lookups {
+					result := clcLookup(t, r, test.Method, code)
+					if result != nil {
+						t.Errorf("%s(%q) should return nil, got %v", test.Method, code, result.Code)
+					}
+				}
+			} else {
+				for _, code := range test.Lookups {
+					result := clcLookup(t, r, test.Method, code)
+					if result == nil {
+						t.Errorf("%s(%q) returned nil", test.Method, code)
+						continue
+					}
+					if result.Code != test.ExpectedCode {
+						t.Errorf("%s(%q).Code = %q, expected %q", test.Method, code, result.Code, test.ExpectedCode)
+					}
+				}
+			}
+		}
+	})
+
+	t.Run("FilterVectors", func(t *testing.T) {
+		for _, test := range vectors.FilterTests {
+			results := clcFilter(t, r, test)
+			resultCodes := make(map[string]bool, len(results))
+			for _, c := range results {
+				resultCodes[c.Code] = true
+			}
+			for _, expected := range test.ExpectedContains {
+				if !resultCodes[expected] {
+					t.Errorf("%s() should contain %s", test.Method, expected)
+				}
+			}
+			for _, excluded := range test.ExpectedNotContains {
+				if resultCodes[excluded] {
+					t.Errorf("%s() should NOT contain %s", test.Method, excluded)
+				}
+			}
+		}
+	})
+
+	t.Run("SummaryHasExpectedKeys", func(t *testing.T) {
+		for _, test := range vectors.SummaryTests {
+			for _, key := range test.ExpectedKeys {
+				if !clcSummaryHasKey(key) {
+					t.Errorf("RegistrySummary missing json key %q", key)
+				}
+			}
+		}
+	})
+
+	t.Run("RegistryContainsAllTestVectorCodes", func(t *testing.T) {
+		for _, v := range vectors.TestVectors {
+			if r.Currency(v.Code) == nil {
+				t.Errorf("%s from test vectors not found in registry", v.Code)
+			}
+		}
+	})
+
+	t.Run("ToMinorHandlesNegativeAmounts", func(t *testing.T) {
+		usd := r.Currency("USD")
+		if usd == nil {
+			t.Fatal("USD not found")
+		}
+		if usd.ToMinor(-100.50) != -10050 {
+			t.Errorf("USD.ToMinor(-100.50) = %d, expected -10050", usd.ToMinor(-100.50))
+		}
+		if usd.ToMinor(-0.01) != -1 {
+			t.Errorf("USD.ToMinor(-0.01) = %d, expected -1", usd.ToMinor(-0.01))
+		}
+	})
+
+	t.Run("FromMinorHandlesNegativeAmounts", func(t *testing.T) {
+		usd := r.Currency("USD")
+		if usd == nil {
+			t.Fatal("USD not found")
+		}
+		if usd.FromMinor(-10050) != -100.5 {
+			t.Errorf("USD.FromMinor(-10050) = %v, expected -100.5", usd.FromMinor(-10050))
+		}
+		if usd.FromMinor(-1) != -0.01 {
+			t.Errorf("USD.FromMinor(-1) = %v, expected -0.01", usd.FromMinor(-1))
+		}
+	})
 }
