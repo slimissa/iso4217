@@ -37,6 +37,14 @@ from dataclasses import dataclass, field
 
 REQUIRED_PYTHON = (3, 8)
 
+# Active-currency count sanity check (issue #9). ISO 4217 currently defines
+# roughly 180 active currency codes. Nothing previously checked that the
+# registry's active count was in a plausible range at all — a registry with
+# 5 active currencies passed validation cleanly, which is exactly how the
+# 61/180 coverage gap shipped in v1.0.0 without any test catching it.
+MIN_ACTIVE_CURRENCIES = 150   # Expected once full ISO 4217 coverage lands (v1.1.0 target)
+WARN_ACTIVE_CURRENCIES = 100  # Below this, warn even if not yet treated as an error
+
 # Currencies that ISO 4217 lists with N minor_units but market convention uses M
 # Format: code -> (iso_minor_units, market_minor_units, explanation)
 KNOWN_MARKET_CONVENTIONS = {
@@ -61,9 +69,6 @@ VALID_PEG_MECHANISMS = {
 
 # Valid non-ISO types
 VALID_NON_ISO_TYPES = {"cryptocurrency", "stablecoin", "commodity", "basket", "offshore", "unit_of_account", "other"}
-
-# Minimum number of active currencies expected (catches catastrophic truncation)
-MIN_ACTIVE_CURRENCIES = 50
 
 # Maximum reasonable minor_units (Ethereum = 18)
 MAX_MINOR_UNITS = 18
@@ -263,15 +268,10 @@ def validate_active_currencies(active: List[Dict]) -> List[ValidationError]:
     """Validate the active currencies array."""
     errors: List[ValidationError] = []
 
-    if len(active) < MIN_ACTIVE_CURRENCIES:
-        errors.append(ValidationError(
-            severity="error",
-            category="integrity",
-            field="currencies.active",
-            code="TOO_FEW_CURRENCIES",
-            message=f"Only {len(active)} active currencies found. Expected at least {MIN_ACTIVE_CURRENCIES}.",
-            suggestion="The registry may be truncated. Verify against full ISO 4217 list."
-        ))
+    # NOTE: active-count plausibility (previously a flat "< 50 is an error"
+    # check here) now lives in validate_statistics() as two graduated
+    # thresholds (WARN_ACTIVE_CURRENCIES, MIN_ACTIVE_CURRENCIES), with
+    # --allow-partial support for intentional partial releases. See issue #9.
 
     for i, currency in enumerate(active):
         code = currency.get("code", f"[index {i}]")
@@ -931,7 +931,7 @@ def validate_cross_references(registry: Dict) -> List[ValidationError]:
 # Statistical checks (anomaly detection)
 # ---------------------------------------------------------------------------
 
-def validate_statistics(registry: Dict) -> Tuple[List[ValidationError], Dict[str, Any]]:
+def validate_statistics(registry: Dict, allow_partial: bool = False) -> Tuple[List[ValidationError], Dict[str, Any]]:
     """Run statistical checks and return errors plus stats dictionary."""
     errors: List[ValidationError] = []
     stats: Dict[str, Any] = {}
@@ -947,6 +947,43 @@ def validate_statistics(registry: Dict) -> Tuple[List[ValidationError], Dict[str
     stats["stablecoin_count"] = len(non_iso.get("stablecoins", []))
     stats["commodity_count"] = len(non_iso.get("commodities", []))
     stats["special_purpose_count"] = len(non_iso.get("special_purpose", []))
+
+    # Active currency count plausibility (issue #9). A registry that claims
+    # ISO 4217 coverage but has an implausibly low active count should not
+    # pass validation silently — that gap is exactly what let v1.0.0 ship
+    # with 61/180 currencies unnoticed. These are two independent
+    # thresholds, not an if/elif: a very low count (e.g. 5) is both below
+    # WARN_ACTIVE_CURRENCIES and below MIN_ACTIVE_CURRENCIES, and should
+    # surface both signals rather than only the more severe one.
+    active_count = stats["active_count"]
+
+    if active_count < WARN_ACTIVE_CURRENCIES:
+        errors.append(ValidationError(
+            severity="warning",
+            category="statistical",
+            field="currencies.active",
+            code="ACTIVE_COUNT_LOW",
+            message=f"Only {active_count} active currencies found (below {WARN_ACTIVE_CURRENCIES}).",
+            suggestion="Consider expanding coverage toward full ISO 4217."
+        ))
+
+    if active_count < MIN_ACTIVE_CURRENCIES:
+        message = (
+            f"Only {active_count} active currencies found. Expected at least "
+            f"{MIN_ACTIVE_CURRENCIES} per ISO 4217. If this is intentional "
+            f"(partial release), suppress with --allow-partial."
+        )
+        errors.append(ValidationError(
+            severity="warning" if allow_partial else "error",
+            category="statistical",
+            field="currencies.active",
+            code="ACTIVE_COUNT_BELOW_MINIMUM",
+            message=message,
+            suggestion=(
+                "Add more active currencies toward full ISO 4217 coverage, "
+                "or run with --allow-partial if this partial release is intentional."
+            )
+        ))
 
     # Distribution of minor_units
     mu_dist = Counter(c.get("minor_units") for c in active if "minor_units" in c)
@@ -1035,7 +1072,7 @@ def load_schema(path: Path) -> Optional[Dict]:
         sys.exit(2)
 
 
-def validate(registry_path: Path, schema_path: Optional[Path] = None) -> ValidationResult:
+def validate(registry_path: Path, schema_path: Optional[Path] = None, allow_partial: bool = False) -> ValidationResult:
     """Run all validations and return structured results."""
     result = ValidationResult(registry_path=str(registry_path))
 
@@ -1080,7 +1117,7 @@ def validate(registry_path: Path, schema_path: Optional[Path] = None) -> Validat
     result.errors.extend(validate_cross_references(registry))
 
     # 7. Statistical checks
-    stat_errors, stats = validate_statistics(registry)
+    stat_errors, stats = validate_statistics(registry, allow_partial=allow_partial)
     result.errors.extend(stat_errors)
     result.stats = stats
 
@@ -1197,6 +1234,7 @@ Examples:
   python tools/validate.py --quiet                  # Only show errors
   python tools/validate.py --json                   # JSON output for CI/CD
   python tools/validate.py --schema custom.json     # Use custom schema
+  python tools/validate.py --allow-partial          # Allow partial ISO coverage (e.g. v1.0.0)
         """
     )
 
@@ -1222,6 +1260,18 @@ Examples:
         action="store_true",
         help="Output results as JSON (useful for CI/CD integration)"
     )
+    parser.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help=(
+            "Downgrade the active-currency-count-below-minimum error to a "
+            f"warning (still errors if below {WARN_ACTIVE_CURRENCIES} via the "
+            "separate low-count warning). Use for intentional partial "
+            f"releases (e.g. v1.0.0's 61 currencies, below the {MIN_ACTIVE_CURRENCIES} "
+            "expected for full ISO 4217 coverage) so CI can pass while the "
+            "gap is still visibly flagged rather than silently ignored."
+        )
+    )
 
     args = parser.parse_args()
 
@@ -1239,7 +1289,7 @@ Examples:
         sys.exit(2)
 
     # Run validation
-    result = validate(registry_path, args.schema)
+    result = validate(registry_path, args.schema, allow_partial=args.allow_partial)
 
     # Output
     output = format_result(result, quiet=args.quiet, json_output=args.json)

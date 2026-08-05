@@ -28,6 +28,9 @@ from tools.validate import (
     validate_cross_references,
     validate_meta,
     validate_source,
+    validate_statistics,
+    MIN_ACTIVE_CURRENCIES,
+    WARN_ACTIVE_CURRENCIES,
 )
 
 
@@ -261,6 +264,110 @@ def test_non_iso_does_not_overlap_iso():
             assert code not in iso_codes, (
                 f"Non-ISO code '{code}' in '{category}' conflicts with ISO 4217 code"
             )
+
+
+# ---------------------------------------------------------------------------
+# Active currency count plausibility (issue #9)
+#
+# A registry with 5 active currencies previously passed validation with no
+# complaint — nothing checked that the count was plausible relative to real
+# ISO 4217 coverage (~180 active codes). That's exactly how the 61/180 gap
+# shipped in v1.0.0 without any test catching it. These tests exercise the
+# check directly against synthetic active-count values rather than only
+# asserting on the real registry's current count, so they keep meaning
+# something once v1.1.0 changes that count.
+# ---------------------------------------------------------------------------
+
+def _registry_with_active_count(n):
+    """Build a synthetic registry with exactly n active currency entries.
+
+    The entries are shallow copies of the real registry's first active
+    currency, repeated. validate_statistics only counts len(active) for
+    this check — it doesn't require unique codes — so duplicate entries
+    are fine here and keep the test fast and dependency-free.
+    """
+    import copy
+    registry = copy.deepcopy(_registry())
+    template = registry["currencies"]["active"][0]
+    registry["currencies"]["active"] = [dict(template) for _ in range(n)]
+    return registry
+
+
+def test_current_registry_active_count_is_below_min_active_currencies():
+    """
+    Sanity check on the constants themselves: this test intentionally FAILS
+    once v1.1.0 raises active_count to >= MIN_ACTIVE_CURRENCIES, which is
+    the point — it's a tripwire reminding whoever ships full coverage to
+    also revisit --allow-partial in CI (see .github/workflows/validate.yml).
+    """
+    registry = _registry()
+    active_count = len(registry["currencies"]["active"])
+    assert active_count < MIN_ACTIVE_CURRENCIES, (
+        f"Active count is now {active_count}, which meets MIN_ACTIVE_CURRENCIES "
+        f"({MIN_ACTIVE_CURRENCIES}). If v1.1.0 shipped full ISO 4217 coverage, "
+        "remove --allow-partial from .github/workflows/validate.yml and delete "
+        "this tripwire test."
+    )
+
+
+def test_active_count_below_warn_threshold_emits_warning():
+    registry = _registry_with_active_count(WARN_ACTIVE_CURRENCIES - 1)
+    errors, stats = validate_statistics(registry)
+    assert stats["active_count"] == WARN_ACTIVE_CURRENCIES - 1
+    codes = {e.code for e in errors}
+    assert "ACTIVE_COUNT_LOW" in codes
+
+
+def test_active_count_at_warn_threshold_does_not_emit_low_warning():
+    registry = _registry_with_active_count(WARN_ACTIVE_CURRENCIES)
+    errors, _ = validate_statistics(registry)
+    codes = {e.code for e in errors}
+    assert "ACTIVE_COUNT_LOW" not in codes
+
+
+def test_active_count_below_min_emits_error_by_default():
+    registry = _registry_with_active_count(MIN_ACTIVE_CURRENCIES - 1)
+    errors, stats = validate_statistics(registry)
+    assert stats["active_count"] == MIN_ACTIVE_CURRENCIES - 1
+    below_min = [e for e in errors if e.code == "ACTIVE_COUNT_BELOW_MINIMUM"]
+    assert len(below_min) == 1
+    assert below_min[0].severity == "error"
+    assert str(MIN_ACTIVE_CURRENCIES) in below_min[0].message
+    assert "--allow-partial" in below_min[0].message
+
+
+def test_active_count_below_min_downgrades_to_warning_with_allow_partial():
+    registry = _registry_with_active_count(MIN_ACTIVE_CURRENCIES - 1)
+    errors, _ = validate_statistics(registry, allow_partial=True)
+    below_min = [e for e in errors if e.code == "ACTIVE_COUNT_BELOW_MINIMUM"]
+    assert len(below_min) == 1
+    assert below_min[0].severity == "warning"
+
+
+def test_active_count_at_min_threshold_does_not_emit_below_minimum_error():
+    registry = _registry_with_active_count(MIN_ACTIVE_CURRENCIES)
+    errors, _ = validate_statistics(registry)
+    codes = {e.code for e in errors}
+    assert "ACTIVE_COUNT_BELOW_MINIMUM" not in codes
+
+
+def test_low_active_count_emits_both_thresholds_independently():
+    """A count below BOTH thresholds should surface both signals, not just
+    the more severe one — that's the whole point of having two independent
+    checks instead of one, per the issue's spec."""
+    registry = _registry_with_active_count(5)
+    errors, _ = validate_statistics(registry)
+    codes = {e.code for e in errors}
+    assert "ACTIVE_COUNT_LOW" in codes
+    assert "ACTIVE_COUNT_BELOW_MINIMUM" in codes
+
+
+def test_full_coverage_active_count_emits_neither_check():
+    registry = _registry_with_active_count(180)
+    errors, _ = validate_statistics(registry)
+    codes = {e.code for e in errors}
+    assert "ACTIVE_COUNT_LOW" not in codes
+    assert "ACTIVE_COUNT_BELOW_MINIMUM" not in codes
 
 
 # ---------------------------------------------------------------------------
