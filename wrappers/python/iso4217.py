@@ -28,6 +28,7 @@ License: Apache 2.0
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import (
     Any,
@@ -38,6 +39,21 @@ from typing import (
     Union,
     overload,
 )
+
+
+def _round_half_away_from_zero(x: float) -> int:
+    """
+    Round to the nearest integer, ties away from zero (2.5 -> 3, -2.5 -> -3).
+
+    This matches Go's math.Round and Rust's f64::round(), and deliberately
+    does NOT match Python's built-in round(), which uses banker's rounding
+    (round-half-to-even: round(2.5) == 2). Currency.to_minor() needs the
+    same rounding rule across all four language wrappers — see
+    tests/cross_language_consistency.json's ROUNDING vector.
+    """
+    if x >= 0:
+        return math.floor(x + 0.5)
+    return math.ceil(x - 0.5)
 
 
 # ---------------------------------------------------------------------------
@@ -265,8 +281,14 @@ class Currency:
                 raise ValueError("Cannot convert infinity to minor units")
 
         factor = 10 ** self.minor_units
-        # Use round() to handle floating-point imprecision
-        return round(major_amount * factor)
+        # Python's built-in round() uses banker's rounding (round-half-to-even):
+        # round(2.5) == 2, round(0.5) == 0. Go's math.Round and Rust's f64::round()
+        # both round half AWAY FROM ZERO: 2.5 -> 3, 0.5 -> 1. For a financial data
+        # library, the same input producing different minor-unit amounts across
+        # wrappers is a real defect (see tests/cross_language_consistency.json's
+        # ROUNDING vector), so this uses the same half-away-from-zero rule the
+        # Go and Rust wrappers use, not Python's default.
+        return _round_half_away_from_zero(major_amount * factor)
 
     def from_minor(self, minor_amount: int) -> float:
         """

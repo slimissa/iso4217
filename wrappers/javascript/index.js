@@ -87,6 +87,22 @@ function loadRegistryData(explicitPath) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Round to the nearest integer, ties away from zero (2.5 -> 3, -2.5 -> -3).
+ *
+ * This matches Go's math.Round and Rust's f64::round(), and deliberately
+ * does NOT match JS's built-in Math.round(), which rounds half toward
+ * +Infinity: Math.round(-2.5) === -2, not -3. Currency.toMinor() needs the
+ * same rounding rule across all four language wrappers — see
+ * tests/cross_language_consistency.json's ROUNDING vector.
+ *
+ * @param {number} x
+ * @returns {number}
+ */
+function roundHalfAwayFromZero(x) {
+  return x >= 0 ? Math.floor(x + 0.5) : Math.ceil(x - 0.5);
+}
+
+/**
  * Represents a single currency from the ISO 4217 registry.
  *
  * Provides read-only access to all currency properties plus convenience
@@ -304,8 +320,7 @@ class Currency {
     }
 
     const factor = Math.pow(10, this.minorUnits);
-    // Use Math.round to handle floating-point imprecision
-    return Math.round(majorAmount * factor);
+    return roundHalfAwayFromZero(majorAmount * factor);
   }
 
   /**

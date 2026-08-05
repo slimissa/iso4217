@@ -60,6 +60,13 @@ def test_conversion_vectors():
             )
 
             # from_minor: minor → major (round-trip)
+            # Entries marked "lossy" represent rounding-boundary values that
+            # are not exactly representable in integer minor units (e.g.
+            # USD 100.005 rounds to 10001, whose true inverse is 100.01, not
+            # the original 100.005). The forward to_minor check above is
+            # still the point of those vectors; only the inverse is skipped.
+            if conv.get("lossy"):
+                continue
             back = currency.from_minor(result)
             assert back == major, (
                 f"{code} round-trip failed: {major} → {result} → {back}"

@@ -13,7 +13,9 @@
         { "major": 0.01, "minor": 1 },
         { "major": 0.99, "minor": 99 },
         { "major": 0.00, "minor": 0 },
-        { "major": 1.00, "minor": 100 }
+        { "major": 1.00, "minor": 100 },
+        { "major": 100.005, "minor": 10001, "lossy": true, "note": "Rounding boundary: 100.005 * 100 = 10000.5, must round HALF AWAY FROM ZERO to 10001. Python's banker's rounding (round-half-to-even) would incorrectly give 10000 since 10000 is even. This is the exact regression case for issue #5. lossy=true: from_minor(10001) correctly returns 100.01, not the original 100.005 — minor units cannot represent a thousandth of a dollar, so this conversion is not round-trippable by design." },
+        { "major": -100.005, "minor": -10001, "lossy": true, "note": "Negative rounding boundary: must round half AWAY FROM ZERO (to -10001), not toward +Infinity. JS's native Math.round(-2.5) === -2 fails this exact pattern. lossy=true: not round-trippable, same reason as the positive case." }
       ],
       "formatting": [
         { "major": 100.50, "formatted": "$100.50" },
@@ -30,7 +32,10 @@
       "conversions": [
         { "major": 500.0, "minor": 500 },
         { "major": 1.0, "minor": 1 },
-        { "major": 0.0, "minor": 0 }
+        { "major": 0.0, "minor": 0 },
+        { "major": 2.5, "minor": 3, "lossy": true, "note": "Rounding boundary: minor_units=0 so factor=1, 2.5*1=2.5, must round HALF AWAY FROM ZERO to 3. Python's round(2.5) == 2 under banker's rounding, which is wrong here. This is the exact regression case for issue #5. lossy=true: from_minor(3) correctly returns 3.0, not the original 2.5 — JPY has no fractional minor unit, so this conversion is not round-trippable by design." },
+        { "major": -2.5, "minor": -3, "lossy": true, "note": "Negative rounding boundary: must round to -3 (half away from zero), not -2 (toward +Infinity, JS's native Math.round behavior). lossy=true: not round-trippable, same reason as the positive case." },
+        { "major": 0.5, "minor": 1, "lossy": true, "note": "Simplest half-boundary case: round(0.5) is 0 under banker's rounding, 1 under half-away-from-zero. lossy=true: not round-trippable." }
       ],
       "formatting": [
         { "major": 500.0, "formatted": "¥500" },
