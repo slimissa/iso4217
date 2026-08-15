@@ -208,7 +208,7 @@ The registry is validated through a multi-layer defense:
 # Run all validations
 python3 tools/validate.py
 
-# Run the full test suite (83 tests)
+# Run the full test suite (92 tests)
 python3 -m pytest tests/ -v
 ```
 
