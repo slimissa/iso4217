@@ -41,21 +41,6 @@ from typing import (
 )
 
 
-def _round_half_away_from_zero(x: float) -> int:
-    """
-    Round to the nearest integer, ties away from zero (2.5 -> 3, -2.5 -> -3).
-
-    This matches Go's math.Round and Rust's f64::round(), and deliberately
-    does NOT match Python's built-in round(), which uses banker's rounding
-    (round-half-to-even: round(2.5) == 2). Currency.to_minor() needs the
-    same rounding rule across all four language wrappers — see
-    tests/cross_language_consistency.json's ROUNDING vector.
-    """
-    if x >= 0:
-        return math.floor(x + 0.5)
-    return math.ceil(x - 0.5)
-
-
 # ---------------------------------------------------------------------------
 # Currency
 # ---------------------------------------------------------------------------
@@ -76,12 +61,18 @@ class Currency:
         entity: Issuing entity or monetary authority.
         central_bank: Official name of the central bank.
         pegged_to: Anchor currency code, basket description, or None.
+        peg_type: Classification of peg ("single", "basket", "undisclosed").
         pegged_since: Date the peg was established, or None.
         peg_rate: Official peg rate, or None.
         peg_band_pct: Allowed deviation from peg as percentage, or None.
+        peg_mechanism: Peg mechanism for stablecoins (e.g., "Fiat-collateralized").
         is_independent: True if currency floats independently.
         note: Optional note for special cases.
         countries: List of country references with code, name, and relationship.
+        withdrawn_date: Withdrawal date for withdrawn currencies, or None.
+        replaced_by: Replacement currency code for withdrawn currencies, or None.
+        conversion_rate: Official conversion rate for withdrawn currencies, or None.
+        market_cap_rank: Market cap rank for crypto/stablecoins, or None.
     """
 
     __slots__ = ("_data",)
@@ -190,6 +181,11 @@ class Currency:
         return self._data.get("peg_band_pct")
 
     @property
+    def peg_mechanism(self) -> Optional[str]:
+        """Peg mechanism for stablecoins (e.g., "Fiat-collateralized")."""
+        return self._data.get("peg_mechanism")
+
+    @property
     def is_independent(self) -> bool:
         """
         True if the currency floats independently or is a managed float
@@ -249,11 +245,21 @@ class Currency:
         """Official conversion rate (units of this currency per 1 unit of replacement)."""
         return self._data.get("conversion_rate")
 
+    # -- Non-ISO properties -------------------------------------------------
+
+    @property
+    def market_cap_rank(self) -> Optional[int]:
+        """Market cap rank for crypto/stablecoins, or None for fiat currencies."""
+        return self._data.get("market_cap_rank")
+
     # -- Conversion ---------------------------------------------------------
 
     def to_minor(self, major_amount: Union[int, float]) -> int:
         """
         Convert a major currency amount to minor units.
+
+        Uses round-half-away-from-zero semantics, matching Go (math.Round),
+        Rust (f64::round()), and JavaScript (Math.round for positives).
 
         Args:
             major_amount: Amount in major units (e.g., 100.50 for $100.50).
@@ -275,20 +281,18 @@ class Currency:
             1
         """
         if isinstance(major_amount, float):
-            if major_amount != major_amount:  # NaN check
+            if math.isnan(major_amount):
                 raise ValueError("Cannot convert NaN to minor units")
-            if major_amount in (float('inf'), float('-inf')):
+            if math.isinf(major_amount):
                 raise ValueError("Cannot convert infinity to minor units")
 
         factor = 10 ** self.minor_units
-        # Python's built-in round() uses banker's rounding (round-half-to-even):
-        # round(2.5) == 2, round(0.5) == 0. Go's math.Round and Rust's f64::round()
-        # both round half AWAY FROM ZERO: 2.5 -> 3, 0.5 -> 1. For a financial data
-        # library, the same input producing different minor-unit amounts across
-        # wrappers is a real defect (see tests/cross_language_consistency.json's
-        # ROUNDING vector), so this uses the same half-away-from-zero rule the
-        # Go and Rust wrappers use, not Python's default.
-        return _round_half_away_from_zero(major_amount * factor)
+        # Round half away from zero: 2.5 -> 3, -2.5 -> -3
+        product = major_amount * factor
+        if product >= 0:
+            return math.floor(product + 0.5)
+        else:
+            return math.ceil(product - 0.5)
 
     def from_minor(self, minor_amount: int) -> float:
         """
