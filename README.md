@@ -251,8 +251,8 @@ iso4217/
 ## Versioning
 
 The registry follows [Semantic Versioning](https://semver.org/):
-- **Major**: Currencies added or removed
-- **Minor**: New optional fields added (backward-compatible)
+- **Major**: Breaking schema changes (removed or renamed required fields)
+- **Minor**: New currencies added, or new optional fields added (backward-compatible)
 - **Patch**: Data corrections
 
 The current version is always in `iso4217.json` → `meta.version`.

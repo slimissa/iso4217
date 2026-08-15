@@ -170,8 +170,8 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 | Change | Version Bump |
 |--------|-------------|
-| Currencies added or removed | Major (`1.0.0` → `2.0.0`) |
-| New optional fields added to schema | Minor (`1.0.0` → `1.1.0`) |
+| Breaking schema changes (removed/renamed required fields) | Major (`1.0.0` → `2.0.0`) |
+| New currencies added or new optional fields | Minor (`1.0.0` → `1.1.0`) |
 | Data corrections (no structural changes) | Patch (`1.0.0` → `1.0.1`) |
 | Wrapper bug fixes | Patch for that wrapper |
 | New wrapper language | Minor for the project |
