@@ -104,7 +104,7 @@ go get github.com/slimissa/iso4217-go
 | Cryptocurrencies | 2 | Major cryptocurrencies by market capitalization |
 | Stablecoins | 3 | Major stablecoins with peg mechanisms |
 | Commodities | 4 | Precious metals with ISO-compatible codes |
-| Special purpose | 2 | IMF units, offshore variants |
+| Special purpose | 4 | IMF units, offshore variants |
 
 ---
 

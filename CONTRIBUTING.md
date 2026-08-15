@@ -112,7 +112,7 @@ go build ./...
 
 1. Edit `iso4217.json`
 2. Run `python3 tools/validate.py` — must pass with 0 errors
-3. Run `python3 -m pytest tests/ -v` — all 83+ tests must pass
+3. Run `python3 -m pytest tests/ -v` — all 92+ tests must pass
 4. Run `python3 tools/sync_wrappers.py` — copies the root `iso4217.json` into `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json`, which are compiled into those wrappers at build time (`go:embed`, `include_str!`) and do **not** update on their own. Skipping this step leaves Go and Rust silently running against stale data. CI will fail the build if these copies aren't in sync with root, but running it locally first saves you a failed PR.
 5. Update `CHANGELOG.md` under `[Unreleased]`
 6. If adding currencies, update `source.last_amendment_applied` and `source.last_verified`
@@ -186,7 +186,7 @@ When reviewing PRs, maintainers will check:
 
 1. **Data accuracy**: Is every currency fact backed by an authoritative source?
 2. **Schema compliance**: Does `iso4217.json` validate against `schema.json`?
-3. **Test coverage**: Do all 83+ tests pass? Are new tests added for new functionality?
+3. **Test coverage**: Do all 92+ tests pass? Are new tests added for new functionality?
 4. **Cross-wrapper consistency**: Does the change maintain API parity across wrappers?
 5. **Documentation**: Are changelogs updated? Are READMEs accurate?
 
