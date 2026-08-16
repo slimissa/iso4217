@@ -107,7 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.1.0] — 2026-08-16
 
 _(no changes yet)_
 
@@ -182,5 +182,5 @@ _(no changes yet)_
 
 | Version | Date | Active | Withdrawn | Non-ISO | Wrappers |
 |---------|------|--------|-----------|---------|----------|
-| 1.1.0 | 2026-08-15 | 61 | 24 | 13 | Python, JS, Rust, Go |
+| 1.1.0 | 2026-08-16 | 61 | 24 | 13 | Python, JS, Rust, Go |
 | 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go |
