@@ -121,16 +121,7 @@ jobs:
         run: pip install jsonschema pytest
 
       - name: Validate registry
-        # --allow-partial: the registry currently has 61/~180 active ISO
-        # 4217 currencies (see README's Coverage section). Without this
-        # flag, tools/validate.py's ACTIVE_COUNT_BELOW_MINIMUM check fails
-        # the build on every run until full coverage lands. This is a
-        # deliberate, temporary CI accommodation for the v1.0.0 partial
-        # release, not a permanent suppression — the flag only downgrades
-        # that one check to a warning, so the gap stays visible in every
-        # run's output instead of silently passing. Remove this flag once
-        # v1.1.0 ships with active_count >= MIN_ACTIVE_CURRENCIES (150).
-        run: python3 tools/validate.py --allow-partial
+        run: python3 tools/validate.py
 
       - name: Run tests
         run: python3 -m pytest tests/ -v

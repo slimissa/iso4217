@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.1.0",
-    "updated": "2026-08-16",
+    "version": "1.2.0",
+    "updated": "2026-08-17",
     "schema_version": "1.0.0",
     "description": "Canonical ISO 4217 currency registry. Active ISO currencies, withdrawn ISO currencies, and commonly-used non-ISO currencies maintained as separate arrays. This file is the single source of truth — all wrappers, bindings, and downstream databases derive from this file.",
     "project": "https://github.com/slimissa/iso4217",
@@ -36,24 +36,96 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "US", "name": "United States", "relationship": "issuing"},
-          {"code": "EC", "name": "Ecuador", "relationship": "adopting"},
-          {"code": "SV", "name": "El Salvador", "relationship": "adopting"},
-          {"code": "FM", "name": "Micronesia", "relationship": "adopting"},
-          {"code": "GU", "name": "Guam", "relationship": "territory"},
-          {"code": "HT", "name": "Haiti", "relationship": "parallel"},
-          {"code": "MH", "name": "Marshall Islands", "relationship": "adopting"},
-          {"code": "MP", "name": "Northern Mariana Islands", "relationship": "territory"},
-          {"code": "PW", "name": "Palau", "relationship": "adopting"},
-          {"code": "PA", "name": "Panama", "relationship": "adopting"},
-          {"code": "PR", "name": "Puerto Rico", "relationship": "territory"},
-          {"code": "TC", "name": "Turks and Caicos Islands", "relationship": "territory"},
-          {"code": "VG", "name": "British Virgin Islands", "relationship": "territory"},
-          {"code": "VI", "name": "US Virgin Islands", "relationship": "territory"},
-          {"code": "ZW", "name": "Zimbabwe", "relationship": "adopting"},
-          {"code": "BQ", "name": "Caribbean Netherlands", "relationship": "adopting"},
-          {"code": "IO", "name": "British Indian Ocean Territory", "relationship": "adopting"},
-          {"code": "TL", "name": "Timor-Leste", "relationship": "adopting"}
+          {
+            "code": "US",
+            "name": "United States",
+            "relationship": "issuing"
+          },
+          {
+            "code": "EC",
+            "name": "Ecuador",
+            "relationship": "adopting"
+          },
+          {
+            "code": "SV",
+            "name": "El Salvador",
+            "relationship": "adopting"
+          },
+          {
+            "code": "FM",
+            "name": "Micronesia",
+            "relationship": "adopting"
+          },
+          {
+            "code": "GU",
+            "name": "Guam",
+            "relationship": "territory"
+          },
+          {
+            "code": "HT",
+            "name": "Haiti",
+            "relationship": "parallel"
+          },
+          {
+            "code": "MH",
+            "name": "Marshall Islands",
+            "relationship": "adopting"
+          },
+          {
+            "code": "MP",
+            "name": "Northern Mariana Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "PW",
+            "name": "Palau",
+            "relationship": "adopting"
+          },
+          {
+            "code": "PA",
+            "name": "Panama",
+            "relationship": "adopting"
+          },
+          {
+            "code": "PR",
+            "name": "Puerto Rico",
+            "relationship": "territory"
+          },
+          {
+            "code": "TC",
+            "name": "Turks and Caicos Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "VG",
+            "name": "British Virgin Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "VI",
+            "name": "US Virgin Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "ZW",
+            "name": "Zimbabwe",
+            "relationship": "adopting"
+          },
+          {
+            "code": "BQ",
+            "name": "Caribbean Netherlands",
+            "relationship": "adopting"
+          },
+          {
+            "code": "IO",
+            "name": "British Indian Ocean Territory",
+            "relationship": "adopting"
+          },
+          {
+            "code": "TL",
+            "name": "Timor-Leste",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -67,40 +139,176 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "AT", "name": "Austria", "relationship": "issuing"},
-          {"code": "BE", "name": "Belgium", "relationship": "issuing"},
-          {"code": "HR", "name": "Croatia", "relationship": "issuing"},
-          {"code": "CY", "name": "Cyprus", "relationship": "issuing"},
-          {"code": "EE", "name": "Estonia", "relationship": "issuing"},
-          {"code": "FI", "name": "Finland", "relationship": "issuing"},
-          {"code": "FR", "name": "France", "relationship": "issuing"},
-          {"code": "DE", "name": "Germany", "relationship": "issuing"},
-          {"code": "GR", "name": "Greece", "relationship": "issuing"},
-          {"code": "IE", "name": "Ireland", "relationship": "issuing"},
-          {"code": "IT", "name": "Italy", "relationship": "issuing"},
-          {"code": "LV", "name": "Latvia", "relationship": "issuing"},
-          {"code": "LT", "name": "Lithuania", "relationship": "issuing"},
-          {"code": "LU", "name": "Luxembourg", "relationship": "issuing"},
-          {"code": "MT", "name": "Malta", "relationship": "issuing"},
-          {"code": "NL", "name": "Netherlands", "relationship": "issuing"},
-          {"code": "PT", "name": "Portugal", "relationship": "issuing"},
-          {"code": "SK", "name": "Slovakia", "relationship": "issuing"},
-          {"code": "SI", "name": "Slovenia", "relationship": "issuing"},
-          {"code": "ES", "name": "Spain", "relationship": "issuing"},
-          {"code": "AD", "name": "Andorra", "relationship": "adopting"},
-          {"code": "MC", "name": "Monaco", "relationship": "adopting"},
-          {"code": "SM", "name": "San Marino", "relationship": "adopting"},
-          {"code": "VA", "name": "Vatican City", "relationship": "adopting"},
-          {"code": "RE", "name": "Réunion", "relationship": "territory"},
-          {"code": "GP", "name": "Guadeloupe", "relationship": "territory"},
-          {"code": "MQ", "name": "Martinique", "relationship": "territory"},
-          {"code": "GF", "name": "French Guiana", "relationship": "territory"},
-          {"code": "YT", "name": "Mayotte", "relationship": "territory"},
-          {"code": "PM", "name": "Saint Pierre and Miquelon", "relationship": "territory"},
-          {"code": "BL", "name": "Saint Barthélemy", "relationship": "territory"},
-          {"code": "MF", "name": "Saint Martin", "relationship": "territory"},
-          {"code": "XK", "name": "Kosovo", "relationship": "adopting"},
-          {"code": "ME", "name": "Montenegro", "relationship": "adopting"}
+          {
+            "code": "AT",
+            "name": "Austria",
+            "relationship": "issuing"
+          },
+          {
+            "code": "BE",
+            "name": "Belgium",
+            "relationship": "issuing"
+          },
+          {
+            "code": "HR",
+            "name": "Croatia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CY",
+            "name": "Cyprus",
+            "relationship": "issuing"
+          },
+          {
+            "code": "EE",
+            "name": "Estonia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "FI",
+            "name": "Finland",
+            "relationship": "issuing"
+          },
+          {
+            "code": "FR",
+            "name": "France",
+            "relationship": "issuing"
+          },
+          {
+            "code": "DE",
+            "name": "Germany",
+            "relationship": "issuing"
+          },
+          {
+            "code": "GR",
+            "name": "Greece",
+            "relationship": "issuing"
+          },
+          {
+            "code": "IE",
+            "name": "Ireland",
+            "relationship": "issuing"
+          },
+          {
+            "code": "IT",
+            "name": "Italy",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LV",
+            "name": "Latvia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LT",
+            "name": "Lithuania",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LU",
+            "name": "Luxembourg",
+            "relationship": "issuing"
+          },
+          {
+            "code": "MT",
+            "name": "Malta",
+            "relationship": "issuing"
+          },
+          {
+            "code": "NL",
+            "name": "Netherlands",
+            "relationship": "issuing"
+          },
+          {
+            "code": "PT",
+            "name": "Portugal",
+            "relationship": "issuing"
+          },
+          {
+            "code": "SK",
+            "name": "Slovakia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "SI",
+            "name": "Slovenia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "ES",
+            "name": "Spain",
+            "relationship": "issuing"
+          },
+          {
+            "code": "AD",
+            "name": "Andorra",
+            "relationship": "adopting"
+          },
+          {
+            "code": "MC",
+            "name": "Monaco",
+            "relationship": "adopting"
+          },
+          {
+            "code": "SM",
+            "name": "San Marino",
+            "relationship": "adopting"
+          },
+          {
+            "code": "VA",
+            "name": "Vatican City",
+            "relationship": "adopting"
+          },
+          {
+            "code": "RE",
+            "name": "Réunion",
+            "relationship": "territory"
+          },
+          {
+            "code": "GP",
+            "name": "Guadeloupe",
+            "relationship": "territory"
+          },
+          {
+            "code": "MQ",
+            "name": "Martinique",
+            "relationship": "territory"
+          },
+          {
+            "code": "GF",
+            "name": "French Guiana",
+            "relationship": "territory"
+          },
+          {
+            "code": "YT",
+            "name": "Mayotte",
+            "relationship": "territory"
+          },
+          {
+            "code": "PM",
+            "name": "Saint Pierre and Miquelon",
+            "relationship": "territory"
+          },
+          {
+            "code": "BL",
+            "name": "Saint Barthélemy",
+            "relationship": "territory"
+          },
+          {
+            "code": "MF",
+            "name": "Saint Martin",
+            "relationship": "territory"
+          },
+          {
+            "code": "XK",
+            "name": "Kosovo",
+            "relationship": "adopting"
+          },
+          {
+            "code": "ME",
+            "name": "Montenegro",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -114,7 +322,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "JP", "name": "Japan", "relationship": "issuing"}
+          {
+            "code": "JP",
+            "name": "Japan",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -128,14 +340,46 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "GB", "name": "United Kingdom", "relationship": "issuing"},
-          {"code": "IM", "name": "Isle of Man", "relationship": "local_issue"},
-          {"code": "JE", "name": "Jersey", "relationship": "local_issue"},
-          {"code": "GG", "name": "Guernsey", "relationship": "local_issue"},
-          {"code": "GS", "name": "South Georgia and South Sandwich Islands", "relationship": "territory"},
-          {"code": "FK", "name": "Falkland Islands", "relationship": "parallel"},
-          {"code": "GI", "name": "Gibraltar", "relationship": "parallel"},
-          {"code": "SH", "name": "Saint Helena", "relationship": "parallel"}
+          {
+            "code": "GB",
+            "name": "United Kingdom",
+            "relationship": "issuing"
+          },
+          {
+            "code": "IM",
+            "name": "Isle of Man",
+            "relationship": "local_issue"
+          },
+          {
+            "code": "JE",
+            "name": "Jersey",
+            "relationship": "local_issue"
+          },
+          {
+            "code": "GG",
+            "name": "Guernsey",
+            "relationship": "local_issue"
+          },
+          {
+            "code": "GS",
+            "name": "South Georgia and South Sandwich Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "FK",
+            "name": "Falkland Islands",
+            "relationship": "parallel"
+          },
+          {
+            "code": "GI",
+            "name": "Gibraltar",
+            "relationship": "parallel"
+          },
+          {
+            "code": "SH",
+            "name": "Saint Helena",
+            "relationship": "parallel"
+          }
         ]
       },
       {
@@ -149,8 +393,16 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CH", "name": "Switzerland", "relationship": "issuing"},
-          {"code": "LI", "name": "Liechtenstein", "relationship": "adopting"}
+          {
+            "code": "CH",
+            "name": "Switzerland",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LI",
+            "name": "Liechtenstein",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -165,7 +417,11 @@
         "is_independent": true,
         "note": "CNY is the onshore yuan. CNH is the offshore yuan (not an ISO code, see non_iso_currencies).",
         "countries": [
-          {"code": "CN", "name": "China", "relationship": "issuing"}
+          {
+            "code": "CN",
+            "name": "China",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -179,14 +435,46 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "AU", "name": "Australia", "relationship": "issuing"},
-          {"code": "CC", "name": "Cocos (Keeling) Islands", "relationship": "territory"},
-          {"code": "CX", "name": "Christmas Island", "relationship": "territory"},
-          {"code": "HM", "name": "Heard Island and McDonald Islands", "relationship": "territory"},
-          {"code": "KI", "name": "Kiribati", "relationship": "adopting"},
-          {"code": "NR", "name": "Nauru", "relationship": "adopting"},
-          {"code": "NF", "name": "Norfolk Island", "relationship": "territory"},
-          {"code": "TV", "name": "Tuvalu", "relationship": "adopting"}
+          {
+            "code": "AU",
+            "name": "Australia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CC",
+            "name": "Cocos (Keeling) Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "CX",
+            "name": "Christmas Island",
+            "relationship": "territory"
+          },
+          {
+            "code": "HM",
+            "name": "Heard Island and McDonald Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "KI",
+            "name": "Kiribati",
+            "relationship": "adopting"
+          },
+          {
+            "code": "NR",
+            "name": "Nauru",
+            "relationship": "adopting"
+          },
+          {
+            "code": "NF",
+            "name": "Norfolk Island",
+            "relationship": "territory"
+          },
+          {
+            "code": "TV",
+            "name": "Tuvalu",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -200,7 +488,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CA", "name": "Canada", "relationship": "issuing"}
+          {
+            "code": "CA",
+            "name": "Canada",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -214,11 +506,31 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "NZ", "name": "New Zealand", "relationship": "issuing"},
-          {"code": "CK", "name": "Cook Islands", "relationship": "adopting"},
-          {"code": "NU", "name": "Niue", "relationship": "adopting"},
-          {"code": "PN", "name": "Pitcairn Islands", "relationship": "territory"},
-          {"code": "TK", "name": "Tokelau", "relationship": "territory"}
+          {
+            "code": "NZ",
+            "name": "New Zealand",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CK",
+            "name": "Cook Islands",
+            "relationship": "adopting"
+          },
+          {
+            "code": "NU",
+            "name": "Niue",
+            "relationship": "adopting"
+          },
+          {
+            "code": "PN",
+            "name": "Pitcairn Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "TK",
+            "name": "Tokelau",
+            "relationship": "territory"
+          }
         ]
       },
       {
@@ -232,7 +544,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "SE", "name": "Sweden", "relationship": "issuing"}
+          {
+            "code": "SE",
+            "name": "Sweden",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -246,9 +562,21 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "NO", "name": "Norway", "relationship": "issuing"},
-          {"code": "BV", "name": "Bouvet Island", "relationship": "territory"},
-          {"code": "SJ", "name": "Svalbard and Jan Mayen", "relationship": "territory"}
+          {
+            "code": "NO",
+            "name": "Norway",
+            "relationship": "issuing"
+          },
+          {
+            "code": "BV",
+            "name": "Bouvet Island",
+            "relationship": "territory"
+          },
+          {
+            "code": "SJ",
+            "name": "Svalbard and Jan Mayen",
+            "relationship": "territory"
+          }
         ]
       },
       {
@@ -267,9 +595,21 @@
         "is_independent": false,
         "note": "Pegged to EUR via ERM II.",
         "countries": [
-          {"code": "DK", "name": "Denmark", "relationship": "issuing"},
-          {"code": "FO", "name": "Faroe Islands", "relationship": "territory"},
-          {"code": "GL", "name": "Greenland", "relationship": "territory"}
+          {
+            "code": "DK",
+            "name": "Denmark",
+            "relationship": "issuing"
+          },
+          {
+            "code": "FO",
+            "name": "Faroe Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "GL",
+            "name": "Greenland",
+            "relationship": "territory"
+          }
         ]
       },
       {
@@ -284,7 +624,11 @@
         "is_independent": true,
         "note": "Managed float against a trade-weighted basket (S$NEER).",
         "countries": [
-          {"code": "SG", "name": "Singapore", "relationship": "issuing"}
+          {
+            "code": "SG",
+            "name": "Singapore",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -298,12 +642,16 @@
         "pegged_to": "USD",
         "peg_type": "single",
         "pegged_since": "1983-10-17",
-        "peg_rate": 7.80,
+        "peg_rate": 7.8,
         "peg_band_pct": 0.65,
         "is_independent": false,
         "note": "Pegged to USD at HK$7.75–7.85 band.",
         "countries": [
-          {"code": "HK", "name": "Hong Kong", "relationship": "issuing"}
+          {
+            "code": "HK",
+            "name": "Hong Kong",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -317,7 +665,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "KR", "name": "South Korea", "relationship": "issuing"}
+          {
+            "code": "KR",
+            "name": "South Korea",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -331,8 +683,16 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "IN", "name": "India", "relationship": "issuing"},
-          {"code": "BT", "name": "Bhutan", "relationship": "adopting"}
+          {
+            "code": "IN",
+            "name": "India",
+            "relationship": "issuing"
+          },
+          {
+            "code": "BT",
+            "name": "Bhutan",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -346,7 +706,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "MX", "name": "Mexico", "relationship": "issuing"}
+          {
+            "code": "MX",
+            "name": "Mexico",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -360,7 +724,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "BR", "name": "Brazil", "relationship": "issuing"}
+          {
+            "code": "BR",
+            "name": "Brazil",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -375,10 +743,26 @@
         "is_independent": true,
         "note": "Also legal tender in the Common Monetary Area (CMA).",
         "countries": [
-          {"code": "ZA", "name": "South Africa", "relationship": "issuing"},
-          {"code": "LS", "name": "Lesotho", "relationship": "parallel"},
-          {"code": "NA", "name": "Namibia", "relationship": "parallel"},
-          {"code": "SZ", "name": "Eswatini", "relationship": "parallel"}
+          {
+            "code": "ZA",
+            "name": "South Africa",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LS",
+            "name": "Lesotho",
+            "relationship": "parallel"
+          },
+          {
+            "code": "NA",
+            "name": "Namibia",
+            "relationship": "parallel"
+          },
+          {
+            "code": "SZ",
+            "name": "Eswatini",
+            "relationship": "parallel"
+          }
         ]
       },
       {
@@ -392,7 +776,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "TR", "name": "Turkey", "relationship": "issuing"}
+          {
+            "code": "TR",
+            "name": "Turkey",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -406,7 +794,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "RU", "name": "Russia", "relationship": "issuing"}
+          {
+            "code": "RU",
+            "name": "Russia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -424,7 +816,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "AE", "name": "United Arab Emirates", "relationship": "issuing"}
+          {
+            "code": "AE",
+            "name": "United Arab Emirates",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -442,7 +838,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "SA", "name": "Saudi Arabia", "relationship": "issuing"}
+          {
+            "code": "SA",
+            "name": "Saudi Arabia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -456,7 +856,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "TH", "name": "Thailand", "relationship": "issuing"}
+          {
+            "code": "TH",
+            "name": "Thailand",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -470,7 +874,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "MY", "name": "Malaysia", "relationship": "issuing"}
+          {
+            "code": "MY",
+            "name": "Malaysia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -485,7 +893,11 @@
         "is_independent": true,
         "note": "ISO 4217 specifies 2 minor units, but in market practice IDR is quoted without decimals (effectively 0 minor units for display). This field follows the ISO standard. For display formatting, treat minor_units as 0 for IDR.",
         "countries": [
-          {"code": "ID", "name": "Indonesia", "relationship": "issuing"}
+          {
+            "code": "ID",
+            "name": "Indonesia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -499,7 +911,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "PH", "name": "Philippines", "relationship": "issuing"}
+          {
+            "code": "PH",
+            "name": "Philippines",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -513,7 +929,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "TW", "name": "Taiwan", "relationship": "issuing"}
+          {
+            "code": "TW",
+            "name": "Taiwan",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -527,7 +947,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "VN", "name": "Vietnam", "relationship": "issuing"}
+          {
+            "code": "VN",
+            "name": "Vietnam",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -541,7 +965,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "PL", "name": "Poland", "relationship": "issuing"}
+          {
+            "code": "PL",
+            "name": "Poland",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -555,7 +983,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CZ", "name": "Czech Republic", "relationship": "issuing"}
+          {
+            "code": "CZ",
+            "name": "Czech Republic",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -569,7 +1001,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "HU", "name": "Hungary", "relationship": "issuing"}
+          {
+            "code": "HU",
+            "name": "Hungary",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -583,7 +1019,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "RO", "name": "Romania", "relationship": "issuing"}
+          {
+            "code": "RO",
+            "name": "Romania",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -597,8 +1037,16 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "IL", "name": "Israel", "relationship": "issuing"},
-          {"code": "PS", "name": "Palestinian Territories", "relationship": "adopting"}
+          {
+            "code": "IL",
+            "name": "Israel",
+            "relationship": "issuing"
+          },
+          {
+            "code": "PS",
+            "name": "Palestinian Territories",
+            "relationship": "adopting"
+          }
         ]
       },
       {
@@ -612,7 +1060,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CL", "name": "Chile", "relationship": "issuing"}
+          {
+            "code": "CL",
+            "name": "Chile",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -626,7 +1078,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CO", "name": "Colombia", "relationship": "issuing"}
+          {
+            "code": "CO",
+            "name": "Colombia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -640,7 +1096,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "AR", "name": "Argentina", "relationship": "issuing"}
+          {
+            "code": "AR",
+            "name": "Argentina",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -654,7 +1114,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "PE", "name": "Peru", "relationship": "issuing"}
+          {
+            "code": "PE",
+            "name": "Peru",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -668,7 +1132,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "NG", "name": "Nigeria", "relationship": "issuing"}
+          {
+            "code": "NG",
+            "name": "Nigeria",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -682,7 +1150,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "EG", "name": "Egypt", "relationship": "issuing"}
+          {
+            "code": "EG",
+            "name": "Egypt",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -696,7 +1168,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "KE", "name": "Kenya", "relationship": "issuing"}
+          {
+            "code": "KE",
+            "name": "Kenya",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -710,7 +1186,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "GH", "name": "Ghana", "relationship": "issuing"}
+          {
+            "code": "GH",
+            "name": "Ghana",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -729,8 +1209,16 @@
         "is_independent": false,
         "note": "Pegged to a EUR/USD basket (60/40 weighting).",
         "countries": [
-          {"code": "MA", "name": "Morocco", "relationship": "issuing"},
-          {"code": "EH", "name": "Western Sahara", "relationship": "territory"}
+          {
+            "code": "MA",
+            "name": "Morocco",
+            "relationship": "issuing"
+          },
+          {
+            "code": "EH",
+            "name": "Western Sahara",
+            "relationship": "territory"
+          }
         ]
       },
       {
@@ -744,7 +1232,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "DZ", "name": "Algeria", "relationship": "issuing"}
+          {
+            "code": "DZ",
+            "name": "Algeria",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -758,7 +1250,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "TN", "name": "Tunisia", "relationship": "issuing"}
+          {
+            "code": "TN",
+            "name": "Tunisia",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -772,7 +1268,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "LY", "name": "Libya", "relationship": "issuing"}
+          {
+            "code": "LY",
+            "name": "Libya",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -791,7 +1291,11 @@
         "is_independent": false,
         "note": "Pegged to an undisclosed currency basket (formerly USD until 2007).",
         "countries": [
-          {"code": "KW", "name": "Kuwait", "relationship": "issuing"}
+          {
+            "code": "KW",
+            "name": "Kuwait",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -809,7 +1313,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "BH", "name": "Bahrain", "relationship": "issuing"}
+          {
+            "code": "BH",
+            "name": "Bahrain",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -827,7 +1335,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "OM", "name": "Oman", "relationship": "issuing"}
+          {
+            "code": "OM",
+            "name": "Oman",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -845,7 +1357,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "QA", "name": "Qatar", "relationship": "issuing"}
+          {
+            "code": "QA",
+            "name": "Qatar",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -863,7 +1379,11 @@
         "peg_band_pct": 0.0,
         "is_independent": false,
         "countries": [
-          {"code": "JO", "name": "Jordan", "relationship": "issuing"}
+          {
+            "code": "JO",
+            "name": "Jordan",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -878,7 +1398,11 @@
         "is_independent": true,
         "note": "Official peg to USD collapsed in practice. Market rate diverged significantly from 2020.",
         "countries": [
-          {"code": "LB", "name": "Lebanon", "relationship": "issuing"}
+          {
+            "code": "LB",
+            "name": "Lebanon",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -892,7 +1416,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "IQ", "name": "Iraq", "relationship": "issuing"}
+          {
+            "code": "IQ",
+            "name": "Iraq",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -906,7 +1434,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "PK", "name": "Pakistan", "relationship": "issuing"}
+          {
+            "code": "PK",
+            "name": "Pakistan",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -920,7 +1452,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "BD", "name": "Bangladesh", "relationship": "issuing"}
+          {
+            "code": "BD",
+            "name": "Bangladesh",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -934,7 +1470,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "LK", "name": "Sri Lanka", "relationship": "issuing"}
+          {
+            "code": "LK",
+            "name": "Sri Lanka",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -948,7 +1488,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "KZ", "name": "Kazakhstan", "relationship": "issuing"}
+          {
+            "code": "KZ",
+            "name": "Kazakhstan",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -962,7 +1506,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "UA", "name": "Ukraine", "relationship": "issuing"}
+          {
+            "code": "UA",
+            "name": "Ukraine",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -976,7 +1524,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "CR", "name": "Costa Rica", "relationship": "issuing"}
+          {
+            "code": "CR",
+            "name": "Costa Rica",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -990,7 +1542,11 @@
         "pegged_to": null,
         "is_independent": true,
         "countries": [
-          {"code": "IS", "name": "Iceland", "relationship": "issuing"}
+          {
+            "code": "IS",
+            "name": "Iceland",
+            "relationship": "issuing"
+          }
         ]
       },
       {
@@ -1009,7 +1565,2284 @@
         "is_independent": false,
         "note": "Pegged to EUR via currency board. Bulgaria is in ERM II.",
         "countries": [
-          {"code": "BG", "name": "Bulgaria", "relationship": "issuing"}
+          {
+            "code": "BG",
+            "name": "Bulgaria",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "BOV",
+        "numeric": "984",
+        "name": "Bolivian Mvdol",
+        "minor_units": 2,
+        "symbol": "BOV",
+        "entity": "Bolivia",
+        "central_bank": "Banco Central de Bolivia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "BO",
+            "name": "Bolivia",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Fund code maintained by the Banco Central de Bolivia for indexation purposes. Not a circulating currency."
+      },
+      {
+        "code": "CHE",
+        "numeric": "947",
+        "name": "WIR Euro",
+        "minor_units": 2,
+        "symbol": "CHE",
+        "entity": "Switzerland",
+        "central_bank": "WIR Bank",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "2000-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CH",
+            "name": "Switzerland",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Complementary currency issued by the WIR Bank in Switzerland. Pegged 1:1 to EUR. Not a tradable ISO currency in the conventional sense."
+      },
+      {
+        "code": "CHW",
+        "numeric": "948",
+        "name": "WIR Franc",
+        "minor_units": 2,
+        "symbol": "CHW",
+        "entity": "Switzerland",
+        "central_bank": "WIR Bank",
+        "pegged_to": "CHF",
+        "peg_type": "single",
+        "pegged_since": "1934-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CH",
+            "name": "Switzerland",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Complementary currency issued by the WIR Bank in Switzerland. Pegged 1:1 to CHF. Not a tradable ISO currency in the conventional sense."
+      },
+      {
+        "code": "CLF",
+        "numeric": "990",
+        "name": "Unidad de Fomento",
+        "minor_units": 4,
+        "symbol": "CLF",
+        "entity": "Chile",
+        "central_bank": "Banco Central de Chile",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "CL",
+            "name": "Chile",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Chilean indexation unit maintained by the Banco Central de Chile. Adjusted daily for inflation. Not a circulating currency."
+      },
+      {
+        "code": "COU",
+        "numeric": "970",
+        "name": "Unidad de Valor Real",
+        "minor_units": 2,
+        "symbol": "COU",
+        "entity": "Colombia",
+        "central_bank": "Banco de la República de Colombia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "CO",
+            "name": "Colombia",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Colombian indexation unit maintained by the Banco de la República. Not a circulating currency."
+      },
+      {
+        "code": "MXV",
+        "numeric": "979",
+        "name": "Mexican Unidad de Inversion",
+        "minor_units": 2,
+        "symbol": "MXV",
+        "entity": "Mexico",
+        "central_bank": "Banco de México",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MX",
+            "name": "Mexico",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Mexican Unidad de Inversion (UDI) — indexation unit maintained by Banco de México. Not a circulating currency."
+      },
+      {
+        "code": "USN",
+        "numeric": "997",
+        "name": "US Dollar (next day)",
+        "minor_units": 2,
+        "symbol": "USN",
+        "entity": "United States",
+        "central_bank": "Federal Reserve System",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1970-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "US",
+            "name": "United States",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "US Dollar (next day) — funds code for settlement purposes. Pegged 1:1 to USD. Not a separate currency."
+      },
+      {
+        "code": "USS",
+        "numeric": "998",
+        "name": "US Dollar (same day)",
+        "minor_units": 2,
+        "symbol": "USS",
+        "entity": "United States",
+        "central_bank": "Federal Reserve System",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1970-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "US",
+            "name": "United States",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "US Dollar (same day) — funds code for settlement purposes. Pegged 1:1 to USD. Not a separate currency."
+      },
+      {
+        "code": "UYI",
+        "numeric": "940",
+        "name": "Uruguay Peso en Unidades Indexadas",
+        "minor_units": 0,
+        "symbol": "UYI",
+        "entity": "Uruguay",
+        "central_bank": "Banco Central del Uruguay",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "UY",
+            "name": "Uruguay",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Uruguay Peso en Unidades Indexadas (UI) — indexation unit maintained by the Banco Central del Uruguay. Not a circulating currency."
+      },
+      {
+        "code": "UYW",
+        "numeric": "927",
+        "name": "Unidad Previsional",
+        "minor_units": 4,
+        "symbol": "UYW",
+        "entity": "Uruguay",
+        "central_bank": "Banco Central del Uruguay",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "UY",
+            "name": "Uruguay",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Unidad Previsional — Uruguayan pension indexation unit. Not a circulating currency."
+      },
+      {
+        "code": "VED",
+        "numeric": "926",
+        "name": "Venezuelan Digital Bolívar",
+        "minor_units": 2,
+        "symbol": "VED",
+        "entity": "Venezuela",
+        "central_bank": "Banco Central de Venezuela",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "VE",
+            "name": "Venezuela",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Venezuelan Digital Bolívar — digital representation of VES. ISO-listed as a separate code. Market usage varies; treat with caution."
+      },
+      {
+        "code": "XOF",
+        "numeric": "952",
+        "name": "West African CFA Franc",
+        "minor_units": 0,
+        "symbol": "CFA",
+        "entity": "West African Economic and Monetary Union (UEMOA)",
+        "central_bank": "Central Bank of West African States (BCEAO)",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 655.957,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BJ",
+            "name": "Benin",
+            "relationship": "issuing"
+          },
+          {
+            "code": "BF",
+            "name": "Burkina Faso",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CI",
+            "name": "Côte d'Ivoire",
+            "relationship": "issuing"
+          },
+          {
+            "code": "GW",
+            "name": "Guinea-Bissau",
+            "relationship": "issuing"
+          },
+          {
+            "code": "ML",
+            "name": "Mali",
+            "relationship": "issuing"
+          },
+          {
+            "code": "NE",
+            "name": "Niger",
+            "relationship": "issuing"
+          },
+          {
+            "code": "SN",
+            "name": "Senegal",
+            "relationship": "issuing"
+          },
+          {
+            "code": "TG",
+            "name": "Togo",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 655.957 XOF per 1 EUR since 1999. Previously pegged to FRF."
+      },
+      {
+        "code": "XAF",
+        "numeric": "950",
+        "name": "Central African CFA Franc",
+        "minor_units": 0,
+        "symbol": "CFA",
+        "entity": "Economic and Monetary Community of Central Africa (CEMAC)",
+        "central_bank": "Bank of Central African States (BEAC)",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 655.957,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CM",
+            "name": "Cameroon",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CF",
+            "name": "Central African Republic",
+            "relationship": "issuing"
+          },
+          {
+            "code": "TD",
+            "name": "Chad",
+            "relationship": "issuing"
+          },
+          {
+            "code": "CG",
+            "name": "Republic of the Congo",
+            "relationship": "issuing"
+          },
+          {
+            "code": "GQ",
+            "name": "Equatorial Guinea",
+            "relationship": "issuing"
+          },
+          {
+            "code": "GA",
+            "name": "Gabon",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 655.957 XAF per 1 EUR since 1999. Previously pegged to FRF."
+      },
+      {
+        "code": "XPF",
+        "numeric": "953",
+        "name": "CFP Franc",
+        "minor_units": 0,
+        "symbol": "₣",
+        "entity": "French Pacific Territories",
+        "central_bank": "Institut d'Émission d'Outre-Mer (IEOM)",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 119.332,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "PF",
+            "name": "French Polynesia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "NC",
+            "name": "New Caledonia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "WF",
+            "name": "Wallis and Futuna",
+            "relationship": "territory"
+          }
+        ],
+        "note": "Pegged to EUR at 119.332 XPF per 1 EUR since 1999. Previously pegged to FRF."
+      },
+      {
+        "code": "XCD",
+        "numeric": "951",
+        "name": "East Caribbean Dollar",
+        "minor_units": 2,
+        "symbol": "EC$",
+        "entity": "Eastern Caribbean Currency Union",
+        "central_bank": "Eastern Caribbean Central Bank",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1976-07-01",
+        "peg_rate": 2.7,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "AG",
+            "name": "Antigua and Barbuda",
+            "relationship": "issuing"
+          },
+          {
+            "code": "DM",
+            "name": "Dominica",
+            "relationship": "issuing"
+          },
+          {
+            "code": "GD",
+            "name": "Grenada",
+            "relationship": "issuing"
+          },
+          {
+            "code": "KN",
+            "name": "Saint Kitts and Nevis",
+            "relationship": "issuing"
+          },
+          {
+            "code": "LC",
+            "name": "Saint Lucia",
+            "relationship": "issuing"
+          },
+          {
+            "code": "VC",
+            "name": "Saint Vincent and the Grenadines",
+            "relationship": "issuing"
+          },
+          {
+            "code": "AI",
+            "name": "Anguilla",
+            "relationship": "territory"
+          },
+          {
+            "code": "MS",
+            "name": "Montserrat",
+            "relationship": "territory"
+          }
+        ],
+        "note": "Pegged to USD at 2.70 XCD per 1 USD since 1976."
+      },
+      {
+        "code": "BBD",
+        "numeric": "052",
+        "name": "Barbadian Dollar",
+        "minor_units": 2,
+        "symbol": "Bds$",
+        "entity": "Barbados",
+        "central_bank": "Central Bank of Barbados",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1975-07-01",
+        "peg_rate": 2.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BB",
+            "name": "Barbados",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 2.00 BBD per 1 USD since 1975."
+      },
+      {
+        "code": "BMD",
+        "numeric": "060",
+        "name": "Bermudian Dollar",
+        "minor_units": 2,
+        "symbol": "BD$",
+        "entity": "Bermuda",
+        "central_bank": "Bermuda Monetary Authority",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1970-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BM",
+            "name": "Bermuda",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to USD. Bermuda uses USD interchangeably with BMD."
+      },
+      {
+        "code": "BSD",
+        "numeric": "044",
+        "name": "Bahamian Dollar",
+        "minor_units": 2,
+        "symbol": "B$",
+        "entity": "Bahamas",
+        "central_bank": "Central Bank of The Bahamas",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1973-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BS",
+            "name": "Bahamas",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to USD. Bahamas uses USD interchangeably with BSD."
+      },
+      {
+        "code": "BZD",
+        "numeric": "084",
+        "name": "Belize Dollar",
+        "minor_units": 2,
+        "symbol": "BZ$",
+        "entity": "Belize",
+        "central_bank": "Central Bank of Belize",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1976-01-01",
+        "peg_rate": 2.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BZ",
+            "name": "Belize",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 2.00 BZD per 1 USD since 1976."
+      },
+      {
+        "code": "KYD",
+        "numeric": "136",
+        "name": "Cayman Islands Dollar",
+        "minor_units": 2,
+        "symbol": "CI$",
+        "entity": "Cayman Islands",
+        "central_bank": "Cayman Islands Monetary Authority",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1974-01-01",
+        "peg_rate": 0.833333,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "KY",
+            "name": "Cayman Islands",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 0.833333 KYD per 1 USD (1 KYD = 1.20 USD) since 1974."
+      },
+      {
+        "code": "ALL",
+        "numeric": "008",
+        "name": "Albanian Lek",
+        "minor_units": 2,
+        "symbol": "L",
+        "entity": "Albania",
+        "central_bank": "Bank of Albania",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "AL",
+            "name": "Albania",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "BAM",
+        "numeric": "977",
+        "name": "Bosnia and Herzegovina Convertible Mark",
+        "minor_units": 2,
+        "symbol": "KM",
+        "entity": "Bosnia and Herzegovina",
+        "central_bank": "Central Bank of Bosnia and Herzegovina",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 1.95583,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BA",
+            "name": "Bosnia and Herzegovina",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 1.95583 BAM per 1 EUR since 1999, mirroring the DEM-EUR fixing rate."
+      },
+      {
+        "code": "BYN",
+        "numeric": "933",
+        "name": "Belarusian Ruble",
+        "minor_units": 2,
+        "symbol": "Br",
+        "entity": "Belarus",
+        "central_bank": "National Bank of the Republic of Belarus",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "BY",
+            "name": "Belarus",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MDL",
+        "numeric": "498",
+        "name": "Moldovan Leu",
+        "minor_units": 2,
+        "symbol": "L",
+        "entity": "Moldova",
+        "central_bank": "National Bank of Moldova",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MD",
+            "name": "Moldova",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MKD",
+        "numeric": "807",
+        "name": "Macedonian Denar",
+        "minor_units": 2,
+        "symbol": "ден",
+        "entity": "North Macedonia",
+        "central_bank": "National Bank of the Republic of North Macedonia",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 61.495,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "MK",
+            "name": "North Macedonia",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 61.495 MKD per 1 EUR since 1999."
+      },
+      {
+        "code": "RSD",
+        "numeric": "941",
+        "name": "Serbian Dinar",
+        "minor_units": 2,
+        "symbol": "дин",
+        "entity": "Serbia",
+        "central_bank": "National Bank of Serbia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "RS",
+            "name": "Serbia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "AMD",
+        "numeric": "051",
+        "name": "Armenian Dram",
+        "minor_units": 2,
+        "symbol": "֏",
+        "entity": "Armenia",
+        "central_bank": "Central Bank of Armenia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "AM",
+            "name": "Armenia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "AZN",
+        "numeric": "944",
+        "name": "Azerbaijani Manat",
+        "minor_units": 2,
+        "symbol": "₼",
+        "entity": "Azerbaijan",
+        "central_bank": "Central Bank of the Republic of Azerbaijan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "AZ",
+            "name": "Azerbaijan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "KGS",
+        "numeric": "417",
+        "name": "Kyrgyzstani Som",
+        "minor_units": 2,
+        "symbol": "с",
+        "entity": "Kyrgyzstan",
+        "central_bank": "National Bank of the Kyrgyz Republic",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "KG",
+            "name": "Kyrgyzstan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "TJS",
+        "numeric": "972",
+        "name": "Tajikistani Somoni",
+        "minor_units": 2,
+        "symbol": "SM",
+        "entity": "Tajikistan",
+        "central_bank": "National Bank of Tajikistan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "TJ",
+            "name": "Tajikistan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "TMT",
+        "numeric": "934",
+        "name": "Turkmenistani Manat",
+        "minor_units": 2,
+        "symbol": "m",
+        "entity": "Turkmenistan",
+        "central_bank": "Central Bank of Turkmenistan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "TM",
+            "name": "Turkmenistan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "UZS",
+        "numeric": "860",
+        "name": "Uzbekistani Som",
+        "minor_units": 2,
+        "symbol": "so'm",
+        "entity": "Uzbekistan",
+        "central_bank": "Central Bank of the Republic of Uzbekistan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "UZ",
+            "name": "Uzbekistan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "AFN",
+        "numeric": "971",
+        "name": "Afghan Afghani",
+        "minor_units": 2,
+        "symbol": "؋",
+        "entity": "Afghanistan",
+        "central_bank": "Da Afghanistan Bank",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "AF",
+            "name": "Afghanistan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "IRR",
+        "numeric": "364",
+        "name": "Iranian Rial",
+        "minor_units": 2,
+        "symbol": "﷼",
+        "entity": "Iran",
+        "central_bank": "Central Bank of the Islamic Republic of Iran",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "IR",
+            "name": "Iran",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SYP",
+        "numeric": "760",
+        "name": "Syrian Pound",
+        "minor_units": 2,
+        "symbol": "£S",
+        "entity": "Syria",
+        "central_bank": "Central Bank of Syria",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SY",
+            "name": "Syria",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "YER",
+        "numeric": "886",
+        "name": "Yemeni Rial",
+        "minor_units": 2,
+        "symbol": "﷼",
+        "entity": "Yemen",
+        "central_bank": "Central Bank of Yemen",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "YE",
+            "name": "Yemen",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "BOB",
+        "numeric": "068",
+        "name": "Bolivian Boliviano",
+        "minor_units": 2,
+        "symbol": "Bs",
+        "entity": "Bolivia",
+        "central_bank": "Banco Central de Bolivia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "BO",
+            "name": "Bolivia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "GTQ",
+        "numeric": "320",
+        "name": "Guatemalan Quetzal",
+        "minor_units": 2,
+        "symbol": "Q",
+        "entity": "Guatemala",
+        "central_bank": "Banco de Guatemala",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "GT",
+            "name": "Guatemala",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "HNL",
+        "numeric": "340",
+        "name": "Honduran Lempira",
+        "minor_units": 2,
+        "symbol": "L",
+        "entity": "Honduras",
+        "central_bank": "Banco Central de Honduras",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "HN",
+            "name": "Honduras",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "NIO",
+        "numeric": "558",
+        "name": "Nicaraguan Córdoba",
+        "minor_units": 2,
+        "symbol": "C$",
+        "entity": "Nicaragua",
+        "central_bank": "Banco Central de Nicaragua",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "NI",
+            "name": "Nicaragua",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "PAB",
+        "numeric": "590",
+        "name": "Panamanian Balboa",
+        "minor_units": 2,
+        "symbol": "B/.",
+        "entity": "Panama",
+        "central_bank": "No central bank (uses USD as primary currency)",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1904-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "PA",
+            "name": "Panama",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to USD since 1904. Panama uses USD as its primary circulating currency; PAB exists only in coin form."
+      },
+      {
+        "code": "PYG",
+        "numeric": "600",
+        "name": "Paraguayan Guaraní",
+        "minor_units": 0,
+        "symbol": "₲",
+        "entity": "Paraguay",
+        "central_bank": "Banco Central del Paraguay",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "PY",
+            "name": "Paraguay",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SRD",
+        "numeric": "968",
+        "name": "Surinamese Dollar",
+        "minor_units": 2,
+        "symbol": "$",
+        "entity": "Suriname",
+        "central_bank": "Centrale Bank van Suriname",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SR",
+            "name": "Suriname",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "UYU",
+        "numeric": "858",
+        "name": "Uruguayan Peso",
+        "minor_units": 2,
+        "symbol": "$U",
+        "entity": "Uruguay",
+        "central_bank": "Banco Central del Uruguay",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "UY",
+            "name": "Uruguay",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "VES",
+        "numeric": "928",
+        "name": "Venezuelan Bolívar Soberano",
+        "minor_units": 2,
+        "symbol": "Bs.S",
+        "entity": "Venezuela",
+        "central_bank": "Banco Central de Venezuela",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "VE",
+            "name": "Venezuela",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Previously pegged to USD at various rates. Currently under managed float with significant inflation."
+      },
+      {
+        "code": "BWP",
+        "numeric": "072",
+        "name": "Botswana Pula",
+        "minor_units": 2,
+        "symbol": "P",
+        "entity": "Botswana",
+        "central_bank": "Bank of Botswana",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "BW",
+            "name": "Botswana",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "LSL",
+        "numeric": "426",
+        "name": "Lesotho Loti",
+        "minor_units": 2,
+        "symbol": "L",
+        "entity": "Lesotho",
+        "central_bank": "Central Bank of Lesotho",
+        "pegged_to": "ZAR",
+        "peg_type": "single",
+        "pegged_since": "1980-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "LS",
+            "name": "Lesotho",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to ZAR through the Common Monetary Area. South African rand circulates alongside the loti."
+      },
+      {
+        "code": "NAD",
+        "numeric": "516",
+        "name": "Namibian Dollar",
+        "minor_units": 2,
+        "symbol": "N$",
+        "entity": "Namibia",
+        "central_bank": "Bank of Namibia",
+        "pegged_to": "ZAR",
+        "peg_type": "single",
+        "pegged_since": "1993-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "NA",
+            "name": "Namibia",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to ZAR through the Common Monetary Area. South African rand circulates alongside the Namibian dollar."
+      },
+      {
+        "code": "SZL",
+        "numeric": "748",
+        "name": "Swazi Lilangeni",
+        "minor_units": 2,
+        "symbol": "L",
+        "entity": "Eswatini",
+        "central_bank": "Central Bank of Eswatini",
+        "pegged_to": "ZAR",
+        "peg_type": "single",
+        "pegged_since": "1986-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "SZ",
+            "name": "Eswatini",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to ZAR through the Common Monetary Area. South African rand circulates alongside the lilangeni."
+      },
+      {
+        "code": "ZMW",
+        "numeric": "967",
+        "name": "Zambian Kwacha",
+        "minor_units": 2,
+        "symbol": "ZK",
+        "entity": "Zambia",
+        "central_bank": "Bank of Zambia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "ZM",
+            "name": "Zambia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "ZWG",
+        "numeric": "924",
+        "name": "Zimbabwe Gold",
+        "minor_units": 2,
+        "symbol": "ZiG",
+        "entity": "Zimbabwe",
+        "central_bank": "Reserve Bank of Zimbabwe",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "ZW",
+            "name": "Zimbabwe",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Introduced April 2024 to replace the Zimbabwean dollar. Backed by gold and foreign currency reserves."
+      },
+      {
+        "code": "MWK",
+        "numeric": "454",
+        "name": "Malawian Kwacha",
+        "minor_units": 2,
+        "symbol": "MK",
+        "entity": "Malawi",
+        "central_bank": "Reserve Bank of Malawi",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MW",
+            "name": "Malawi",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MZN",
+        "numeric": "943",
+        "name": "Mozambican Metical",
+        "minor_units": 2,
+        "symbol": "MT",
+        "entity": "Mozambique",
+        "central_bank": "Banco de Moçambique",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MZ",
+            "name": "Mozambique",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "AOA",
+        "numeric": "973",
+        "name": "Angolan Kwanza",
+        "minor_units": 2,
+        "symbol": "Kz",
+        "entity": "Angola",
+        "central_bank": "Banco Nacional de Angola",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "AO",
+            "name": "Angola",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "BIF",
+        "numeric": "108",
+        "name": "Burundian Franc",
+        "minor_units": 0,
+        "symbol": "FBu",
+        "entity": "Burundi",
+        "central_bank": "Banque de la République du Burundi",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "BI",
+            "name": "Burundi",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "CDF",
+        "numeric": "976",
+        "name": "Congolese Franc",
+        "minor_units": 2,
+        "symbol": "FC",
+        "entity": "Democratic Republic of the Congo",
+        "central_bank": "Banque Centrale du Congo",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "CD",
+            "name": "Democratic Republic of the Congo",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "DJF",
+        "numeric": "262",
+        "name": "Djiboutian Franc",
+        "minor_units": 0,
+        "symbol": "Fdj",
+        "entity": "Djibouti",
+        "central_bank": "Banque Centrale de Djibouti",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1973-01-01",
+        "peg_rate": 177.721,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "DJ",
+            "name": "Djibouti",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 177.721 DJF per 1 USD since 1973."
+      },
+      {
+        "code": "ERN",
+        "numeric": "232",
+        "name": "Eritrean Nakfa",
+        "minor_units": 2,
+        "symbol": "Nfk",
+        "entity": "Eritrea",
+        "central_bank": "Bank of Eritrea",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1997-01-01",
+        "peg_rate": 15.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "ER",
+            "name": "Eritrea",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 15.00 ERN per 1 USD since 1997."
+      },
+      {
+        "code": "ETB",
+        "numeric": "230",
+        "name": "Ethiopian Birr",
+        "minor_units": 2,
+        "symbol": "Br",
+        "entity": "Ethiopia",
+        "central_bank": "National Bank of Ethiopia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "ET",
+            "name": "Ethiopia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "KMF",
+        "numeric": "174",
+        "name": "Comorian Franc",
+        "minor_units": 0,
+        "symbol": "CF",
+        "entity": "Comoros",
+        "central_bank": "Banque Centrale des Comores",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 491.968,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "KM",
+            "name": "Comoros",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 491.968 KMF per 1 EUR since 1999. Previously pegged to FRF."
+      },
+      {
+        "code": "MGA",
+        "numeric": "969",
+        "name": "Malagasy Ariary",
+        "minor_units": 2,
+        "symbol": "Ar",
+        "entity": "Madagascar",
+        "central_bank": "Banque Centrale de Madagascar",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MG",
+            "name": "Madagascar",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MRU",
+        "numeric": "929",
+        "name": "Mauritanian Ouguiya",
+        "minor_units": 2,
+        "symbol": "UM",
+        "entity": "Mauritania",
+        "central_bank": "Banque Centrale de Mauritanie",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MR",
+            "name": "Mauritania",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MUR",
+        "numeric": "480",
+        "name": "Mauritian Rupee",
+        "minor_units": 2,
+        "symbol": "₨",
+        "entity": "Mauritius",
+        "central_bank": "Bank of Mauritius",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MU",
+            "name": "Mauritius",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "RWF",
+        "numeric": "646",
+        "name": "Rwandan Franc",
+        "minor_units": 0,
+        "symbol": "FRw",
+        "entity": "Rwanda",
+        "central_bank": "National Bank of Rwanda",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "RW",
+            "name": "Rwanda",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SCR",
+        "numeric": "690",
+        "name": "Seychellois Rupee",
+        "minor_units": 2,
+        "symbol": "₨",
+        "entity": "Seychelles",
+        "central_bank": "Central Bank of Seychelles",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SC",
+            "name": "Seychelles",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SDG",
+        "numeric": "938",
+        "name": "Sudanese Pound",
+        "minor_units": 2,
+        "symbol": "ج.س",
+        "entity": "Sudan",
+        "central_bank": "Central Bank of Sudan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SD",
+            "name": "Sudan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SLE",
+        "numeric": "925",
+        "name": "Sierra Leonean Leone",
+        "minor_units": 2,
+        "symbol": "Le",
+        "entity": "Sierra Leone",
+        "central_bank": "Bank of Sierra Leone",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SL",
+            "name": "Sierra Leone",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SOS",
+        "numeric": "706",
+        "name": "Somali Shilling",
+        "minor_units": 2,
+        "symbol": "Sh.So.",
+        "entity": "Somalia",
+        "central_bank": "Central Bank of Somalia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SO",
+            "name": "Somalia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SSP",
+        "numeric": "728",
+        "name": "South Sudanese Pound",
+        "minor_units": 2,
+        "symbol": "SS£",
+        "entity": "South Sudan",
+        "central_bank": "Bank of South Sudan",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SS",
+            "name": "South Sudan",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "STN",
+        "numeric": "930",
+        "name": "São Tomé and Príncipe Dobra",
+        "minor_units": 2,
+        "symbol": "Db",
+        "entity": "São Tomé and Príncipe",
+        "central_bank": "Banco Central de São Tomé e Príncipe",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "2010-01-01",
+        "peg_rate": 24.5,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "ST",
+            "name": "São Tomé and Príncipe",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 24.50 STN per 1 EUR since 2010. Previously pegged to the Portuguese escudo, then to a EUR-USD basket."
+      },
+      {
+        "code": "TZS",
+        "numeric": "834",
+        "name": "Tanzanian Shilling",
+        "minor_units": 2,
+        "symbol": "TSh",
+        "entity": "Tanzania",
+        "central_bank": "Bank of Tanzania",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "TZ",
+            "name": "Tanzania",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "UGX",
+        "numeric": "800",
+        "name": "Ugandan Shilling",
+        "minor_units": 0,
+        "symbol": "USh",
+        "entity": "Uganda",
+        "central_bank": "Bank of Uganda",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "UG",
+            "name": "Uganda",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "CVE",
+        "numeric": "132",
+        "name": "Cape Verdean Escudo",
+        "minor_units": 2,
+        "symbol": "Esc",
+        "entity": "Cape Verde",
+        "central_bank": "Banco de Cabo Verde",
+        "pegged_to": "EUR",
+        "peg_type": "single",
+        "pegged_since": "1999-01-01",
+        "peg_rate": 110.265,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CV",
+            "name": "Cape Verde",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to EUR at 110.265 CVE per 1 EUR since 1999. Previously pegged to the Portuguese escudo."
+      },
+      {
+        "code": "GMD",
+        "numeric": "270",
+        "name": "Gambian Dalasi",
+        "minor_units": 2,
+        "symbol": "D",
+        "entity": "Gambia",
+        "central_bank": "Central Bank of The Gambia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "GM",
+            "name": "Gambia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "GNF",
+        "numeric": "324",
+        "name": "Guinean Franc",
+        "minor_units": 0,
+        "symbol": "FG",
+        "entity": "Guinea",
+        "central_bank": "Banque Centrale de la République de Guinée",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "GN",
+            "name": "Guinea",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "LRD",
+        "numeric": "430",
+        "name": "Liberian Dollar",
+        "minor_units": 2,
+        "symbol": "L$",
+        "entity": "Liberia",
+        "central_bank": "Central Bank of Liberia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "LR",
+            "name": "Liberia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "ANG",
+        "numeric": "532",
+        "name": "Netherlands Antillean Guilder",
+        "minor_units": 2,
+        "symbol": "ƒ",
+        "entity": "Curaçao and Sint Maarten",
+        "central_bank": "Centrale Bank van Curaçao en Sint Maarten",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1971-01-01",
+        "peg_rate": 1.79,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CW",
+            "name": "Curaçao",
+            "relationship": "issuing"
+          },
+          {
+            "code": "SX",
+            "name": "Sint Maarten",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 1.79 ANG per 1 USD since 1971. To be replaced by the Caribbean Guilder (XCG) — not yet active."
+      },
+      {
+        "code": "AWG",
+        "numeric": "533",
+        "name": "Aruban Florin",
+        "minor_units": 2,
+        "symbol": "Afl",
+        "entity": "Aruba",
+        "central_bank": "Centrale Bank van Aruba",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1986-01-01",
+        "peg_rate": 1.79,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "AW",
+            "name": "Aruba",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to USD at 1.79 AWG per 1 USD since 1986."
+      },
+      {
+        "code": "BND",
+        "numeric": "096",
+        "name": "Brunei Dollar",
+        "minor_units": 2,
+        "symbol": "B$",
+        "entity": "Brunei Darussalam",
+        "central_bank": "Brunei Darussalam Central Bank",
+        "pegged_to": "SGD",
+        "peg_type": "single",
+        "pegged_since": "1967-06-12",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BN",
+            "name": "Brunei",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to SGD through a Currency Interchangeability Agreement since 1967."
+      },
+      {
+        "code": "BTN",
+        "numeric": "064",
+        "name": "Bhutanese Ngultrum",
+        "minor_units": 2,
+        "symbol": "Nu.",
+        "entity": "Bhutan",
+        "central_bank": "Royal Monetary Authority of Bhutan",
+        "pegged_to": "INR",
+        "peg_type": "single",
+        "pegged_since": "1974-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "BT",
+            "name": "Bhutan",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to INR since 1974. Indian rupee circulates alongside the ngultrum."
+      },
+      {
+        "code": "CUC",
+        "numeric": "931",
+        "name": "Cuban Convertible Peso",
+        "minor_units": 2,
+        "symbol": "CUC$",
+        "entity": "Cuba",
+        "central_bank": "Banco Central de Cuba",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "1994-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "CU",
+            "name": "Cuba",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to USD. Demonetized January 2021 — effectively withdrawn from circulation but still ISO-listed as active. Treat with caution."
+      },
+      {
+        "code": "CUP",
+        "numeric": "192",
+        "name": "Cuban Peso",
+        "minor_units": 2,
+        "symbol": "$MN",
+        "entity": "Cuba",
+        "central_bank": "Banco Central de Cuba",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "CU",
+            "name": "Cuba",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "DOP",
+        "numeric": "214",
+        "name": "Dominican Peso",
+        "minor_units": 2,
+        "symbol": "RD$",
+        "entity": "Dominican Republic",
+        "central_bank": "Banco Central de la República Dominicana",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "DO",
+            "name": "Dominican Republic",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "FJD",
+        "numeric": "242",
+        "name": "Fijian Dollar",
+        "minor_units": 2,
+        "symbol": "FJ$",
+        "entity": "Fiji",
+        "central_bank": "Reserve Bank of Fiji",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "FJ",
+            "name": "Fiji",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "FKP",
+        "numeric": "238",
+        "name": "Falkland Islands Pound",
+        "minor_units": 2,
+        "symbol": "FK£",
+        "entity": "Falkland Islands",
+        "central_bank": "Government of the Falkland Islands",
+        "pegged_to": "GBP",
+        "peg_type": "single",
+        "pegged_since": "1899-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "FK",
+            "name": "Falkland Islands",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to GBP. British pound circulates alongside the Falkland pound."
+      },
+      {
+        "code": "GEL",
+        "numeric": "981",
+        "name": "Georgian Lari",
+        "minor_units": 2,
+        "symbol": "₾",
+        "entity": "Georgia",
+        "central_bank": "National Bank of Georgia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "GE",
+            "name": "Georgia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "GIP",
+        "numeric": "292",
+        "name": "Gibraltar Pound",
+        "minor_units": 2,
+        "symbol": "£",
+        "entity": "Gibraltar",
+        "central_bank": "Government of Gibraltar",
+        "pegged_to": "GBP",
+        "peg_type": "single",
+        "pegged_since": "1927-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "GI",
+            "name": "Gibraltar",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to GBP. British pound circulates alongside the Gibraltar pound."
+      },
+      {
+        "code": "GYD",
+        "numeric": "328",
+        "name": "Guyanese Dollar",
+        "minor_units": 2,
+        "symbol": "G$",
+        "entity": "Guyana",
+        "central_bank": "Bank of Guyana",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "GY",
+            "name": "Guyana",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "HTG",
+        "numeric": "332",
+        "name": "Haitian Gourde",
+        "minor_units": 2,
+        "symbol": "G",
+        "entity": "Haiti",
+        "central_bank": "Banque de la République d'Haïti",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "HT",
+            "name": "Haiti",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "JMD",
+        "numeric": "388",
+        "name": "Jamaican Dollar",
+        "minor_units": 2,
+        "symbol": "J$",
+        "entity": "Jamaica",
+        "central_bank": "Bank of Jamaica",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "JM",
+            "name": "Jamaica",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "KHR",
+        "numeric": "116",
+        "name": "Cambodian Riel",
+        "minor_units": 2,
+        "symbol": "៛",
+        "entity": "Cambodia",
+        "central_bank": "National Bank of Cambodia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "KH",
+            "name": "Cambodia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "KPW",
+        "numeric": "408",
+        "name": "North Korean Won",
+        "minor_units": 2,
+        "symbol": "₩",
+        "entity": "North Korea",
+        "central_bank": "Central Bank of the Democratic People's Republic of Korea",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "KP",
+            "name": "North Korea",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "LAK",
+        "numeric": "418",
+        "name": "Lao Kip",
+        "minor_units": 2,
+        "symbol": "₭",
+        "entity": "Laos",
+        "central_bank": "Bank of the Lao P.D.R.",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "LA",
+            "name": "Laos",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MMK",
+        "numeric": "104",
+        "name": "Myanmar Kyat",
+        "minor_units": 2,
+        "symbol": "K",
+        "entity": "Myanmar",
+        "central_bank": "Central Bank of Myanmar",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MM",
+            "name": "Myanmar",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MNT",
+        "numeric": "496",
+        "name": "Mongolian Tögrög",
+        "minor_units": 2,
+        "symbol": "₮",
+        "entity": "Mongolia",
+        "central_bank": "Bank of Mongolia",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MN",
+            "name": "Mongolia",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "MOP",
+        "numeric": "446",
+        "name": "Macanese Pataca",
+        "minor_units": 2,
+        "symbol": "MOP$",
+        "entity": "Macao SAR",
+        "central_bank": "Monetary Authority of Macao",
+        "pegged_to": "HKD",
+        "peg_type": "single",
+        "pegged_since": "1977-01-01",
+        "peg_rate": 1.03,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "MO",
+            "name": "Macao",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to HKD at 1.03 MOP per 1 HKD since 1977."
+      },
+      {
+        "code": "MVR",
+        "numeric": "462",
+        "name": "Maldivian Rufiyaa",
+        "minor_units": 2,
+        "symbol": "Rf",
+        "entity": "Maldives",
+        "central_bank": "Maldives Monetary Authority",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "MV",
+            "name": "Maldives",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "NPR",
+        "numeric": "524",
+        "name": "Nepalese Rupee",
+        "minor_units": 2,
+        "symbol": "₨",
+        "entity": "Nepal",
+        "central_bank": "Nepal Rastra Bank",
+        "pegged_to": "INR",
+        "peg_type": "single",
+        "pegged_since": "1993-01-01",
+        "peg_rate": 1.6,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "NP",
+            "name": "Nepal",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged to INR at 1.6 NPR per 1 INR since 1993."
+      },
+      {
+        "code": "PGK",
+        "numeric": "598",
+        "name": "Papua New Guinean Kina",
+        "minor_units": 2,
+        "symbol": "K",
+        "entity": "Papua New Guinea",
+        "central_bank": "Bank of Papua New Guinea",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "PG",
+            "name": "Papua New Guinea",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SBD",
+        "numeric": "090",
+        "name": "Solomon Islands Dollar",
+        "minor_units": 2,
+        "symbol": "SI$",
+        "entity": "Solomon Islands",
+        "central_bank": "Central Bank of Solomon Islands",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "SB",
+            "name": "Solomon Islands",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "SHP",
+        "numeric": "654",
+        "name": "Saint Helena Pound",
+        "minor_units": 2,
+        "symbol": "£",
+        "entity": "Saint Helena, Ascension and Tristan da Cunha",
+        "central_bank": "Government of Saint Helena",
+        "pegged_to": "GBP",
+        "peg_type": "single",
+        "pegged_since": "1976-01-01",
+        "peg_rate": 1.0,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "SH",
+            "name": "Saint Helena",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Pegged 1:1 to GBP. British pound circulates alongside the Saint Helena pound."
+      },
+      {
+        "code": "SVC",
+        "numeric": "222",
+        "name": "Salvadoran Colón",
+        "minor_units": 2,
+        "symbol": "₡",
+        "entity": "El Salvador",
+        "central_bank": "Banco Central de Reserva de El Salvador",
+        "pegged_to": "USD",
+        "peg_type": "single",
+        "pegged_since": "2001-01-01",
+        "peg_rate": 8.75,
+        "peg_band_pct": 0.0,
+        "is_independent": false,
+        "countries": [
+          {
+            "code": "SV",
+            "name": "El Salvador",
+            "relationship": "issuing"
+          }
+        ],
+        "note": "Effectively withdrawn — El Salvador dollarized to USD in 2001. ISO 4217 continues to list as active. Treat with caution."
+      },
+      {
+        "code": "TOP",
+        "numeric": "776",
+        "name": "Tongan Paʻanga",
+        "minor_units": 2,
+        "symbol": "T$",
+        "entity": "Tonga",
+        "central_bank": "National Reserve Bank of Tonga",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "TO",
+            "name": "Tonga",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "TTD",
+        "numeric": "780",
+        "name": "Trinidad and Tobago Dollar",
+        "minor_units": 2,
+        "symbol": "TT$",
+        "entity": "Trinidad and Tobago",
+        "central_bank": "Central Bank of Trinidad and Tobago",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "TT",
+            "name": "Trinidad and Tobago",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "VUV",
+        "numeric": "548",
+        "name": "Vanuatu Vatu",
+        "minor_units": 0,
+        "symbol": "VT",
+        "entity": "Vanuatu",
+        "central_bank": "Reserve Bank of Vanuatu",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "VU",
+            "name": "Vanuatu",
+            "relationship": "issuing"
+          }
+        ]
+      },
+      {
+        "code": "WST",
+        "numeric": "882",
+        "name": "Samoan Tala",
+        "minor_units": 2,
+        "symbol": "WS$",
+        "entity": "Samoa",
+        "central_bank": "Central Bank of Samoa",
+        "pegged_to": null,
+        "peg_type": null,
+        "is_independent": true,
+        "countries": [
+          {
+            "code": "WS",
+            "name": "Samoa",
+            "relationship": "issuing"
+          }
         ]
       }
     ],
@@ -1089,7 +3922,7 @@
         "entity": "Greece",
         "withdrawn_date": "2001-01-01",
         "replaced_by": "EUR",
-        "conversion_rate": 340.750
+        "conversion_rate": 340.75
       },
       {
         "code": "IEP",
@@ -1155,7 +3988,7 @@
         "entity": "Slovakia",
         "withdrawn_date": "2009-01-01",
         "replaced_by": "EUR",
-        "conversion_rate": 30.1260
+        "conversion_rate": 30.126
       },
       {
         "code": "EEK",
@@ -1199,7 +4032,7 @@
         "entity": "Croatia",
         "withdrawn_date": "2023-01-01",
         "replaced_by": "EUR",
-        "conversion_rate": 7.53450
+        "conversion_rate": 7.5345
       },
       {
         "code": "CYP",

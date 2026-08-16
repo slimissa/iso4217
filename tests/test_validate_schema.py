@@ -293,23 +293,6 @@ def _registry_with_active_count(n):
     return registry
 
 
-def test_current_registry_active_count_is_below_min_active_currencies():
-    """
-    Sanity check on the constants themselves: this test intentionally FAILS
-    once v1.1.0 raises active_count to >= MIN_ACTIVE_CURRENCIES, which is
-    the point — it's a tripwire reminding whoever ships full coverage to
-    also revisit --allow-partial in CI (see .github/workflows/validate.yml).
-    """
-    registry = _registry()
-    active_count = len(registry["currencies"]["active"])
-    assert active_count < MIN_ACTIVE_CURRENCIES, (
-        f"Active count is now {active_count}, which meets MIN_ACTIVE_CURRENCIES "
-        f"({MIN_ACTIVE_CURRENCIES}). If v1.1.0 shipped full ISO 4217 coverage, "
-        "remove --allow-partial from .github/workflows/validate.yml and delete "
-        "this tripwire test."
-    )
-
-
 def test_active_count_below_warn_threshold_emits_warning():
     registry = _registry_with_active_count(WARN_ACTIVE_CURRENCIES - 1)
     errors, stats = validate_statistics(registry)
