@@ -34,7 +34,7 @@ The registry is language-agnostic by design. The JSON is the contract.
 ### Direct download
 
 ```bash
-curl -O https://raw.githubusercontent.com/slimissa/iso4217/main/iso4217.json
+curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.1.0/iso4217.json
 ```
 
 ### Python

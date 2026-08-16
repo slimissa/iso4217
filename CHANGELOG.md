@@ -109,6 +109,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_(no changes yet)_
+
+---
+
+## [1.1.0] — 2026-08-15
+
 ### Schema
 - Added `peg_type` field to active currencies (`"single"` / `"basket"` / `"undisclosed"` / `null`), so consumers can tell a parseable ISO code apart from a free-text peg description without guessing
 - Added conditional validation: `peg_type` is required whenever `pegged_to` is set; `pegged_to` must match `^[A-Z]{3}$` when `peg_type` is `"single"`, and must *not* match that pattern when `peg_type` is `"basket"` or `"undisclosed"`
@@ -157,13 +163,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented the MXN/MXN_OLD numeric code reuse in README's schema section
 - Updated CONTRIBUTING.md to document the `tools/sync_wrappers.py` step as required before committing changes to `iso4217.json`
 
-### Planned for v1.1.0
-- Expand to full ~160 active ISO 4217 currencies (currently 61 actively traded)
+### Planned for v1.2.0
+- Expand to full ~160 active ISO 4217 currencies (currently 61 actively traded;
+  106 known-missing codes identified via `tools/parse_source.py`'s ground-truth set)
 - Add remaining ~100 withdrawn currencies
 - CI/CD matrix testing across all four wrapper languages
 - Automated ISO amendment monitoring
 
-### Planned for v1.2.0
+### Planned for v1.3.0
 - SQL dump export for direct database import
 - CSV export
 - Additional language wrappers (C#, Java, Swift, Kotlin, Ruby)
@@ -175,4 +182,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Active | Withdrawn | Non-ISO | Wrappers |
 |---------|------|--------|-----------|---------|----------|
+| 1.1.0 | 2026-08-15 | 61 | 24 | 13 | Python, JS, Rust, Go |
 | 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go |
