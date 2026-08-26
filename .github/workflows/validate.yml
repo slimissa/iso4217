@@ -127,16 +127,12 @@ jobs:
       matrix:
         include:
           - language: python
-            setup: pip install pytest
-            test_cmd: python3 -m pytest tests/test_wrappers.py -v
+            test_cmd: pip install pytest && python3 -m pytest tests/test_wrappers.py -v
           - language: javascript
-            setup: cd wrappers/javascript && npm install
-            test_cmd: cd wrappers/javascript && npm test
+            test_cmd: cd wrappers/javascript && npm install && npm test
           - language: go
-            setup: go test ./... -v
             test_cmd: cd wrappers/go && go test ./... -v
           - language: rust
-            setup: cargo test
             test_cmd: cd wrappers/rust && cargo test
 
     steps:
