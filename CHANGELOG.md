@@ -184,7 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### Planned for v1.3.0
-  106 known-missing codes identified via `tools/parse_source.py`'s ground-truth set
+106 known-missing codes identified via `tools/parse_source.py`'s ground-truth set
 - Add remaining ~100 withdrawn currencies
 - CI/CD matrix testing across all four wrapper languages
 - Automated ISO amendment monitoring

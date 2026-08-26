@@ -813,22 +813,46 @@ def validate_cross_references(registry: Dict) -> List[ValidationError]:
                 suggestion="Each active currency must have a unique numeric code."
             ))
 
-    withdrawn_numeric: Dict[str, List[str]] = {}
+    withdrawn_numeric: Dict[str, Dict[str, List[str]]] = {}
     for c in withdrawn:
         numeric = c.get("numeric")
         if numeric:
-            withdrawn_numeric.setdefault(numeric, []).append(c.get("code", "?"))
+            entity = c.get("entity", "unknown")
+            withdrawn_numeric.setdefault(numeric, {}).setdefault(entity, []).append(c.get("code", "?"))
 
-    for numeric, codes in withdrawn_numeric.items():
-        if len(codes) > 1:
-            errors.append(ValidationError(
-                severity="error",
-                category="cross_reference",
-                field="currencies.withdrawn[*].numeric",
-                code="DUPLICATE_WITHDRAWN_NUMERIC",
-                message=f"Numeric code '{numeric}' is used by multiple withdrawn currencies: {sorted(codes)}.",
-                suggestion="Each withdrawn currency must have a unique numeric code."
-            ))
+    for numeric, entity_map in withdrawn_numeric.items():
+        # Collect all codes across all entities for this numeric code
+        all_codes = []
+        for entity_codes in entity_map.values():
+            all_codes.extend(entity_codes)
+
+        if len(all_codes) > 1:
+            if len(entity_map) > 1:
+                # Different entities sharing a numeric code — genuine error
+                entity_detail = "; ".join(
+                    f"{entity}: {sorted(codes)}"
+                    for entity, codes in sorted(entity_map.items())
+                )
+                errors.append(ValidationError(
+                    severity="error",
+                    category="cross_reference",
+                    field="currencies.withdrawn[*].numeric",
+                    code="DUPLICATE_WITHDRAWN_NUMERIC",
+                    message=f"Numeric code '{numeric}' is used by multiple withdrawn currencies from different entities: {entity_detail}.",
+                    suggestion="Each withdrawn currency must have a unique numeric code unless they are part of the same country's revaluation chain."
+                ))
+            else:
+                # Same entity shares a numeric code — legitimate revaluation chain
+                entity = list(entity_map.keys())[0]
+                codes = sorted(all_codes)
+                errors.append(ValidationError(
+                    severity="warning",
+                    category="cross_reference",
+                    field="currencies.withdrawn[*].numeric",
+                    code="REVALUATION_CHAIN_NUMERIC_REUSE",
+                    message=f"Numeric code '{numeric}' is shared by {entity}'s revaluation chain: {codes}.",
+                    suggestion="Legitimate historical reuse within a single country's currency revaluation sequence. No action needed."
+                ))
 
     numeric_overlap = set(active_numeric.keys()) & set(withdrawn_numeric.keys())
     if numeric_overlap:
