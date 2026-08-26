@@ -3,9 +3,8 @@ name: Validate Registry
 # --- What triggers this workflow, and why ------------------------------
 #
 # GitHub Actions only supports path filters at the workflow level, not
-# per-job — so every path listed below triggers ALL THREE jobs
-# (check-wrapper-sync, validate-json, validate-wrappers), not just the
-# job whose name matches. The `needs:` chain inside the jobs still
+# per-job — so every path listed below triggers ALL jobs, not just
+# the job whose name matches. The `needs:` chain inside the jobs still
 # controls what actually runs and in what order once triggered.
 #
 # Paths grouped by what they logically belong to:
@@ -15,25 +14,13 @@ name: Validate Registry
 #                                                     -> the two local data copies
 #                                                        that can drift from root
 #                                                        (see check-wrapper-sync)
-#   - wrappers/**/*.py, .js, .go, .rs                -> wrapper SOURCE CODE. Without
-#                                                        these, a wrapper bug fix or
-#                                                        regression could be pushed
-#                                                        and merged without CI ever
-#                                                        running that wrapper's tests.
-#   - wrappers/**/Cargo.toml, go.mod, package.json   -> wrapper dependency/build
-#                                                        manifests — a bad version
-#                                                        bump here can break the
-#                                                        build the same way a code
-#                                                        change can, and previously
-#                                                        wouldn't trigger CI either.
+#   - wrappers/**/*.py, .js, .go, .rs                -> wrapper SOURCE CODE
+#   - wrappers/**/Cargo.toml, go.mod, package.json   -> wrapper dependency manifests
 #   - tests/**                                       -> the test suites themselves
-#   - .github/workflows/validate.yml                 -> so changes to this file
-#                                                        are validated against
-#                                                        themselves
+#   - .github/workflows/validate.yml                 -> changes to this file
 #
-# NOTE: wrappers/**/*.json (e.g. wrappers/go/iso4217.json) is intentionally
-# listed explicitly above rather than merged into a wrapper source glob —
-# it's data, not code, and check-wrapper-sync treats it differently.
+# NOTE: wrappers/**/*.json is listed explicitly, not merged into a source
+# glob — it's data, not code, and check-wrapper-sync treats it differently.
 
 on:
   push:
@@ -75,9 +62,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Triggered by any path above. Regenerates wrappers/go/iso4217.json and
-  # wrappers/rust/iso4217.json from root iso4217.json and fails the build
-  # if the committed copies don't match — catches drift, not wrapper code bugs.
+  # --- Job 1: Wrapper copy synchronization -------------------------------
+  # Regenerates wrappers/go/iso4217.json and wrappers/rust/iso4217.json
+  # from root iso4217.json and fails if the committed copies don't match.
   check-wrapper-sync:
     name: Check wrapper copies are in sync with root
     runs-on: ubuntu-latest
@@ -102,8 +89,9 @@ jobs:
             exit 1
           }
 
-  # Triggered by any path above. Runs schema/business-logic validation
-  # against iso4217.json and the full pytest suite.
+  # --- Job 2: Schema/data validation ------------------------------------
+  # Runs schema/business-logic validation against iso4217.json and the
+  # full pytest suite.
   validate-json:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
@@ -126,54 +114,56 @@ jobs:
       - name: Run tests
         run: python3 -m pytest tests/ -v
 
-  # Triggered by any path above — this is the job the wrapper-source path
-  # filters above exist for. Before this fix, editing wrappers/**/*.py, .js,
-  # .go, or .rs did not trigger the workflow at all, so this job (and the
-  # wrapper tests inside it) could be skipped entirely on a wrapper-only PR.
+  # --- Job 3: Wrapper tests — matrix across 4 languages ------------------
+  # Each language runs in its own parallel job with its own toolchain.
+  # A failure in one language doesn't block the others from running,
+  # and the UI shows per-language status.
   validate-wrappers:
-    name: Validate wrappers
+    name: Validate ${{ matrix.language }} wrapper
     runs-on: ubuntu-latest
     needs: [validate-json, check-wrapper-sync]
+    strategy:
+      fail-fast: false  # Run all languages even if one fails
+      matrix:
+        include:
+          - language: python
+            setup: pip install pytest
+            test_cmd: python3 -m pytest tests/test_wrappers.py -v
+          - language: javascript
+            setup: cd wrappers/javascript && npm install
+            test_cmd: cd wrappers/javascript && npm test
+          - language: go
+            setup: go test ./... -v
+            test_cmd: cd wrappers/go && go test ./... -v
+          - language: rust
+            setup: cargo test
+            test_cmd: cd wrappers/rust && cargo test
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: matrix.language == 'python'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Test Python wrapper
-        run: |
-          pip install pytest
-          python3 -m pytest tests/test_wrappers.py -v
-
       - name: Set up Node.js
+        if: matrix.language == 'javascript'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Test JavaScript wrapper
-        run: |
-          cd wrappers/javascript
-          npm install
-          npm test
-
       - name: Set up Go
+        if: matrix.language == 'go'
         uses: actions/setup-go@v5
         with:
           go-version: '1.21'
 
-      - name: Test Go wrapper
-        run: |
-          cd wrappers/go
-          go test ./... -v
-
       - name: Set up Rust
+        if: matrix.language == 'rust'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Test Rust wrapper
-        run: |
-          cd wrappers/rust
-          cargo test
+      - name: Run ${{ matrix.language }} wrapper tests
+        run: ${{ matrix.test_cmd }}
