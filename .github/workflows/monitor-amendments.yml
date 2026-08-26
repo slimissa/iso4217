@@ -1,0 +1,159 @@
+name: Monitor ISO Amendments
+
+# --- What this workflow does -------------------------------------------
+#
+# Checks weekly (and on manual trigger) for new ISO 4217 amendments
+# published by SIX Group. When a new amendment is detected, it:
+#   1. Creates a GitHub Issue with amendment details
+#   2. Provides step-by-step action instructions
+#   3. Labels the issue for triage
+#
+# The check script (tools/check_amendments.py) is designed to be
+# network-resilient: if SIX's website is unreachable, the script exits 0
+# with a "skipped" status — a flaky network does NOT create false alarms
+# or fail the workflow. Only a genuine new amendment exits 1.
+#
+# Schedule: Every Monday at 08:00 UTC
+#   - Weekly cadence is sufficient; ISO amendments are published 1-2
+#     times per year, never daily.
+#   - Monday is chosen so any amendment found on Friday gets reviewed
+#     during the work week, not over the weekend.
+
+on:
+  schedule:
+    # ┌───────────── minute (0-59)
+    # │ ┌───────────── hour (0-23)
+    # │ │ ┌───────────── day of month (1-31)
+    # │ │ │ ┌───────────── month (1-12)
+    # │ │ │ │ ┌───────────── day of week (0-6, 0=Sunday)
+    # │ │ │ │ │
+    - cron: '0 8 * * 1'  # Every Monday at 8:00 AM UTC
+  workflow_dispatch:
+    # Manual trigger from GitHub UI for immediate checks
+    # Also useful for testing the workflow without waiting for Monday
+
+jobs:
+  check-amendments:
+    name: Check for new ISO 4217 amendments
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check for amendments
+        id: amendment_check
+        run: |
+          python3 tools/check_amendments.py --json --verbose
+        continue-on-error: true  # Exit 1 (new amendment) is expected, not a failure
+
+      - name: Read amendment check result
+        id: read_result
+        run: |
+          # Re-run with JSON output and capture the result
+          RESULT=$(python3 tools/check_amendments.py --json 2>/dev/null || true)
+          echo "$RESULT" > /tmp/amendment_result.json
+          echo "result_file=/tmp/amendment_result.json" >> $GITHUB_OUTPUT
+
+      - name: Create issue if new amendment detected
+        if: steps.amendment_check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Parse the JSON result from the check step
+            const result = JSON.parse(
+              fs.readFileSync('/tmp/amendment_result.json', 'utf8').trim()
+            );
+            
+            const current = result.current_amendment;
+            const latest = result.latest_amendment;
+            const source = result.source;
+            const checkedDate = result.date_checked;
+            
+            // Check if an issue already exists for this amendment
+            // to avoid duplicate issues on repeated workflow runs
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'data',
+            });
+            
+            const issueTitle = `ISO 4217 amendment ${latest} detected — registry update required`;
+            const alreadyExists = existingIssues.some(
+              issue => issue.title === issueTitle
+            );
+            
+            if (alreadyExists) {
+              console.log(`Issue already exists for amendment ${latest}, skipping.`);
+              return;
+            }
+            
+            // Create the issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              labels: ['data', 'maintenance'],
+              body: `## ISO 4217 Amendment ${latest} Detected
+
+**Registry currently tracks:** Amendment ${current}
+**Latest known amendment:** ${latest}
+**Detection source:** ${source}
+**Date checked:** ${checkedDate}
+
+### Action Required
+
+1. Review the SIX Group amendment page:
+   https://www.currency-iso.org/en/home/amendments.html
+
+2. Fetch and parse the latest data:
+   \`\`\`bash
+   python3 tools/update_from_iso.py --fetch-sources
+   python3 tools/parse_source.py
+   \`\`\`
+
+3. Update \`iso4217.json\` with changes
+
+4. Run validation:
+   \`\`\`bash
+   python3 tools/validate.py
+   python3 -m pytest tests/ -v
+   \`\`\`
+
+5. Update the following fields:
+   - \`source.last_amendment_applied\` → ${latest}
+   - \`source.last_amendment_date\` → (amendment date)
+   - \`tools/check_amendments.py\` → \`KNOWN_LATEST_AMENDMENT\` → ${latest}
+   - \`tools/check_amendments.py\` → \`AMENDMENT_HISTORY\` entry
+
+6. Sync wrapper copies:
+   \`\`\`bash
+   python3 tools/sync_wrappers.py
+   \`\`\`
+
+7. Bump \`meta.version\`, update CHANGELOG, commit, tag
+
+### Notes
+
+- This issue was auto-generated by \`tools/check_amendments.py\`
+- Detection source: ${source}
+- If this is a false positive, close with reason "SIX page parse error"
+- If the amendment was already applied, close with reason "Already applied"
+`,
+            });
+            
+            console.log(`Created issue for amendment ${latest}`);
+
+      - name: Log result summary
+        run: |
+          RESULT=$(cat /tmp/amendment_result.json 2>/dev/null || echo '{}')
+          echo "Amendment check complete:"
+          echo "$RESULT" | python3 -m json.tool
