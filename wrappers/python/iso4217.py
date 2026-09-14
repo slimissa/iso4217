@@ -190,8 +190,14 @@ class Currency:
         """
         True if the currency floats independently or is a managed float
         without a fixed anchor. False if hard-pegged or currency board.
+
+        Defaults to False when the field is absent — the conservative
+        choice, matching the CSV export's rendering. Reporting a pegged
+        currency as independent is a silent correctness bug no downstream
+        consumer would notice; reporting an independent currency as
+        not-independent is visible in any filter and easy to correct.
         """
-        return self._data.get("is_independent", True)
+        return self._data.get("is_independent", False)
 
     @property
     def is_pegged(self) -> bool:

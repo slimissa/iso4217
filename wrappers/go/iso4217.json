@@ -5457,7 +5457,8 @@
         "entity": "Decentralized",
         "introduced": "2009-01-03",
         "market_cap_rank": 1,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage.",
+        "is_independent": true
       },
       {
         "code": "ETH",
@@ -5468,7 +5469,8 @@
         "entity": "Decentralized",
         "introduced": "2015-07-30",
         "market_cap_rank": 2,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage.",
+        "is_independent": true
       },
       {
         "code": "XRP",
@@ -5479,7 +5481,8 @@
         "entity": "Ripple Labs",
         "introduced": "2012-06-01",
         "market_cap_rank": 5,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit.",
+        "is_independent": true
       },
       {
         "code": "SOL",
@@ -5490,7 +5493,8 @@
         "entity": "Solana Foundation",
         "introduced": "2020-03-16",
         "market_cap_rank": 7,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit.",
+        "is_independent": true
       },
       {
         "code": "BNB",
@@ -5501,7 +5505,8 @@
         "entity": "Binance",
         "introduced": "2017-07-14",
         "market_cap_rank": 4,
-        "note": "Not an ISO 4217 code. 18 minor units follows the BEP20 (BSC) convention; the BEP2 (Binance Chain) variant uses 8. VERIFY before commit."
+        "note": "Not an ISO 4217 code. 18 minor units follows the BEP20 (BSC) convention; the BEP2 (Binance Chain) variant uses 8. VERIFY before commit.",
+        "is_independent": true
       },
       {
         "code": "ADA",
@@ -5512,7 +5517,8 @@
         "entity": "Cardano Foundation",
         "introduced": "2017-09-29",
         "market_cap_rank": 19,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit.",
+        "is_independent": true
       },
       {
         "code": "DOGE",
@@ -5523,7 +5529,8 @@
         "entity": "Decentralized",
         "introduced": "2013-12-06",
         "market_cap_rank": 12,
-        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit."
+        "note": "Not an ISO 4217 code. Included due to widespread financial market usage. VERIFY: introduced date and rank before commit.",
+        "is_independent": true
       }
     ],
     "commodities": [
@@ -5534,7 +5541,8 @@
         "symbol": "XAU",
         "type": "commodity",
         "entity": "N/A",
-        "note": "ISO 4217-compatible code for gold. Not a currency. Minor units of 2 is a practical convention for USD-denominated pricing; no ISO standard exists."
+        "note": "ISO 4217-compatible code for gold. Not a currency. Minor units of 2 is a practical convention for USD-denominated pricing; no ISO standard exists.",
+        "is_independent": true
       },
       {
         "code": "XAG",
@@ -5543,7 +5551,8 @@
         "symbol": "XAG",
         "type": "commodity",
         "entity": "N/A",
-        "note": "ISO 4217-compatible code for silver. Not a currency. Minor units of 2 is a practical convention."
+        "note": "ISO 4217-compatible code for silver. Not a currency. Minor units of 2 is a practical convention.",
+        "is_independent": true
       },
       {
         "code": "XPT",
@@ -5552,7 +5561,8 @@
         "symbol": "XPT",
         "type": "commodity",
         "entity": "N/A",
-        "note": "ISO 4217-compatible code for platinum. Not a currency."
+        "note": "ISO 4217-compatible code for platinum. Not a currency.",
+        "is_independent": true
       },
       {
         "code": "XPD",
@@ -5561,7 +5571,8 @@
         "symbol": "XPD",
         "type": "commodity",
         "entity": "N/A",
-        "note": "ISO 4217-compatible code for palladium. Not a currency."
+        "note": "ISO 4217-compatible code for palladium. Not a currency.",
+        "is_independent": true
       }
     ],
     "special_purpose": [

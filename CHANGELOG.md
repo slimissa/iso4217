@@ -6,6 +6,70 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.5.0] — 2026-09-15
+
+### Added
+
+#### SQL export — four dialects
+- **`iso4217.sql`** — ANSI SQL-92 portable export. Works on PostgreSQL, MySQL 8+, MariaDB 10.4+, SQLite 3.37+, SQL Server 2016+, Oracle 12c+, and IBM Db2.
+- **`iso4217.postgresql.sql`** — PostgreSQL 12+ export, with a commented `INSERT ... ON CONFLICT (code) DO NOTHING` alternative for append-only imports.
+- **`iso4217.mysql.sql`** — MySQL 8+ / MariaDB 10.4+ export using `ENGINE=InnoDB` and `utf8mb4`.
+- **`iso4217.sqlite.sql`** — SQLite 3.37+ export using `STRICT` tables for real type enforcement.
+- **`tools/export_sql.py`** — dialect-parameterized generator with `--dialect`, `--stdout`, and `--check` modes. Atomic writes; deterministic row ordering; exit codes 0/1/2/3 aligned with the rest of the toolchain.
+- **`tests/test_export_sql.py`** — 154 tests covering row construction, escaping, per-dialect rendering, determinism, sort order, `--check` mode, CLI exit codes, and cross-checks against the committed SQL files.
+- **Schema:** one `currencies` table with seven columns (`code`, `numeric_code`, `name`, `minor_units`, `symbol`, `entity`, `status`). `status` is `'active'` or `'withdrawn'`, CHECK-constrained. `code` is the primary key in every dialect.
+- The SQL files intentionally **exclude** non-ISO instruments, peg information, and country relationships — they are a reference table for foreign keys, not a relational mirror of the JSON.
+
+#### CSV / TSV export — four dialects
+- **`iso4217.csv`** — RFC 4180 comma-separated, 11 columns.
+- **`iso4217.excel.csv`** — Excel-compatible, UTF-8 BOM.
+- **`iso4217.european.csv`** — semicolon-delimited for European Excel locales.
+- **`iso4217.tsv`** — tab-separated for terminal, clipboard, and Google Sheets workflows.
+- **`tools/export_csv.py`** — dialect-parameterized generator with the same `--check` / `--stdout` interface as `export_sql.py`. LF line endings in all four files; BOM only in the Excel dialect; quoting delegated to the Python standard library's `csv` module rather than hand-rolled.
+- **`tests/test_export_csv.py`** — 266 tests covering quoting round-trip via `csv.reader`, per-dialect delimiters, BOM policy, LF enforcement, determinism, full-file data-integrity scans, and a cross-check that the seven shared columns match `iso4217.sqlite.sql` row for row.
+- The CSV files intentionally **include** peg metadata (`is_independent`, `pegged_to`, `peg_type`, `peg_rate`) and intentionally **exclude** countries, central banks, and non-ISO instruments — they are for human analysis, not for FK constraints.
+
+#### Command-line interface
+- **`iso4217` console script** — eight subcommands: `lookup`, `list`, `minor`, `major`, `format`, `peg`, `info`, `validate`. Supports bare-argument shorthand (`iso4217 USD` ≡ `iso4217 lookup USD`) and reads codes from stdin via `-`.
+- **Five output modes** — default human-readable; `--json` (single object or array); `--jsonl` (newline-delimited); `--tsv` / `--csv` (columns match the corresponding export byte for byte); and `--raw FIELD` for bare-value extraction. Machine modes are mutually exclusive with each other and with the human default; piped output never contains color.
+- **`ISO4217_COLOR=never|auto|always`** — environment variable for color control. Precedence: environment variable wins over TTY detection. Colors are limited to three roles: bold code, status green/dim, peg type yellow/blue/magenta.
+- **`--registry PATH`** — test-only escape hatch for running against an alternate registry file. Composes with `--raw` and the bare-argument shorthand.
+- **`wrappers/python/tests/test_cli.py`** — 171 tests covering every subcommand, every output mode, every exit code, stdin via `-`, the `--registry` flag and its compositions, help output, and a cross-check that `list --active --tsv` matches the committed `iso4217.tsv` row for row.
+- The CLI reuses the existing Python wrapper (`CurrencyRegistry`, `pegged_to`, `with_minor_units`, `issued_by`, `used_in`) for all lookups and filters — no duplicated query logic. A regression in the wrapper's basket-peg rule changes the CLI's behavior in the same commit; no drift is possible by construction.
+
+### Changed
+
+- **Python package version bumped from `1.0.0` to `1.1.0`.** The registry remains at `1.5.0`; the wrapper's version tracks its own API surface independently of the registry data version, so a wrapper-only release (e.g., a bug fix in `format()`) does not require a registry bump and vice versa.
+- **CI now gates on three parallel export checks** — `check-sql-export`, `check-csv-export`, and `check-cli` run simultaneously and all three must pass before `validate-json` and `validate-wrappers` start. A stale flat-file artifact fails the build in under a minute rather than after the slower wrapper matrix completes.
+
+### Schema
+
+- **`is_independent` is now permitted on non-ISO entries.** The wrapper's `is_independent` default changed from `True` to `False` (see Fixed, below) to match the CSV export's conservative choice, and eleven non-ISO entries — BTC, ETH, XRP, SOL, BNB, ADA, DOGE, and the four metals XAU/XAG/XPT/XPD — now carry the field explicitly. The schema's `additionalProperties: false` on those definitions was not updated at the same time as the data, so the schema file is now extended to allow `is_independent` on every non-ISO category. Backward-compatible: an entry without the field is still valid, and consumers must treat absent as `False`.
+- `schema.json`'s `$id` remains at its previous version. The schema version is independent of the registry version, and this change relaxes a constraint rather than adding or removing a required field.
+
+### Fixed
+
+- **`Currency.is_independent` in the Python wrapper now defaults to `False`** when the field is absent from the source JSON, matching the CSV export's conservative choice. Previously it defaulted to `True`, silently reporting currencies without an explicit `is_independent` field as "freely floating" — which contradicts the `pegged_to is not None` invariant that `tools/validate.py` enforces on the source data. The CLI's cross-check against `iso4217.tsv` surfaced this on its first full run.
+- **`wrappers/python/setup.py` entry point corrected.** The previous declaration referenced a function (`iso4217:main_validate`) that was never written. The entry point now points at the real CLI entry (`iso4217_cli:main`).
+- **Data-file packaging corrected.** `package_data` and `data_files` were both silently failing for this `py_modules`-based distribution: `package_data` only applies to directories that are Python packages, and `data_files` with an empty target installs to `sys.prefix` rather than to the module directory. Replaced with `include_package_data=True` plus a `MANIFEST.in` that ships `iso4217.json` and `schema.json` next to the installed modules.
+
+### Tests
+
+- SQL export test suite: **154 tests**
+- CSV/TSV export test suite: **266 tests**
+- CLI test suite: **171 tests**
+- Full repository: **768 tests passing** (`pytest tests/ wrappers/python/tests/ -q`)
+
+### Verified
+
+- `tools/validate.py` runs clean: 0 errors, same warning count as v1.4.1.
+- `tools/export_sql.py --check` and `tools/export_csv.py --check` both exit 0 against the committed artifacts.
+- CI is green with **eight top-level jobs** plus the four-language wrapper matrix (`check-wrapper-sync`, `check-sql-export`, `check-csv-export`, `check-cli`, `validate-json`, `validate-wrappers` × 4 languages).
+- The Python package installs cleanly in a fresh virtualenv; `iso4217 --version` prints the registry version (`1.5.0`), not the package version (`1.1.0`).
+- The three deliverables — SQL, CSV/TSV, and CLI — derive from `iso4217.json` and regenerate from a single command sequence.
+
+---
+
 ## [1.4.1] — 2026-09-14
 
 ### Fixed
@@ -280,19 +344,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-### Planned for v1.5.0
-- SQL dump export for direct database import
-- CSV export
+### Planned for v1.6.0
+
+The v1.5.0 roadmap's three deliverables — SQL dump export, CSV export, and CLI tool for registry queries — all shipped in v1.5.0. Remaining planned work:
+
 - Additional language wrappers (C#, Java, Swift, Kotlin, Ruby)
-- CLI tool for registry queries (`iso4217 USD --to-minor 100.50`)
+- ISO 3166 country registry — a companion registry that makes the 200+ country codes already referenced in `currencies[].countries[]` resolvable without a second lookup table
+
+---
 
 ## Version History
 
-| Version | Date | Active | Withdrawn | Non-ISO | Wrappers |
-|---------|------|--------|-----------|---------|----------|
-| **1.4.0** | **2026-09-14** | **167** | **135** | **21** | Python, JS, Rust, Go |
-| 1.3.0 | 2026-08-26 | 167 | 135 | 13 | Python, JS, Rust, Go |
-| 1.2.0 | 2026-08-17 | 167 | 24 | 13 | Python, JS, Rust, Go |
-| 1.1.0 | 2026-08-16 | 61 | 24 | 13 | Python, JS, Rust, Go |
-| 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go |
-
+| Version | Date | Active | Withdrawn | Non-ISO | Wrappers | Exports |
+|---------|------|--------|-----------|---------|----------|---------|
+| **1.5.0** | **2026-09-15** | **167** | **135** | **21** | Python, JS, Rust, Go | **SQL, CSV/TSV, CLI** |
+| 1.4.1 | 2026-09-14 | 167 | 135 | 21 | Python, JS, Rust, Go | — |
+| 1.4.0 | 2026-09-14 | 167 | 135 | 21 | Python, JS, Rust, Go | — |
+| 1.3.0 | 2026-08-26 | 167 | 135 | 13 | Python, JS, Rust, Go | — |
+| 1.2.0 | 2026-08-17 | 167 | 24 | 13 | Python, JS, Rust, Go | — |
+| 1.1.0 | 2026-08-16 | 61 | 24 | 13 | Python, JS, Rust, Go | — |
+| 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go | — |

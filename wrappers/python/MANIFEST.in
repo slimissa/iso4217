@@ -1,0 +1,4 @@
+include iso4217.json
+include schema.json
+include README.md
+include LICENSE

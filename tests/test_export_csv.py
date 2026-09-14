@@ -1489,23 +1489,6 @@ class TestCrossCheckWithSQL:
         having worked, so if it fails, this test names the real cause."""
         self._sql_rows()  # raises if executescript failed
 
-
-# ---------------------------------------------------------------------------
-# Phase 4 gap closure — roadmap items not covered by the first pass
-#
-# Nine items from the roadmap's Phase 4.2 checklist:
-#   1. Undisclosed peg case (KWD-style)
-#   2. Bare carriage return inside a field
-#   3. Empty field rendered as unquoted empty
-#   4. Excel file with BOM stripped == iso4217.csv, byte for byte
-#   5. All numeric_code values are 3 chars, all digits
-#   6. All status values are exactly 'active' or 'withdrawn'
-#   7. All is_independent values are exactly 'true' or 'false'
-#   8. Non-ASCII coverage includes € and £
-#   9. Every CSV row compared field-by-field against its JSON source
-# ---------------------------------------------------------------------------
-
-
 class TestUndisclosedPeg:
     """KWD-style peg: pegged_to is free text, peg_type is 'undisclosed',
     peg_rate is absent. The roadmap names this as a distinct case from

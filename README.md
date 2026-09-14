@@ -2,12 +2,12 @@
 
 **A canonical, versioned, machine-readable registry of ISO 4217 currency codes — 167 active currencies covering the complete ISO 4217 standard, including all G20 economies, major and minor trading pairs, and every currently-assigned code.**
 
-One JSON file. Zero dependencies. Works with every language.
+One JSON file. Zero dependencies. Every language, database, spreadsheet, and shell.
 
 [![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Schema Version](https://img.shields.io/badge/schema-1.1.0-green.svg)](./schema.json)
-[![Registry Version](https://img.shields.io/badge/registry-1.4.0-orange.svg)](./iso4217.json)
+[![Registry Version](https://img.shields.io/badge/registry-1.5.0-orange.svg)](./iso4217.json)
 ---
 
 ## Why?
@@ -21,8 +21,11 @@ Every quant library, trading system, payment processor, and fintech app maintain
 - **Go trading systems** use it for foreign key constraints
 - **Rust finance crates** use it for compile-time currency verification
 - **JavaScript fintech apps** use it for payment processing
+- **Database teams** get a ready-made seed file — one command, no JSON parsing.
+- **Analysts, engineers, and researchers** each get a zero-friction entry point — no JSON parser, no driver, no setup.
+- **Shell users, CI pipelines, and scripts** get the same registry with one command — no Python, no CSV, no JSON, no jq.
 
-The registry is language-agnostic by design. The JSON is the contract.
+The registry is language-agnostic by design. The JSON is the contract. The SQL, CSV, and CLI exports are three ways to consume it without writing a parser.
 
 ---
 
@@ -31,7 +34,7 @@ The registry is language-agnostic by design. The JSON is the contract.
 ### Direct download
 
 ```bash
-curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.4.0/iso4217.json
+curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.5.0/iso4217.json
 ```
 
 ### Python
@@ -90,6 +93,118 @@ fmt.Println(usd.ToMinor(100.50))  // 10050
 go get github.com/slimissa/iso4217-go
 ```
 
+### Direct download (SQL)
+
+Four files, one per dialect, each self-contained and idempotent — safe to run twice.
+
+| File | Target |
+|------|--------|
+| [`iso4217.sql`](./iso4217.sql) | ANSI SQL-92 — portable default; works on PostgreSQL, MySQL 8+, MariaDB 10.4+, SQLite 3.37+, SQL Server 2016+, Oracle 12c+, IBM Db2 |
+| [`iso4217.postgresql.sql`](./iso4217.postgresql.sql) | PostgreSQL 12+ — includes a commented `INSERT ... ON CONFLICT (code) DO NOTHING` alternative for append-only imports |
+| [`iso4217.mysql.sql`](./iso4217.mysql.sql) | MySQL 8+ / MariaDB 10.4+ — `ENGINE=InnoDB`, `utf8mb4` |
+| [`iso4217.sqlite.sql`](./iso4217.sqlite.sql) | SQLite 3.37+ — `STRICT` tables for real type enforcement |
+
+Import in one line:
+
+```bash
+psql -f iso4217.postgresql.sql            # PostgreSQL
+mysql < iso4217.mysql.sql                 # MySQL / MariaDB
+sqlite3 registry.db < iso4217.sqlite.sql  # SQLite
+psql -f iso4217.sql                       # any SQL-92 engine
+```
+
+**What's in them:** one `currencies` table, seven columns (`code`, `numeric_code`, `name`, `minor_units`, `symbol`, `entity`, `status`), one `INSERT` per active and withdrawn ISO 4217 code. `status` is `'active'` or `'withdrawn'`, enforced by a CHECK constraint. `code` is the primary key. The table is FK-ready — add `FOREIGN KEY (currency) REFERENCES currencies(code)` to any transaction table and start joining.
+
+**What's intentionally absent:** pegs, countries, central banks, withdrawn-date metadata, and non-ISO instruments (crypto, stablecoins, commodities). The SQL export is a reference table for foreign keys, not a relational mirror of the JSON. If you need those fields, read [`iso4217.json`](./iso4217.json) directly — the SQL is the wrong tool for the job, by design.
+
+### Direct download (CSV / TSV)
+
+Four files, one per audience. No BOM except where Excel needs it; LF line endings everywhere; headers always present.
+
+| File | Audience |
+|------|----------|
+| [`iso4217.csv`](./iso4217.csv) | Universal — every CSV parser on every platform |
+| [`iso4217.excel.csv`](./iso4217.excel.csv) | Excel on Windows — UTF-8 BOM so symbols render without an encoding prompt |
+| [`iso4217.european.csv`](./iso4217.european.csv) | European Excel locales — semicolon-delimited so FR/DE/ES/IT open it without an import dialog |
+| [`iso4217.tsv`](./iso4217.tsv) | Terminal, clipboard, Google Sheets, SQL clients — tab-separated |
+
+Load in one line:
+
+```python
+# Python — pandas
+import pandas as pd
+df = pd.read_csv('iso4217.csv')
+
+# Python — standard library
+import csv
+with open('iso4217.csv', encoding='utf-8', newline='') as f:
+    for row in csv.DictReader(f):
+        ...
+```
+
+```javascript
+// JavaScript — d3
+d3.csv('iso4217.csv').then(rows => { /* ... */ });
+```
+
+```go
+// Go — encoding/csv
+f, _ := os.Open("iso4217.csv")
+r := csv.NewReader(f)
+records, _ := r.ReadAll()
+```
+
+```rust
+// Rust — csv crate
+let mut rdr = csv::Reader::from_path("iso4217.csv")?;
+for result in rdr.records() { /* ... */ }
+```
+
+**Eleven columns** — SQL's seven plus four peg columns: `is_independent`, `pegged_to`, `peg_type`, `peg_rate`. SQL stays minimal because it's for foreign keys; CSV earns the peg metadata because it's for human analysis. The first seven column names are identical to the SQL export's, so joining the two is a straight comparison on `code`.
+
+**No comment header.** The four files start with the column-name row — a leading comment block would break `pandas.read_csv` without `skiprows` and violate RFC 4180. Version matching is derived from `meta.updated` in [`iso4217.json`](./iso4217.json), not from anything inside the CSV.
+
+### Command-line interface
+
+`pip install iso4217-registry` also provides an `iso4217` command. Eight subcommands, all read-only, all offline:
+
+```bash
+iso4217 lookup USD                   # all fields for one currency
+iso4217 list --pegged-to USD         # filter across the registry
+iso4217 minor 100.50 USD             # major → minor units    (→ 10050)
+iso4217 major 10050 USD              # minor → major units    (→ 100.5)
+iso4217 format 1000 USD              # symbol + separators    (→ $1,000.00)
+iso4217 peg AED                      # peg details only
+iso4217 info                         # registry metadata
+iso4217 validate USD EUR JPY         # exit 0 if all exist, 1 otherwise
+```
+
+Every command supports four machine-readable modes:
+
+- `--json` — one object (single lookup, peg, info) or an array (list, multi-lookup)
+- `--jsonl` — newline-delimited JSON, one object per line
+- `--tsv` / `--csv` — columns match `iso4217.tsv` and `iso4217.csv` byte for byte
+- `--raw FIELD` — bare value only, one per line for lists
+
+Pipe-friendly by design:
+
+```bash
+# Every currency pegged to USD, formatted as "$100.00"
+iso4217 list --pegged-to USD --raw code | xargs -I{} iso4217 format 100 {}
+
+# Branch on "not in the registry" vs. "you typed the command wrong"
+if ! iso4217 validate "$USER_INPUT" 2>/dev/null; then
+    case $? in
+        1) echo "unknown code: $USER_INPUT" ;;
+        2) echo "usage error" ;;
+    esac
+fi
+```
+
+**Exit codes** — 0 success; 1 code not found; 2 usage error (bad flag, missing argument); 3 registry file missing or invalid. Scripts can branch on the difference between "not in the registry" and "you typed the command wrong."
+
+Color is on when stdout is a TTY, off when piped. Override with `ISO4217_COLOR=never|auto|always`. Machine modes always disable color, so `diff` and golden-file tests stay stable.
+
 ---
 
 ## Registry Contents
@@ -107,7 +222,7 @@ go get github.com/slimissa/iso4217-go
 
 ## Coverage
 
-**v1.4.0 includes all 167 currencies currently active under ISO 4217, plus all 135 withdrawn currencies and 21 non-ISO instruments.** This is complete coverage of the standard — every active code, every historical revaluation chain, and the major cryptocurrencies, stablecoins, and precious-metal commodity codes in active financial use.
+**v1.5.0 includes all 167 currencies currently active under ISO 4217, plus all 135 withdrawn currencies and 21 non-ISO instruments.** This is complete coverage of the standard — every active code, every historical revaluation chain, and the major cryptocurrencies, stablecoins, and precious-metal commodity codes in active financial use.
 
 The registry contains three distinct layers:
 
@@ -170,6 +285,8 @@ Each wrapper is idiomatic to its language while maintaining identical behavior a
 | Rust | `cargo add iso4217` | `use iso4217::CurrencyRegistry;` |
 | Go | `go get github.com/slimissa/iso4217-go` | `import iso4217 "github.com/slimissa/iso4217-go"` |
 
+The Python package also installs the `iso4217` CLI. See [Command-line interface](#command-line-interface) above.
+
 ### Consistent API across languages
 
 | Operation | Python | JavaScript | Rust | Go |
@@ -181,6 +298,16 @@ Each wrapper is idiomatic to its language while maintaining identical behavior a
 | Format with symbol | `.format(100.50)` | `.format(100.50)` | `.format(100.50)` | `.Format(100.50)` |
 | Filter pegged to USD | `.pegged_to("USD")` | `.peggedTo("USD")` | `.pegged_to("USD")` | `.PeggedTo("USD")` |
 | Peg type discrimination | `.peg_type` | `.pegType` | `.peg_type` | `.PegType` |
+
+### Exports (all regenerated from the same JSON)
+
+| Format | Dialects | Regenerated by | Verified by |
+|--------|----------|----------------|-------------|
+| SQL | ANSI, PostgreSQL, MySQL, SQLite | `tools/export_sql.py` | `tools/export_sql.py --check` in CI |
+| CSV / TSV | RFC 4180, Excel, European, TSV | `tools/export_csv.py` | `tools/export_csv.py --check` in CI |
+| CLI | one binary, eight subcommands, five output modes | *(part of the wrapper)* | `pytest wrappers/python/tests/test_cli.py` in CI |
+
+Every export is committed to the repository and re-verified on every push. A stale artifact fails CI before it reaches `main`.
 
 ---
 
@@ -197,6 +324,7 @@ The registry is validated through a multi-layer defense:
 | **Ground truth** | Historical facts — Eurozone rates, numeric codes, peg relationships | `tests/test_iso_codes.py` |
 | **Cross-language** | Identical behavior across all four wrappers | `tests/cross_language_consistency.json` |
 | **Coverage** | Active count ≥ 150 (MIN_ACTIVE_CURRENCIES) — enforced without flag | `tools/validate.py` |
+| **Export drift** | SQL, CSV, and CLI outputs match the current registry | CI jobs `check-sql-export`, `check-csv-export`, `check-cli` |
 
 ```bash
 # Run all validations
@@ -204,6 +332,10 @@ python3 tools/validate.py
 
 # Run the full test suite
 python3 -m pytest tests/ -v
+
+# Verify exports are in sync with the registry
+python3 tools/export_sql.py --check
+python3 tools/export_csv.py --check
 ```
 
 ---
@@ -219,25 +351,50 @@ iso4217/
 ├── CHANGELOG.md              # Version history
 ├── CONTRIBUTING.md           # How to contribute
 ├── .gitignore
+│
+├── iso4217.sql               # SQL export — ANSI SQL-92 (portable)
+├── iso4217.postgresql.sql    # SQL export — PostgreSQL 12+
+├── iso4217.mysql.sql         # SQL export — MySQL 8+ / MariaDB 10.4+
+├── iso4217.sqlite.sql        # SQL export — SQLite 3.37+
+├── iso4217.csv               # CSV export — RFC 4180
+├── iso4217.excel.csv         # CSV export — Excel-compatible (UTF-8 BOM)
+├── iso4217.european.csv      # CSV export — semicolon-delimited
+├── iso4217.tsv               # TSV export — tab-separated
+│
 ├── wrappers/
 │   ├── python/               # pip install iso4217-registry
+│   │   ├── iso4217.py        # Currency, CurrencyRegistry
+│   │   ├── iso4217_cli.py    # iso4217 command-line interface
+│   │   ├── setup.py
+│   │   └── tests/
+│   │       └── test_cli.py   # CLI test suite
 │   ├── javascript/           # npm install iso4217-registry
 │   ├── rust/                 # cargo add iso4217
 │   └── go/                   # go get github.com/slimissa/iso4217-go
+│
 ├── tests/
 │   ├── cross_language_consistency.json
 │   ├── test_iso_codes.py
 │   ├── test_validate_schema.py
+│   ├── test_export_sql.py
+│   ├── test_export_csv.py
 │   └── test_wrappers.py
+│
 ├── tools/
 │   ├── validate.py           # 6-layer validation
+│   ├── export_sql.py         # SQL export generator (--check for CI)
+│   ├── export_csv.py         # CSV/TSV export generator (--check for CI)
+│   ├── refresh_market_caps.py # Crypto/stablecoin rank refresh
+│   ├── sync_wrappers.py      # Wrapper copy synchronization
+│   ├── check_amendments.py   # Weekly ISO amendment monitor
 │   ├── update_from_iso.py    # Fetch + diff + apply pipeline
 │   ├── parse_source.py       # Wikipedia table classifier
-│   ├── sync_wrappers.py      # Wrapper copy synchronization
 │   └── generate_v1_2_skeletons.py  # Skeleton generator (historical tool)
+│
 └── .github/
     ├── workflows/
-    │   └── validate.yml      # CI on every push
+    │   ├── validate.yml      # CI on every push
+    │   └── monitor.yml       # Weekly ISO amendment monitor
     └── ISSUE_TEMPLATE/
         └── currency_update.md
 ```
@@ -251,7 +408,7 @@ The registry follows [Semantic Versioning](https://semver.org/):
 - **Minor**: New currencies added, or new optional fields added (backward-compatible)
 - **Patch**: Data corrections
 
-The current version is always in `iso4217.json` → `meta.version`.
+The current version is always in `iso4217.json` → `meta.version`. The Python package version (`wrappers/python/setup.py`) is independent — it tracks the wrapper's own API, not the registry data. As of v1.5.0, the registry is at `1.5.0` and the Python package at `1.1.0`.
 
 ---
 
@@ -260,11 +417,20 @@ The current version is always in `iso4217.json` → `meta.version`.
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on data corrections, new currencies, wrapper ports, and tooling improvements.
 
 **Quick correction workflow:**
+
 1. Edit `iso4217.json`
 2. Run `python3 tools/validate.py` — must pass with 0 errors
-3. Run `python3 -m pytest tests/ -v` — all tests must pass
-4. Run `python3 tools/sync_wrappers.py` — sync Go/Rust embedded copies
-5. Submit a PR with your source cited
+3. Regenerate every derived artifact:
+   ```bash
+   python3 tools/export_sql.py       # four SQL files
+   python3 tools/export_csv.py       # four CSV/TSV files
+   python3 tools/sync_wrappers.py    # Go and Rust embedded copies
+   ```
+4. Run the full suite — `python3 -m pytest tests/ wrappers/python/tests/ -q` — all tests must pass
+5. Run `pytest wrappers/python/tests/test_cli.py -q` to confirm the CLI still resolves against the updated registry
+6. Submit a PR with your source cited, including all regenerated artifacts
+
+CI rejects PRs where any derived file is stale. The three export checks (`check-sql-export`, `check-csv-export`, `check-cli`) run in parallel and gate the slower wrapper matrix.
 
 ---
 
@@ -287,3 +453,11 @@ Apache 2.0 — use it anywhere, no attribution required. The currency data in th
 ## Author
 
 **Le P'tit** — [github.com/slimissa](https://github.com/slimissa)
+
+---
+
+## What's next
+
+The registry is usable from every language and every tool the ecosystem touches. The next release is a second registry — ISO 3166 country codes — built to the same shape: same JSON schema discipline, same four wrappers, same SQL/CSV/CLI exports, same CI gates. Any table that joins against `currencies` will eventually be able to join against `countries`.
+
+*One source of truth per standard. One consumption pattern across all of them.*

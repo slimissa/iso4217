@@ -4,23 +4,12 @@
   "title": "ISO 4217 Currency Registry Schema",
   "description": "JSON Schema for the canonical ISO 4217 currency registry. Validates structure, types, patterns, and constraints for active ISO currencies, withdrawn currencies, and non-ISO financial instruments.",
   "type": "object",
-  "required": [
-    "meta",
-    "source",
-    "currencies"
-  ],
+  "required": ["meta", "source", "currencies"],
   "additionalProperties": false,
   "properties": {
     "meta": {
       "type": "object",
-      "required": [
-        "version",
-        "updated",
-        "schema_version",
-        "description",
-        "project",
-        "license"
-      ],
+      "required": ["version", "updated", "schema_version", "description", "project", "license"],
       "additionalProperties": false,
       "properties": {
         "version": {
@@ -51,37 +40,23 @@
         },
         "license": {
           "type": "string",
-          "enum": [
-            "Apache-2.0"
-          ],
+          "enum": ["Apache-2.0"],
           "description": "SPDX license identifier."
         }
       }
     },
     "source": {
       "type": "object",
-      "required": [
-        "standard",
-        "maintenance_agency",
-        "maintenance_agency_url",
-        "last_amendment_applied",
-        "last_amendment_date",
-        "last_verified",
-        "verified_against"
-      ],
+      "required": ["standard", "maintenance_agency", "maintenance_agency_url", "last_amendment_applied", "last_amendment_date", "last_verified", "verified_against"],
       "additionalProperties": false,
       "properties": {
         "standard": {
           "type": "string",
-          "enum": [
-            "ISO 4217:2015"
-          ]
+          "enum": ["ISO 4217:2015"]
         },
         "maintenance_agency": {
           "type": "string",
-          "enum": [
-            "SIX Group"
-          ]
+          "enum": ["SIX Group"]
         },
         "maintenance_agency_url": {
           "type": "string",
@@ -122,61 +97,41 @@
     },
     "currencies": {
       "type": "object",
-      "required": [
-        "active",
-        "withdrawn"
-      ],
+      "required": ["active", "withdrawn"],
       "additionalProperties": false,
       "properties": {
         "active": {
           "type": "array",
           "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/activeCurrency"
-          }
+          "items": { "$ref": "#/definitions/activeCurrency" }
         },
         "withdrawn": {
           "type": "array",
           "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/withdrawnCurrency"
-          }
+          "items": { "$ref": "#/definitions/withdrawnCurrency" }
         }
       }
     },
     "non_iso": {
       "type": "object",
-      "required": [
-        "cryptocurrencies",
-        "stablecoins",
-        "commodities",
-        "special_purpose"
-      ],
+      "required": ["cryptocurrencies", "stablecoins", "commodities", "special_purpose"],
       "additionalProperties": false,
       "properties": {
         "cryptocurrencies": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/cryptocurrency"
-          }
+          "items": { "$ref": "#/definitions/cryptocurrency" }
         },
         "stablecoins": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/stablecoin"
-          }
+          "items": { "$ref": "#/definitions/stablecoin" }
         },
         "commodities": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/commodity"
-          }
+          "items": { "$ref": "#/definitions/commodity" }
         },
         "special_purpose": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/specialPurpose"
-          }
+          "items": { "$ref": "#/definitions/specialPurpose" }
         }
       }
     }
@@ -184,11 +139,7 @@
   "definitions": {
     "countryReference": {
       "type": "object",
-      "required": [
-        "code",
-        "name",
-        "relationship"
-      ],
+      "required": ["code", "name", "relationship"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -203,31 +154,14 @@
         },
         "relationship": {
           "type": "string",
-          "enum": [
-            "issuing",
-            "adopting",
-            "territory",
-            "parallel",
-            "local_issue"
-          ],
+          "enum": ["issuing", "adopting", "territory", "parallel", "local_issue"],
           "description": "Relationship of this country/territory to the currency."
         }
       }
     },
     "activeCurrency": {
       "type": "object",
-      "required": [
-        "code",
-        "numeric",
-        "name",
-        "minor_units",
-        "symbol",
-        "entity",
-        "central_bank",
-        "pegged_to",
-        "is_independent",
-        "countries"
-      ],
+      "required": ["code", "numeric", "name", "minor_units", "symbol", "entity", "central_bank", "pegged_to", "is_independent", "countries"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -269,29 +203,15 @@
         "pegged_to": {
           "description": "ISO 4217 code of the anchor currency (only when peg_type is 'single'), free-text description of a basket/undisclosed peg, or null if floating.",
           "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "string",
-              "minLength": 3
-            }
+            { "type": "null" },
+            { "type": "string", "minLength": 3 }
           ]
         },
         "peg_type": {
           "description": "Classification of how pegged_to should be interpreted. 'single': pegged_to is a parseable ISO 4217 code (^[A-Z]{3}$). 'basket': pegged_to is a free-text description of a weighted-basket peg. 'undisclosed': pegged, but the peg mechanism/composition is not public — pegged_to is a free-text description. null/absent: not pegged. Required whenever pegged_to is non-null; consumers must check peg_type before assuming pegged_to is a parseable currency code.",
           "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "string",
-              "enum": [
-                "single",
-                "basket",
-                "undisclosed"
-              ]
-            }
+            { "type": "null" },
+            { "type": "string", "enum": ["single", "basket", "undisclosed"] }
           ]
         },
         "pegged_since": {
@@ -302,26 +222,15 @@
         "peg_rate": {
           "description": "Official peg rate, or null for baskets/undisclosed pegs.",
           "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "number",
-              "minimum": 0
-            }
+            { "type": "null" },
+            { "type": "number", "minimum": 0 }
           ]
         },
         "peg_band_pct": {
           "description": "Allowed deviation from peg as percentage, or null.",
           "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 100
-            }
+            { "type": "null" },
+            { "type": "number", "minimum": 0, "maximum": 100 }
           ]
         },
         "is_independent": {
@@ -335,9 +244,7 @@
         "countries": {
           "type": "array",
           "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/countryReference"
-          },
+          "items": { "$ref": "#/definitions/countryReference" },
           "description": "Countries and territories where this currency is primary legal tender."
         }
       },
@@ -345,88 +252,39 @@
         {
           "$comment": "If pegged_to is a string (i.e. the currency is pegged to something), peg_type must be present and non-null so consumers know how to interpret pegged_to.",
           "if": {
-            "properties": {
-              "pegged_to": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "pegged_to"
-            ]
+            "properties": { "pegged_to": { "type": "string" } },
+            "required": ["pegged_to"]
           },
           "then": {
-            "required": [
-              "peg_type"
-            ],
-            "properties": {
-              "peg_type": {
-                "type": "string"
-              }
-            }
+            "required": ["peg_type"],
+            "properties": { "peg_type": { "type": "string" } }
           }
         },
         {
           "$comment": "If peg_type is 'single', pegged_to must be a bare 3-letter ISO 4217 code, not a basket/undisclosed description.",
           "if": {
-            "properties": {
-              "peg_type": {
-                "const": "single"
-              }
-            },
-            "required": [
-              "peg_type"
-            ]
+            "properties": { "peg_type": { "const": "single" } },
+            "required": ["peg_type"]
           },
           "then": {
-            "properties": {
-              "pegged_to": {
-                "type": "string",
-                "pattern": "^[A-Z]{3}$"
-              }
-            }
+            "properties": { "pegged_to": { "type": "string", "pattern": "^[A-Z]{3}$" } }
           }
         },
         {
           "$comment": "If peg_type is 'basket' or 'undisclosed', pegged_to must NOT look like a bare 3-letter code — it must read as a description, catching cases where someone mislabels a real code as a basket/undisclosed peg or vice versa.",
           "if": {
-            "properties": {
-              "peg_type": {
-                "enum": [
-                  "basket",
-                  "undisclosed"
-                ]
-              }
-            },
-            "required": [
-              "peg_type"
-            ]
+            "properties": { "peg_type": { "enum": ["basket", "undisclosed"] } },
+            "required": ["peg_type"]
           },
           "then": {
-            "properties": {
-              "pegged_to": {
-                "type": "string",
-                "not": {
-                  "pattern": "^[A-Z]{3}$"
-                }
-              }
-            }
+            "properties": { "pegged_to": { "type": "string", "not": { "pattern": "^[A-Z]{3}$" } } }
           }
         }
       ]
     },
     "withdrawnCurrency": {
       "type": "object",
-      "required": [
-        "code",
-        "numeric",
-        "name",
-        "minor_units",
-        "symbol",
-        "entity",
-        "withdrawn_date",
-        "replaced_by",
-        "conversion_rate"
-      ],
+      "required": ["code", "numeric", "name", "minor_units", "symbol", "entity", "withdrawn_date", "replaced_by", "conversion_rate"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -480,17 +338,7 @@
     },
     "cryptocurrency": {
       "type": "object",
-      "required": [
-        "code",
-        "name",
-        "minor_units",
-        "symbol",
-        "type",
-        "entity",
-        "introduced",
-        "market_cap_rank",
-        "note"
-      ],
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "introduced", "market_cap_rank", "note"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -529,28 +377,12 @@
         "note": {
           "type": "string",
           "minLength": 10
-        },
-        "is_independent": {
-          "type": "boolean",
-          "description": "True if the instrument trades independently; False if its value is pegged to or otherwise directly derived from another asset. Optional; when absent, consumers must treat it as False."
         }
       }
     },
     "stablecoin": {
       "type": "object",
-      "required": [
-        "code",
-        "name",
-        "minor_units",
-        "symbol",
-        "type",
-        "entity",
-        "introduced",
-        "market_cap_rank",
-        "pegged_to",
-        "peg_mechanism",
-        "note"
-      ],
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "introduced", "market_cap_rank", "pegged_to", "peg_mechanism", "note"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -603,24 +435,12 @@
         "note": {
           "type": "string",
           "minLength": 10
-        },
-        "is_independent": {
-          "type": "boolean",
-          "description": "True if the instrument trades independently; False if its value is pegged to or otherwise directly derived from another asset. Optional; when absent, consumers must treat it as False."
         }
       }
     },
     "commodity": {
       "type": "object",
-      "required": [
-        "code",
-        "name",
-        "minor_units",
-        "symbol",
-        "type",
-        "entity",
-        "note"
-      ],
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "note"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -657,25 +477,12 @@
           "type": "string",
           "minLength": 10,
           "description": "Must clarify that minor_units is conventional and this is not a currency."
-        },
-        "is_independent": {
-          "type": "boolean",
-          "description": "True if the instrument trades independently; False if its value is pegged to or otherwise directly derived from another asset. Optional; when absent, consumers must treat it as False."
         }
       }
     },
     "specialPurpose": {
       "type": "object",
-      "required": [
-        "code",
-        "name",
-        "minor_units",
-        "symbol",
-        "type",
-        "entity",
-        "iso_status",
-        "note"
-      ],
+      "required": ["code", "name", "minor_units", "symbol", "type", "entity", "iso_status", "note"],
       "additionalProperties": false,
       "properties": {
         "code": {
@@ -702,12 +509,7 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "basket",
-            "offshore",
-            "unit_of_account",
-            "other"
-          ],
+          "enum": ["basket", "offshore", "unit_of_account", "other"],
           "description": "Classification of this special purpose instrument."
         },
         "entity": {
@@ -717,21 +519,13 @@
         },
         "iso_status": {
           "type": "string",
-          "enum": [
-            "iso_code",
-            "market_convention",
-            "obsolete_iso"
-          ],
+          "enum": ["iso_code", "market_convention", "obsolete_iso"],
           "description": "Ground truth for whether this code is officially defined in ISO 4217. 'iso_code': a currently-active code in the ISO 4217 standard (e.g. XDR, XUA, XSU) — not necessarily a tradable currency, but genuinely ISO-defined. 'market_convention': a code market participants use that is NOT part of ISO 4217 (e.g. CNH). 'obsolete_iso': was an ISO 4217 code but has since been withdrawn from the standard (distinct from currencies.withdrawn, which is for retired national currencies, not retired special-purpose codes). This field is authoritative — tools/validate.py uses it directly instead of inferring ISO status from the note text."
         },
         "note": {
           "type": "string",
           "minLength": 10,
           "description": "Must explain relationship to ISO 4217 and usage context, consistent with iso_status."
-        },
-        "is_independent": {
-          "type": "boolean",
-          "description": "True if the instrument trades independently; False if its value is pegged to or otherwise directly derived from another asset. Optional; when absent, consumers must treat it as False."
         }
       }
     }
