@@ -21,15 +21,26 @@ name: Validate Registry
 #
 # NOTE: wrappers/**/*.json is listed explicitly, not merged into a source
 # glob — it's data, not code, and check-wrapper-sync treats it differently.
+permissions:
+  contents: read
 
+concurrency:
+  group: validate-registry-${{ github.ref }}
+  cancel-in-progress: true
+  
 on:
   push:
     branches: [main]
     paths:
       - 'iso4217.json'
       - 'schema.json'
+      - 'iso4217.sql'
+      - 'iso4217.postgresql.sql'
+      - 'iso4217.mysql.sql'
+      - 'iso4217.sqlite.sql'
       - 'tools/validate.py'
       - 'tools/sync_wrappers.py'
+      - 'tools/export_sql.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -40,14 +51,20 @@ on:
       - 'wrappers/**/go.mod'
       - 'wrappers/**/package.json'
       - 'tests/**'
+      - 'tests/test_export_sql.py'
       - '.github/workflows/validate.yml'
   pull_request:
     branches: [main]
     paths:
       - 'iso4217.json'
       - 'schema.json'
+      - 'iso4217.sql'
+      - 'iso4217.postgresql.sql'
+      - 'iso4217.mysql.sql'
+      - 'iso4217.sqlite.sql'
       - 'tools/validate.py'
       - 'tools/sync_wrappers.py'
+      - 'tools/export_sql.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -58,6 +75,7 @@ on:
       - 'wrappers/**/go.mod'
       - 'wrappers/**/package.json'
       - 'tests/**'
+      - 'tests/test_export_sql.py'
       - '.github/workflows/validate.yml'
   workflow_dispatch:
 
@@ -89,12 +107,46 @@ jobs:
             exit 1
           }
 
-  # --- Job 2: Schema/data validation ------------------------------------
+  # --- Job 2: SQL export drift check ------------------------------------
+  # Regenerates the four SQL files in memory and compares against the
+  # committed copies. Runs first so a stale SQL artifact fails fast,
+  # before the slower wrapper matrix starts.
+  check-sql-export:
+    name: Check SQL exports match registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check SQL files are in sync
+        run: |
+          python3 tools/export_sql.py --check || {
+            code=$?
+            if [ "$code" = "1" ]; then
+              echo "::error::SQL files are stale. Run 'python3 tools/export_sql.py' and commit the result."
+            elif [ "$code" = "3" ]; then
+              echo "::error::One or more SQL files are missing. Run 'python3 tools/export_sql.py' and commit the result."
+            else
+              echo "::error::export_sql.py --check failed with exit code $code"
+            fi
+            exit 1
+          }
+
+  # --- Job 3: Schema/data validation ------------------------------------
   # Runs schema/business-logic validation against iso4217.json and the
   # full pytest suite.
   validate-json:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [check-sql-export]
 
     steps:
       - name: Checkout
@@ -121,7 +173,9 @@ jobs:
   validate-wrappers:
     name: Validate ${{ matrix.language }} wrapper
     runs-on: ubuntu-latest
-    needs: [validate-json, check-wrapper-sync]
+    timeout-minutes: 25
+    needs: [validate-json, check-wrapper-sync, check-sql-export]
+  
     strategy:
       fail-fast: false  # Run all languages even if one fails
       matrix:
