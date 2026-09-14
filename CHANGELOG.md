@@ -7,6 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] — 2026-09-14
+
+### Added
+
+#### Registry Data — Non-ISO Expansion
+- **5 new cryptocurrencies**: XRP, SOL, BNB, ADA, DOGE (top 10 by market cap, excluding existing BTC and ETH)
+- **3 new stablecoins**: USDP (Paxos), FRAX (Frax Finance, Hybrid peg), TUSD (TrueUSD)
+- Cryptocurrency count: 2 → **7**
+- Stablecoin count: 3 → **6**
+- BUSD intentionally excluded (deprecated by Paxos Feb 2024)
+- Market cap ranks reflect a snapshot on 2026-09-14
+- BNB uses 18 minor units (BEP20 convention); BEP2 uses 8 — documented in the entry's note
+
+### Tests
+- Added 8 ground-truth tests to `tests/test_iso_codes.py::TestNonISO`
+- Test suite: 91 → **99 Python tests**
+
+### Verified
+- `tools/validate.py` runs clean: 0 errors, 27 expected warnings
+- All existing tests still pass
+- Wrapper copies synced (Go, Rust)
+- Schema unchanged (new entries fit existing schema)
+
+---
+
+## [1.3.0] — 2026-08-26
+
+### Added
+
+#### Registry Data — Complete Withdrawn Coverage
+- **111 new withdrawn currencies**, bringing the total from 24 to **135 of 135** — every withdrawn or obsolete ISO 4217 alphabetic code now present
+- Revaluation chains covered:
+  - **Brazilian**: BRB → BRC → BRN → BRE → BRR (5 currencies)
+  - **Yugoslav**: YUD → YUN → YUR → YUO → YUG → YUM → CSD (7 currencies)
+  - **Angolan**: AOK → AON → AOR (3 currencies)
+  - **Bulgarian**: BGJ → BGK → BGL (3 currencies)
+  - **Argentine**: ARM → ARL → ARP → ARA (4 currencies)
+  - **Czechoslovak**: CSK, CSJ (2 currencies)
+  - **Zimbabwean**: RHD → ZWC → ZWD → ZWN → ZWR → ZWL (6 currencies)
+  - **Zairean**: ZRZ → ZRN (2 currencies)
+  - **Peruvian**: PEH → PEI (3 currencies)
+  - **Asian**: BUK, DDM, LAJ, TJR, TMM, TPE, VNC, YDD (8 currencies)
+  - **African**: 37 currencies (BOP, CHC, CSD, GEK, GHC, GHP, GQE, HRD, LTT, LUC, LUL, LVR, MGF, MKN, MLF, MTP, MVQ, MZE, MZM, MRO, PLZ, SDD, SDP, SLL, SRG, STD, UAK, UGS, UGW, UYN, UYP, VEB, VEF, ZAL, ZMK, plus others)
+  - **Eurozone micro-states**: ADF, ADP, MCF, SML, VAL
+  - **Special settlement**: XEU (ECU), XFO (Gold Franc), XFU (UIC Franc), XRE (RINET)
+- Every withdrawn currency includes `withdrawn_date`, `replaced_by`, and `conversion_rate` with documented sources
+
+#### Tools
+- Added `tools/generate_v1_3_skeletons.py` — reads `tools/parse_source.py`'s curated withdrawn-code set, diffs against the registry, and generates skeleton JSON entries with `TODO` placeholders. Auto-fills Eurozone rates (locked by ECB).
+- Archived skeleton generators to `tools/archive/` (v1.2 and v1.3) — historical tools, job complete
+
+#### Validation
+- **Added revaluation chain detection**: same-entity numeric reuse (e.g., Brazil's 076 shared by BRB/BRC/BRN/BRE) now emits a warning, not an error. Different-entity reuse still errors.
+- **Fixed entity mismatches**: SUR/RUR unified as Russia; RHD/ZWD/ZWC unified as Zimbabwe; CSD/YUM unified as Yugoslavia; micro-states aligned to parent currencies
+- **Numeric code collision detection** now handles shared codes across revaluation chains correctly
+
+#### CI/CD
+- **CI matrix testing**: `validate-wrappers` split into 4 parallel jobs (Python, JavaScript, Go, Rust) with `fail-fast: false` — per-language visibility, faster runs
+- **Automated ISO amendment monitoring**: `tools/check_amendments.py` + `.github/workflows/monitor-amendments.yml` — weekly check for new SIX Group amendments, creates GitHub Issue when detected
+
+### Tests
+- `tests/test_iso_codes.py` unchanged (already covered withdrawn currencies)
+- Test suite remains **91 Python tests + 29 JavaScript tests + 60 Go tests + 42 Rust tests**
+
+### Verified
+- **135/135 withdrawn ISO 4217 currencies** — complete coverage against `tools/parse_source.py::WITHDRAWN_ISO_CODES`
+- All 111 new currencies validated: numeric codes, replacement codes, conversion rates all correct
+- `tools/validate.py` runs clean: 0 errors, 27 expected warnings
+- Wrapper copies synced
+
+---
+
 ## [1.2.0] — 2026-08-17
 
 ### Added
@@ -183,13 +255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-### Planned for v1.3.0
-106 known-missing codes identified via `tools/parse_source.py`'s ground-truth set
-- Add remaining ~100 withdrawn currencies
-- CI/CD matrix testing across all four wrapper languages
-- Automated ISO amendment monitoring
-
-### Planned for v1.4.0
+### Planned for v1.5.0
 - SQL dump export for direct database import
 - CSV export
 - Additional language wrappers (C#, Java, Swift, Kotlin, Ruby)
@@ -199,7 +265,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Active | Withdrawn | Non-ISO | Wrappers |
 |---------|------|--------|-----------|---------|----------|
-| **1.2.0** | **2026-08-17** | **167** | **24** | **13** | Python, JS, Rust, Go |
+| **1.4.0** | **2026-09-14** | **167** | **135** | **21** | Python, JS, Rust, Go |
+| 1.3.0 | 2026-08-26 | 167 | 135 | 13 | Python, JS, Rust, Go |
+| 1.2.0 | 2026-08-17 | 167 | 24 | 13 | Python, JS, Rust, Go |
 | 1.1.0 | 2026-08-16 | 61 | 24 | 13 | Python, JS, Rust, Go |
 | 1.0.0 | 2026-07-29 | 61 | 24 | 12 | Python, JS, Rust, Go |
 

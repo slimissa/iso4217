@@ -506,6 +506,69 @@ class TestNonISO:
                 assert len(c["note"]) > 10, (
                     f"{c['code']} note is too short: '{c.get('note', '')}'"
                 )
+    # --- v1.4.0 crypto additions ---
+
+    def test_xrp_has_6_minor_units(self):
+        r = _registry()
+        xrp = _non_iso(r, "cryptocurrencies", "XRP")
+        assert xrp is not None, "XRP not found in cryptocurrencies"
+        assert xrp["minor_units"] == 6, f"XRP minor_units={xrp['minor_units']}, expected 6"
+
+    def test_sol_has_9_minor_units(self):
+        r = _registry()
+        sol = _non_iso(r, "cryptocurrencies", "SOL")
+        assert sol is not None, "SOL not found in cryptocurrencies"
+        assert sol["minor_units"] == 9, f"SOL minor_units={sol['minor_units']}, expected 9"
+
+    def test_bnb_has_18_minor_units(self):
+        r = _registry()
+        bnb = _non_iso(r, "cryptocurrencies", "BNB")
+        assert bnb is not None, "BNB not found in cryptocurrencies"
+        assert bnb["minor_units"] == 18, (
+            f"BNB minor_units={bnb['minor_units']}, expected 18 (BEP20 convention)"
+        )
+
+    def test_ada_has_6_minor_units(self):
+        r = _registry()
+        ada = _non_iso(r, "cryptocurrencies", "ADA")
+        assert ada is not None, "ADA not found in cryptocurrencies"
+        assert ada["minor_units"] == 6, f"ADA minor_units={ada['minor_units']}, expected 6"
+
+    def test_doge_has_8_minor_units(self):
+        r = _registry()
+        doge = _non_iso(r, "cryptocurrencies", "DOGE")
+        assert doge is not None, "DOGE not found in cryptocurrencies"
+        assert doge["minor_units"] == 8, f"DOGE minor_units={doge['minor_units']}, expected 8"
+
+    # --- v1.4.0 stablecoin additions ---
+
+    def test_usdp_is_stablecoin(self):
+        r = _registry()
+        usdp = _non_iso(r, "stablecoins", "USDP")
+        assert usdp is not None, "USDP not found in stablecoins"
+        assert usdp.get("type") == "stablecoin"
+        assert usdp.get("pegged_to") == "USD"
+        assert usdp.get("peg_mechanism") == "Fiat-collateralized"
+
+    def test_frax_is_hybrid_stablecoin(self):
+        r = _registry()
+        frax = _non_iso(r, "stablecoins", "FRAX")
+        assert frax is not None, "FRAX not found in stablecoins"
+        assert frax.get("type") == "stablecoin"
+        assert frax.get("pegged_to") == "USD"
+        assert frax.get("peg_mechanism") == "Hybrid", (
+            f"FRAX peg_mechanism={frax.get('peg_mechanism')}, expected Hybrid"
+        )
+
+    def test_tusd_is_stablecoin(self):
+        r = _registry()
+        tusd = _non_iso(r, "stablecoins", "TUSD")
+        assert tusd is not None, "TUSD not found in stablecoins"
+        assert tusd.get("type") == "stablecoin"
+        assert tusd.get("pegged_to") == "USD"
+        assert tusd.get("peg_mechanism") == "Fiat-collateralized"
+
+
 
 
 # ---------------------------------------------------------------------------

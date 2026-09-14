@@ -7,8 +7,7 @@ One JSON file. Zero dependencies. Works with every language.
 [![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Schema Version](https://img.shields.io/badge/schema-1.1.0-green.svg)](./schema.json)
-[![Registry Version](https://img.shields.io/badge/registry-1.2.0-orange.svg)](./iso4217.json)
-
+[![Registry Version](https://img.shields.io/badge/registry-1.4.0-orange.svg)](./iso4217.json)
 ---
 
 ## Why?
@@ -32,7 +31,7 @@ The registry is language-agnostic by design. The JSON is the contract.
 ### Direct download
 
 ```bash
-curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.2.0/iso4217.json
+curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.4.0/iso4217.json
 ```
 
 ### Python
@@ -98,9 +97,9 @@ go get github.com/slimissa/iso4217-go
 | Category | Count | Description |
 |----------|-------|-------------|
 | Active ISO 4217 currencies | **167 of 167** | **Complete ISO 4217 active coverage** — every currently-assigned alphabetic code |
-| Withdrawn ISO currencies | 24 | Historical currencies with replacement info and conversion rates |
-| Cryptocurrencies | 2 | Major cryptocurrencies by market capitalization |
-| Stablecoins | 3 | Major stablecoins with peg mechanisms |
+| Withdrawn ISO currencies | **135 of 135** | Complete historical coverage with revaluation chains and conversion rates |
+| Cryptocurrencies | 7 | Top 10 by market cap (excluding BTC, ETH) |
+| Stablecoins | 6 | Top 10 by market cap (excluding USDT, USDC, DAI) |
 | Commodities | 4 | Precious metals with ISO-compatible codes |
 | Special purpose | 4 | IMF units, offshore variants |
 
@@ -108,7 +107,15 @@ go get github.com/slimissa/iso4217-go
 
 ## Coverage
 
-**v1.2.0 includes all 167 currencies currently active under ISO 4217.** This is complete coverage of the standard's active list — every G20 economy, every major and minor FX trading pair, every CFA franc zone, every Caribbean and Pacific dollar, every dinar and rupee and peso and shilling, plus the fund codes and indexation units that complete the standard.
+**v1.4.0 includes all 167 currencies currently active under ISO 4217, plus all 135 withdrawn currencies and 21 non-ISO instruments.** This is complete coverage of the standard — every active code, every historical revaluation chain, and the major cryptocurrencies, stablecoins, and precious-metal commodity codes in active financial use.
+
+The registry contains three distinct layers:
+
+| Layer | Count | Purpose |
+|-------|-------|---------|
+| **Active ISO 4217** | 167 | Currently circulating currencies — fiat only |
+| **Withdrawn ISO 4217** | 135 | Historical currencies with revaluation chains and conversion rates |
+| **Non-ISO** | 21 | Cryptocurrencies (7), stablecoins (6), commodities (4), special purpose (4) |
 
 **Included:** every code in `tools/parse_source.py::ACTIVE_ISO_CODES` — the curated 167-code ground-truth set cross-checked against ISO 4217 amendment 179.
 
