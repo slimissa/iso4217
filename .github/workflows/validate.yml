@@ -43,6 +43,9 @@ on:
       - 'iso4217.european.csv'
       - 'iso4217.tsv'
       - 'tools/validate.py'
+      - 'wrappers/python/iso4217_cli.py'
+      - 'wrappers/python/setup.py'
+      - 'wrappers/python/tests/test_cli.py'
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
       - 'tools/export_csv.py'
@@ -73,6 +76,9 @@ on:
       - 'iso4217.european.csv'
       - 'iso4217.tsv'
       - 'tools/validate.py'
+      - 'wrappers/python/iso4217_cli.py'
+      - 'wrappers/python/setup.py'
+      - 'wrappers/python/tests/test_cli.py'
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
       - 'tools/export_csv.py'
@@ -184,6 +190,54 @@ jobs:
             exit 1
           }
 
+  # --- Job 2c: CLI tests -------------------------------------------------
+  # Installs the Python wrapper editable, runs the CLI test suite, then
+  # runs three smoke tests through the installed console_scripts entry
+  # point to confirm the packaging and the argv rewrites both work end
+  # to end. Runs in parallel with check-sql-export and check-csv-export.
+  check-cli:
+    name: Check CLI tests and smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install wrapper editable
+        run: pip install -e "wrappers/python[dev]" --quiet
+
+      - name: Run CLI test suite
+        run: python3 -m pytest wrappers/python/tests/test_cli.py -v
+
+      - name: Smoke test — JSON output round-trips
+        run: |
+          iso4217 lookup USD --json | python3 -c "import sys, json; d = json.load(sys.stdin); assert d['code'] == 'USD', d"
+
+      - name: Smoke test — validate exits 1 on an unknown code
+        run: |
+          set +e
+          iso4217 validate USD XYZ
+          code=$?
+          set -e
+          if [ "$code" != "1" ]; then
+            echo "::error::expected exit 1 from 'iso4217 validate USD XYZ', got $code"
+            exit 1
+          fi
+
+      - name: Smoke test — --raw list prints one code per line
+        run: |
+          count=$(iso4217 list --pegged-to USD --raw code | wc -l)
+          if [ "$count" -lt 5 ]; then
+            echo "::error::expected at least 5 USD-pegged currencies, got $count"
+            exit 1
+          fi
+
   # --- Job 3: Schema/data validation ------------------------------------
   # Runs schema/business-logic validation against iso4217.json and the
   # full pytest suite.
@@ -191,7 +245,7 @@ jobs:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [check-sql-export, check-csv-export]
+    needs: [check-sql-export, check-csv-export, check-cli]
 
     steps:
       - name: Checkout
@@ -219,7 +273,7 @@ jobs:
     name: Validate ${{ matrix.language }} wrapper
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: [validate-json, check-wrapper-sync, check-sql-export, check-csv-export]
+    needs: [validate-json, check-wrapper-sync, check-sql-export, check-csv-export, check-cli]
   
     strategy:
       fail-fast: false  # Run all languages even if one fails
