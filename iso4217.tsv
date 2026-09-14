@@ -1,0 +1,303 @@
+code	numeric_code	name	minor_units	symbol	entity	status	is_independent	pegged_to	peg_type	peg_rate
+AED	784	UAE Dirham	2	د.إ	United Arab Emirates	active	false	USD	single	3.6725
+AFN	971	Afghan Afghani	2	؋	Afghanistan	active	true			
+ALL	008	Albanian Lek	2	L	Albania	active	true			
+AMD	051	Armenian Dram	2	֏	Armenia	active	true			
+ANG	532	Netherlands Antillean Guilder	2	ƒ	Curaçao and Sint Maarten	active	false	USD	single	1.79
+AOA	973	Angolan Kwanza	2	Kz	Angola	active	true			
+ARS	032	Argentine Peso	2	$	Argentina	active	true			
+AUD	036	Australian Dollar	2	$	Australia	active	true			
+AWG	533	Aruban Florin	2	Afl	Aruba	active	false	USD	single	1.79
+AZN	944	Azerbaijani Manat	2	₼	Azerbaijan	active	true			
+BAM	977	Bosnia and Herzegovina Convertible Mark	2	KM	Bosnia and Herzegovina	active	false	EUR	single	1.95583
+BBD	052	Barbadian Dollar	2	Bds$	Barbados	active	false	USD	single	2.0
+BDT	050	Bangladeshi Taka	2	৳	Bangladesh	active	true			
+BGN	975	Bulgarian Lev	2	лв	Bulgaria	active	false	EUR	single	1.95583
+BHD	048	Bahraini Dinar	3	ب.د	Bahrain	active	false	USD	single	0.376
+BIF	108	Burundian Franc	0	FBu	Burundi	active	true			
+BMD	060	Bermudian Dollar	2	BD$	Bermuda	active	false	USD	single	1.0
+BND	096	Brunei Dollar	2	B$	Brunei Darussalam	active	false	SGD	single	1.0
+BOB	068	Bolivian Boliviano	2	Bs	Bolivia	active	true			
+BOV	984	Bolivian Mvdol	2	BOV	Bolivia	active	true			
+BRL	986	Brazilian Real	2	R$	Brazil	active	true			
+BSD	044	Bahamian Dollar	2	B$	Bahamas	active	false	USD	single	1.0
+BTN	064	Bhutanese Ngultrum	2	Nu.	Bhutan	active	false	INR	single	1.0
+BWP	072	Botswana Pula	2	P	Botswana	active	true			
+BYN	933	Belarusian Ruble	2	Br	Belarus	active	true			
+BZD	084	Belize Dollar	2	BZ$	Belize	active	false	USD	single	2.0
+CAD	124	Canadian Dollar	2	$	Canada	active	true			
+CDF	976	Congolese Franc	2	FC	Democratic Republic of the Congo	active	true			
+CHE	947	WIR Euro	2	CHE	Switzerland	active	false	EUR	single	1.0
+CHF	756	Swiss Franc	2	CHF	Switzerland	active	true			
+CHW	948	WIR Franc	2	CHW	Switzerland	active	false	CHF	single	1.0
+CLF	990	Unidad de Fomento	4	CLF	Chile	active	true			
+CLP	152	Chilean Peso	0	$	Chile	active	true			
+CNY	156	Chinese Yuan	2	¥	China	active	true			
+COP	170	Colombian Peso	2	$	Colombia	active	true			
+COU	970	Unidad de Valor Real	2	COU	Colombia	active	true			
+CRC	188	Costa Rican Colon	2	₡	Costa Rica	active	true			
+CUC	931	Cuban Convertible Peso	2	CUC$	Cuba	active	false	USD	single	1.0
+CUP	192	Cuban Peso	2	$MN	Cuba	active	true			
+CVE	132	Cape Verdean Escudo	2	Esc	Cape Verde	active	false	EUR	single	110.265
+CZK	203	Czech Koruna	2	Kč	Czech Republic	active	true			
+DJF	262	Djiboutian Franc	0	Fdj	Djibouti	active	false	USD	single	177.721
+DKK	208	Danish Krone	2	kr	Denmark	active	false	EUR	single	7.46038
+DOP	214	Dominican Peso	2	RD$	Dominican Republic	active	true			
+DZD	012	Algerian Dinar	2	د.ج	Algeria	active	true			
+EGP	818	Egyptian Pound	2	E£	Egypt	active	true			
+ERN	232	Eritrean Nakfa	2	Nfk	Eritrea	active	false	USD	single	15.0
+ETB	230	Ethiopian Birr	2	Br	Ethiopia	active	true			
+EUR	978	Euro	2	€	European Union (Eurosystem)	active	true			
+FJD	242	Fijian Dollar	2	FJ$	Fiji	active	true			
+FKP	238	Falkland Islands Pound	2	FK£	Falkland Islands	active	false	GBP	single	1.0
+GBP	826	Pound Sterling	2	£	United Kingdom	active	true			
+GEL	981	Georgian Lari	2	₾	Georgia	active	true			
+GHS	936	Ghanaian Cedi	2	GH₵	Ghana	active	true			
+GIP	292	Gibraltar Pound	2	£	Gibraltar	active	false	GBP	single	1.0
+GMD	270	Gambian Dalasi	2	D	Gambia	active	true			
+GNF	324	Guinean Franc	0	FG	Guinea	active	true			
+GTQ	320	Guatemalan Quetzal	2	Q	Guatemala	active	true			
+GYD	328	Guyanese Dollar	2	G$	Guyana	active	true			
+HKD	344	Hong Kong Dollar	2	HK$	Hong Kong SAR	active	false	USD	single	7.8
+HNL	340	Honduran Lempira	2	L	Honduras	active	true			
+HTG	332	Haitian Gourde	2	G	Haiti	active	true			
+HUF	348	Hungarian Forint	2	Ft	Hungary	active	true			
+IDR	360	Indonesian Rupiah	2	Rp	Indonesia	active	true			
+ILS	376	Israeli New Shekel	2	₪	Israel	active	true			
+INR	356	Indian Rupee	2	₹	India	active	true			
+IQD	368	Iraqi Dinar	3	ع.د	Iraq	active	true			
+IRR	364	Iranian Rial	2	﷼	Iran	active	true			
+ISK	352	Icelandic Krona	0	kr	Iceland	active	true			
+JMD	388	Jamaican Dollar	2	J$	Jamaica	active	true			
+JOD	400	Jordanian Dinar	3	د.ا	Jordan	active	false	USD	single	0.709
+JPY	392	Japanese Yen	0	¥	Japan	active	true			
+KES	404	Kenyan Shilling	2	KSh	Kenya	active	true			
+KGS	417	Kyrgyzstani Som	2	с	Kyrgyzstan	active	true			
+KHR	116	Cambodian Riel	2	៛	Cambodia	active	true			
+KMF	174	Comorian Franc	0	CF	Comoros	active	false	EUR	single	491.968
+KPW	408	North Korean Won	2	₩	North Korea	active	true			
+KRW	410	South Korean Won	0	₩	South Korea	active	true			
+KWD	414	Kuwaiti Dinar	3	د.ك	Kuwait	active	false	Currency basket	undisclosed	
+KYD	136	Cayman Islands Dollar	2	CI$	Cayman Islands	active	false	USD	single	0.833333
+KZT	398	Kazakhstani Tenge	2	₸	Kazakhstan	active	true			
+LAK	418	Lao Kip	2	₭	Laos	active	true			
+LBP	422	Lebanese Pound	2	ل.ل	Lebanon	active	true			
+LKR	144	Sri Lankan Rupee	2	රු	Sri Lanka	active	true			
+LRD	430	Liberian Dollar	2	L$	Liberia	active	true			
+LSL	426	Lesotho Loti	2	L	Lesotho	active	false	ZAR	single	1.0
+LYD	434	Libyan Dinar	3	ل.د	Libya	active	true			
+MAD	504	Moroccan Dirham	2	د.م.	Morocco	active	false	EUR+USD basket	basket	
+MDL	498	Moldovan Leu	2	L	Moldova	active	true			
+MGA	969	Malagasy Ariary	2	Ar	Madagascar	active	true			
+MKD	807	Macedonian Denar	2	ден	North Macedonia	active	false	EUR	single	61.495
+MMK	104	Myanmar Kyat	2	K	Myanmar	active	true			
+MNT	496	Mongolian Tögrög	2	₮	Mongolia	active	true			
+MOP	446	Macanese Pataca	2	MOP$	Macao SAR	active	false	HKD	single	1.03
+MRU	929	Mauritanian Ouguiya	2	UM	Mauritania	active	true			
+MUR	480	Mauritian Rupee	2	₨	Mauritius	active	true			
+MVR	462	Maldivian Rufiyaa	2	Rf	Maldives	active	true			
+MWK	454	Malawian Kwacha	2	MK	Malawi	active	true			
+MXN	484	Mexican Peso	2	$	Mexico	active	true			
+MXV	979	Mexican Unidad de Inversion	2	MXV	Mexico	active	true			
+MYR	458	Malaysian Ringgit	2	RM	Malaysia	active	true			
+MZN	943	Mozambican Metical	2	MT	Mozambique	active	true			
+NAD	516	Namibian Dollar	2	N$	Namibia	active	false	ZAR	single	1.0
+NGN	566	Nigerian Naira	2	₦	Nigeria	active	true			
+NIO	558	Nicaraguan Córdoba	2	C$	Nicaragua	active	true			
+NOK	578	Norwegian Krone	2	kr	Norway	active	true			
+NPR	524	Nepalese Rupee	2	₨	Nepal	active	false	INR	single	1.6
+NZD	554	New Zealand Dollar	2	$	New Zealand	active	true			
+OMR	512	Omani Rial	3	ر.ع.	Oman	active	false	USD	single	0.384497
+PAB	590	Panamanian Balboa	2	B/.	Panama	active	false	USD	single	1.0
+PEN	604	Peruvian Sol	2	S/	Peru	active	true			
+PGK	598	Papua New Guinean Kina	2	K	Papua New Guinea	active	true			
+PHP	608	Philippine Peso	2	₱	Philippines	active	true			
+PKR	586	Pakistani Rupee	2	₨	Pakistan	active	true			
+PLN	985	Polish Zloty	2	zł	Poland	active	true			
+PYG	600	Paraguayan Guaraní	0	₲	Paraguay	active	true			
+QAR	634	Qatari Riyal	2	ر.ق	Qatar	active	false	USD	single	3.64
+RON	946	Romanian Leu	2	lei	Romania	active	true			
+RSD	941	Serbian Dinar	2	дин	Serbia	active	true			
+RUB	643	Russian Ruble	2	₽	Russia	active	true			
+RWF	646	Rwandan Franc	0	FRw	Rwanda	active	true			
+SAR	682	Saudi Riyal	2	ر.س	Saudi Arabia	active	false	USD	single	3.75
+SBD	090	Solomon Islands Dollar	2	SI$	Solomon Islands	active	true			
+SCR	690	Seychellois Rupee	2	₨	Seychelles	active	true			
+SDG	938	Sudanese Pound	2	ج.س	Sudan	active	true			
+SEK	752	Swedish Krona	2	kr	Sweden	active	true			
+SGD	702	Singapore Dollar	2	S$	Singapore	active	true			
+SHP	654	Saint Helena Pound	2	£	Saint Helena, Ascension and Tristan da Cunha	active	false	GBP	single	1.0
+SLE	925	Sierra Leonean Leone	2	Le	Sierra Leone	active	true			
+SOS	706	Somali Shilling	2	Sh.So.	Somalia	active	true			
+SRD	968	Surinamese Dollar	2	$	Suriname	active	true			
+SSP	728	South Sudanese Pound	2	SS£	South Sudan	active	true			
+STN	930	São Tomé and Príncipe Dobra	2	Db	São Tomé and Príncipe	active	false	EUR	single	24.5
+SVC	222	Salvadoran Colón	2	₡	El Salvador	active	false	USD	single	8.75
+SYP	760	Syrian Pound	2	£S	Syria	active	true			
+SZL	748	Swazi Lilangeni	2	L	Eswatini	active	false	ZAR	single	1.0
+THB	764	Thai Baht	2	฿	Thailand	active	true			
+TJS	972	Tajikistani Somoni	2	SM	Tajikistan	active	true			
+TMT	934	Turkmenistani Manat	2	m	Turkmenistan	active	true			
+TND	788	Tunisian Dinar	3	د.ت	Tunisia	active	true			
+TOP	776	Tongan Paʻanga	2	T$	Tonga	active	true			
+TRY	949	Turkish Lira	2	₺	Turkey	active	true			
+TTD	780	Trinidad and Tobago Dollar	2	TT$	Trinidad and Tobago	active	true			
+TWD	901	New Taiwan Dollar	2	NT$	Taiwan	active	true			
+TZS	834	Tanzanian Shilling	2	TSh	Tanzania	active	true			
+UAH	980	Ukrainian Hryvnia	2	₴	Ukraine	active	true			
+UGX	800	Ugandan Shilling	0	USh	Uganda	active	true			
+USD	840	US Dollar	2	$	United States	active	true			
+USN	997	US Dollar (next day)	2	USN	United States	active	false	USD	single	1.0
+USS	998	US Dollar (same day)	2	USS	United States	active	false	USD	single	1.0
+UYI	940	Uruguay Peso en Unidades Indexadas	0	UYI	Uruguay	active	true			
+UYU	858	Uruguayan Peso	2	$U	Uruguay	active	true			
+UYW	927	Unidad Previsional	4	UYW	Uruguay	active	true			
+UZS	860	Uzbekistani Som	2	so'm	Uzbekistan	active	true			
+VED	926	Venezuelan Digital Bolívar	2	VED	Venezuela	active	true			
+VES	928	Venezuelan Bolívar Soberano	2	Bs.S	Venezuela	active	true			
+VND	704	Vietnamese Dong	0	₫	Vietnam	active	true			
+VUV	548	Vanuatu Vatu	0	VT	Vanuatu	active	true			
+WST	882	Samoan Tala	2	WS$	Samoa	active	true			
+XAF	950	Central African CFA Franc	0	CFA	Economic and Monetary Community of Central Africa (CEMAC)	active	false	EUR	single	655.957
+XCD	951	East Caribbean Dollar	2	EC$	Eastern Caribbean Currency Union	active	false	USD	single	2.7
+XOF	952	West African CFA Franc	0	CFA	West African Economic and Monetary Union (UEMOA)	active	false	EUR	single	655.957
+XPF	953	CFP Franc	0	₣	French Pacific Territories	active	false	EUR	single	119.332
+YER	886	Yemeni Rial	2	﷼	Yemen	active	true			
+ZAR	710	South African Rand	2	R	South Africa	active	true			
+ZMW	967	Zambian Kwacha	2	ZK	Zambia	active	true			
+ZWG	924	Zimbabwe Gold	2	ZiG	Zimbabwe	active	true			
+ADF	250	Andorran Franc	2	F	France	withdrawn	false			
+ADP	020	Andorran Peseta	0	Pts	Andorra	withdrawn	false			
+AFA	004	Afghan Afghani (old)	2	؋	Afghanistan	withdrawn	false			
+ALK	008	Albanian Lek (old)	0	L	Albania	withdrawn	false			
+AOK	024	Angolan Kwanza (1977)	0	Kz	Angola	withdrawn	false			
+AON	024	Angolan Novo Kwanza	0	Kz	Angola	withdrawn	false			
+AOR	982	Angolan Kwanza Reajustado	0	Kz	Angola	withdrawn	false			
+ARA	032	Argentine Austral	2	₳	Argentina	withdrawn	false			
+ARL	032	Argentine Peso Ley	2	$L	Argentina	withdrawn	false			
+ARM	032	Argentine Peso Moneda Nacional	2	m$n	Argentina	withdrawn	false			
+ARP	032	Argentine Peso Argentino	2	$a	Argentina	withdrawn	false			
+ARY	032	Argentine Peso Ley (alternative code)	0	$L	Argentina	withdrawn	false			
+ATS	040	Austrian Schilling	2	S	Austria	withdrawn	false			
+AZM	031	Azerbaijani Manat (old)	2	₼	Azerbaijan	withdrawn	false			
+BAD	070	Bosnia and Herzegovina Dinar	2	BAD	Bosnia and Herzegovina	withdrawn	false			
+BEC	993	Belgian Convertible Franc	0	FB	Belgium	withdrawn	false			
+BEF	056	Belgian Franc	2	fr.	Belgium	withdrawn	false			
+BEL	992	Belgian Financial Franc	0	FB	Belgium	withdrawn	false			
+BGJ	100	Bulgarian Lev (1962)	0	лв	Bulgaria	withdrawn	false			
+BGK	100	Bulgarian Lev (1997)	0	лв	Bulgaria	withdrawn	false			
+BGL	100	Bulgarian Lev (1999)	2	лв	Bulgaria	withdrawn	false			
+BOP	068	Bolivian Peso	2	b$	Bolivia	withdrawn	false			
+BRB	076	Brazilian Cruzeiro	2	Cr$	Brazil	withdrawn	false			
+BRC	076	Brazilian Cruzado	2	Cz$	Brazil	withdrawn	false			
+BRE	076	Brazilian Cruzeiro (1990)	2	Cr$	Brazil	withdrawn	false			
+BRN	076	Brazilian Cruzado Novo	2	NCz$	Brazil	withdrawn	false			
+BRR	987	Brazilian Cruzeiro Real	2	CR$	Brazil	withdrawn	false			
+BUK	104	Burmese Kyat (old)	0	K	Myanmar (formerly Burma)	withdrawn	false			
+BYB	112	Belarusian Ruble (1992)	2	Br	Belarus	withdrawn	false			
+BYR	974	Belarusian Ruble (2000)	0	Br	Belarus	withdrawn	false			
+CHC	948	WIR Franc (electronic)	2	CHC	Switzerland	withdrawn	false			
+CSD	891	Serbian Dinar (2003)	2	CSD	Yugoslavia	withdrawn	false			
+CSJ	203	Czechoslovak Koruna (1993)	2	Kčs	Czechoslovakia	withdrawn	false			
+CSK	200	Czechoslovak Koruna	2	Kčs	Czechoslovakia	withdrawn	false			
+CYP	196	Cypriot Pound	2	£	Cyprus	withdrawn	false			
+DDM	278	East German Mark	0	M	German Democratic Republic	withdrawn	false			
+DEM	276	German Mark	2	DM	Germany	withdrawn	false			
+ECS	218	Ecuadorian Sucre	0	S/.	Ecuador	withdrawn	false			
+ECV	983	Ecuadorian Unidad de Valor Constante	2	UVC	Ecuador	withdrawn	false			
+EEK	233	Estonian Kroon	2	kr	Estonia	withdrawn	false			
+ESA	996	Spanish Peseta (Account A)	0	Pts	Spain	withdrawn	false			
+ESB	995	Spanish Peseta (Account B)	0	Pts	Spain	withdrawn	false			
+ESP	724	Spanish Peseta	0	Pts	Spain	withdrawn	false			
+FIM	246	Finnish Markka	2	mk	Finland	withdrawn	false			
+FRF	250	French Franc	2	F	France	withdrawn	false			
+GEK	268	Georgian Kuponi	0	GEK	Georgia	withdrawn	false			
+GHC	288	Ghanaian Cedi (old)	2	GH₵	Ghana	withdrawn	false			
+GHP	939	Ghanaian Cedi (transitional)	2	GH₵	Ghana	withdrawn	false			
+GNE	324	Guinean Syli	0	S	Guinea	withdrawn	false			
+GNS	324	Guinean Syli (alternative code)	0	S	Guinea	withdrawn	false			
+GQE	226	Equatorial Guinean Ekwele	0	E	Equatorial Guinea	withdrawn	false			
+GRD	300	Greek Drachma	0	Δρχ	Greece	withdrawn	false			
+GWE	624	Guinean Escudo	0	GWE	Guinea-Bissau	withdrawn	false			
+GWP	624	Guinea-Bissau Peso	2	PG	Guinea-Bissau	withdrawn	false			
+HRD	191	Croatian Dinar	0	HRD	Croatia	withdrawn	false			
+HRK	191	Croatian Kuna	2	kn	Croatia	withdrawn	false			
+IEP	372	Irish Pound	2	£	Ireland	withdrawn	false			
+ILP	376	Israeli Pound	0	ILP	Israel	withdrawn	false			
+ILR	376	Israeli Shekel (old)	2	IS	Israel	withdrawn	false			
+ISJ	352	Icelandic Króna (old)	2	kr	Iceland	withdrawn	false			
+ITL	380	Italian Lira	0	₤	Italy	withdrawn	false			
+LAJ	418	Lao Kip (old)	0	₭	Laos	withdrawn	false			
+LSM	426	Lesotho Loti (old)	0	L	Lesotho	withdrawn	false			
+LTL	440	Lithuanian Litas	2	Lt	Lithuania	withdrawn	false			
+LTT	440	Lithuanian Talonas	2	LTT	Lithuania	withdrawn	false			
+LUC	989	Luxembourg Convertible Franc	0	LUC	Luxembourg	withdrawn	false			
+LUF	442	Luxembourg Franc	2	F	Luxembourg	withdrawn	false			
+LUL	988	Luxembourg Financial Franc	0	LUL	Luxembourg	withdrawn	false			
+LVL	428	Latvian Lats	2	Ls	Latvia	withdrawn	false			
+LVR	428	Latvian Rublis	2	LVR	Latvia	withdrawn	false			
+MCF	250	Monégasque Franc	2	F	France	withdrawn	false			
+MGF	450	Malagasy Franc	0	FMG	Madagascar	withdrawn	false			
+MKN	807	Macedonian Denar (old)	0	MKN	North Macedonia	withdrawn	false			
+MLF	466	Malian Franc	0	MLF	Mali	withdrawn	false			
+MRO	478	Mauritanian Ouguiya (old)	2	UM	Mauritania	withdrawn	false			
+MTL	470	Maltese Lira	2	Lm	Malta	withdrawn	false			
+MTP	470	Maltese Pound	0	£M	Malta	withdrawn	false			
+MVQ	462	Maldivian Rupee	0	MRF	Maldives	withdrawn	false			
+MXN_OLD	484	Mexican Peso (pre-1993)	2	MXP	Mexico	withdrawn	false			
+MXP	484	Mexican Peso (pre-1993)	0	$	Mexico	withdrawn	false			
+MZE	508	Mozambican Escudo	2	MZE	Mozambique	withdrawn	false			
+MZM	508	Mozambican Metical (old)	2	MT	Mozambique	withdrawn	false			
+NIC	558	Nicaraguan Córdoba (1988)	2	C$	Nicaragua	withdrawn	false			
+NLG	528	Dutch Guilder	2	ƒ	Netherlands	withdrawn	false			
+PEH	604	Peruvian Sol de Oro	0	S/.	Peru	withdrawn	false			
+PEI	604	Peruvian Inti	0	I/.	Peru	withdrawn	false			
+PES	604	Peruvian Sol (alternative code)	2	S/.	Peru	withdrawn	false			
+PLZ	616	Polish Zloty (old)	2	PLZ	Poland	withdrawn	false			
+PTE	620	Portuguese Escudo	0	$	Portugal	withdrawn	false			
+RHD	716	Rhodesian Dollar	2	R$	Zimbabwe	withdrawn	false			
+ROK	642	Romanian Leu (old)	0	ROL	Romania	withdrawn	false			
+ROL	642	Romanian Leu (old)	2	ROL	Romania	withdrawn	false			
+RUR	810	Russian Ruble (old)	2	RUR	Russia	withdrawn	false			
+SDD	736	Sudanese Dinar	2	SDD	Sudan	withdrawn	false			
+SDP	736	Sudanese Pound (old)	0	SDP	Sudan	withdrawn	false			
+SIT	705	Slovenian Tolar	2	SIT	Slovenia	withdrawn	false			
+SKK	703	Slovak Koruna	2	Sk	Slovakia	withdrawn	false			
+SLL	694	Sierra Leonean Leone (old)	2	Le	Sierra Leone	withdrawn	false			
+SML	380	San Marinese Lira	0	₤	Italy	withdrawn	false			
+SRG	740	Surinamese Guilder	2	SRG	Suriname	withdrawn	false			
+STD	678	São Tomé and Príncipe Dobra (old)	2	Db	São Tomé and Príncipe	withdrawn	false			
+SUR	810	Soviet Union Ruble	0	SUR	Russia	withdrawn	false			
+TJR	762	Tajikistani Ruble	0	TJR	Tajikistan	withdrawn	false			
+TMM	795	Turkmenistani Manat (old)	2	m	Turkmenistan	withdrawn	false			
+TPE	626	Portuguese Timorese Escudo	0	$	East Timor	withdrawn	false			
+TRL	792	Turkish Lira (old)	0	TL	Turkey	withdrawn	false			
+UAK	804	Ukrainian Karbovanets	2	UAK	Ukraine	withdrawn	false			
+UGS	800	Ugandan Shilling (old)	0	UGS	Uganda	withdrawn	false			
+UGW	800	Ugandan Shilling (old, alternative)	0	UGW	Uganda	withdrawn	false			
+UYN	858	Uruguayan Peso (old)	2	UYN	Uruguay	withdrawn	false			
+UYP	858	Uruguayan New Peso	0	UYP	Uruguay	withdrawn	false			
+VAL	380	Vatican Lira	0	₤	Italy	withdrawn	false			
+VEB	862	Venezuelan Bolívar (old)	2	Bs	Venezuela	withdrawn	false			
+VEF	937	Venezuelan Bolívar Fuerte	2	Bs.F	Venezuela	withdrawn	false			
+VNC	704	Vietnamese Dong (old)	0	₫	Vietnam	withdrawn	false			
+XEU	954	European Currency Unit	0	ECU	European Union	withdrawn	false			
+XFO	955	Gold Franc	0	XFO	Bank for International Settlements	withdrawn	false			
+XFU	956	UIC Franc	0	XFU	International Union of Railways	withdrawn	false			
+XRE	957	RINET Funds Code	0	XRE	RINET	withdrawn	false			
+YDD	720	South Yemeni Dinar	0	YD	Yemen (formerly South Yemen)	withdrawn	false			
+YUD	890	Yugoslav Dinar (1966)	2	din.	Yugoslavia	withdrawn	false			
+YUG	890	Yugoslav January Dinar	2	din.	Yugoslavia	withdrawn	false			
+YUM	891	Yugoslav Novi Dinar	2	din.	Yugoslavia	withdrawn	false			
+YUN	890	Yugoslav Convertible Dinar	2	din.	Yugoslavia	withdrawn	false			
+YUO	890	Yugoslav October Dinar	2	din.	Yugoslavia	withdrawn	false			
+YUR	890	Yugoslav Reformed Dinar	2	din.	Yugoslavia	withdrawn	false			
+ZAL	991	South African Financial Rand	2	ZAL	South Africa	withdrawn	false			
+ZMK	894	Zambian Kwacha (1968)	2	ZK	Zambia	withdrawn	false			
+ZRN	180	Zairean New Zaire	2	NZ	Democratic Republic of the Congo	withdrawn	false			
+ZRZ	180	Zairean Zaire	2	Z	Democratic Republic of the Congo	withdrawn	false			
+ZWC	716	Rhodesian Dollar	2	R$	Zimbabwe	withdrawn	false			
+ZWD	716	Zimbabwean Dollar (1980)	2	Z$	Zimbabwe	withdrawn	false			
+ZWL	932	Zimbabwean Dollar (2009)	2	Z$	Zimbabwe	withdrawn	false			
+ZWN	942	Zimbabwean Dollar (2006)	2	Z$	Zimbabwe	withdrawn	false			
+ZWR	935	Zimbabwean Dollar (2008)	2	Z$	Zimbabwe	withdrawn	false			
