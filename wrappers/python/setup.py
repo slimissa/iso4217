@@ -27,6 +27,39 @@ from pathlib import Path
 from setuptools import setup
 
 
+
+# ---------------------------------------------------------------------------
+# Custom build_py — copy data files into the wheel
+# ---------------------------------------------------------------------------
+# setuptools does not ship non-Python files in a wheel for a py_modules
+# distribution. MANIFEST.in affects the sdist, not the wheel. This override
+# copies iso4217.json and schema.json next to the modules after the normal
+# build_py step, so a pip install from a wheel resolves them at runtime.
+
+from pathlib import Path as _Path
+from setuptools.command.build_py import build_py as _build_py
+
+
+class build_py(_build_py):
+    """Copy data files next to the modules in the wheel's build/lib."""
+
+    DATA_FILES = ("iso4217.json", "schema.json")
+
+    def run(self):
+        super().run()
+        src_dir = _Path(__file__).parent
+        dest_dir = _Path(self.build_lib)
+        for name in self.DATA_FILES:
+            src = src_dir / name
+            if not src.exists():
+                # A missing data file is a hard error — the wheel would be
+                # broken at runtime. Fail loudly.
+                raise RuntimeError(
+                    f"{name} not found at {src}; the wheel would be broken"
+                )
+            dest = dest_dir / name
+            self.copy_file(str(src), str(dest))
+
 HERE = Path(__file__).parent
 
 # The Python package version. This is independent of the registry data
@@ -39,6 +72,7 @@ LONG_DESCRIPTION = README_PATH.read_text(encoding="utf-8") if README_PATH.exists
 
 
 setup(
+    cmdclass={"build_py": build_py},
     # -- Identity ----------------------------------------------------------
     name="iso4217-registry",
     version=VERSION,
