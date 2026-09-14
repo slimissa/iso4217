@@ -23,6 +23,12 @@ Design principles
 - **Only updates existing entries.** Adding or removing coins requires a
   schema-checked decision (see CHANGELOG v1.4.0) — not something a refresh
   tool should decide unilaterally.
+- **Only fetches the top N by market cap (default 250).** Entries that have
+  dropped below top N won't be refreshed — the tool warns about them by name
+  but doesn't fetch their individual rank. In that case, update the rank
+  manually using CoinGecko's `/coins/{id}` endpoint, which returns the exact
+  current rank regardless of global position. Learned the hard way with USDP
+  (rank 700, well below the default fetch window).
 - **Idempotent-by-default.** `--check` mode exits 3 (not 0) if changes are
   needed, without writing. Useful for CI monitoring.
 

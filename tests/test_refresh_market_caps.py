@@ -824,8 +824,14 @@ class TestRefresh:
 
 class TestParseArgs:
     def test_defaults(self):
+        """
+        Default registry path must match the module's own constant, not a
+        hardcoded absolute path — the test has to pass on any machine
+        (developer laptop, CI runner, container).
+        """
+        from tools.refresh_market_caps import DEFAULT_REGISTRY_PATH
         args = parse_args([])
-        assert args.registry == Path("/home/slim/Documents/iso4217 registry/iso4217.json")
+        assert args.registry == DEFAULT_REGISTRY_PATH
         assert args.top_n == 250
         assert args.dry_run is False
         assert args.check is False

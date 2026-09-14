@@ -6,7 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.4.1] — 2026-09-14
 
+### Fixed
+- `tests/test_refresh_market_caps.py::TestParseArgs::test_defaults` hardcoded
+  the developer's absolute path to `iso4217.json`. It now compares against the
+  module's own `DEFAULT_REGISTRY_PATH` constant, so the test passes on any
+  machine — developer laptop, CI runner, or container. This was the sole cause
+  of the v1.4.0 CI failure.
+
+### Data
+- **USDP `market_cap_rank` corrected from 50 to 700.** CoinGecko's current
+  rank for Pax Dollar is 700 (below the tool's default `--top-n 250` fetch
+  window). The tool correctly warned that USDP wasn't in the response — it
+  wasn't delisted or renamed, just ranked lower than expected. The v1.4.0
+  CHANGELOG's "Top 10 stablecoins" phrasing was too strong for a coin that has
+  since dropped out of the top 250 globally; the registry documents
+  *significant* stablecoins, not exclusively top-10 ones.
+- USDP's `note` field now records the rank and the tool's fetch-window
+  limitation.
+
+### Docs
+- Documented the tool's `--top-n 250` default and its consequence: entries
+  below that rank won't be refreshed automatically, and need manual
+  reconciliation via CoinGecko's `/coins/{id}` endpoint. This was learned the
+  hard way with USDP.
+  
 ## [1.4.0] — 2026-09-14
 
 ### Added

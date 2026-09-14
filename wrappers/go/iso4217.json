@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.4.0",
+    "version": "1.4.1",
     "updated": "2026-09-14",
     "schema_version": "1.0.0",
     "description": "Canonical ISO 4217 currency registry. Active ISO currencies, withdrawn ISO currencies, and commonly-used non-ISO currencies maintained as separate arrays. This file is the single source of truth — all wrappers, bindings, and downstream databases derive from this file.",
@@ -5657,10 +5657,10 @@
         "type": "stablecoin",
         "entity": "Paxos Trust Company",
         "introduced": "2018-09-10",
-        "market_cap_rank": 50,
+        "market_cap_rank": 700,
         "pegged_to": "USD",
         "peg_mechanism": "Fiat-collateralized",
-        "note": "Not an ISO 4217 code. Regulated US dollar stablecoin issued by Paxos. VERIFY: rank before commit."
+        "note": "Not an ISO 4217 code. Regulated US dollar stablecoin issued by Paxos. Market cap rank as of 2026-09-14: 700 (below top 250, not fetched by tools/refresh_market_caps.py by default)."
       },
       {
         "code": "FRAX",
