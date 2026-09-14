@@ -844,6 +844,52 @@ def _build_parser() -> argparse.ArgumentParser:
 # Entry point
 # ---------------------------------------------------------------------------
 
+def _normalize_argv(argv: list[str]) -> list[str]:
+    """
+    Preprocess argv so both the roadmap's usage shapes work:
+
+      iso4217 --raw lookup USD minor_units
+      iso4217 --raw info active_currencies
+      iso4217 USD                       (bare-argument shorthand)
+      iso4217 lookup USD                (explicit)
+
+    The roadmap puts `--raw` at the top level, with the field name as the
+    trailing positional after the subcommand's own arguments. The parser
+    expects `--raw FIELD` after the subcommand. This function translates
+    between the two shapes.
+
+    Rules:
+      1. If argv starts with `--raw`, and the next token is a known
+         subcommand, rewrite as `<subcommand> <middle args> --raw <last arg>`.
+      2. Else if argv[0] is a non-flag token that is not a subcommand,
+         prepend `lookup`.
+      3. Otherwise leave argv alone.
+
+    Anything the translator can't make sense of is passed through unchanged
+    so argparse produces its own clear usage error.
+    """
+    if not argv:
+        return argv
+
+    # Rule 1 — top-level --raw prefix.
+    if argv[0] == "--raw":
+        if len(argv) < 3:
+            return argv  # too short to translate; let argparse complain
+        sub = argv[1]
+        if sub not in SUBCOMMANDS:
+            return argv  # not a subcommand; let argparse complain
+        middle = argv[2:-1]
+        field = argv[-1]
+        return [sub] + list(middle) + ["--raw", field]
+
+    # Rule 2 — bare-argument shorthand.
+    if not argv[0].startswith("-") and argv[0] not in SUBCOMMANDS:
+        return ["lookup"] + argv
+
+    # Rule 3 — nothing to do.
+    return argv
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """
     CLI entry point. Returns the process exit code.
@@ -853,13 +899,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     subcommand nor a flag, prepend 'lookup' so `iso4217 USD` works.
     """
     argv = list(sys.argv[1:] if argv is None else argv)
-
-    # Bare-argument shorthand. Any leading token that starts with '-' is a
-    # top-level flag (--version, --help, -h); argparse handles those. A token
-    # that is a known subcommand is left alone. Anything else becomes the
-    # first argument to `lookup`.
-    if argv and not argv[0].startswith("-") and argv[0] not in SUBCOMMANDS:
-        argv = ["lookup"] + argv
+    argv = _normalize_argv(argv)
 
     parser = _build_parser()
 
