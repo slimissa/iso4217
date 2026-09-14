@@ -1488,3 +1488,292 @@ class TestCrossCheckWithSQL:
         the SQL executes. The cross-check tests above depend on this
         having worked, so if it fails, this test names the real cause."""
         self._sql_rows()  # raises if executescript failed
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 gap closure — roadmap items not covered by the first pass
+#
+# Nine items from the roadmap's Phase 4.2 checklist:
+#   1. Undisclosed peg case (KWD-style)
+#   2. Bare carriage return inside a field
+#   3. Empty field rendered as unquoted empty
+#   4. Excel file with BOM stripped == iso4217.csv, byte for byte
+#   5. All numeric_code values are 3 chars, all digits
+#   6. All status values are exactly 'active' or 'withdrawn'
+#   7. All is_independent values are exactly 'true' or 'false'
+#   8. Non-ASCII coverage includes € and £
+#   9. Every CSV row compared field-by-field against its JSON source
+# ---------------------------------------------------------------------------
+
+
+class TestUndisclosedPeg:
+    """KWD-style peg: pegged_to is free text, peg_type is 'undisclosed',
+    peg_rate is absent. The roadmap names this as a distinct case from
+    single and basket pegs, and the first pass never exercised it."""
+
+    def test_undisclosed_peg_has_free_text_anchor(self):
+        row = _row_from_entry(
+            {
+                "code": "KWD",
+                "numeric": "414",
+                "name": "Kuwaiti dinar",
+                "minor_units": 3,
+                "is_independent": False,
+                "pegged_to": "Currency basket",
+                "peg_type": "undisclosed",
+            },
+            "active",
+        )
+        assert row.pegged_to == "Currency basket"
+        assert row.peg_type == "undisclosed"
+        assert row.peg_rate == ""
+        assert row.is_independent == "false"
+
+    def test_undisclosed_peg_round_trips(self):
+        reg = _wrap_rows(
+            _build_row(
+                code="KWD",
+                numeric_code="414",
+                name="Kuwaiti dinar",
+                minor_units="3",
+                symbol="\u062f.\u0643",
+                entity="Kuwait",
+                is_independent="false",
+                pegged_to="Currency basket",
+                peg_type="undisclosed",
+                peg_rate="",
+            )
+        )
+        for dialect in DIALECT_FILES:
+            rows = _parse(RENDERERS[dialect](reg), dialect)
+            assert rows[1][8] == "Currency basket"
+            assert rows[1][9] == "undisclosed"
+            assert rows[1][10] == ""
+
+
+class TestQuotingGaps:
+    """Quoting cases the first pass didn't exercise: bare CR, empty-field
+    rendering, and the additional non-ASCII symbols the roadmap names."""
+
+    def test_carriage_return_field_is_quoted(self):
+        """A bare \\r inside a field must be quoted, same as \\n."""
+        content = render_rfc(_wrap_rows(_build_row(name="Line1\rLine2")))
+        assert '"' in content, "CR field was not quoted"
+        rows = _parse(content, "rfc")
+        assert rows[1][2] == "Line1\rLine2"
+
+    def test_carriage_return_round_trips_in_all_dialects(self):
+        reg = _wrap_rows(_build_row(name="A\rB"))
+        for dialect in DIALECT_FILES:
+            rows = _parse(RENDERERS[dialect](reg), dialect)
+            assert rows[1][2] == "A\rB", f"{dialect} failed to round-trip CR"
+
+    def test_empty_field_renders_unquoted_empty(self):
+        """An empty string is a zero-length field between two delimiters.
+        It must not be written as a quoted empty string (\\"\\") — that
+        would confuse consumers and inflate diffs."""
+        content = render_rfc(_wrap_rows(_build_row(symbol="", entity="")))
+        data_line = content.split("\n")[1]
+        assert '""' not in data_line, "empty field was quoted"
+        rows = _parse(content, "rfc")
+        assert rows[1][4] == ""
+        assert rows[1][5] == ""
+
+    def test_every_empty_optional_field_unquoted(self):
+        """Sweep all four optional text columns to confirm none of them
+        produces a quoted empty."""
+        reg = _wrap_rows(
+            _build_row(
+                symbol="", entity="", pegged_to="", peg_type="", peg_rate=""
+            )
+        )
+        for dialect in DIALECT_FILES:
+            content = RENDERERS[dialect](reg)
+            for line in content.split("\n"):
+                if line and not line.startswith("code"):
+                    assert '""' not in line, f"{dialect}: quoted empty field"
+
+    def test_euro_symbol_round_trips(self):
+        content = render_rfc(
+            _wrap_rows(_build_row(symbol="\u20ac", entity="Eurozone"))
+        )
+        rows = _parse(content, "rfc")
+        assert rows[1][4] == "\u20ac"
+
+    def test_pound_symbol_round_trips(self):
+        content = render_rfc(
+            _wrap_rows(_build_row(symbol="\u00a3", entity="United Kingdom"))
+        )
+        rows = _parse(content, "rfc")
+        assert rows[1][4] == "\u00a3"
+
+    def test_all_non_ascii_symbols_round_trip_in_every_dialect(self):
+        """The roadmap names four: \u00a5, \u20ac, \u062f.\u0643, \u00a3.
+        Plus \u20bf and \u039e from the crypto entries in the real registry."""
+        symbols = ["\u00a5", "\u20ac", "\u00a3", "\u062f.\u0643", "\u20bf", "\u039e"]
+        for symbol in symbols:
+            reg = _wrap_rows(_build_row(symbol=symbol))
+            for dialect in DIALECT_FILES:
+                rows = _parse(RENDERERS[dialect](reg), dialect)
+                assert rows[1][4] == symbol, (
+                    f"{dialect}: {symbol!r} -> {rows[1][4]!r}"
+                )
+
+
+class TestRendererExcelGaps:
+    """The roadmap: 'Stripping the BOM yields byte-identical output to
+    iso4217.csv'. This class proves that, both on fixtures and on the
+    committed files."""
+
+    def test_bom_stripped_matches_rfc(self, minimal_registry):
+        excel = render_excel(minimal_registry)
+        rfc = render_rfc(minimal_registry)
+        assert excel[1:] == rfc
+
+    def test_real_excel_file_stripped_matches_real_rfc_file(self):
+        excel_path = PROJECT_ROOT / "iso4217.excel.csv"
+        rfc_path = PROJECT_ROOT / "iso4217.csv"
+        if not excel_path.exists() or not rfc_path.exists():
+            pytest.skip("committed CSV files not present")
+        excel_bytes = excel_path.read_bytes()
+        rfc_bytes = rfc_path.read_bytes()
+        assert excel_bytes[:3] == b"\xef\xbb\xbf"
+        assert excel_bytes[3:] == rfc_bytes, (
+            "iso4217.excel.csv without its BOM differs from iso4217.csv"
+        )
+
+
+class TestRealProjectDataIntegrity:
+    """Full-file scans the first pass only spot-checked. Every row in
+    the committed iso4217.csv is now validated for the invariants the
+    schema promises."""
+
+    @staticmethod
+    def _all_rows() -> list[dict]:
+        path = PROJECT_ROOT / "iso4217.csv"
+        if not path.exists():
+            pytest.skip("iso4217.csv not present")
+        with open(path, encoding="utf-8", newline="") as f:
+            return list(csv_module.DictReader(f))
+
+    def test_all_numeric_codes_are_three_digits(self):
+        for r in self._all_rows():
+            assert len(r["numeric_code"]) == 3, r["code"]
+            assert r["numeric_code"].isdigit(), r["code"]
+
+    def test_all_codes_are_uppercase_alnum_underscore(self):
+        for r in self._all_rows():
+            for ch in r["code"]:
+                assert ch.isupper() or ch.isdigit() or ch == "_", (
+                    r["code"], ch
+                )
+
+    def test_all_statuses_are_active_or_withdrawn(self):
+        for r in self._all_rows():
+            assert r["status"] in ("active", "withdrawn"), r["code"]
+
+    def test_all_is_independent_values_are_lowercase_boolean(self):
+        for r in self._all_rows():
+            assert r["is_independent"] in ("true", "false"), r["code"]
+
+    def test_all_minor_units_are_in_range(self):
+        for r in self._all_rows():
+            mu = int(r["minor_units"])
+            assert 0 <= mu <= 18, (r["code"], mu)
+
+    def test_all_peg_types_are_known_or_empty(self):
+        for r in self._all_rows():
+            assert r["peg_type"] in (
+                "",
+                "single",
+                "basket",
+                "undisclosed",
+            ), r["code"]
+
+    def test_pegged_rows_have_nonempty_pegged_to(self):
+        for r in self._all_rows():
+            if r["peg_type"]:
+                assert r["pegged_to"], r["code"]
+
+    def test_single_peg_rows_have_numeric_rate(self):
+        for r in self._all_rows():
+            if r["peg_type"] == "single":
+                assert r["peg_rate"], r["code"]
+                float(r["peg_rate"])  # must parse
+
+    def test_basket_and_undisclosed_pegs_have_no_rate(self):
+        for r in self._all_rows():
+            if r["peg_type"] in ("basket", "undisclosed"):
+                assert r["peg_rate"] == "", r["code"]
+
+    def test_is_independent_false_when_pegged(self):
+        """A pegged currency must never claim independence."""
+        for r in self._all_rows():
+            if r["peg_type"] in ("single", "basket", "undisclosed"):
+                assert r["is_independent"] == "false", r["code"]
+
+
+class TestRealProjectFullComparison:
+    """The roadmap: 'Read iso4217.csv with the standard csv.reader,
+    reconstruct dicts, compare ... field by field, for every row.'
+    The first pass only did this for USD."""
+
+    def test_every_row_matches_json_source_field_by_field(self):
+        registry = json.loads(
+            (PROJECT_ROOT / "iso4217.json").read_text(encoding="utf-8")
+        )
+
+        source: dict[str, tuple[dict, str]] = {}
+        for status_key in ("active", "withdrawn"):
+            for c in registry["currencies"][status_key]:
+                source[c["code"]] = (c, status_key)
+
+        with open(
+            PROJECT_ROOT / "iso4217.csv", encoding="utf-8", newline=""
+        ) as f:
+            csv_rows = list(csv_module.DictReader(f))
+
+        assert len(csv_rows) == len(source), (
+            f"{len(csv_rows)} CSV rows vs {len(source)} JSON entries"
+        )
+
+        for r in csv_rows:
+            code = r["code"]
+            assert code in source, f"{code} in CSV but not JSON"
+            src, expected_status = source[code]
+
+            assert r["numeric_code"] == src["numeric"], code
+            assert r["name"] == src["name"], code
+            assert r["minor_units"] == str(src["minor_units"]), code
+            assert r["symbol"] == src.get("symbol", ""), code
+            assert r["entity"] == src.get("entity", ""), code
+            assert r["status"] == expected_status, code
+
+            src_ind = src.get("is_independent")
+            if src_ind is None:
+                expected_ind = "false"
+            else:
+                expected_ind = "true" if src_ind else "false"
+            assert r["is_independent"] == expected_ind, code
+
+            assert r["pegged_to"] == (src.get("pegged_to") or ""), code
+            assert r["peg_type"] == (src.get("peg_type") or ""), code
+
+            src_rate = src.get("peg_rate")
+            expected_rate = "" if src_rate is None else repr(float(src_rate))
+            assert r["peg_rate"] == expected_rate, code
+
+    def test_no_json_entries_missing_from_csv(self):
+        registry = json.loads(
+            (PROJECT_ROOT / "iso4217.json").read_text(encoding="utf-8")
+        )
+        all_json_codes = set()
+        for status_key in ("active", "withdrawn"):
+            for c in registry["currencies"][status_key]:
+                all_json_codes.add(c["code"])
+        with open(
+            PROJECT_ROOT / "iso4217.csv", encoding="utf-8", newline=""
+        ) as f:
+            csv_codes = {r["code"] for r in csv_module.DictReader(f)}
+        missing = all_json_codes - csv_codes
+        assert not missing, f"codes in JSON but not CSV: {sorted(missing)}"
