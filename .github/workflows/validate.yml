@@ -38,9 +38,14 @@ on:
       - 'iso4217.postgresql.sql'
       - 'iso4217.mysql.sql'
       - 'iso4217.sqlite.sql'
+      - 'iso4217.csv'
+      - 'iso4217.excel.csv'
+      - 'iso4217.european.csv'
+      - 'iso4217.tsv'
       - 'tools/validate.py'
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
+      - 'tools/export_csv.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -52,6 +57,7 @@ on:
       - 'wrappers/**/package.json'
       - 'tests/**'
       - 'tests/test_export_sql.py'
+      - 'tests/test_export_csv.py'
       - '.github/workflows/validate.yml'
   pull_request:
     branches: [main]
@@ -62,9 +68,14 @@ on:
       - 'iso4217.postgresql.sql'
       - 'iso4217.mysql.sql'
       - 'iso4217.sqlite.sql'
+      - 'iso4217.csv'
+      - 'iso4217.excel.csv'
+      - 'iso4217.european.csv'
+      - 'iso4217.tsv'
       - 'tools/validate.py'
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
+      - 'tools/export_csv.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -76,6 +87,7 @@ on:
       - 'wrappers/**/package.json'
       - 'tests/**'
       - 'tests/test_export_sql.py'
+      - 'tests/test_export_csv.py'
       - '.github/workflows/validate.yml'
   workflow_dispatch:
 
@@ -139,6 +151,39 @@ jobs:
             exit 1
           }
 
+  # --- Job 2b: CSV export drift check -----------------------------------
+  # Regenerates the four CSV/TSV files in memory and compares against the
+  # committed copies. Runs in parallel with check-sql-export. Both gate
+  # validate-json and validate-wrappers, so a stale flat-file artifact
+  # fails fast before the slower wrapper matrix starts.
+  check-csv-export:
+    name: Check CSV exports match registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check CSV files are in sync
+        run: |
+          python3 tools/export_csv.py --check || {
+            code=$?
+            if [ "$code" = "1" ]; then
+              echo "::error::CSV/TSV files are stale. Run 'python3 tools/export_csv.py' and commit the result."
+            elif [ "$code" = "3" ]; then
+              echo "::error::One or more CSV/TSV files are missing. Run 'python3 tools/export_csv.py' and commit the result."
+            else
+              echo "::error::export_csv.py --check failed with exit code $code"
+            fi
+            exit 1
+          }
+
   # --- Job 3: Schema/data validation ------------------------------------
   # Runs schema/business-logic validation against iso4217.json and the
   # full pytest suite.
@@ -146,7 +191,7 @@ jobs:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [check-sql-export]
+    needs: [check-sql-export, check-csv-export]
 
     steps:
       - name: Checkout
@@ -174,7 +219,7 @@ jobs:
     name: Validate ${{ matrix.language }} wrapper
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: [validate-json, check-wrapper-sync, check-sql-export]
+    needs: [validate-json, check-wrapper-sync, check-sql-export, check-csv-export]
   
     strategy:
       fail-fast: false  # Run all languages even if one fails
