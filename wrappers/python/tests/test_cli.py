@@ -558,7 +558,12 @@ class TestInfo:
         parsed = json.loads(out)
         summary = registry.summary()
         for key in summary:
-            assert parsed[key] == summary[key], key
+            if key == "minor_units_distribution":
+                # JSON object keys are always strings; convert back to int
+                # so the comparison matches summary()'s int-keyed dict.
+                assert {int(k): v for k, v in parsed[key].items()} == summary[key]
+            else:
+                assert parsed[key] == summary[key], key
 
     def test_raw_field(self, run_cli, registry):
         code, out, _ = run_cli(["--raw", "info", "active_currencies"])
@@ -815,7 +820,7 @@ class TestColor:
     def test_machine_modes_have_no_color_even_when_forced(
         self, run_cli, force_color, mode
     ):
-        _, out, _ = run_cli(["list", mode])
+        _, out, _ = run_cli(["list", *mode])
         assert not ANSI_RE.search(out)
 
     def test_raw_has_no_color_even_when_forced(self, run_cli, force_color):
@@ -1040,16 +1045,20 @@ class TestCrossCheckWithExports:
         assert actual == expected
 
     def test_cli_tsv_all_iso_rows_match_export(self, run_cli):
-        """--all includes non-ISO, which the export does not. Compare only
-        the ISO subset by filtering the CLI's output on status."""
+        """--all includes non-ISO, which the export does not. Filter the
+        CLI's output by code membership in the export — not by status —
+        because the CLI reports non-ISO currencies with status 'active'
+        (they are not in the withdrawn map), which would otherwise leak
+        rows like ADA and BTC into the ISO comparison."""
         _, out, _ = run_cli(["list", "--all", "--tsv"])
         _, export_rows = self._parse_tsv(self.TSV_PATH)
+        export_codes = {r[0] for r in export_rows}
         actual = list(csv.reader(io.StringIO(out), delimiter="\t"))[1:]
-        # Filter CLI rows whose status is a value in the export
-        actual_iso = [r for r in actual if r[6] in ("active", "withdrawn")]
-        # Sort both by (status_group, code) to compare independent of order
+        actual_iso = [r for r in actual if r[0] in export_codes]
+
         def key(r):
             return (0 if r[6] == "active" else 1, r[0])
+
         assert sorted(actual_iso, key=key) == sorted(export_rows, key=key)
 
 
