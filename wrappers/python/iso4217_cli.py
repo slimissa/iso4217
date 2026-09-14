@@ -759,6 +759,26 @@ _HANDLERS: dict[str, Callable[[argparse.Namespace, CurrencyRegistry], int]] = {
 # Argument parser
 # ---------------------------------------------------------------------------
 
+def _add_epilog(p: argparse.ArgumentParser, *, example: str, exit_codes: bool = True) -> None:
+    """
+    Attach a standard epilog to a subparser: one worked example, and the
+    shared four-line exit-code table. Keeping this in one place means the
+    table is correct everywhere or wrong everywhere — never inconsistent.
+    """
+    lines = ["", "Example:", f"  {example}"]
+    if exit_codes:
+        lines += [
+            "",
+            "Exit codes:",
+            "  0  success",
+            "  1  code not found in the registry",
+            "  2  usage error (bad flag, missing argument)",
+            "  3  registry file missing or invalid",
+        ]
+    p.epilog = "\n".join(lines)
+    p.formatter_class = argparse.RawDescriptionHelpFormatter
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="iso4217",
@@ -768,6 +788,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--version",
         action="store_true",
         help="print the registry version and exit",
+    )
+    parser.add_argument(
+        "--registry",
+        metavar="PATH",
+        default=None,
+        help="path to iso4217.json (test-only; do not use in production)",
     )
 
     sub = parser.add_subparsers(dest="cmd", metavar="COMMAND")
@@ -781,6 +807,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="currency code(s); use '-' to read from stdin, one per line",
     )
     _add_output_flags(p)
+    _add_epilog(p, example="iso4217 lookup USD")
 
     # list
     p = sub.add_parser("list", help="filter across the registry")
@@ -808,6 +835,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--long", action="store_true", help="add numeric_code, symbol, entity")
     p.add_argument("--wide", action="store_true", help="all 11 columns")
     _add_output_flags(p)
+    _add_epilog(p, example="iso4217 list --pegged-to USD --raw code")
 
     # minor / major / format — same shape
     for name, helptext in (
@@ -818,15 +846,18 @@ def _build_parser() -> argparse.ArgumentParser:
         p = sub.add_parser(name, help=helptext)
         p.add_argument("amount", metavar="AMOUNT")
         p.add_argument("code", metavar="CODE")
+        _add_epilog(p, example=f"iso4217 {name} 100 USD", exit_codes=True)
 
     # peg
     p = sub.add_parser("peg", help="peg details only")
     p.add_argument("code", metavar="CODE", help="currency code, or '-' to read one from stdin")
     _add_output_flags(p)
+    _add_epilog(p, example="iso4217 peg AED")
 
     # info
     p = sub.add_parser("info", help="registry metadata")
     _add_output_flags(p)
+    _add_epilog(p, example="iso4217 info --json")
 
     # validate
     p = sub.add_parser("validate", help="exit 0 if all codes exist, 1 otherwise")
@@ -836,6 +867,7 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="CODE",
         help="currency code(s); use '-' to read from stdin, one per line",
     )
+    _add_epilog(p, example="iso4217 validate USD EUR")
 
     return parser
 
@@ -871,23 +903,32 @@ def _normalize_argv(argv: list[str]) -> list[str]:
     if not argv:
         return argv
 
+    # A leading --registry PATH is a global flag. Strip it here so the
+    # rewrites below can inspect argv[0]; prepend it back at every return.
+    prefix: list[str] = []
+    if argv[0] == "--registry" and len(argv) >= 2:
+        prefix = argv[:2]
+        argv = argv[2:]
+        if not argv:
+            return prefix
+
     # Rule 1 — top-level --raw prefix.
     if argv[0] == "--raw":
         if len(argv) < 3:
-            return argv  # too short to translate; let argparse complain
+            return prefix + argv  # too short; let argparse complain
         sub = argv[1]
         if sub not in SUBCOMMANDS:
-            return argv  # not a subcommand; let argparse complain
+            return prefix + argv  # not a subcommand; let argparse complain
         middle = argv[2:-1]
         field = argv[-1]
-        return [sub] + list(middle) + ["--raw", field]
+        return prefix + [sub] + list(middle) + ["--raw", field]
 
     # Rule 2 — bare-argument shorthand.
     if not argv[0].startswith("-") and argv[0] not in SUBCOMMANDS:
-        return ["lookup"] + argv
+        return prefix + ["lookup"] + argv
 
     # Rule 3 — nothing to do.
-    return argv
+    return prefix + argv
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -919,7 +960,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # --version short-circuits before any subcommand runs.
     if getattr(args, "version", False):
         try:
-            registry = _load_registry(None)
+            registry = _load_registry(getattr(args, "registry", None))
         except RegistryError as e:
             print(f"error: {e}", file=sys.stderr)
             return EXIT_DATA
@@ -932,7 +973,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         return EXIT_USAGE
 
     try:
-        registry = _load_registry(None)
+        registry = _load_registry(getattr(args, "registry", None))
     except RegistryError as e:
         print(f"error: {e}", file=sys.stderr)
         return EXIT_DATA
