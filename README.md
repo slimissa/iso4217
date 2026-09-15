@@ -353,6 +353,8 @@ The registry is validated through a multi-layer defense:
 | **Coverage** | Active count ≥ 150 (MIN_ACTIVE_CURRENCIES) — enforced without flag | `tools/validate.py` |
 | **Export drift** | SQL, CSV, and CLI outputs match the current registry | CI jobs `check-sql-export`, `check-csv-export`, `check-cli` |
 
+For the full provenance story — where each field comes from, how often it is refreshed, what the amendment monitor actually checks, and what the registry's known limitations are — see [docs/PROVENANCE.md](./docs/PROVENANCE.md).
+
 ```bash
 # Run all validations
 python3 tools/validate.py
