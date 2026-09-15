@@ -647,3 +647,61 @@ class TestCountries:
 if __name__ == "__main__":
     import pytest
     sys.exit(pytest.main([__file__, "-v"]))
+
+# ---------------------------------------------------------------------------
+# v1.5.1 — count consistency, code-length invariants
+# ---------------------------------------------------------------------------
+
+class TestV151Counts:
+    """Count guards tied to README claims. If a count changes, update both
+    the registry and the README description that references the count."""
+
+    def test_crypto_count_matches_readme(self):
+        r = _registry()
+        assert len(r["non_iso"]["cryptocurrencies"]) == 7, (
+            "README says 'BTC, ETH, and five others'. "
+            "Update both if the count changes."
+        )
+
+    def test_stablecoin_count_matches_readme(self):
+        r = _registry()
+        assert len(r["non_iso"]["stablecoins"]) == 6, (
+            "README says 'USDT, USDC, DAI, and three others'. "
+            "Update both if the count changes."
+        )
+
+
+class TestV151CodeLengths:
+    """Code-length invariants. The active layer is ISO-pure: exactly 3
+    characters. The withdrawn layer permits synthetic identifiers of the
+    form <STEM>_<OLD>, per docs/decisions/withdrawn-codes.md."""
+
+    def test_all_active_codes_are_3_chars(self):
+        r = _registry()
+        for c in r["currencies"]["active"]:
+            assert len(c["code"]) == 3, (
+                f"{c['code']} is {len(c['code'])} chars, expected 3. "
+                "Active ISO 4217 codes are always 3 letters."
+            )
+
+    def test_withdrawn_codes_match_convention(self):
+        """Every withdrawn code is either a 3-char ISO code or a
+        <STEM>_<SUFFIX> synthetic identifier with a 3-char uppercase stem."""
+        r = _registry()
+        for c in r["currencies"]["withdrawn"]:
+            code = c["code"]
+            if len(code) == 3:
+                assert code.isalpha() and code.isupper(), (
+                    f"{code} is 3 chars but not 3 uppercase letters"
+                )
+                continue
+            # Synthetic identifier
+            assert "_" in code, (
+                f"{code} is {len(code)} chars with no '_' separator. "
+                "See docs/decisions/withdrawn-codes.md."
+            )
+            stem, _, suffix = code.partition("_")
+            assert len(stem) == 3 and stem.isupper() and stem.isalpha(), (
+                f"{code} has malformed stem '{stem}'; expected 3 uppercase letters"
+            )
+            assert suffix, f"{code} has an empty suffix"

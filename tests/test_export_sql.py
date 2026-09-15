@@ -1068,3 +1068,30 @@ class TestRealProject:
     def test_ansi_file_has_mxn_old(self):
         sql = (PROJECT_ROOT / "iso4217.sql").read_text(encoding="utf-8")
         assert "'MXN_OLD'" in sql
+
+# ---------------------------------------------------------------------------
+# v1.5.1 — JSON field name -> SQL column name mapping
+# ---------------------------------------------------------------------------
+
+def test_numeric_maps_to_numeric_code(minimal_registry):
+    """The JSON field `numeric` becomes the SQL column `numeric_code`.
+
+    The rename exists because `numeric` is a reserved word in ANSI SQL.
+    README documents the mapping under "What's in a currency entry".
+    This test codifies that contract.
+    """
+    sql = render_ansi(minimal_registry)
+    for row in minimal_registry.rows:
+        assert f"'{row.numeric_code}'" in sql, (
+            f"row {row.code}: numeric_code {row.numeric_code!r} "
+            "not found in rendered SQL"
+        )
+
+
+def test_numeric_not_used_as_column_name(minimal_registry):
+    """Regression guard: the SQL column list must never use 'numeric'
+    as an identifier, because it would require quoting on every dialect."""
+    sql = render_ansi(minimal_registry)
+    # Column list appears in every INSERT
+    assert "(code, numeric_code, name, minor_units, symbol, entity, status)" in sql
+    assert "(code, numeric, name," not in sql
