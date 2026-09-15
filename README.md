@@ -297,6 +297,8 @@ Every active currency includes:
 
 Withdrawn currencies include withdrawal dates, replacement codes, and official conversion rates — including all Eurozone irrevocable fixing rates.
 
+**Withdrawn code convention.** ISO 4217 assigns three-letter codes. When a withdrawal chain produces more than one entry competing for the same code stem, the registry uses a synthetic identifier of the form `<STEM>_<OLD>` — for example, `MXN_OLD` disambiguates the pre-1993 Mexican peso from the active `MXN`. Consumers must treat `code` as an opaque string of length 3–7 and declare any SQL column that references it as `VARCHAR(7)`, not `CHAR(3)`. The full rationale is in [docs/decisions/withdrawn-codes.md](./docs/decisions/withdrawn-codes.md).
+
 ---
 
 ## Wrappers
