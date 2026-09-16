@@ -299,7 +299,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install jsonschema pytest
+        run: pip install jsonschema pytest pyarrow --quiet
 
       - name: Validate registry
         run: python3 tools/validate.py
