@@ -24,6 +24,7 @@ Every quant library, trading system, payment processor, and fintech app maintain
 - **Database teams** get a ready-made seed file — one command, no JSON parsing.
 - **Analysts, engineers, and researchers** each get a zero-friction entry point — no JSON parser, no driver, no setup.
 - **Shell users, CI pipelines, and scripts** get the same registry with one command — no Python, no CSV, no JSON, no jq.
+- **Analytics teams** get a typed, columnar file that every dataframe library and SQL engine reads natively — no casting, no null sentinels.
 
 The registry is language-agnostic by design. The JSON is the contract. The SQL, CSV, and CLI exports are three ways to consume it without writing a parser.
 
@@ -163,6 +164,47 @@ for result in rdr.records() { /* ... */ }
 **Eleven columns** — SQL's seven plus four peg columns: `is_independent`, `pegged_to`, `peg_type`, `peg_rate`. SQL stays minimal because it's for foreign keys; CSV earns the peg metadata because it's for human analysis. The first seven column names are identical to the SQL export's, so joining the two is a straight comparison on `code`.
 
 **No comment header.** The four files start with the column-name row — a leading comment block would break `pandas.read_csv` without `skiprows` and violate RFC 4180. Version matching is derived from `meta.updated` in [`iso4217.json`](./iso4217.json), not from anything inside the CSV.
+
+### Direct download (Parquet)
+
+One Parquet file, columnar, typed, compressed. The analytics format.
+
+| File | Consumer |
+|------|----------|
+| [`iso4217.parquet`](./iso4217.parquet) | pandas, Polars, DuckDB, Spark, every warehouse loader |
+
+```python
+# Python - pandas
+import pandas as pd
+df = pd.read_parquet('iso4217.parquet')
+```
+
+```python
+# Python - DuckDB
+import duckdb
+duckdb.query("SELECT * FROM 'iso4217.parquet' WHERE is_independent")
+```
+
+```python
+# Python - Polars
+import polars as pl
+df = pl.read_parquet('iso4217.parquet')
+```
+
+```scala
+// Spark
+val df = spark.read.parquet("iso4217.parquet")
+```
+
+**Three differences from the CSV export.** The column names are identical, but three types differ because Parquet has a type system that CSV does not:
+
+- **`minor_units` is a native integer** (`int8`), not the string `"2"`. A query like `WHERE minor_units = 3` works without casting.
+- **`is_independent` is a native boolean**, not the strings `'true'`/`'false'`. A filter like `WHERE is_independent` works directly.
+- **`pegged_to`, `peg_type`, `peg_rate` use `null`** for "not applicable", not empty strings. `WHERE pegged_to IS NOT NULL` correctly returns only pegged currencies.
+
+**Footer metadata.** The Parquet file carries three keys in its footer: `iso4217.version`, `iso4217.updated`, and `iso4217.amendment`. A consumer who receives only the `.parquet` file can tell which registry version produced it without opening the JSON.
+
+The full schema rationale is in [`docs/decisions/parquet-schema.md`](./docs/decisions/parquet-schema.md).
 
 ### Command-line interface
 

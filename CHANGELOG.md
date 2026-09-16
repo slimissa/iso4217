@@ -6,6 +6,92 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.5.2] — 2026-09-16
+
+A patch release that adds a fourth consumption format and formalizes the
+registry's data-layering discipline. No data changes — `iso4217.json` is
+byte-identical to v1.5.1 except for `meta.version` and `meta.updated`.
+
+### Added
+
+#### Parquet export
+
+- **`iso4217.parquet`** — a single typed, columnar, snappy-compressed
+  Parquet file. 302 rows, 11 columns, ~15 KB. The eleven columns match
+  the CSV export's names and order; the types differ where Parquet's
+  type system allows it.
+
+- **`tools/export_parquet.py`** — the generator. Same structure as
+  `export_sql.py` and `export_csv.py`: `--check` mode, atomic writes,
+  exit codes 0/1/2/3. One documented divergence: `--check` compares
+  *logical content*, not bytes, because Parquet permits byte-different
+  files with identical content.
+
+- **`tests/test_export_parquet.py`** — 143 tests. Covers the schema,
+  native types (`int8`, `bool`, `float64`), null semantics, metadata,
+  determinism, sort order, the tampered-value / tampered-type /
+  tampered-metadata failure modes of `--check`, and cross-checks
+  against the CSV and SQL exports.
+
+- **`docs/decisions/parquet-schema.md`** — ADR recording the schema
+  decision, the three type differences from CSV, the null policy, the
+  metadata contract, and the alternatives considered (Avro, Iceberg,
+  no-export, CSV-compatible types).
+
+#### Data layering
+
+- **`docs/LAYERS.md`** — formal documentation of the three-layer model
+  the registry follows: RAW (`iso4217.json`), CURATED (SQL, CSV, TSV,
+  Parquet exports; wrapper copies; the CLI), and AGGREGATED (not yet
+  implemented). States the rule — *a layer may only assume what the
+  layer below guarantees* — and maps every artifact in the repository
+  to its layer.
+
+### Changed
+
+- **README** gains a `Direct download (Parquet)` subsection documenting
+  the three type differences from CSV and the footer metadata contract,
+  plus a new "Why?" bullet for analytics teams and an updated Project
+  Structure tree.
+
+- **CONTRIBUTING**'s "after editing `iso4217.json`" step now regenerates
+  the Parquet export alongside SQL, CSV, and the wrapper copies. The
+  full regeneration sequence is four commands, not three.
+
+### Fixed
+
+- **`validate-json` CI job now installs pyarrow.** The parquet test file
+  imports pyarrow at module level; `validate-json` runs the full test
+  suite and did not have pyarrow in its install step, so collection
+  failed. This was the sole cause of the failure on commits `bd54a16`
+  through `3ba251a`.
+
+### Tests
+
+- Parquet export test suite: **143 tests** (new)
+- Full repository: **917 tests passing** (up from 774 at v1.5.1)
+
+### Verified
+
+- `tools/export_parquet.py --check` exits 0 against the committed file.
+- `pandas.read_parquet('iso4217.parquet')` returns a DataFrame of shape
+  `(302, 11)` with native dtypes: `is_independent` is `bool`,
+  `minor_units` is `int8`, `pegged_to` has 256 nulls, `peg_rate` has
+  258 nulls (256 + MAD + KWD).
+- DuckDB reads the file natively and evaluates
+  `WHERE pegged_to IS NOT NULL` correctly — 46 pegged currencies.
+- CI has a new `check-parquet-export` gate; the pipeline now has six
+  top-level jobs plus the four-language wrapper matrix.
+
+### Known limitations
+
+The `agg` keyword in the pyarrow writer is not used; default row-group
+and compression settings are taken as-is. At 302 rows this is correct —
+multiple row groups are a scale optimization the file will never need.
+If the registry grows past 100,000 rows, revisit.
+
+---
+
 ## [1.5.1] — 2026-09-15
 
 A patch release focused on documentation accuracy and verification
