@@ -431,6 +431,7 @@ iso4217/
 ├── iso4217.excel.csv         # CSV export — Excel-compatible (UTF-8 BOM)
 ├── iso4217.european.csv      # CSV export — semicolon-delimited
 ├── iso4217.tsv               # TSV export — tab-separated
+├── iso4217.parquet           # Parquet export — typed, columnar, snappy-compressed
 │
 ├── wrappers/
 │   ├── python/               # pip install iso4217-registry
