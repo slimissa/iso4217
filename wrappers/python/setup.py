@@ -65,7 +65,7 @@ HERE = Path(__file__).parent
 # The Python package version. This is independent of the registry data
 # version inside iso4217.json (meta.version). 1.1.0 is the release that
 # adds the CLI; 1.0.0 shipped only the wrapper.
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 
 README_PATH = HERE / "README.md"
 LONG_DESCRIPTION = README_PATH.read_text(encoding="utf-8") if README_PATH.exists() else ""
