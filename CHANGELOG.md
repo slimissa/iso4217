@@ -6,6 +6,154 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.5.1] — 2026-09-15
+
+A patch release focused on documentation accuracy and verification
+completeness. No data changes, no schema changes, no wrapper API
+changes — the JSON, the SQL exports, and the CSV/TSV exports are
+byte-identical to v1.5.0 except for the version string in headers.
+
+Triggered by an external review of the v1.5.0 README that found nine
+issues — five documentation gaps, three design questions, and one
+cross-repo inconsistency. The five that were in scope for a patch are
+addressed here; the rest are deferred to v1.6.0 and tracked in
+`docs/decisions/v1.6.0-candidates.md`.
+
+### Added
+
+#### Documentation
+
+- **`docs/PROVENANCE.md`** — sources by category, refresh cadence,
+  what `tools/check_amendments.py` actually checks (detection only, not
+  ingestion), how Wikipedia is used (secondary only, never sole source),
+  a five-step audit procedure for any currency code, and five explicit
+  known gaps. Answers the "where does this data come from?" question
+  institutional readers ask before adopting.
+
+- **`docs/decisions/withdrawn-codes.md`** — an ADR for the
+  `<STEM>_<OLD>` synthetic identifier convention. The withdrawn Mexican
+  peso entry `MXN_OLD` is 7 characters; ISO 4217 codes are 3 letters.
+  The ADR records why the synthetic identifier exists, what alternatives
+  were rejected, and the consequences for SQL column widths and wrapper
+  length assumptions.
+
+- **`docs/decisions/v1.6.0-candidates.md`** — deferred decisions that
+  did not fit the v1.5.x line, starting with the `standard` field on
+  every JSON entry and the potential consolidation of the three Mexican
+  entries (`MXN`, `MXP`, `MXN_OLD`).
+
+- **`docs/v1.5.1-verification.md`** — post-release verification of the
+  three CLI checks that did not complete during v1.5.0's Phase 8, plus
+  the results of the documentation-review follow-ups.
+
+#### Tests
+
+- **`TestV151Counts`** in `tests/test_iso_codes.py` — crypto count (7)
+  and stablecoin count (6) guards. Tied to the README's new count
+  descriptions; if either count changes, this fails until the README is
+  updated to match.
+
+- **`TestV151CodeLengths`** in `tests/test_iso_codes.py` — active codes
+  are always exactly 3 characters; withdrawn codes are either 3 chars
+  or match the `<STEM>_<SUFFIX>` convention documented in the ADR.
+
+- **`test_numeric_maps_to_numeric_code`** in `tests/test_export_sql.py`
+  — codifies the JSON field → SQL column mapping the README now
+  documents. Every row's `numeric_code` appears in the rendered SQL.
+
+- **`test_numeric_not_used_as_column_name`** in
+  `tests/test_export_sql.py` — regression guard. The SQL column list
+  must never use `numeric` as an identifier.
+
+- Full suite: **768 → 774 tests passing.**
+
+### Changed
+
+#### Documentation
+
+- **README** — five targeted edits:
+  - Documents the `numeric` → `numeric_code` rename. The JSON field is
+    `numeric`; the SQL and CSV column is `numeric_code`. The rename is
+    deliberate (`numeric` is an ANSI SQL reserved word) but was only
+    documented in a code comment. Now it is in the README.
+  - Corrects the non-ISO count descriptions. The counts (7 crypto, 6
+    stablecoin) are correct; the "excluding X" phrasing implied BTC,
+    ETH, USDT, USDC, and DAI were excluded when they are included.
+  - Shows the top-level JSON shape so readers can see where `status`
+    comes from. It is derived by the exporters from which array an
+    entry lives in; it is not a JSON field.
+  - Reframes "Adopted By" as "Consumed By" with two subsections
+    ("Within the QuantOS ecosystem" and "External adopters") plus a
+    "How to adopt" section.
+  - Adds the Tempus integration code example — the generated C array
+    that the Tempus compiler links into every binary. Makes the
+    ecosystem feel wired together instead of adjacent.
+
+### Fixed
+
+- **`wrappers/python/setup.py`** — the `build_py` override now copies
+  `iso4217.json` and `schema.json` into the wheel. setuptools does not
+  ship non-Python files in a wheel for a `py_modules` distribution,
+  regardless of `MANIFEST.in` or `include_package_data`. The override
+  was added in `d718d21` (post-v1.5.0 tag) and is included in v1.5.1.
+  A wheel built from v1.5.1 resolves its data file at runtime; a wheel
+  built from v1.5.0 does not.
+
+- **CLI verification** — three checks that did not complete during
+  v1.5.0's Phase 8 (8.4.4 CLI-vs-TSV byte comparison, 8.4.5 help
+  output, 8.5 README-vs-CLI subcommand parity) now run and pass. The
+  initial verification run reported FAIL for 8.4.5 and 8.5 due to a
+  grep-pattern bug: argparse indents subcommands with 4 spaces, not 2.
+  After fixing the pattern, all three checks pass.
+
+### Deferred to v1.6.0
+
+- **`standard` field on every JSON entry** — would make filtering
+  "give me only ISO 4217 entries" a one-liner. Deferred because it is
+  a schema addition, and v1.5.1 is a patch.
+
+- **Consolidation of the three Mexican entries** (`MXN`, `MXP`,
+  `MXN_OLD`) — all share numeric code 484. Two withdrawn entries for
+  the same currency lineage is a data-quality wart. Consolidating
+  requires deciding which form is canonical and updating the schema,
+  wrappers, and tests accordingly. Deferred because it is a data
+  change, not a documentation one.
+
+- **Author name consolidation across the ecosystem** — Tempus uses
+  "LASS," ISO 4217 uses "Le P'tit," LAS_Shell uses "slimissa."
+  Deferred to a coordinated cross-repo update.
+
+- **Publication to PyPI, npm, and crates.io** — the packages are
+  installable from source and from locally built wheels but are not
+  yet published to the public registries. Tracked as a v1.6.0
+  milestone.
+
+### Known limitations
+
+The v1.5.0 tag ships a wheel that lacks `iso4217.json` and
+`schema.json`. The `build_py` fix landed after the tag, in `d718d21`.
+Users installing from a wheel built at the `v1.5.0` tag will get a CLI
+that cannot resolve its data file. Users installing from the v1.5.1
+tag or from `main` are unaffected. The v1.5.0 tag is not retroactively
+modified — the fix is captured in v1.5.1.
+
+Windows-specific CSV checks (Excel encoding, CR bytes, BOM policy) and
+the LibreOffice European-locale check were not run on the verification
+host (Ubuntu). They are documented as "not tested — deferred" in
+`docs/v1.5.1-verification.md` and will be appended when a Windows
+environment is available.
+
+### Verified
+
+- 774 tests passing (`pytest tests/ wrappers/python/tests/ -q`)
+- `tools/validate.py`: 0 errors, 27 warnings
+- `tools/export_sql.py --check`: exit 0
+- `tools/export_csv.py --check`: exit 0
+- All three wrapper copies byte-identical to `iso4217.json`
+- CI green across all six top-level jobs plus the four-language matrix
+
+---
+
 ## [1.5.0] — 2026-09-15
 
 ### Added
