@@ -1373,7 +1373,11 @@ class TestPandasRead:
         if not path.exists():
             pytest.skip("iso4217.parquet not present")
         df = pd.read_parquet(path)
-        # 121 independent + 135 withdrawn = 256 null pegged_to
+        # pegged_to and peg_type are null for the 256 currencies with no
+        # peg at all: 121 independent + 135 withdrawn.
         assert df["pegged_to"].isna().sum() == 256
         assert df["peg_type"].isna().sum() == 256
-        assert df["peg_rate"].isna().sum() == 256
+        # peg_rate is additionally null for the 2 currencies that have a
+        # pegged_to and a peg_type but no numeric rate: MAD (basket) and
+        # KWD (undisclosed). Total: 256 + 2 = 258.
+        assert df["peg_rate"].isna().sum() == 258
