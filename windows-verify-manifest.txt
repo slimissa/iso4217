@@ -1,0 +1,8 @@
+# v1.5.1 Windows verification manifest
+# Generated on Linux from commit: 69277cf5600ecc367855b1330524046505d9c97a
+# Tag: v1.5.1
+
+iso4217.csv              size=18690    sha256=a5bf9dc6d1b064762937fba3f34c72a412530be0733ad7aea577f8e6356183f7
+iso4217.excel.csv        size=18693    sha256=4afbd905ce24a45bd65915e2317438071ee41fc534ea61969b81486fac7c90cd
+iso4217.european.csv     size=18686    sha256=a5a671a93baef84e330781c0686df0199dfe1727142e15a32d961fc8a9aad4e6
+iso4217.tsv              size=18686    sha256=0e56f6821237334acd718f436a34f4ae20518352578092bdb9ea8fc0de89a2e9
