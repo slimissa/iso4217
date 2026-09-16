@@ -1315,3 +1315,65 @@ class TestEdgeCases:
         content = render_parquet(reg)
         table = pq.read_table(io.BytesIO(content))
         assert table.column("minor_units").to_pylist() == [18]
+
+
+# ===========================================================================
+# Pipe-friendliness — pandas read
+# ===========================================================================
+
+class TestPandasRead:
+    """
+    The roadmap names pandas as a consumer. pandas.read_parquet delegates
+    to pyarrow, so this class verifies the DataFrame shape and native
+    dtypes pandas produces from the file — the same contract DuckDB and
+    other consumers rely on.
+    """
+
+    def test_pandas_is_importable(self):
+        pd = pytest.importorskip("pandas")
+        assert pd is not None
+
+    def test_reads_correct_shape(self):
+        pd = pytest.importorskip("pandas")
+        path = PROJECT_ROOT / "iso4217.parquet"
+        if not path.exists():
+            pytest.skip("iso4217.parquet not present")
+        df = pd.read_parquet(path)
+        assert df.shape == (302, 11), df.shape
+
+    def test_column_names_match(self):
+        pd = pytest.importorskip("pandas")
+        path = PROJECT_ROOT / "iso4217.parquet"
+        if not path.exists():
+            pytest.skip("iso4217.parquet not present")
+        df = pd.read_parquet(path)
+        assert list(df.columns) == list(COLUMNS)
+
+    def test_is_independent_is_bool_dtype(self):
+        pd = pytest.importorskip("pandas")
+        path = PROJECT_ROOT / "iso4217.parquet"
+        if not path.exists():
+            pytest.skip("iso4217.parquet not present")
+        df = pd.read_parquet(path)
+        assert df["is_independent"].dtype == bool
+
+    def test_minor_units_is_integer_dtype(self):
+        pd = pytest.importorskip("pandas")
+        path = PROJECT_ROOT / "iso4217.parquet"
+        if not path.exists():
+            pytest.skip("iso4217.parquet not present")
+        df = pd.read_parquet(path)
+        # int8 from Parquet; some pandas versions upcast to int64.
+        # Either is acceptable — the underlying Arrow type is int8.
+        assert "int" in str(df["minor_units"].dtype)
+
+    def test_null_counts_match_registry(self):
+        pd = pytest.importorskip("pandas")
+        path = PROJECT_ROOT / "iso4217.parquet"
+        if not path.exists():
+            pytest.skip("iso4217.parquet not present")
+        df = pd.read_parquet(path)
+        # 121 independent + 135 withdrawn = 256 null pegged_to
+        assert df["pegged_to"].isna().sum() == 256
+        assert df["peg_type"].isna().sum() == 256
+        assert df["peg_rate"].isna().sum() == 256
