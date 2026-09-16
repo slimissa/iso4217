@@ -42,6 +42,7 @@ on:
       - 'iso4217.excel.csv'
       - 'iso4217.european.csv'
       - 'iso4217.tsv'
+      - 'iso4217.parquet'
       - 'tools/validate.py'
       - 'wrappers/python/iso4217_cli.py'
       - 'wrappers/python/setup.py'
@@ -49,6 +50,7 @@ on:
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
       - 'tools/export_csv.py'
+      - 'tools/export_parquet.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -61,6 +63,7 @@ on:
       - 'tests/**'
       - 'tests/test_export_sql.py'
       - 'tests/test_export_csv.py'
+      - 'tests/test_export_parquet.py'
       - '.github/workflows/validate.yml'
   pull_request:
     branches: [main]
@@ -75,6 +78,7 @@ on:
       - 'iso4217.excel.csv'
       - 'iso4217.european.csv'
       - 'iso4217.tsv'
+      - 'iso4217.parquet'
       - 'tools/validate.py'
       - 'wrappers/python/iso4217_cli.py'
       - 'wrappers/python/setup.py'
@@ -82,6 +86,7 @@ on:
       - 'tools/sync_wrappers.py'
       - 'tools/export_sql.py'
       - 'tools/export_csv.py'
+      - 'tools/export_parquet.py'
       - 'wrappers/go/iso4217.json'
       - 'wrappers/rust/iso4217.json'
       - 'wrappers/**/*.py'
@@ -94,6 +99,7 @@ on:
       - 'tests/**'
       - 'tests/test_export_sql.py'
       - 'tests/test_export_csv.py'
+      - 'tests/test_export_parquet.py'
       - '.github/workflows/validate.yml'
   workflow_dispatch:
 
@@ -238,6 +244,42 @@ jobs:
             exit 1
           fi
 
+  # --- Job 2d: Parquet export drift check --------------------------------
+  # Regenerates the Parquet export in memory and compares it logically
+  # against the committed file. Runs in parallel with check-sql-export
+  # and check-csv-export. All four export gates must pass before
+  # validate-json and validate-wrappers start.
+  check-parquet-export:
+    name: Check Parquet export matches registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pyarrow
+        run: pip install pyarrow --quiet
+
+      - name: Check Parquet file is in sync
+        run: |
+          python3 tools/export_parquet.py --check || {
+            code=$?
+            if [ "$code" = "1" ]; then
+              echo "::error::iso4217.parquet is stale. Run 'python3 tools/export_parquet.py' and commit the result."
+            elif [ "$code" = "3" ]; then
+              echo "::error::iso4217.parquet is missing. Run 'python3 tools/export_parquet.py' and commit the result."
+            else
+              echo "::error::export_parquet.py --check failed with exit code $code"
+            fi
+            exit 1
+          }
+
   # --- Job 3: Schema/data validation ------------------------------------
   # Runs schema/business-logic validation against iso4217.json and the
   # full pytest suite.
@@ -245,7 +287,7 @@ jobs:
     name: Validate iso4217.json
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [check-sql-export, check-csv-export, check-cli]
+    needs: [check-sql-export, check-csv-export, check-parquet-export, check-cli]
 
     steps:
       - name: Checkout
@@ -273,7 +315,7 @@ jobs:
     name: Validate ${{ matrix.language }} wrapper
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: [validate-json, check-wrapper-sync, check-sql-export, check-csv-export, check-cli]
+    needs: [validate-json, check-wrapper-sync, check-sql-export, check-csv-export, check-parquet-export, check-cli]
   
     strategy:
       fail-fast: false  # Run all languages even if one fails
