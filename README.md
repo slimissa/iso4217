@@ -466,7 +466,7 @@ iso4217/
 └── .github/
     ├── workflows/
     │   ├── validate.yml      # CI on every push
-    │   └── monitor.yml       # Weekly ISO amendment monitor
+    │   └── monitor-amendments.yml  # Weekly ISO amendment monitor
     └── ISSUE_TEMPLATE/
         └── currency_update.md
 ```

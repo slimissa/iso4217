@@ -44,12 +44,26 @@ Consequences, spelled out:
   the SQL export.
 - A future `tools/export_aggregated.py` will read a CURATED artifact (SQL
   or Parquet), not `iso4217.json`.
-- No tool writes to `iso4217.json`. It is edited by hand, in a commit, with
-  a CHANGELOG entry.
+- No tool commits changes to `iso4217.json`. Every write must be
+  reviewed and committed by a human.
 
 The rule cuts in one direction: a tool may read the layer below it, never
 the layer above it, and never a sibling within the same layer to build a
 new artifact.
+
+---
+
+## Write-capable tools
+
+A tool may write to `iso4217.json` directly, as long as nothing it
+writes reaches `main` without a human reviewing and committing it. This
+is narrower than "no tool writes to `iso4217.json`" — it's about who
+commits, not who writes.
+
+| Tool | What it writes | Review gate |
+|------|-----------------|-------------|
+| `tools/refresh_market_caps.py` | Updates `market_cap_rank` for non-ISO entries (cryptocurrencies, stablecoins) | Writes to a local working copy; the diff is reviewed and committed by a human before it reaches `main` |
+| `tools/update_from_iso.py` | Applies ISO amendments to active/withdrawn currency entries | Semi-interactive; each change is confirmed before write, and the resulting diff is reviewed and committed by a human before it reaches `main` |
 
 ---
 
@@ -150,6 +164,9 @@ When the registry needs a new derived file, the decision is:
 3. **Is it an aggregation of two or more CURATED artifacts?** It belongs in
    AGGREGATED — wait until v1.7.0, or place it in `tools/export_aggregated.py`
    when that file exists.
+
+Any new tool that writes to `iso4217.json` must be added to the
+write-capable tools table above.
 
 The rule about which layer a tool may read is what makes each artifact
 auditable. If a generator reads from two layers, the artifact it produces
