@@ -19,8 +19,8 @@
       "SIX Group amendment summaries",
       "Central bank official websites for minor unit verification"
     ],
-    "crypto_source": "CoinMarketCap top 10 by market capitalization, 2026-07-29",
-    "stablecoin_source": "CoinMarketCap top 5 stablecoins by market capitalization, 2026-07-29",
+    "crypto_source": "CoinGecko top 10 by market capitalization, 2026-07-29",
+    "stablecoin_source": "CoinGecko top 5 stablecoins by market capitalization, 2026-07-29",
     "commodity_source": "ISO 4217-compatible codes per SIX Group guidance"
   },
   "currencies": {
