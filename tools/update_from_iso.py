@@ -184,14 +184,17 @@ def load_registry(path: Path = REGISTRY_PATH) -> Dict:
         return json.load(f)
 
 
-def save_registry(data: Dict, path: Path = REGISTRY_PATH) -> None:
+def save_registry(data: Dict, path: Optional[Path] = None) -> None:
     """Save registry with consistent formatting.
-    Defaults to the canonical registry path. Callers that operate on a
-    temp copy or a user-specified path pass it explicitly.
+
+    Defaults to the canonical REGISTRY_PATH. Resolved at call time so
+    that monkeypatching REGISTRY_PATH in tests works correctly.
     """
+    if path is None:
+        path = REGISTRY_PATH
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-        f.write('\n')  # Trailing newline
+        f.write('\n')
 
 
 def backup_registry(path: Path = REGISTRY_PATH) -> Path:

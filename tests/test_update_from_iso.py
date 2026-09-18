@@ -597,12 +597,19 @@ class TestDiffCurrency:
 class TestGenerateDiff:
     def test_identical_data_produces_no_changes(self, sample_registry: dict):
         source = [
-            {"code": c["code"], "numeric": c["numeric"], "name": c["name"],
-             "minor_units": c["minor_units"]}
+            {
+                "code": c["code"],
+                "numeric": c["numeric"],
+                "name": c["name"],
+                "minor_units": c["minor_units"],
+                "symbol": c["symbol"],
+                "entity": c["entity"],
+            }
             for c in sample_registry["currencies"]["active"]
         ]
         mapping = {"code": "code", "numeric": "numeric",
-                   "name": "name", "minor_units": "minor_units"}
+                   "name": "name", "minor_units": "minor_units",
+                   "symbol": "symbol", "entity": "entity"}
         report = generate_diff(sample_registry, source, mapping)
         assert report.total_changes == 0
 
@@ -623,12 +630,15 @@ class TestGenerateDiff:
     def test_detects_modified_currency(self, sample_registry: dict):
         source = [
             {"code": "USD", "numeric": "840", "name": "US Dollar",
-             "minor_units": 3},  # changed from 2
-            {"code": "EUR", "numeric": "978", "name": "Euro", "minor_units": 2},
-            {"code": "JPY", "numeric": "392", "name": "Japanese Yen", "minor_units": 0},
+            "minor_units": 3, "symbol": "$", "entity": "United States"},
+            {"code": "EUR", "numeric": "978", "name": "Euro",
+            "minor_units": 2, "symbol": "\u20ac", "entity": "Eurozone"},
+            {"code": "JPY", "numeric": "392", "name": "Japanese Yen",
+            "minor_units": 0, "symbol": "\u00a5", "entity": "Japan"},
         ]
         mapping = {"code": "code", "numeric": "numeric",
-                   "name": "name", "minor_units": "minor_units"}
+                   "name": "name", "minor_units": "minor_units",
+                   "symbol": "symbol", "entity": "entity"}
         report = generate_diff(sample_registry, source, mapping)
         modified = [c for c in report.changes if c.change_type == ChangeType.MODIFIED]
         assert len(modified) == 1
