@@ -1381,3 +1381,24 @@ class TestPandasRead:
         # pegged_to and a peg_type but no numeric rate: MAD (basket) and
         # KWD (undisclosed). Total: 256 + 2 = 258.
         assert df["peg_rate"].isna().sum() == 258
+
+    def test_independent_three_decimal_currencies(self):
+        # Locks in the corrected value for docs/v1.5.2-verification.md
+        # section 8.4. The report originally claimed ['JOD', 'OMR'], which
+        # is wrong — JOD and OMR are pegged, not independent. The three
+        # independent 3-decimal currencies are IQD, LYD, TND; KWD, BHD,
+        # JOD, and OMR are also 3-decimal but pegged (is_independent=False).
+        pd = pytest.importorskip("pandas")
+        df = pd.read_parquet(PROJECT_ROOT / "iso4217.parquet")
+        codes = sorted(df[(df["is_independent"]) & (df["minor_units"] == 3)]["code"])
+        assert codes == ["IQD", "LYD", "TND"]
+
+    def test_top_three_by_peg_rate(self):
+        # Locks in the corrected value for docs/v1.5.2-verification.md
+        # section 8.4. The report originally claimed XAF/XOF/DJF, but
+        # DJF's peg_rate (177.721) doesn't place in the top three — KMF's
+        # 491.968 does.
+        pd = pytest.importorskip("pandas")
+        df = pd.read_parquet(PROJECT_ROOT / "iso4217.parquet")
+        top = df[df["peg_rate"].notna()].nlargest(3, "peg_rate")["code"].tolist()
+        assert set(top) == {"XAF", "XOF", "KMF"}
