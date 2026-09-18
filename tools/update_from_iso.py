@@ -665,27 +665,26 @@ def format_report(report: UpdateReport) -> str:
 
     if not report.changes:
         lines.append("\n  ✅ No changes detected. Registry is up to date.")
-        return "\n".join(lines)
+    else:
+        lines.append(f"\n  Changes ({report.total_changes}):")
+        lines.append("  " + "-" * 68)
 
-    lines.append(f"\n  Changes ({report.total_changes}):")
-    lines.append("  " + "-" * 68)
-
-    for change in report.changes:
-        symbol = {
-            ChangeType.ADDED: "+",
-            ChangeType.REMOVED: "-",
-            ChangeType.WITHDRAWN: "↓",
-            ChangeType.MODIFIED: "~",
-            ChangeType.REACTIVATED: "↑",
-        }.get(change.change_type, "?")
-        lines.append(f"  {symbol} {change.code} — {change.change_type.value.upper()}")
-        if change.note:
-            lines.append(f"    Note: {change.note}")
-        for fc in change.field_changes:
-            old_str = str(fc.old_value)[:60]
-            new_str = str(fc.new_value)[:60]
-            lines.append(f"    {fc.field}: {old_str} → {new_str}")
-        lines.append("")
+        for change in report.changes:
+            symbol = {
+                ChangeType.ADDED: "+",
+                ChangeType.REMOVED: "-",
+                ChangeType.WITHDRAWN: "↓",
+                ChangeType.MODIFIED: "~",
+                ChangeType.REACTIVATED: "↑",
+            }.get(change.change_type, "?")
+            lines.append(f"  {symbol} {change.code} — {change.change_type.value.upper()}")
+            if change.note:
+                lines.append(f"    Note: {change.note}")
+            for fc in change.field_changes:
+                old_str = str(fc.old_value)[:60]
+                new_str = str(fc.new_value)[:60]
+                lines.append(f"    {fc.field}: {old_str} → {new_str}")
+                lines.append("")
 
     if report.warnings:
         lines.append("  ⚠️  Warnings:")
