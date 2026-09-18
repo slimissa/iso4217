@@ -180,6 +180,8 @@ Every derived artifact must be regenerated in the same commit. CI rejects PRs wh
 8. Commit `iso4217.json`, the eight flat-file artifacts (`iso4217.sql`, `iso4217.postgresql.sql`, `iso4217.mysql.sql`, `iso4217.sqlite.sql`, `iso4217.csv`, `iso4217.excel.csv`, `iso4217.european.csv`, `iso4217.tsv`), and the regenerated `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json` in the same commit
 9. Commit with a descriptive message: `Add AFN, ALL, AMD to active currencies (ISO amendment 179)`
 
+Any tool that writes to `iso4217.json` must be listed in the write-capable tools table in `docs/LAYERS.md`. Adding a new write path without adding it to that table is a review blocker.
+
 ### For Wrapper Changes
 
 1. Make your changes to the wrapper code

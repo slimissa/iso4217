@@ -6,6 +6,79 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.5.3] — Unreleased
+
+A patch release correcting five issues surfaced by an external audit of
+v1.5.2: one code defect, one verification report with unverified
+claims, one incorrect layering-discipline statement, one incorrect
+provenance field, and one stale documentation reference. No schema
+changes, no currency data changes. `iso4217.json` differs from v1.5.2
+only in `source.crypto_source` and `source.stablecoin_source`
+(`meta.version` and `meta.updated` are bumped at release, not here).
+
+### Fixed
+
+- **`tools/update_from_iso.py::save_registry`** required a `path`
+  argument but was called with one argument from `--add-currency` and
+  `--apply`, raising `TypeError: save_registry() missing 1 required
+  positional argument: 'path'`. `path` now defaults to
+  `REGISTRY_PATH`.
+
+- **`docs/v1.5.2-verification.md`** section 8.4 claimed two DuckDB
+  query results that did not match the actual Parquet file. Corrected
+  `WHERE is_independent AND minor_units = 3` from `['JOD', 'OMR']` to
+  `['IQD', 'LYD', 'TND']`, and the top-three-by-`peg_rate` result from
+  `XAF`/`XOF`/`DJF` to `XAF`/`XOF`/`KMF`. The Parquet export was
+  correct; the report was written from a template, not from command
+  output.
+
+- **`docs/LAYERS.md`** stated *"No tool writes to `iso4217.json`. It is
+  edited by hand."* This is false — `tools/refresh_market_caps.py` and
+  `tools/update_from_iso.py` both write to it directly. Corrected to
+  *"No tool commits changes to `iso4217.json`. Every write must be
+  reviewed and committed by a human,"* plus an explicit write-capable
+  tools table naming both tools and their review gates.
+
+- **`iso4217.json`** — `source.crypto_source` and
+  `source.stablecoin_source` said CoinMarketCap. The actual fetch code
+  (`tools/refresh_market_caps.py`, `COINGECKO_MARKETS_URL`) and
+  `docs/PROVENANCE.md` both say CoinGecko. Corrected.
+
+- **README** Project Structure tree named `.github/workflows/monitor.yml`;
+  the actual file is `monitor-amendments.yml`.
+
+### Added
+
+#### Tests
+
+- **`tests/test_update_from_iso.py`** — 89 tests. The only
+  write-capable tool in the repository had no coverage before this
+  release. Includes
+  `TestSaveRegistry::test_save_registry_with_one_argument_no_longer_raises`,
+  the regression guard for the `save_registry` fix above, plus
+  coverage of the diff engine, change application, backup naming, and
+  report formatting.
+
+- Two tests in **`tests/test_export_parquet.py`** —
+  `test_independent_three_decimal_currencies` and
+  `test_top_three_by_peg_rate` — locking in the corrected values from
+  section 8.4 of the v1.5.2 verification report.
+
+- Full suite: **1,008 tests passing** (up from 917 at v1.5.2).
+
+### Process
+
+- Verification reports must be produced by running commands, not by
+  filling in a template. The v1.5.2 report contained two claims that
+  were never verified against the actual file. The correction and the
+  two new lock-in tests prevent this class of error.
+
+### Verified
+
+- *To be filled in after release verification.*
+
+---
+
 ## [1.5.2] — 2026-09-16
 
 A patch release that adds a fourth consumption format and formalizes the

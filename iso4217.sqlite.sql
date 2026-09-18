@@ -1,6 +1,6 @@
 -- ISO 4217 Currency Registry — SQL Export (SQLite 3.37+)
--- Source:      iso4217.json v1.5.2
--- Updated:     2026-09-16
+-- Source:      iso4217.json v1.5.3
+-- Updated:     2026-09-18
 -- Amendment:   179
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0

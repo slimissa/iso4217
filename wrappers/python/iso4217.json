@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.5.2",
-    "updated": "2026-09-16",
+    "version": "1.5.3",
+    "updated": "2026-09-18",
     "schema_version": "1.0.0",
     "description": "Canonical ISO 4217 currency registry. Active ISO currencies, withdrawn ISO currencies, and commonly-used non-ISO currencies maintained as separate arrays. This file is the single source of truth — all wrappers, bindings, and downstream databases derive from this file.",
     "project": "https://github.com/slimissa/iso4217",
@@ -19,8 +19,8 @@
       "SIX Group amendment summaries",
       "Central bank official websites for minor unit verification"
     ],
-    "crypto_source": "CoinMarketCap top 10 by market capitalization, 2026-07-29",
-    "stablecoin_source": "CoinMarketCap top 5 stablecoins by market capitalization, 2026-07-29",
+    "crypto_source": "CoinGecko top 10 by market capitalization, 2026-07-29",
+    "stablecoin_source": "CoinGecko top 5 stablecoins by market capitalization, 2026-07-29",
     "commodity_source": "ISO 4217-compatible codes per SIX Group guidance"
   },
   "currencies": {
