@@ -184,8 +184,11 @@ def load_registry(path: Path = REGISTRY_PATH) -> Dict:
         return json.load(f)
 
 
-def save_registry(data: Dict, path: Path) -> None:
-    """Save registry with consistent formatting."""
+def save_registry(data: Dict, path: Path = REGISTRY_PATH) -> None:
+    """Save registry with consistent formatting.
+    Defaults to the canonical registry path. Callers that operate on a
+    temp copy or a user-specified path pass it explicitly.
+    """
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         f.write('\n')  # Trailing newline
