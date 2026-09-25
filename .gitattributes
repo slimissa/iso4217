@@ -2,3 +2,4 @@
 # Flat-file exports — LF regardless of platform
 *.csv text eol=lf
 *.tsv text eol=lf
+VERSION text eol=lf
