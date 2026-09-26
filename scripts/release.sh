@@ -299,8 +299,8 @@ run_gate() {
     run_gate_step "sync_wrappers.py --check"        python3 tools/sync_wrappers.py --check
     run_gate_step "check_mojibake.py"               python3 tools/check_mojibake.py
 
-    if [[ -f scripts/check_cross_language.sh ]]; then
-        run_gate_step "check_cross_language.sh"     bash scripts/check_cross_language.sh
+    if [[ -f tools/check_cross_language.sh ]]; then
+        run_gate_step "check_cross_language.sh"     bash tools/check_cross_language.sh
     fi
 
     if [[ "$GATE_FAILED" -ne 0 ]]; then
@@ -488,8 +488,8 @@ print_plan() {
     echo "  python3 tools/export_parquet.py --check"
     echo "  python3 tools/sync_wrappers.py --check"
     echo "  python3 tools/check_mojibake.py"
-    [[ -f scripts/check_cross_language.sh ]] && \
-        echo "  bash scripts/check_cross_language.sh"
+    [[ -f tools/check_cross_language.sh ]] && \
+        echo "  bash tools/check_cross_language.sh"
     echo
     echo "Post-gate:"
     echo "  git add -A && git commit -m 'Release $TAG'"
