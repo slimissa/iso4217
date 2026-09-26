@@ -73,15 +73,6 @@ type rawSource struct {
 type rawCurrencies struct {
 	Active    []rawCurrency `json:"active"`
 	Withdrawn []rawCurrency `json:"withdrawn"`
-	Classification *string       `json:"classification"`
-	NumericReused  *bool         `json:"numeric_reused"`
-	SourceURL      *string       `json:"source_url"`
-	CodeLifetime   *RawCodeLifetime `json:"code_lifetime"`
-}
-
-type RawCodeLifetime struct {
-	From *string `json:"from"`
-	To   string  `json:"to"`
 }
 
 type rawNonISO struct {
@@ -115,6 +106,16 @@ type rawCurrency struct {
 	Type          *string `json:"type"`
 	MarketCapRank *int    `json:"market_cap_rank"`
 	PegMechanism  *string `json:"peg_mechanism"`
+	// v1.6.0 fields
+	Classification *string          `json:"classification"`
+	NumericReused  *bool            `json:"numeric_reused"`
+	SourceURL      *string          `json:"source_url"`
+	CodeLifetime   *RawCodeLifetime `json:"code_lifetime"`
+}
+
+type RawCodeLifetime struct {
+	From *string `json:"from"`
+	To   string  `json:"to"`
 }
 
 type rawCountry struct {
