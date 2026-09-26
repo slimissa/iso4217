@@ -266,80 +266,27 @@ The counts are **inclusive**: BTC and ETH are among the seven cryptocurrencies, 
 
 ## Coverage
 
-**v1.5.0 includes all 167 currencies currently active under ISO 4217, plus all 135 withdrawn currencies and 21 non-ISO instruments.** This is complete coverage of the standard — every active code, every historical revaluation chain, and the major cryptocurrencies, stablecoins, and precious-metal commodity codes in active financial use.
+Per-field coverage across the two ISO layers. Every active entry carries the eight universal fields plus the three v1.6.0 additions. Withdrawn entries carry the same set minus `classification` and `numeric_reused`, plus `code_lifetime`.
 
-The registry contains three distinct layers:
+| Field | Active | Withdrawn | Notes |
+|-------|--------|-----------|-------|
+| `code` | 167/167 | 135/135 | Required |
+| `numeric` | 167/167 | 135/135 | 3-digit string |
+| `name` | 167/167 | 135/135 | Required |
+| `minor_units` | 167/167 | 135/135 | 0–18 |
+| `symbol` | 167/167 | 135/135 | May be empty string |
+| `entity` | 167/167 | 135/135 | Required |
+| `classification` | 167/167 | — | **v1.6.0**, active only |
+| `numeric_reused` | 167/167 | — | **v1.6.0**, active only |
+| `source_url` | 167/167 | 135/135 | **v1.6.0** |
+| `code_lifetime` | — | 135/135 | **v1.6.0**, withdrawn only |
+| `code_lifetime.from` | — | 0/135 | Undocumented for all entries |
+| `central_bank` | 167/167 | — | Active only |
+| `pegged_to` | 46/167 | — | Present only when pegged |
+| `peg_type` | 46/167 | — | Present only when pegged |
+| `countries[]` | 167/167 | — | At least one issuing country |
 
-| Layer | Count | Purpose |
-|-------|-------|---------|
-| **Active ISO 4217** | 167 | Currently circulating currencies — fiat only |
-| **Withdrawn ISO 4217** | 135 | Historical currencies with revaluation chains and conversion rates |
-| **Non-ISO** | 21 | Cryptocurrencies (7), stablecoins (6), commodities (4), special purpose (4) |
-
-The top-level shape of `iso4217.json`:
-
-```
-{
-  "meta":     { "version": "1.5.1", "updated": "2026-09-15", ... },
-  "source":   { "standard": "ISO 4217:2015", "last_amendment_applied": 179, ... },
-  "currencies": {
-    "active":    [ /* 167 entries, each with a code field */ ],
-    "withdrawn": [ /* 135 entries, each with a code field */ ]
-  },
-  "non_iso": {
-    "cryptocurrencies": [ /* 7 entries */ ],
-    "stablecoins":      [ /* 6 entries */ ],
-    "commodities":      [ /* 4 entries */ ],
-    "special_purpose":  [ /* 4 entries */ ]
-  }
-}
-```
-
-`status` is not a field in the JSON — the SQL and CSV exporters derive it from which array the entry came from. Every currency in `currencies.active` becomes `status = 'active'`; every currency in `currencies.withdrawn` becomes `status = 'withdrawn'`. Non-ISO entries never receive a `status` at all, because they are excluded from the SQL and CSV exports by design.
-
-**Included:** every code in `tools/parse_source.py::ACTIVE_ISO_CODES` — the curated 167-code ground-truth set cross-checked against ISO 4217 amendment 179.
-
-**Classification notes:**
-
-- **Fund codes** (BOV, CHE, CHW, CLF, COU, MXV, USN, USS, UYI, UYW, VED) are included as active ISO codes with explicit `note` fields explaining they are indexation or settlement units, not circulating currencies.
-- **Effectively withdrawn codes** (CUC, SVC) remain listed as active because ISO 4217 has not formally withdrawn them, but their `note` fields flag their demonetization status.
-- **Pegged currencies** have full peg metadata: anchor, type (`single`/`basket`/`undisclosed`), rate, band, and establishment date where applicable.
-
-### What's in a currency entry
-
-```json
-{
-  "code": "USD",
-  "numeric": "840",
-  "name": "US Dollar",
-  "minor_units": 2,
-  "symbol": "$",
-  "entity": "United States",
-  "central_bank": "Federal Reserve System",
-  "pegged_to": null,
-  "peg_type": null,
-  "is_independent": true,
-  "countries": [
-    { "code": "US", "name": "United States", "relationship": "issuing" },
-    { "code": "EC", "name": "Ecuador", "relationship": "adopting" },
-    { "code": "PA", "name": "Panama", "relationship": "adopting" }
-  ]
-}
-```
-
-**Field name mapping:** the JSON field is `numeric`; the SQL and CSV column is `numeric_code`. The rename exists because `numeric` is a reserved word in ANSI SQL and would require quoting in every query on every dialect. The values are identical — `"840"` in JSON becomes `840` in the `numeric_code` column. A consumer joining the two should map `numeric` to `numeric_code` explicitly.
-
-Every active currency includes:
-- **ISO 4217** alphabetic and numeric codes. Numeric codes are unique within active currencies but may overlap with withdrawn codes due to historical reuse (e.g., MXN/MXN_OLD share 484, since Mexico reused the numeric code after the 1993 revaluation). **Do not use numeric code as a unique key across active + withdrawn** — use the alphabetic `code` for that instead. `tools/validate.py` enforces uniqueness within each of active-only and withdrawn-only, and warns (without failing) on any active/withdrawn overlap.
-- **Minor units** — the number of decimal places (0 for JPY, 2 for USD, 3 for KWD, 8 for BTC, 4 for CLF/UYW fund codes)
-- **Peg information** — anchor currency, type, rate, band, and establishment date
-- **Central bank** — official name of the monetary authority
-- **Country relationships** — every country/territory with its relationship to the currency (issuing, adopting, territory, parallel, local_issue)
-- **Market convention notes** — where ISO and market practice diverge (e.g., IDR, CUC, SVC)
-
-Withdrawn currencies include withdrawal dates, replacement codes, and official conversion rates — including all Eurozone irrevocable fixing rates.
-
-**Withdrawn code convention.** ISO 4217 assigns three-letter codes. When a withdrawal chain produces more than one entry competing for the same code stem, the registry uses a synthetic identifier of the form `<STEM>_<OLD>` — for example, `MXN_OLD` disambiguates the pre-1993 Mexican peso from the active `MXN`. Consumers must treat `code` as an opaque string of length 3–7 and declare any SQL column that references it as `VARCHAR(7)`, not `CHAR(3)`. The full rationale is in [docs/decisions/withdrawn-codes.md](./docs/decisions/withdrawn-codes.md).
+The `code_lifetime.from` row is honest about a real gap: none of the 135 withdrawn entries has a documented ISO assignment date. The field is `null` for every one. That is a fact about ISO's documentation, not a failure of the enrichment. If you have a primary source for any of them, [open an issue](https://github.com/slimissa/iso4217/issues).
 
 ---
 
