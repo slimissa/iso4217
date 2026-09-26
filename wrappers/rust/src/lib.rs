@@ -75,6 +75,16 @@ struct RawSource {
 struct RawCurrencies {
     active: Option<Vec<RawCurrency>>,
     withdrawn: Option<Vec<RawCurrency>>,
+    classification: Option<String>,
+    numeric_reused: Option<bool>,
+    source_url: Option<String>,
+    code_lifetime: Option<RawCodeLifetime>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+struct RawCodeLifetime {
+    from: Option<String>,
+    to: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -234,6 +244,25 @@ pub struct Currency {
     pub market_cap_rank: Option<u32>,
     /// Peg mechanism for stablecoins (e.g., "Fiat-collateralized").
     pub peg_mechanism: Option<String>,
+    /// Classification of active currencies: "circulating", "fund",
+    /// "settlement", or "indexation". None for withdrawn entries.
+    pub classification: Option<String>,
+    /// True when this active currency's numeric code also appears on a
+    /// withdrawn entry.
+    pub numeric_reused: Option<bool>,
+    /// URL of the entry's primary source.
+    pub source_url: Option<String>,
+    /// The withdrawn code's full valid range.
+    pub code_lifetime: Option<CodeLifetime>,
+}
+
+/// The valid range of a withdrawn code.
+#[derive(Debug, Clone)]
+pub struct CodeLifetime {
+    /// ISO assignment date, or None when undocumented.
+    pub from: Option<String>,
+    /// Withdrawal date. Equal to `Currency::withdrawn_date`.
+    pub to: String,
 }
 
 impl Currency {
@@ -393,6 +422,13 @@ impl From<RawCurrency> for Currency {
             currency_type: raw.currency_type,
             market_cap_rank: raw.market_cap_rank,
             peg_mechanism: raw.peg_mechanism,
+                        classification: raw.classification,
+            numeric_reused: raw.numeric_reused,
+            source_url: raw.source_url,
+            code_lifetime: raw.code_lifetime.map(|l| CodeLifetime {
+                from: l.from,
+                to: l.to,
+            }),
         }
     }
 }
@@ -694,6 +730,24 @@ impl CurrencyRegistry {
         self.active
             .values()
             .filter(|c| c.countries.iter().any(|country| country.code == code))
+            .collect()
+    }
+
+    /// Find all active currencies with the given classification.
+    ///
+    /// `cls` is one of `"circulating"`, `"fund"`, `"settlement"`, or
+    /// `"indexation"`. Returns an empty `Vec` if none match.
+    ///
+    /// ```rust
+    /// # use iso4217::CurrencyRegistry;
+    /// # let registry = CurrencyRegistry::load().unwrap();
+    /// let funds = registry.by_classification("fund");
+    /// assert!(!funds.is_empty());
+    /// ```
+    pub fn by_classification(&self, cls: &str) -> Vec<&Currency> {
+        self.active
+            .values()
+            .filter(|c| c.classification.as_deref() == Some(cls))
             .collect()
     }
 
@@ -1124,6 +1178,13 @@ mod tests {
                 reg.with_minor_units(arg)
             }
             "independent" => reg.independent(),
+            "by_classification" => {
+                let arg = match &test.argument {
+                    Some(ClcArgument::Str(s)) => s,
+                    _ => panic!("by_classification argument is not a string"),
+                };
+                reg.by_classification(arg)
+            }
             other => panic!("no Rust mapping for filter method '{other}'"),
         }
     }
@@ -1331,5 +1392,76 @@ mod tests {
         assert_eq!(usd.to_minor(-0.01), -1);
         assert_eq!(usd.from_minor(-10050), -100.5);
         assert_eq!(usd.from_minor(-1), -0.01);
+    }
+
+    #[derive(Deserialize)]
+    struct ClcClassificationBlock {
+        #[serde(default)]
+        expected: Option<std::collections::HashMap<String, String>>,
+        #[serde(default)]
+        method: Option<String>,
+        #[serde(default)]
+        argument: Option<ClcArgument>,
+        #[serde(default)]
+        expected_contains: Vec<String>,
+        #[serde(default)]
+        expected_not_contains: Vec<String>,
+    }
+
+    #[derive(Deserialize)]
+    struct ClcClassificationFile {
+        #[serde(default)]
+        classification_tests: Vec<ClcClassificationBlock>,
+    }
+
+    fn load_classification_vectors() -> ClcClassificationFile {
+        let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
+            .expect("failed to read fixture");
+        serde_json::from_str(&raw).expect("failed to parse fixture")
+    }
+
+    #[test]
+    fn test_cross_language_consistency_classification_values() {
+        let reg = registry();
+        let v = load_classification_vectors();
+        for block in &v.classification_tests {
+            if let Some(expected) = &block.expected {
+                for (code, expected_cls) in expected {
+                    let c = reg.currency(code)
+                        .unwrap_or_else(|| panic!("{} not found", code));
+                    assert_eq!(
+                        c.classification.as_deref(),
+                        Some(expected_cls.as_str()),
+                        "{} classification mismatch", code
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_cross_language_consistency_by_classification() {
+        let reg = registry();
+        let v = load_classification_vectors();
+        for block in &v.classification_tests {
+            if block.method.as_deref() != Some("by_classification") {
+                continue;
+            }
+            let arg = match &block.argument {
+                Some(ClcArgument::Str(s)) => s,
+                _ => panic!("by_classification argument is not a string"),
+            };
+            let results = reg.by_classification(arg);
+            let codes: std::collections::HashSet<&str> =
+                results.iter().map(|c| c.code.as_str()).collect();
+            for expected in &block.expected_contains {
+                assert!(codes.contains(expected.as_str()),
+                    "by_classification({}) should contain {}", arg, expected);
+            }
+            for excluded in &block.expected_not_contains {
+                assert!(!codes.contains(excluded.as_str()),
+                    "by_classification({}) should NOT contain {}", arg, excluded);
+            }
+        }
     }
 }
