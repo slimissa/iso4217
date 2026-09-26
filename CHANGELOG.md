@@ -6,6 +6,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.6.1] — Unreleased
+
+Convention extension and the first cross-registry snapshot. No data
+changes; no schema changes.
+
+### Added
+
+- `axes.json` — declares the two version axes (registry, schema) and
+  the 11 sites that carry them. Not yet read by the check script;
+  exists as a stable contract for registries that will adopt it.
+- `tools/iso3166_snapshot.json` — vendored byte-for-byte copy of
+  ISO 3166 v1.5.2's `iso3166.json`.
+- `tools/check_country_codes.py` — verifies every `countries[].code`
+  in the registry resolves in the snapshot.
+- CI job `check-country-codes`.
+
+### Changed
+
+- `tools/check_mojibake.py` — signature set extended from three
+  literal byte sequences to four patterns, the fourth being a
+  range check that catches every Latin-1 accented-character
+  round-trip (`Côte` → `CÃ´te`, `Curaçao` → `CuraÃ§ao`, etc.).
+  Added `.sql` and `.html` to the scan suffixes. Added a
+  `# mojibake-scan: skip` marker for test fixtures.
+- `README.md` — ISO 3166 added to the "Consumed by" table with the
+  vendored version.
+- `docs/LAYERS.md` — vendored-snapshots subsection under CURATED.
+
+### Verified
+
+- `python3 tools/check_mojibake.py` exits 0 on the clean repo
+- `python3 tools/check_country_codes.py` exits 0
+- `python3 tools/validate.py` — 0 errors
+- All eight gate checks pass
+
+---
+
 ## [1.6.0] — 2026-09-26
 
 Data model extension. Adds four fields to the registry, extends the
