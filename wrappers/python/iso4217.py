@@ -258,6 +258,52 @@ class Currency:
         """Market cap rank for crypto/stablecoins, or None for fiat currencies."""
         return self._data.get("market_cap_rank")
 
+    # -- v1.6.0 properties --------------------------------------------------
+
+    @property
+    def classification(self) -> Optional[str]:
+        """
+        Classification of an active currency: "circulating", "fund",
+        "settlement", or "indexation". None for withdrawn and non-ISO
+        entries, and for v1.5.x registries that predate this field.
+
+        See the README's Enums section for the meaning of each value.
+        """
+        return self._data.get("classification")
+
+    @property
+    def numeric_reused(self) -> Optional[bool]:
+        """
+        True if this active currency's numeric code also appears on a
+        withdrawn entry. False if not. None for withdrawn and non-ISO
+        entries, and for v1.5.x registries.
+
+        A consumer who uses numeric codes as foreign keys should filter
+        on `numeric_reused is not True` to avoid the reuse case.
+        """
+        return self._data.get("numeric_reused")
+
+    @property
+    def source_url(self) -> Optional[str]:
+        """
+        URL of the entry's primary source. Present on every active and
+        withdrawn entry as of v1.6.0. None for v1.5.x registries and
+        for non-ISO entries.
+        """
+        return self._data.get("source_url")
+
+    @property
+    def code_lifetime(self) -> Optional[Dict[str, Any]]:
+        """
+        The withdrawn code's full valid range: ``{"from": str | None,
+        "to": str}``. None for active and non-ISO entries, and for
+        v1.5.x registries.
+
+        ``from`` is None when the ISO assignment date is undocumented —
+        which is the case for every withdrawn entry in v1.6.0.
+        """
+        return self._data.get("code_lifetime")
+
     # -- Conversion ---------------------------------------------------------
 
     def to_minor(self, major_amount: Union[int, float]) -> int:
@@ -638,6 +684,27 @@ class CurrencyRegistry:
             c for c in self._active.values()
             if any(country.get("code") == code for country in c.countries)
         ]
+
+    def by_classification(self, cls: str) -> List[Currency]:
+        """
+        Find all active currencies with the given classification.
+
+        Args:
+            cls: One of "circulating", "fund", "settlement", "indexation".
+
+        Returns:
+            List of active Currency objects whose classification matches.
+            Empty list if none match, or if the registry predates v1.6.0
+            and no entry carries a classification field.
+
+        Examples:
+            >>> len(registry.by_classification("circulating"))
+            157
+            >>> [c.code for c in registry.by_classification("indexation")]
+            ['VED']
+        """
+        return [c for c in self._active.values() if c.classification == cls]
+
 
     # -- Iteration ----------------------------------------------------------
 

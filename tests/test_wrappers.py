@@ -296,6 +296,49 @@ def test_filter_methods_exist():
             f"Registry.{method_name} is not callable"
         )
 
+# ---------------------------------------------------------------------------
+# Classification tests (v1.6.0)
+# ---------------------------------------------------------------------------
+
+def test_classification_values():
+    """Every classification test vector must match the registry."""
+    data = _load_vectors()
+    registry = _load_registry()
+
+    for block in data.get("classification_tests", []):
+        expected = block.get("expected")
+        if not expected:
+            continue
+        for code, expected_cls in expected.items():
+            currency = registry.currency(code)
+            assert currency is not None, f"{code} not found in registry"
+            assert currency.classification == expected_cls, (
+                f"{code}.classification = {currency.classification!r}, "
+                f"expected {expected_cls!r}"
+            )
+
+
+def test_by_classification():
+    """by_classification() must return the expected codes."""
+    data = _load_vectors()
+    registry = _load_registry()
+
+    for block in data.get("classification_tests", []):
+        if block.get("method") != "by_classification":
+            continue
+        arg = block["argument"]
+        results = registry.by_classification(arg)
+        codes = {c.code for c in results}
+
+        for expected in block.get("expected_contains", []):
+            assert expected in codes, (
+                f"by_classification({arg!r}) should contain {expected}, "
+                f"got {sorted(codes)}"
+            )
+        for excluded in block.get("expected_not_contains", []):
+            assert excluded not in codes, (
+                f"by_classification({arg!r}) should NOT contain {excluded}"
+            )
 
 # ---------------------------------------------------------------------------
 # Summary tests
