@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parquet export generator for the ISO 4217 Currency Registry (v1.5.2).
+Parquet export generator for the ISO 4217 Currency Registry.
 
 Generates a single file at the repository root:
 

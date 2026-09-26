@@ -1,6 +1,6 @@
 {
   "name": "iso4217-registry",
-  "version": "1.0.0",
+  "version": "1.5.4",
   "description": "Canonical ISO 4217 currency registry — machine-readable, versioned, language-agnostic. JavaScript/Node.js wrapper with zero dependencies.",
   "main": "index.js",
   "types": "index.d.ts",

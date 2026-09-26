@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.5.4] — Unreleased
+
+Port the convention: add the VERSION file, the version consistency check
+tool, and reconcile every version site. No data changes; no schema changes.
+
+### Added
+
+- `VERSION` at repo root
+- `tools/check_version_consistency.py` — two-axis version check
+- `.gitattributes` rule for `VERSION` (eol=lf)
+
+### Changed
+
+- All version sites reconciled to `1.5.4`
+- `iso4217.json` → `meta.schema_version` set to `1.3.0`
+- `wrappers/python/iso4217.json` added to `sync_wrappers.py`
+- `tools/validate.py` schema version expectation updated to `1.3.0`
+
+### Fixed
+
+- `tools/parse_source.py`: removed stray `USS` from `ACTIVE_ISO_CODES`
+
+### Verified
+
+- `python3 tools/check_version_consistency.py` exits 0
+- All six export and validation checks exit 0
+
+---
+
 ## [1.5.3] — Unreleased
 
 A patch release correcting five issues surfaced by an external audit of

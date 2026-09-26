@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CSV/TSV export generator for the ISO 4217 Currency Registry (v1.5.0).
+CSV/TSV export generator for the ISO 4217 Currency Registry.
 
 Generates four dialect-specific flat files at the repository root:
     iso4217.csv              — RFC 4180 comma-separated (universal default)

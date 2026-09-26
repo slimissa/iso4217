@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SQL export generator for the ISO 4217 Currency Registry (v1.5.0).
+SQL export generator for the ISO 4217 Currency Registry.
 
 Generates four dialect-specific SQL files at the repository root:
     iso4217.sql              — ANSI SQL-92 portable
