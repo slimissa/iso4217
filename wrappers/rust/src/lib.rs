@@ -126,41 +126,6 @@ struct RawNonIso {
     special_purpose: Option<Vec<RawCurrency>>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-struct RawCurrency {
-    code: String,
-    #[serde(default)]
-    numeric: String,
-    name: String,
-    minor_units: u8,
-    #[serde(default)]
-    symbol: String,
-    #[serde(default)]
-    entity: String,
-    #[serde(default)]
-    central_bank: String,
-    // Peg fields
-    pegged_to: Option<String>,
-    peg_type: Option<String>,
-    pegged_since: Option<String>,
-    peg_rate: Option<f64>,
-    peg_band_pct: Option<f64>,
-    #[serde(default = "default_true")]
-    is_independent: bool,
-    // Optional fields
-    note: Option<String>,
-    #[serde(default)]
-    countries: Vec<RawCountry>,
-    // Withdrawn fields
-    withdrawn_date: Option<String>,
-    replaced_by: Option<String>,
-    conversion_rate: Option<f64>,
-    // Non-ISO fields
-    #[serde(rename = "type")]
-    currency_type: Option<String>,
-    market_cap_rank: Option<u32>,
-    peg_mechanism: Option<String>,
-}
 
 #[derive(Debug, Deserialize, Clone)]
 struct RawCountry {
