@@ -4350,6 +4350,7 @@
     "withdrawn": [
       {
         "code": "ATS",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ATS",
         "numeric": "040",
         "name": "Austrian Schilling",
@@ -4362,6 +4363,7 @@
       },
       {
         "code": "BEF",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEF",
         "numeric": "056",
         "name": "Belgian Franc",
@@ -4374,6 +4376,7 @@
       },
       {
         "code": "DEM",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DEM",
         "numeric": "276",
         "name": "German Mark",
@@ -4386,6 +4389,7 @@
       },
       {
         "code": "ESP",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESP",
         "numeric": "724",
         "name": "Spanish Peseta",
@@ -4398,6 +4402,7 @@
       },
       {
         "code": "FIM",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FIM",
         "numeric": "246",
         "name": "Finnish Markka",
@@ -4410,6 +4415,7 @@
       },
       {
         "code": "FRF",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FRF",
         "numeric": "250",
         "name": "French Franc",
@@ -4422,6 +4428,7 @@
       },
       {
         "code": "GRD",
+        "code_lifetime": {"from": null, "to": "2001-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GRD",
         "numeric": "300",
         "name": "Greek Drachma",
@@ -4434,6 +4441,7 @@
       },
       {
         "code": "IEP",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:IEP",
         "numeric": "372",
         "name": "Irish Pound",
@@ -4446,6 +4454,7 @@
       },
       {
         "code": "ITL",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ITL",
         "numeric": "380",
         "name": "Italian Lira",
@@ -4458,6 +4467,7 @@
       },
       {
         "code": "LUF",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUF",
         "numeric": "442",
         "name": "Luxembourg Franc",
@@ -4470,6 +4480,7 @@
       },
       {
         "code": "NLG",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NLG",
         "numeric": "528",
         "name": "Dutch Guilder",
@@ -4482,6 +4493,7 @@
       },
       {
         "code": "PTE",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PTE",
         "numeric": "620",
         "name": "Portuguese Escudo",
@@ -4494,6 +4506,7 @@
       },
       {
         "code": "SKK",
+        "code_lifetime": {"from": null, "to": "2009-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SKK",
         "numeric": "703",
         "name": "Slovak Koruna",
@@ -4506,6 +4519,7 @@
       },
       {
         "code": "EEK",
+        "code_lifetime": {"from": null, "to": "2011-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:EEK",
         "numeric": "233",
         "name": "Estonian Kroon",
@@ -4518,6 +4532,7 @@
       },
       {
         "code": "LVL",
+        "code_lifetime": {"from": null, "to": "2014-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LVL",
         "numeric": "428",
         "name": "Latvian Lats",
@@ -4530,6 +4545,7 @@
       },
       {
         "code": "LTL",
+        "code_lifetime": {"from": null, "to": "2015-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LTL",
         "numeric": "440",
         "name": "Lithuanian Litas",
@@ -4542,6 +4558,7 @@
       },
       {
         "code": "HRK",
+        "code_lifetime": {"from": null, "to": "2023-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HRK",
         "numeric": "191",
         "name": "Croatian Kuna",
@@ -4554,6 +4571,7 @@
       },
       {
         "code": "CYP",
+        "code_lifetime": {"from": null, "to": "2008-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CYP",
         "numeric": "196",
         "name": "Cypriot Pound",
@@ -4566,6 +4584,7 @@
       },
       {
         "code": "MTL",
+        "code_lifetime": {"from": null, "to": "2008-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MTL",
         "numeric": "470",
         "name": "Maltese Lira",
@@ -4578,6 +4597,7 @@
       },
       {
         "code": "SIT",
+        "code_lifetime": {"from": null, "to": "2007-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SIT",
         "numeric": "705",
         "name": "Slovenian Tolar",
@@ -4590,6 +4610,7 @@
       },
       {
         "code": "ROL",
+        "code_lifetime": {"from": null, "to": "2005-07-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ROL",
         "numeric": "642",
         "name": "Romanian Leu (old)",
@@ -4602,6 +4623,7 @@
       },
       {
         "code": "TRL",
+        "code_lifetime": {"from": null, "to": "2005-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TRL",
         "numeric": "792",
         "name": "Turkish Lira (old)",
@@ -4614,6 +4636,7 @@
       },
       {
         "code": "MXN_OLD",
+        "code_lifetime": {"from": null, "to": "1993-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXN",
         "numeric": "484",
         "name": "Mexican Peso (pre-1993)",
@@ -4627,6 +4650,7 @@
       },
       {
         "code": "RUR",
+        "code_lifetime": {"from": null, "to": "1998-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RUR",
         "numeric": "810",
         "name": "Russian Ruble (old)",
@@ -4639,6 +4663,7 @@
       },
       {
         "code": "BRB",
+        "code_lifetime": {"from": null, "to": "1986-02-28"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRB",
         "numeric": "076",
         "name": "Brazilian Cruzeiro",
@@ -4652,6 +4677,7 @@
       },
       {
         "code": "BRC",
+        "code_lifetime": {"from": null, "to": "1989-01-15"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRC",
         "numeric": "076",
         "name": "Brazilian Cruzado",
@@ -4665,6 +4691,7 @@
       },
       {
         "code": "BRN",
+        "code_lifetime": {"from": null, "to": "1990-03-15"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRN",
         "numeric": "076",
         "name": "Brazilian Cruzado Novo",
@@ -4678,6 +4705,7 @@
       },
       {
         "code": "BRE",
+        "code_lifetime": {"from": null, "to": "1993-08-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRE",
         "numeric": "076",
         "name": "Brazilian Cruzeiro (1990)",
@@ -4691,6 +4719,7 @@
       },
       {
         "code": "BRR",
+        "code_lifetime": {"from": null, "to": "1994-07-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRR",
         "numeric": "987",
         "name": "Brazilian Cruzeiro Real",
@@ -4704,6 +4733,7 @@
       },
       {
         "code": "YUD",
+        "code_lifetime": {"from": null, "to": "1989-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUD",
         "numeric": "890",
         "name": "Yugoslav Dinar (1966)",
@@ -4717,6 +4747,7 @@
       },
       {
         "code": "YUN",
+        "code_lifetime": {"from": null, "to": "1992-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUN",
         "numeric": "890",
         "name": "Yugoslav Convertible Dinar",
@@ -4730,6 +4761,7 @@
       },
       {
         "code": "YUR",
+        "code_lifetime": {"from": null, "to": "1993-09-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUR",
         "numeric": "890",
         "name": "Yugoslav Reformed Dinar",
@@ -4743,6 +4775,7 @@
       },
       {
         "code": "YUO",
+        "code_lifetime": {"from": null, "to": "1993-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUO",
         "numeric": "890",
         "name": "Yugoslav October Dinar",
@@ -4756,6 +4789,7 @@
       },
       {
         "code": "YUG",
+        "code_lifetime": {"from": null, "to": "1994-01-23"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUG",
         "numeric": "890",
         "name": "Yugoslav January Dinar",
@@ -4769,6 +4803,7 @@
       },
       {
         "code": "YUM",
+        "code_lifetime": {"from": null, "to": "2003-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUM",
         "numeric": "891",
         "name": "Yugoslav Novi Dinar",
@@ -4782,6 +4817,7 @@
       },
       {
         "code": "AOK",
+        "code_lifetime": {"from": null, "to": "1990-09-24"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AOK",
         "numeric": "024",
         "name": "Angolan Kwanza (1977)",
@@ -4795,6 +4831,7 @@
       },
       {
         "code": "AON",
+        "code_lifetime": {"from": null, "to": "1995-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AON",
         "numeric": "024",
         "name": "Angolan Novo Kwanza",
@@ -4808,6 +4845,7 @@
       },
       {
         "code": "AOR",
+        "code_lifetime": {"from": null, "to": "1999-11-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AOR",
         "numeric": "982",
         "name": "Angolan Kwanza Reajustado",
@@ -4821,6 +4859,7 @@
       },
       {
         "code": "BGJ",
+        "code_lifetime": {"from": null, "to": "1997-07-04"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGJ",
         "numeric": "100",
         "name": "Bulgarian Lev (1962)",
@@ -4834,6 +4873,7 @@
       },
       {
         "code": "BGK",
+        "code_lifetime": {"from": null, "to": "1999-07-04"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGK",
         "numeric": "100",
         "name": "Bulgarian Lev (1997)",
@@ -4847,6 +4887,7 @@
       },
       {
         "code": "BGL",
+        "code_lifetime": {"from": null, "to": "1999-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGL",
         "numeric": "100",
         "name": "Bulgarian Lev (1999)",
@@ -4860,6 +4901,7 @@
       },
       {
         "code": "CSK",
+        "code_lifetime": {"from": null, "to": "1993-02-07"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSK",
         "numeric": "200",
         "name": "Czechoslovak Koruna",
@@ -4873,6 +4915,7 @@
       },
       {
         "code": "CSJ",
+        "code_lifetime": {"from": null, "to": "1993-02-07"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSJ",
         "numeric": "203",
         "name": "Czechoslovak Koruna (1993)",
@@ -4886,6 +4929,7 @@
       },
       {
         "code": "ARL",
+        "code_lifetime": {"from": null, "to": "1983-05-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARL",
         "numeric": "032",
         "name": "Argentine Peso Ley",
@@ -4899,6 +4943,7 @@
       },
       {
         "code": "ARP",
+        "code_lifetime": {"from": null, "to": "1985-06-14"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARP",
         "numeric": "032",
         "name": "Argentine Peso Argentino",
@@ -4912,6 +4957,7 @@
       },
       {
         "code": "ARA",
+        "code_lifetime": {"from": null, "to": "1991-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARA",
         "numeric": "032",
         "name": "Argentine Austral",
@@ -4925,6 +4971,7 @@
       },
       {
         "code": "ARY",
+        "code_lifetime": {"from": null, "to": "1983-05-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARY",
         "numeric": "032",
         "name": "Argentine Peso Ley (alternative code)",
@@ -4938,6 +4985,7 @@
       },
       {
         "code": "GNE",
+        "code_lifetime": {"from": null, "to": "1985-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GNE",
         "numeric": "324",
         "name": "Guinean Syli",
@@ -4951,6 +4999,7 @@
       },
       {
         "code": "GWP",
+        "code_lifetime": {"from": null, "to": "1997-05-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GWP",
         "numeric": "624",
         "name": "Guinea-Bissau Peso",
@@ -4964,6 +5013,7 @@
       },
       {
         "code": "GWE",
+        "code_lifetime": {"from": null, "to": "1975-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GWE",
         "numeric": "624",
         "name": "Guinean Escudo",
@@ -4977,6 +5027,7 @@
       },
       {
         "code": "GNS",
+        "code_lifetime": {"from": null, "to": "1985-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GNS",
         "numeric": "324",
         "name": "Guinean Syli (alternative code)",
@@ -4990,6 +5041,7 @@
       },
       {
         "code": "BYB",
+        "code_lifetime": {"from": null, "to": "1999-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BYB",
         "numeric": "112",
         "name": "Belarusian Ruble (1992)",
@@ -5003,6 +5055,7 @@
       },
       {
         "code": "BYR",
+        "code_lifetime": {"from": null, "to": "2016-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BYR",
         "numeric": "974",
         "name": "Belarusian Ruble (2000)",
@@ -5016,6 +5069,7 @@
       },
       {
         "code": "BEC",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEC",
         "numeric": "993",
         "name": "Belgian Convertible Franc",
@@ -5029,6 +5083,7 @@
       },
       {
         "code": "BEL",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEL",
         "numeric": "992",
         "name": "Belgian Financial Franc",
@@ -5042,6 +5097,7 @@
       },
       {
         "code": "ECS",
+        "code_lifetime": {"from": null, "to": "2000-03-12"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ECS",
         "numeric": "218",
         "name": "Ecuadorian Sucre",
@@ -5055,6 +5111,7 @@
       },
       {
         "code": "ECV",
+        "code_lifetime": {"from": null, "to": "2000-03-12"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ECV",
         "numeric": "983",
         "name": "Ecuadorian Unidad de Valor Constante",
@@ -5068,6 +5125,7 @@
       },
       {
         "code": "PEH",
+        "code_lifetime": {"from": null, "to": "1985-01-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PEH",
         "numeric": "604",
         "name": "Peruvian Sol de Oro",
@@ -5081,6 +5139,7 @@
       },
       {
         "code": "PEI",
+        "code_lifetime": {"from": null, "to": "1991-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PEI",
         "numeric": "604",
         "name": "Peruvian Inti",
@@ -5094,6 +5153,7 @@
       },
       {
         "code": "PES",
+        "code_lifetime": {"from": null, "to": "1985-01-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PES",
         "numeric": "604",
         "name": "Peruvian Sol (alternative code)",
@@ -5107,6 +5167,7 @@
       },
       {
         "code": "NIC",
+        "code_lifetime": {"from": null, "to": "1991-04-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NIC",
         "numeric": "558",
         "name": "Nicaraguan Córdoba (1988)",
@@ -5120,6 +5181,7 @@
       },
       {
         "code": "MXP",
+        "code_lifetime": {"from": null, "to": "1992-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXP",
         "numeric": "484",
         "name": "Mexican Peso (pre-1993)",
@@ -5133,6 +5195,7 @@
       },
       {
         "code": "ZWD",
+        "code_lifetime": {"from": null, "to": "2006-07-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWD",
         "numeric": "716",
         "name": "Zimbabwean Dollar (1980)",
@@ -5146,6 +5209,7 @@
       },
       {
         "code": "ZWN",
+        "code_lifetime": {"from": null, "to": "2008-07-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWN",
         "numeric": "942",
         "name": "Zimbabwean Dollar (2006)",
@@ -5159,6 +5223,7 @@
       },
       {
         "code": "ZWR",
+        "code_lifetime": {"from": null, "to": "2009-02-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWR",
         "numeric": "935",
         "name": "Zimbabwean Dollar (2008)",
@@ -5172,6 +5237,7 @@
       },
       {
         "code": "ZWL",
+        "code_lifetime": {"from": null, "to": "2009-04-11"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWL",
         "numeric": "932",
         "name": "Zimbabwean Dollar (2009)",
@@ -5185,6 +5251,7 @@
       },
       {
         "code": "ZWC",
+        "code_lifetime": {"from": null, "to": "1980-04-17"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWC",
         "numeric": "716",
         "name": "Rhodesian Dollar",
@@ -5198,6 +5265,7 @@
       },
       {
         "code": "ZRZ",
+        "code_lifetime": {"from": null, "to": "1993-10-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZRZ",
         "numeric": "180",
         "name": "Zairean Zaire",
@@ -5211,6 +5279,7 @@
       },
       {
         "code": "ZRN",
+        "code_lifetime": {"from": null, "to": "1997-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZRN",
         "numeric": "180",
         "name": "Zairean New Zaire",
@@ -5224,6 +5293,7 @@
       },
       {
         "code": "ZMK",
+        "code_lifetime": {"from": null, "to": "2012-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZMK",
         "numeric": "894",
         "name": "Zambian Kwacha (1968)",
@@ -5237,6 +5307,7 @@
       },
       {
         "code": "BUK",
+        "code_lifetime": {"from": null, "to": "1989-06-17"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BUK",
         "numeric": "104",
         "name": "Burmese Kyat (old)",
@@ -5250,6 +5321,7 @@
       },
       {
         "code": "DDM",
+        "code_lifetime": {"from": null, "to": "1990-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DDM",
         "numeric": "278",
         "name": "East German Mark",
@@ -5263,6 +5335,7 @@
       },
       {
         "code": "LAJ",
+        "code_lifetime": {"from": null, "to": "1979-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LAJ",
         "numeric": "418",
         "name": "Lao Kip (old)",
@@ -5276,6 +5349,7 @@
       },
       {
         "code": "TJR",
+        "code_lifetime": {"from": null, "to": "2000-10-29"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TJR",
         "numeric": "762",
         "name": "Tajikistani Ruble",
@@ -5289,6 +5363,7 @@
       },
       {
         "code": "TMM",
+        "code_lifetime": {"from": null, "to": "2008-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TMM",
         "numeric": "795",
         "name": "Turkmenistani Manat (old)",
@@ -5302,6 +5377,7 @@
       },
       {
         "code": "TPE",
+        "code_lifetime": {"from": null, "to": "2002-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TPE",
         "numeric": "626",
         "name": "Portuguese Timorese Escudo",
@@ -5315,6 +5391,7 @@
       },
       {
         "code": "VNC",
+        "code_lifetime": {"from": null, "to": "1978-05-02"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VNC",
         "numeric": "704",
         "name": "Vietnamese Dong (old)",
@@ -5328,6 +5405,7 @@
       },
       {
         "code": "YDD",
+        "code_lifetime": {"from": null, "to": "1990-05-21"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YDD",
         "numeric": "720",
         "name": "South Yemeni Dinar",
@@ -5341,6 +5419,7 @@
       },
       {
         "code": "BAD",
+        "code_lifetime": {"from": null, "to": "1998-06-21"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BAD",
         "numeric": "070",
         "name": "Bosnia and Herzegovina Dinar",
@@ -5354,6 +5433,7 @@
       },
       {
         "code": "BOP",
+        "code_lifetime": {"from": null, "to": "1986-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BOP",
         "numeric": "068",
         "name": "Bolivian Peso",
@@ -5367,6 +5447,7 @@
       },
       {
         "code": "CHC",
+        "code_lifetime": {"from": null, "to": "2004-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CHC",
         "numeric": "948",
         "name": "WIR Franc (electronic)",
@@ -5380,6 +5461,7 @@
       },
       {
         "code": "CSD",
+        "code_lifetime": {"from": null, "to": "2006-10-24"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSD",
         "numeric": "891",
         "name": "Serbian Dinar (2003)",
@@ -5393,6 +5475,7 @@
       },
       {
         "code": "GEK",
+        "code_lifetime": {"from": null, "to": "1995-10-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GEK",
         "numeric": "268",
         "name": "Georgian Kuponi",
@@ -5406,6 +5489,7 @@
       },
       {
         "code": "GHC",
+        "code_lifetime": {"from": null, "to": "2007-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GHC",
         "numeric": "288",
         "name": "Ghanaian Cedi (old)",
@@ -5419,6 +5503,7 @@
       },
       {
         "code": "GHP",
+        "code_lifetime": {"from": null, "to": "2007-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GHP",
         "numeric": "939",
         "name": "Ghanaian Cedi (transitional)",
@@ -5432,6 +5517,7 @@
       },
       {
         "code": "GQE",
+        "code_lifetime": {"from": null, "to": "1985-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GQE",
         "numeric": "226",
         "name": "Equatorial Guinean Ekwele",
@@ -5445,6 +5531,7 @@
       },
       {
         "code": "HRD",
+        "code_lifetime": {"from": null, "to": "1994-05-29"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HRD",
         "numeric": "191",
         "name": "Croatian Dinar",
@@ -5458,6 +5545,7 @@
       },
       {
         "code": "LTT",
+        "code_lifetime": {"from": null, "to": "1993-06-24"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LTT",
         "numeric": "440",
         "name": "Lithuanian Talonas",
@@ -5471,6 +5559,7 @@
       },
       {
         "code": "LUC",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUC",
         "numeric": "989",
         "name": "Luxembourg Convertible Franc",
@@ -5484,6 +5573,7 @@
       },
       {
         "code": "LUL",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUL",
         "numeric": "988",
         "name": "Luxembourg Financial Franc",
@@ -5497,6 +5587,7 @@
       },
       {
         "code": "LVR",
+        "code_lifetime": {"from": null, "to": "1993-03-04"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LVR",
         "numeric": "428",
         "name": "Latvian Rublis",
@@ -5510,6 +5601,7 @@
       },
       {
         "code": "MGF",
+        "code_lifetime": {"from": null, "to": "2004-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MGF",
         "numeric": "450",
         "name": "Malagasy Franc",
@@ -5523,6 +5615,7 @@
       },
       {
         "code": "MKN",
+        "code_lifetime": {"from": null, "to": "1993-05-04"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MKN",
         "numeric": "807",
         "name": "Macedonian Denar (old)",
@@ -5536,6 +5629,7 @@
       },
       {
         "code": "MLF",
+        "code_lifetime": {"from": null, "to": "1984-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MLF",
         "numeric": "466",
         "name": "Malian Franc",
@@ -5549,6 +5643,7 @@
       },
       {
         "code": "MTP",
+        "code_lifetime": {"from": null, "to": "1972-05-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MTP",
         "numeric": "470",
         "name": "Maltese Pound",
@@ -5562,6 +5657,7 @@
       },
       {
         "code": "MVQ",
+        "code_lifetime": {"from": null, "to": "1981-01-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MVQ",
         "numeric": "462",
         "name": "Maldivian Rupee",
@@ -5575,6 +5671,7 @@
       },
       {
         "code": "MZE",
+        "code_lifetime": {"from": null, "to": "1980-06-15"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MZE",
         "numeric": "508",
         "name": "Mozambican Escudo",
@@ -5588,6 +5685,7 @@
       },
       {
         "code": "MZM",
+        "code_lifetime": {"from": null, "to": "2006-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MZM",
         "numeric": "508",
         "name": "Mozambican Metical (old)",
@@ -5601,6 +5699,7 @@
       },
       {
         "code": "MRO",
+        "code_lifetime": {"from": null, "to": "2017-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MRO",
         "numeric": "478",
         "name": "Mauritanian Ouguiya (old)",
@@ -5614,6 +5713,7 @@
       },
       {
         "code": "PLZ",
+        "code_lifetime": {"from": null, "to": "1994-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PLZ",
         "numeric": "616",
         "name": "Polish Zloty (old)",
@@ -5627,6 +5727,7 @@
       },
       {
         "code": "RHD",
+        "code_lifetime": {"from": null, "to": "1980-04-17"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RHD",
         "numeric": "716",
         "name": "Rhodesian Dollar",
@@ -5640,6 +5741,7 @@
       },
       {
         "code": "SDD",
+        "code_lifetime": {"from": null, "to": "2007-01-09"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SDD",
         "numeric": "736",
         "name": "Sudanese Dinar",
@@ -5653,6 +5755,7 @@
       },
       {
         "code": "SDP",
+        "code_lifetime": {"from": null, "to": "1992-01-08"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SDP",
         "numeric": "736",
         "name": "Sudanese Pound (old)",
@@ -5666,6 +5769,7 @@
       },
       {
         "code": "SLL",
+        "code_lifetime": {"from": null, "to": "2021-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SLL",
         "numeric": "694",
         "name": "Sierra Leonean Leone (old)",
@@ -5679,6 +5783,7 @@
       },
       {
         "code": "SRG",
+        "code_lifetime": {"from": null, "to": "2003-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SRG",
         "numeric": "740",
         "name": "Surinamese Guilder",
@@ -5692,6 +5797,7 @@
       },
       {
         "code": "STD",
+        "code_lifetime": {"from": null, "to": "2017-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:STD",
         "numeric": "678",
         "name": "São Tomé and Príncipe Dobra (old)",
@@ -5705,6 +5811,7 @@
       },
       {
         "code": "SUR",
+        "code_lifetime": {"from": null, "to": "1991-12-25"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SUR",
         "numeric": "810",
         "name": "Soviet Union Ruble",
@@ -5718,6 +5825,7 @@
       },
       {
         "code": "UAK",
+        "code_lifetime": {"from": null, "to": "1996-09-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UAK",
         "numeric": "804",
         "name": "Ukrainian Karbovanets",
@@ -5731,6 +5839,7 @@
       },
       {
         "code": "UGS",
+        "code_lifetime": {"from": null, "to": "1987-05-14"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UGS",
         "numeric": "800",
         "name": "Ugandan Shilling (old)",
@@ -5744,6 +5853,7 @@
       },
       {
         "code": "UGW",
+        "code_lifetime": {"from": null, "to": "1987-05-14"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UGW",
         "numeric": "800",
         "name": "Ugandan Shilling (old, alternative)",
@@ -5757,6 +5867,7 @@
       },
       {
         "code": "UYN",
+        "code_lifetime": {"from": null, "to": "1975-06-30"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYN",
         "numeric": "858",
         "name": "Uruguayan Peso (old)",
@@ -5770,6 +5881,7 @@
       },
       {
         "code": "UYP",
+        "code_lifetime": {"from": null, "to": "1992-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYP",
         "numeric": "858",
         "name": "Uruguayan New Peso",
@@ -5783,6 +5895,7 @@
       },
       {
         "code": "VEB",
+        "code_lifetime": {"from": null, "to": "2007-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VEB",
         "numeric": "862",
         "name": "Venezuelan Bolívar (old)",
@@ -5796,6 +5909,7 @@
       },
       {
         "code": "VEF",
+        "code_lifetime": {"from": null, "to": "2018-08-19"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VEF",
         "numeric": "937",
         "name": "Venezuelan Bolívar Fuerte",
@@ -5809,6 +5923,7 @@
       },
       {
         "code": "ZAL",
+        "code_lifetime": {"from": null, "to": "1995-03-12"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZAL",
         "numeric": "991",
         "name": "South African Financial Rand",
@@ -5822,6 +5937,7 @@
       },
       {
         "code": "ADF",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ADF",
         "numeric": "250",
         "name": "Andorran Franc",
@@ -5835,6 +5951,7 @@
       },
       {
         "code": "ADP",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ADP",
         "numeric": "020",
         "name": "Andorran Peseta",
@@ -5848,6 +5965,7 @@
       },
       {
         "code": "AFA",
+        "code_lifetime": {"from": null, "to": "2003-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AFA",
         "numeric": "004",
         "name": "Afghan Afghani (old)",
@@ -5861,6 +5979,7 @@
       },
       {
         "code": "ALK",
+        "code_lifetime": {"from": null, "to": "1965-08-15"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ALK",
         "numeric": "008",
         "name": "Albanian Lek (old)",
@@ -5874,6 +5993,7 @@
       },
       {
         "code": "AZM",
+        "code_lifetime": {"from": null, "to": "2006-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AZM",
         "numeric": "031",
         "name": "Azerbaijani Manat (old)",
@@ -5887,6 +6007,7 @@
       },
       {
         "code": "ESA",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESA",
         "numeric": "996",
         "name": "Spanish Peseta (Account A)",
@@ -5900,6 +6021,7 @@
       },
       {
         "code": "ESB",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESB",
         "numeric": "995",
         "name": "Spanish Peseta (Account B)",
@@ -5913,6 +6035,7 @@
       },
       {
         "code": "ILP",
+        "code_lifetime": {"from": null, "to": "1980-02-23"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ILP",
         "numeric": "376",
         "name": "Israeli Pound",
@@ -5926,6 +6049,7 @@
       },
       {
         "code": "ILR",
+        "code_lifetime": {"from": null, "to": "1985-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ILR",
         "numeric": "376",
         "name": "Israeli Shekel (old)",
@@ -5939,6 +6063,7 @@
       },
       {
         "code": "ISJ",
+        "code_lifetime": {"from": null, "to": "1980-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ISJ",
         "numeric": "352",
         "name": "Icelandic Króna (old)",
@@ -5952,6 +6077,7 @@
       },
       {
         "code": "LSM",
+        "code_lifetime": {"from": null, "to": "1985-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LSM",
         "numeric": "426",
         "name": "Lesotho Loti (old)",
@@ -5965,6 +6091,7 @@
       },
       {
         "code": "MCF",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MCF",
         "numeric": "250",
         "name": "Monégasque Franc",
@@ -5978,6 +6105,7 @@
       },
       {
         "code": "ROK",
+        "code_lifetime": {"from": null, "to": "1952-01-27"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ROK",
         "numeric": "642",
         "name": "Romanian Leu (old)",
@@ -5991,6 +6119,7 @@
       },
       {
         "code": "SML",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SML",
         "numeric": "380",
         "name": "San Marinese Lira",
@@ -6004,6 +6133,7 @@
       },
       {
         "code": "VAL",
+        "code_lifetime": {"from": null, "to": "1999-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VAL",
         "numeric": "380",
         "name": "Vatican Lira",
@@ -6017,6 +6147,7 @@
       },
       {
         "code": "ARM",
+        "code_lifetime": {"from": null, "to": "1969-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARM",
         "numeric": "032",
         "name": "Argentine Peso Moneda Nacional",
@@ -6030,6 +6161,7 @@
       },
       {
         "code": "XEU",
+        "code_lifetime": {"from": null, "to": "1998-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XEU",
         "numeric": "954",
         "name": "European Currency Unit",
@@ -6043,6 +6175,7 @@
       },
       {
         "code": "XFO",
+        "code_lifetime": {"from": null, "to": "2003-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XFO",
         "numeric": "955",
         "name": "Gold Franc",
@@ -6056,6 +6189,7 @@
       },
       {
         "code": "XFU",
+        "code_lifetime": {"from": null, "to": "2013-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XFU",
         "numeric": "956",
         "name": "UIC Franc",
@@ -6069,6 +6203,7 @@
       },
       {
         "code": "XRE",
+        "code_lifetime": {"from": null, "to": "1999-12-31"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XRE",
         "numeric": "957",
         "name": "RINET Funds Code",
