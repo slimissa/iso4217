@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.6.0] — Unreleased
+## [1.6.0] — 2026-09-26
 
 Data model extension. Adds four fields to the registry, extends the
 schema, and adds validation rules. No breaking changes — every new

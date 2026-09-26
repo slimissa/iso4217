@@ -1,6 +1,6 @@
 [package]
 name = "iso4217"
-version = "1.5.4"
+version = "1.6.0"
 edition = "2021"
 description = "Canonical ISO 4217 currency registry — machine-readable, versioned, language-agnostic. Rust crate with zero runtime dependencies."
 license = "Apache-2.0"
