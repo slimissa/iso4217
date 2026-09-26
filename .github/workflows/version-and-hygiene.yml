@@ -1,0 +1,69 @@
+name: Version and Hygiene
+
+# Four fast checks that enforce the convention ported in v1.5.4.
+#
+# These live in their own workflow, not in validate.yml, so they can
+# run in parallel with the slower test matrix and finish in under a
+# minute. A stale version site or a broken wrapper copy fails here
+# before the heavier wrapper matrix even starts.
+#
+# Runs on:
+#   - every push to main
+#   - every tag push (so a release tag is validated by the same rules)
+#   - every pull request
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    name: Version consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pyarrow
+        run: python3 -m pip install --upgrade pip pyarrow
+      - name: Check version consistency
+        run: python3 tools/check_version_consistency.py
+
+  check-mojibake:
+    name: Mojibake scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Scan for mojibake
+        run: python3 tools/check_mojibake.py
+
+  sync-wrappers-check:
+    name: Wrapper copies in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify wrapper copies
+        run: python3 tools/sync_wrappers.py --check
+
+  check-freshness:
+    name: Snapshot freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check snapshot freshness
+        run: python3 tools/check_snapshot_freshness.py
