@@ -71,6 +71,12 @@ struct RawSource {
     last_amendment_date: Option<String>,
 }
 
+
+#[derive(Debug, Deserialize)]
+struct RawCurrencies {
+    active: Option<Vec<RawCurrency>>,
+    withdrawn: Option<Vec<RawCurrency>>,
+}
 #[derive(Debug, Deserialize, Clone)]
 struct RawCurrency {
     code: String,
