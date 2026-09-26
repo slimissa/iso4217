@@ -7,7 +7,7 @@ One JSON file. Zero dependencies. Every language, database, spreadsheet, and she
 [![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Schema Version](https://img.shields.io/badge/schema-1.3.0-green.svg)](./schema.json)
-[![Registry Version](https://img.shields.io/badge/registry-1.5.5-orange.svg)](./iso4217.json)
+[![Registry Version](https://img.shields.io/badge/registry-1.5.4-orange.svg)](./iso4217.json)
 ---
 
 ## Why?
