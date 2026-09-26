@@ -56,7 +56,7 @@ ACTIVE_ISO_CODES: Set[str] = {
     "WST",
     "XAF", "XCD", "XOF", "XPF",
     "YER",
-    "ZAR", "ZMW", "ZWG", "USS",
+    "ZAR", "ZMW", "ZWG",
 }
 
 # Known withdrawn codes — these appear in Wikipedia's table but are not active

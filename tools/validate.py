@@ -195,7 +195,7 @@ def validate_meta(registry: Dict) -> List[ValidationError]:
 
     # Schema version matches
     schema_version = meta.get("schema_version", "")
-    if schema_version != "1.0.0":
+    if schema_version != "1.3.0":
         errors.append(ValidationError(
             severity="warning",
             category="integrity",
