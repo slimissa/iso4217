@@ -126,6 +126,12 @@ the registry's own file structure.
 | `wrappers/rust/iso4217.json` | Rust wrapper, embedded at compile time via `include_str!` |
 | `wrappers/python/iso4217.json` | Python wrapper, resolved at runtime |
 
+**Vendored snapshots (external registries):**
+
+| File | Vendored from | Refreshed by | CI gate |
+|------|---------------|--------------|---------|
+| `tools/iso3166_snapshot.json` | ISO 3166 (v1.5.2) | `tools/check_country_codes.py --refresh-from <path>` | `check-country-codes` |
+
 **Read-only interfaces (no artifact on disk):**
 
 | Interface | Reads |
