@@ -2,6 +2,8 @@
   "meta": {
     "version": "1.5.4",
     "updated": "2026-09-26",
+    "amendment": 179,
+    "amendment_date": "2025-06-15",
     "schema_version": "1.4.0",
     "description": "Canonical ISO 4217 currency registry. Active ISO currencies, withdrawn ISO currencies, and commonly-used non-ISO currencies maintained as separate arrays. This file is the single source of truth — all wrappers, bindings, and downstream databases derive from this file.",
     "project": "https://github.com/slimissa/iso4217",
