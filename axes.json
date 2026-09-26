@@ -1,0 +1,158 @@
+{
+  "$comment": "Version axes for the ISO 4217 Currency Registry. Declares which files carry which version, how to extract each version, and what each site means. This file is a stable contract — the reference implementation of the axes shape for the QuantOS registries. tools/check_version_consistency.py does not yet read it; the refactor that makes it data-driven waits for ISO 10383's version, making three implementations.",
+  "version": "1.0.0",
+  "notes": [
+    "Two independent axes are declared because the data version and the format-contract version can move separately. A patch correction to the data does not change the schema; a new optional field in the schema does not change the data.",
+    "Each axis has one source of truth. Every other site on that axis must equal it, or CI fails.",
+    "Sites are ordered by reading priority: the source of truth first, then every derived or mirrored site.",
+    "An extractor is a named reader. A consumer reads the file at `path` with the extractor's implementation, following the parameters listed in the `extractors` block.",
+    "Required sites that are missing fail the check. Optional sites that are missing are skipped, not failed. This lets a registry declare a site that may legitimately be absent from some checkouts (e.g. a Parquet export in an sdist) without weakening the contract for the repo.",
+    "The badge extractor matches shields.io badge URLs of the form `https://img.shields.io/badge/<prefix>-X.Y.Z-<color>.svg`. The color is not checked."
+  ],
+
+  "extractors": {
+    "text": {
+      "description": "Read the file as UTF-8 text and return its stripped contents. Used for one-line files like VERSION.",
+      "parameters": {}
+    },
+    "first_released_heading": {
+      "description": "Find the first '## [X.Y.Z]' heading in a Markdown file whose trailing text does not start with 'Unreleased'. Trailing text after the version is ignored.",
+      "parameters": {}
+    },
+    "json_path": {
+      "description": "Read the file as JSON and return the value at `json_path`, a dot-separated path with '$' as the root. Only object-key traversal is required.",
+      "parameters": {
+        "json_path": "string — dot-separated path, e.g. '$.meta.version'"
+      }
+    },
+    "parquet_footer": {
+      "description": "Read the Parquet file's footer metadata and return the value at `key`, decoded as UTF-8. Uses the file's schema metadata block; the data rows are not read.",
+      "parameters": {
+        "key": "string — footer metadata key, e.g. 'iso4217.version'"
+      }
+    },
+    "badge": {
+      "description": "Match a shields.io badge URL in a Markdown file of the form `badge/<prefix>-X.Y.Z-<color>` and return X.Y.Z. Anchored on `badge/` so it never matches a version mentioned elsewhere in prose.",
+      "parameters": {
+        "prefix": "string — the badge's label, e.g. 'registry' or 'schema'"
+      }
+    },
+    "python_regex": {
+      "description": "Apply a Python-flavored regex to the file's text and return the captured group. The default group is 1.",
+      "parameters": {
+        "pattern": "string — Python regex, MULTILINE flags applied",
+        "group": "integer, optional, default 1 — the capturing group to return"
+      }
+    },
+    "toml_section": {
+      "description": "Read a key from a TOML file, restricted to a named section. Does not match keys in other sections.",
+      "parameters": {
+        "section": "string — the section name, e.g. 'package'",
+        "key": "string — the key to read, e.g. 'version'"
+      }
+    },
+    "schema_id": {
+      "description": "Read a JSON Schema's `$id` field and extract the trailing '/vX.Y.Z/' segment. The leading 'v' is stripped; the returned value is 'X.Y.Z'.",
+      "parameters": {}
+    }
+  },
+
+  "axes": [
+    {
+      "name": "registry",
+      "description": "The data version. Bumped on a patch for corrections, on a minor for new currencies or new optional data fields. The source of truth is the VERSION file at repo root.",
+      "source": {
+        "path": "VERSION",
+        "extractor": "text"
+      },
+      "sites": [
+        {
+          "path": "VERSION",
+          "extractor": "text",
+          "label": "VERSION",
+          "required": true
+        },
+        {
+          "path": "CHANGELOG.md",
+          "extractor": "first_released_heading",
+          "label": "CHANGELOG.md (first released heading)",
+          "required": true
+        },
+        {
+          "path": "iso4217.json",
+          "extractor": "json_path",
+          "json_path": "$.meta.version",
+          "label": "iso4217.json → meta.version",
+          "required": true
+        },
+        {
+          "path": "iso4217.parquet",
+          "extractor": "parquet_footer",
+          "key": "iso4217.version",
+          "label": "iso4217.parquet → footer 'iso4217.version'",
+          "required": true
+        },
+        {
+          "path": "README.md",
+          "extractor": "badge",
+          "prefix": "registry",
+          "label": "README.md → registry badge",
+          "required": true
+        },
+        {
+          "path": "wrappers/python/setup.py",
+          "extractor": "python_regex",
+          "pattern": "^VERSION\\s*=\\s*[\"']([0-9]+\\.[0-9]+\\.[0-9]+)[\"']",
+          "group": 1,
+          "label": "wrappers/python/setup.py → VERSION",
+          "required": true
+        },
+        {
+          "path": "wrappers/javascript/package.json",
+          "extractor": "json_path",
+          "json_path": "$.version",
+          "label": "wrappers/javascript/package.json → version",
+          "required": true
+        },
+        {
+          "path": "wrappers/rust/Cargo.toml",
+          "extractor": "toml_section",
+          "section": "package",
+          "key": "version",
+          "label": "wrappers/rust/Cargo.toml → [package].version",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "schema",
+      "description": "The format-contract version. Bumped only when the schema's structure changes: a new optional field is a minor bump, a removed or renamed required field is a major bump. The source of truth is schema.json's $id trailing segment.",
+      "source": {
+        "path": "schema.json",
+        "extractor": "schema_id"
+      },
+      "sites": [
+        {
+          "path": "schema.json",
+          "extractor": "schema_id",
+          "label": "schema.json → $id",
+          "required": true
+        },
+        {
+          "path": "iso4217.json",
+          "extractor": "json_path",
+          "json_path": "$.meta.schema_version",
+          "label": "iso4217.json → meta.schema_version",
+          "required": true
+        },
+        {
+          "path": "README.md",
+          "extractor": "badge",
+          "prefix": "schema",
+          "label": "README.md → schema badge",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
