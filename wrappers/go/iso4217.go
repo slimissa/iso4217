@@ -73,6 +73,15 @@ type rawSource struct {
 type rawCurrencies struct {
 	Active    []rawCurrency `json:"active"`
 	Withdrawn []rawCurrency `json:"withdrawn"`
+	Classification *string       `json:"classification"`
+	NumericReused  *bool         `json:"numeric_reused"`
+	SourceURL      *string       `json:"source_url"`
+	CodeLifetime   *RawCodeLifetime `json:"code_lifetime"`
+}
+
+type RawCodeLifetime struct {
+	From *string `json:"from"`
+	To   string  `json:"to"`
 }
 
 type rawNonISO struct {
@@ -187,6 +196,24 @@ type Currency struct {
 	MarketCapRank *int `json:"market_cap_rank,omitempty"`
 	// Peg mechanism for stablecoins (e.g., "Fiat-collateralized").
 	PegMechanism *string `json:"peg_mechanism,omitempty"`
+	// Classification of active currencies: "circulating", "fund",
+	// "settlement", or "indexation". Nil for withdrawn entries.
+	Classification *string `json:"classification,omitempty"`
+	// NumericReused is true when this active currency's numeric code
+	// also appears on a withdrawn entry.
+	NumericReused *bool `json:"numeric_reused,omitempty"`
+	// SourceURL is the URL of the entry's primary source.
+	SourceURL *string `json:"source_url,omitempty"`
+	// CodeLifetime is the withdrawn code's full valid range.
+	CodeLifetime *CodeLifetime `json:"code_lifetime,omitempty"`
+}
+
+// CodeLifetime represents the valid range of a withdrawn code.
+type CodeLifetime struct {
+	// From is the ISO assignment date, or nil when undocumented.
+	From *string `json:"from"`
+	// To is the withdrawal date. Equal to Currency.WithdrawnDate.
+	To string `json:"to"`
 }
 
 // IsPegged returns true if this currency is pegged to something.
@@ -480,6 +507,10 @@ func newCurrency(raw rawCurrency) *Currency {
 		Type:           raw.Type,
 		MarketCapRank:  raw.MarketCapRank,
 		PegMechanism:   raw.PegMechanism,
+		Classification: raw.Classification,
+		NumericReused:  raw.NumericReused,
+		SourceURL:      raw.SourceURL,
+		CodeLifetime:   convertCodeLifetime(raw.CodeLifetime),
 	}
 }
 
@@ -493,6 +524,16 @@ func convertCountries(raw []rawCountry) []Country {
 		}
 	}
 	return countries
+}
+
+func convertCodeLifetime(raw *RawCodeLifetime) *CodeLifetime {
+	if raw == nil {
+		return nil
+	}
+	return &CodeLifetime{
+		From: raw.From,
+		To:   raw.To,
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -655,6 +696,21 @@ func (r *CurrencyRegistry) UsedIn(countryCode string) []*Currency {
 				result = append(result, c)
 				break
 			}
+		}
+	}
+	return result
+}
+
+// ByClassification returns all active currencies with the given
+// classification ("circulating", "fund", "settlement", "indexation").
+//
+// Returns an empty slice if none match, or if the registry predates
+// v1.6.0 and no entry carries a classification field.
+func (r *CurrencyRegistry) ByClassification(cls string) []*Currency {
+	var result []*Currency
+	for _, c := range r.active {
+		if c.Classification != nil && *c.Classification == cls {
+			result = append(result, c)
 		}
 	}
 	return result

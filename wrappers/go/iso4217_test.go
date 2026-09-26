@@ -1139,6 +1139,12 @@ func clcFilter(t *testing.T, r *CurrencyRegistry, test clcFilterTest) []*Currenc
 		return r.WithMinorUnits(int(argF))
 	case "independent":
 		return r.Independent()
+	case "by_classification":
+		arg, ok := test.Argument.(string)
+		if !ok {
+			t.Fatalf("by_classification argument is not a string: %v", test.Argument)
+		}
+		return r.ByClassification(arg)
 	default:
 		t.Fatalf("no Go mapping for filter method %q", test.Method)
 		return nil
@@ -1354,6 +1360,79 @@ func TestCrossLanguageConsistency(t *testing.T) {
 			for _, excluded := range test.ExpectedNotContains {
 				if resultCodes[excluded] {
 					t.Errorf("%s() should NOT contain %s", test.Method, excluded)
+				}
+			}
+		}
+	})
+
+	t.Run("ClassificationValues", func(t *testing.T) {
+		type classBlock struct {
+			Expected map[string]string `json:"expected"`
+		}
+		type classFile struct {
+			ClassificationTests []classBlock `json:"classification_tests"`
+		}
+		raw, err := os.ReadFile("../../tests/cross_language_consistency.json")
+		if err != nil {
+			t.Fatalf("read fixture: %v", err)
+		}
+		var cf classFile
+		if err := json.Unmarshal(raw, &cf); err != nil {
+			t.Fatalf("parse fixture: %v", err)
+		}
+		for _, block := range cf.ClassificationTests {
+			for code, expected := range block.Expected {
+				c := r.Currency(code)
+				if c == nil {
+					t.Errorf("%s not found", code)
+					continue
+				}
+				if c.Classification == nil {
+					t.Errorf("%s.Classification is nil, expected %q", code, expected)
+					continue
+				}
+				if *c.Classification != expected {
+					t.Errorf("%s.Classification = %q, expected %q", code, *c.Classification, expected)
+				}
+			}
+		}
+	})
+
+	t.Run("ByClassification", func(t *testing.T) {
+		type filterBlock struct {
+			Method              string   `json:"method"`
+			Argument            string   `json:"argument"`
+			ExpectedContains    []string `json:"expected_contains"`
+			ExpectedNotContains []string `json:"expected_not_contains"`
+		}
+		type classFile struct {
+			ClassificationTests []filterBlock `json:"classification_tests"`
+		}
+		raw, err := os.ReadFile("../../tests/cross_language_consistency.json")
+		if err != nil {
+			t.Fatalf("read fixture: %v", err)
+		}
+		var cf classFile
+		if err := json.Unmarshal(raw, &cf); err != nil {
+			t.Fatalf("parse fixture: %v", err)
+		}
+		for _, block := range cf.ClassificationTests {
+			if block.Method != "by_classification" {
+				continue
+			}
+			results := r.ByClassification(block.Argument)
+			codes := make(map[string]bool, len(results))
+			for _, c := range results {
+				codes[c.Code] = true
+			}
+			for _, expected := range block.ExpectedContains {
+				if !codes[expected] {
+					t.Errorf("ByClassification(%q) should contain %s", block.Argument, expected)
+				}
+			}
+			for _, excluded := range block.ExpectedNotContains {
+				if codes[excluded] {
+					t.Errorf("ByClassification(%q) should NOT contain %s", block.Argument, excluded)
 				}
 			}
 		}
