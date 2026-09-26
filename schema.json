@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/slimissa/iso4217/v1.3.0/schema.json",
+  "$id": "https://raw.githubusercontent.com/slimissa/iso4217/v1.4.0/schema.json",
   "title": "ISO 4217 Currency Registry Schema",
   "description": "JSON Schema for the canonical ISO 4217 currency registry. Validates structure, types, patterns, and constraints for active ISO currencies, withdrawn currencies, and non-ISO financial instruments.",
   "type": "object",
@@ -26,7 +26,18 @@
         "version": {
           "type": "string",
           "pattern": "^\\d+\\.\\d+\\.\\d+$",
-          "description": "Semantic version of the registry data."
+          "description": "Semantic version of the registry data.",
+          "amendment": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999,
+            "description": "ISO 4217 amendment number applied. Mirrors source.last_amendment_applied."
+          },
+          "amendment_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Effective date of the amendment."
+          }
         },
         "updated": {
           "type": "string",
@@ -217,6 +228,9 @@
     "activeCurrency": {
       "type": "object",
       "required": [
+        "classification",
+        "numeric_reused",
+        "source_url",
         "code",
         "numeric",
         "name",
@@ -230,6 +244,20 @@
       ],
       "additionalProperties": false,
       "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["circulating", "fund", "settlement", "indexation"],
+          "description": "Whether this code is a circulating currency, a fund unit, a settlement unit, or an indexation unit. Required on every active entry."
+        },
+        "numeric_reused": {
+          "type": "boolean",
+          "description": "True if this entry's numeric code also appears on a withdrawn entry. Required on every active entry."
+        },  
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the entry's primary source. Required."
+        },
         "code": {
           "type": "string",
           "pattern": "^[A-Z]{3}$",
@@ -425,7 +453,9 @@
         "entity",
         "withdrawn_date",
         "replaced_by",
-        "conversion_rate"
+        "conversion_rate",
+        "source_url",
+        "code_lifetime"
       ],
       "additionalProperties": false,
       "properties": {
@@ -475,6 +505,31 @@
         "note": {
           "type": "string",
           "description": "Optional note for unusual withdrawal circumstances."
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the entry's primary source. Required."
+        },
+        "code_lifetime": {
+          "type": "object",
+          "required": ["from", "to"],
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "oneOf": [
+                {"type": "null"},
+                {"type": "string", "format": "date"}
+              ],
+            "description": "ISO assignment date, or null when undocumented."
+            },
+            "to": {
+              "type": "string",
+              "format": "date",
+              "description": "Withdrawal date. Must equal withdrawn_date."
+            }
+          },
+          "description": "The code's full valid range. from may be null. Required."
         }
       }
     },
