@@ -6,6 +6,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.6.0] — Unreleased
+
+Data model extension. Adds four fields to the registry, extends the
+schema, and adds validation rules. No breaking changes — every new
+field is optional at the schema level; the wrappers read absent fields
+as null.
+
+### Added
+
+#### Registry data
+- `classification` on every active entry (`circulating` | `fund` |
+  `settlement` | `indexation`)
+- `numeric_reused` on every active entry (boolean)
+- `source_url` on every active and withdrawn entry (http(s) URI)
+- `code_lifetime` on every withdrawn entry (`{from, to}` object)
+- `meta.amendment` and `meta.amendment_date`
+
+#### Schema
+- Four new fields on `activeCurrency`, two on `withdrawnCurrency`
+- Two new fields on `meta`
+- `$id` bumped to `v1.4.0`
+
+#### Tooling
+- `tools/enrich_field.py` — one tool, four modes, formatting-preserving
+- `tools/validate.py` — six new rules, `validate_v160_fields()`
+
+#### Documentation
+- Four ADRs under `docs/decisions/`
+- `README.md` "Enums" section
+- `README.md` per-field coverage table
+
+#### Wrappers
+- `classification`, `numeric_reused`, `source_url`, `code_lifetime`
+  on `Currency` in Python, JavaScript, Go, and Rust
+- `by_classification(cls)` / `byClassification(cls)` /
+  `ByClassification(cls)` / `by_classification(cls)` on
+  `CurrencyRegistry` in all four
+- Extended `tests/cross_language_consistency.json` with
+  `classification_tests`
+
+### Changed
+
+- `tools/parse_source.py` — removed stray `USS` from `ACTIVE_ISO_CODES`
+- `schema.json` — `amendment` and `amendment_date` moved out of `version`
+  up to `meta.properties`
+
+### Verified
+
+- `python3 tools/validate.py` — 0 errors
+- All four `--check` commands exit 0
+- All four wrapper suites pass
+- `bash tools/check_cross_language.sh` exits 0
+
+---
+
 ## [1.5.4] — 2026-09-26
 
 Port the convention: add the VERSION file, the version consistency check
