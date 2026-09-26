@@ -170,4 +170,19 @@ This document describes the provenance discipline in effect as of v1.5.1. If the
 **Applies to registry version:** 1.5.0 (data), 1.5.1 (documentation)
 **Maintainer:** [github.com/slimissa](https://github.com/slimissa)
 
+---
 
+## 8. Snapshot freshness
+
+`tools/check_snapshot_freshness.py` fails CI when `iso4217.json`'s
+`meta.updated` field is more than **180 days** old.
+
+Rationale: ISO 4217 amendments are published irregularly, and the
+registry's `check_amendments.py` detects new amendments but does not
+ingest them — a human applies each change. A single missed cycle,
+roughly two quarterly windows, is a signal that the review loop has
+stalled, not that the source is late. 180 days is one clearly-missed
+cycle without being noisy on a healthy schedule.
+
+The threshold can be overridden at the command line
+(`--threshold 365`) but the CI job uses the default.
