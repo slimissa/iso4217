@@ -73,6 +73,11 @@ VALID_NON_ISO_TYPES = {"cryptocurrency", "stablecoin", "commodity", "basket", "o
 # Maximum reasonable minor_units (Ethereum = 18)
 MAX_MINOR_UNITS = 18
 
+# v1.6.0 — classification and code_lifetime enums
+VALID_CLASSIFICATIONS = {"circulating", "fund", "settlement", "indexation"}
+
+# Matches any http(s) URL, used to reject URLs inside `note` text.
+NOTE_URL_PATTERN = re.compile(r"https?://")
 
 # ---------------------------------------------------------------------------
 # Data classes for structured results
@@ -205,6 +210,47 @@ def validate_meta(registry: Dict) -> List[ValidationError]:
             suggestion="Update schema_version or update the validator."
         ))
 
+    # v1.6.0 — meta.amendment and meta.amendment_date
+    amendment = meta.get("amendment")
+    if amendment is not None:
+        if not isinstance(amendment, int) or isinstance(amendment, bool):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field="meta.amendment",
+                code="INVALID_AMENDMENT",
+                message=f"meta.amendment must be an integer, got {type(amendment).__name__}."
+            ))
+        elif amendment < 1 or amendment > 999:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field="meta.amendment",
+                code="AMENDMENT_OUT_OF_RANGE",
+                message=f"meta.amendment={amendment} is outside the expected range 1-999."
+            ))
+
+    amendment_date = meta.get("amendment_date")
+    if amendment_date is not None:
+        if not isinstance(amendment_date, str):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field="meta.amendment_date",
+                code="INVALID_AMENDMENT_DATE",
+                message="meta.amendment_date must be a string."
+            ))
+        else:
+            try:
+                date.fromisoformat(amendment_date)
+            except ValueError:
+                errors.append(ValidationError(
+                    severity="error",
+                    category="integrity",
+                    field="meta.amendment_date",
+                    code="INVALID_AMENDMENT_DATE",
+                    message=f"meta.amendment_date='{amendment_date}' is not a valid ISO 8601 date."
+                ))
     return errors
 
 
@@ -950,6 +996,263 @@ def validate_cross_references(registry: Dict) -> List[ValidationError]:
 
     return errors
 
+# ---------------------------------------------------------------------------
+# v1.6.0 field validation
+# ---------------------------------------------------------------------------
+
+def validate_v160_fields(registry: Dict) -> List[ValidationError]:
+    """
+    Validate the fields introduced in v1.6.0:
+
+        classification  — active only, required, one of four values
+        numeric_reused  — active only, required, boolean
+        source_url      — active + withdrawn, required, http(s) URI
+        code_lifetime   — withdrawn only, required, {from, to} shape
+        note            — no URLs anywhere
+
+    All six checks are additive; a failure in one does not suppress the
+    others. Every error names the specific code and field at fault.
+    """
+    errors: List[ValidationError] = []
+
+    active = registry.get("currencies", {}).get("active", [])
+    withdrawn = registry.get("currencies", {}).get("withdrawn", [])
+
+    # -- Active entries: classification, numeric_reused, source_url ------
+
+    for i, c in enumerate(active):
+        code = c.get("code", f"[index {i}]")
+        prefix = f"currencies.active[{i}] ({code})"
+
+        # classification
+        cls = c.get("classification")
+        if cls is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.classification",
+                code="MISSING_CLASSIFICATION",
+                message=f"{code} is missing required 'classification' field."
+            ))
+        elif cls not in VALID_CLASSIFICATIONS:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.classification",
+                code="INVALID_CLASSIFICATION",
+                message=(
+                    f"{code} has classification='{cls}', not one of "
+                    f"{sorted(VALID_CLASSIFICATIONS)}."
+                )
+            ))
+
+        # numeric_reused
+        reused = c.get("numeric_reused")
+        if reused is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.numeric_reused",
+                code="MISSING_NUMERIC_REUSED",
+                message=f"{code} is missing required 'numeric_reused' field."
+            ))
+        elif not isinstance(reused, bool):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.numeric_reused",
+                code="INVALID_NUMERIC_REUSED",
+                message=(
+                    f"{code} has numeric_reused={reused!r}, must be boolean."
+                )
+            ))
+
+        # source_url
+        url = c.get("source_url")
+        if url is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.source_url",
+                code="MISSING_SOURCE_URL",
+                message=f"{code} is missing required 'source_url' field."
+            ))
+        elif not isinstance(url, str) or not url.startswith(("http://", "https://")):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.source_url",
+                code="INVALID_SOURCE_URL",
+                message=f"{code} has source_url='{url}', must be an http(s) URL."
+            ))
+
+        # code_lifetime must be absent on active entries
+        if "code_lifetime" in c:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.code_lifetime",
+                code="CODE_LIFETIME_ON_ACTIVE",
+                message=(
+                    f"{code} is active but carries 'code_lifetime'. "
+                    "That field belongs only on withdrawn entries."
+                )
+            ))
+
+        # note must not contain a URL
+        note = c.get("note")
+        if isinstance(note, str) and NOTE_URL_PATTERN.search(note):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.note",
+                code="NOTE_CONTAINS_URL",
+                message=(
+                    f"{code}'s note contains a URL. "
+                    "Move it to source_url and leave the prose in note."
+                )
+            ))
+
+    # -- Withdrawn entries: source_url, code_lifetime, note -------------
+
+    for i, c in enumerate(withdrawn):
+        code = c.get("code", f"[index {i}]")
+        prefix = f"currencies.withdrawn[{i}] ({code})"
+
+        # source_url
+        url = c.get("source_url")
+        if url is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.source_url",
+                code="MISSING_SOURCE_URL",
+                message=f"{code} is missing required 'source_url' field."
+            ))
+        elif not isinstance(url, str) or not url.startswith(("http://", "https://")):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.source_url",
+                code="INVALID_SOURCE_URL",
+                message=f"{code} has source_url='{url}', must be an http(s) URL."
+            ))
+
+        # code_lifetime
+        lifetime = c.get("code_lifetime")
+        if lifetime is None:
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.code_lifetime",
+                code="MISSING_CODE_LIFETIME",
+                message=f"{code} is missing required 'code_lifetime' field."
+            ))
+        elif not isinstance(lifetime, dict):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.code_lifetime",
+                code="INVALID_CODE_LIFETIME",
+                message=f"{code} has code_lifetime={lifetime!r}, must be an object."
+            ))
+        else:
+            # 'from' must be null or a valid ISO date
+            frm = lifetime.get("from")
+            if frm is not None:
+                if not isinstance(frm, str):
+                    errors.append(ValidationError(
+                        severity="error",
+                        category="integrity",
+                        field=f"{prefix}.code_lifetime.from",
+                        code="INVALID_CODE_LIFETIME_FROM",
+                        message=f"{code} code_lifetime.from must be null or a date string."
+                    ))
+                else:
+                    try:
+                        date.fromisoformat(frm)
+                    except ValueError:
+                        errors.append(ValidationError(
+                            severity="error",
+                            category="integrity",
+                            field=f"{prefix}.code_lifetime.from",
+                            code="INVALID_CODE_LIFETIME_FROM",
+                            message=(
+                                f"{code} code_lifetime.from='{frm}' "
+                                "is not a valid ISO 8601 date."
+                            )
+                        ))
+
+            # 'to' must be a valid ISO date and equal withdrawn_date
+            to = lifetime.get("to")
+            if not isinstance(to, str):
+                errors.append(ValidationError(
+                    severity="error",
+                    category="integrity",
+                    field=f"{prefix}.code_lifetime.to",
+                    code="INVALID_CODE_LIFETIME_TO",
+                    message=f"{code} code_lifetime.to must be a date string."
+                ))
+            else:
+                try:
+                    date.fromisoformat(to)
+                except ValueError:
+                    errors.append(ValidationError(
+                        severity="error",
+                        category="integrity",
+                        field=f"{prefix}.code_lifetime.to",
+                        code="INVALID_CODE_LIFETIME_TO",
+                        message=(
+                            f"{code} code_lifetime.to='{to}' "
+                            "is not a valid ISO 8601 date."
+                        )
+                    ))
+                else:
+                    wd = c.get("withdrawn_date")
+                    if isinstance(wd, str) and to != wd:
+                        errors.append(ValidationError(
+                            severity="error",
+                            category="integrity",
+                            field=f"{prefix}.code_lifetime.to",
+                            code="CODE_LIFETIME_TO_MISMATCH",
+                            message=(
+                                f"{code} code_lifetime.to='{to}' does not match "
+                                f"withdrawn_date='{wd}'."
+                            )
+                        ))
+
+            # from <= to when both are present
+            if isinstance(frm, str) and isinstance(to, str):
+                try:
+                    if date.fromisoformat(frm) > date.fromisoformat(to):
+                        errors.append(ValidationError(
+                            severity="error",
+                            category="integrity",
+                            field=f"{prefix}.code_lifetime",
+                            code="CODE_LIFETIME_INVERTED",
+                            message=(
+                                f"{code} code_lifetime.from='{frm}' is after "
+                                f"code_lifetime.to='{to}'."
+                            )
+                        ))
+                except ValueError:
+                    pass  # format errors already reported above
+
+        # note must not contain a URL
+        note = c.get("note")
+        if isinstance(note, str) and NOTE_URL_PATTERN.search(note):
+            errors.append(ValidationError(
+                severity="error",
+                category="integrity",
+                field=f"{prefix}.note",
+                code="NOTE_CONTAINS_URL",
+                message=(
+                    f"{code}'s note contains a URL. "
+                    "Move it to source_url and leave the prose in note."
+                )
+            ))
+
+    return errors
 
 # ---------------------------------------------------------------------------
 # Statistical checks (anomaly detection)
@@ -1139,6 +1442,9 @@ def validate(registry_path: Path, schema_path: Optional[Path] = None, allow_part
 
     # 6. Cross-reference validation
     result.errors.extend(validate_cross_references(registry))
+
+    # 6b. v1.6.0 field validation
+    result.errors.extend(validate_v160_fields(registry))
 
     # 7. Statistical checks
     stat_errors, stats = validate_statistics(registry, allow_partial=allow_partial)
