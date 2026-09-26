@@ -90,7 +90,7 @@ tool, and reconcile every version site. No data changes; no schema changes.
 
 ---
 
-## [1.5.3] — Unreleased
+## [1.5.3] — 2026-09-XX
 
 A patch release correcting five issues surfaced by an external audit of
 v1.5.2: one code defect, one verification report with unverified
