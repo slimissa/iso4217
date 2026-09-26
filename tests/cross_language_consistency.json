@@ -232,6 +232,25 @@
       "expected_not_contains": ["AED", "SAR", "HKD"]
     }
   ],
+  "classification_tests": [
+    {
+      "description": "Fund codes and indexation units are classified",
+      "expected": {
+        "USD": "circulating",
+        "EUR": "circulating",
+        "CLF": "fund",
+        "USN": "fund",
+        "VED": "indexation"
+      }
+    },
+    {
+      "description": "Fund and indexation filtering",
+      "method": "by_classification",
+      "argument": "fund",
+      "expected_contains": ["CLF", "USN", "CHE", "BOV"],
+      "expected_not_contains": ["USD", "EUR", "VED"]
+    }
+  ],
   "summary_tests": [
     {
       "description": "Summary contains expected keys",
