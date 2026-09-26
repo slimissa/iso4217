@@ -299,6 +299,47 @@ class Currency {
     return this._data.peg_mechanism || null;
   }
 
+  // -- v1.6.0 properties --------------------------------------------------
+
+  /**
+   * Classification of an active currency: "circulating", "fund",
+   * "settlement", or "indexation". `null` for withdrawn and non-ISO
+   * entries, and for v1.5.x registries that predate this field.
+   * @returns {string|null}
+   */
+  get classification() {
+    return this._data.classification || null;
+  }
+
+  /**
+   * True if this active currency's numeric code also appears on a
+   * withdrawn entry. `null` for withdrawn and non-ISO entries, and
+   * for v1.5.x registries.
+   * @returns {boolean|null}
+   */
+  get numericReused() {
+    const v = this._data.numeric_reused;
+    return v === undefined ? null : v;
+  }
+
+  /**
+   * URL of the entry's primary source. Present on every active and
+   * withdrawn entry as of v1.6.0.
+   * @returns {string|null}
+   */
+  get sourceUrl() {
+    return this._data.source_url || null;
+  }
+
+  /**
+   * Withdrawn code's full valid range: `{ from: string|null, to: string }`.
+   * `null` for active and non-ISO entries.
+   * @returns {object|null}
+   */
+  get codeLifetime() {
+    return this._data.code_lifetime || null;
+  }
+
   // -- Conversion ---------------------------------------------------------
 
   /**
@@ -667,6 +708,24 @@ class CurrencyRegistry {
       }
     }
 
+    return result;
+  }
+
+  /**
+   * Find all active currencies with the given classification.
+   *
+   * @param {string} cls - One of "circulating", "fund", "settlement",
+   *   "indexation".
+   * @returns {Currency[]} Active currencies whose classification matches.
+   *   Empty array if none match or if the registry predates v1.6.0.
+   */
+  byClassification(cls) {
+    const result = [];
+    for (const c of this._active.values()) {
+      if (c.classification === cls) {
+        result.push(c);
+      }
+    }
     return result;
   }
 

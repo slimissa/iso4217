@@ -344,6 +344,7 @@ const FILTER_METHOD_MAP = {
   pegged_to: 'peggedTo',
   with_minor_units: 'withMinorUnits',
   independent: 'independent',
+  by_classification: 'byClassification',
 };
 
 test('cross-lang: filter method vectors', () => {
@@ -367,6 +368,40 @@ test('cross-lang: filter method vectors', () => {
         !resultCodes.has(excludedCode),
         `${jsMethodName}() should NOT contain ${excludedCode}`
       );
+    }
+  }
+});
+
+// -- Classification vectors (v1.6.0) --------------------------------------
+
+test('cross-lang: classification values', () => {
+  for (const block of (vectors.classification_tests || [])) {
+    const expected = block.expected;
+    if (!expected) continue;
+    for (const [code, expectedCls] of Object.entries(expected)) {
+      const c = registry.currency(code);
+      assert(c !== null, `${code} not found in registry`);
+      assert(
+        c.classification === expectedCls,
+        `${code}.classification = ${JSON.stringify(c.classification)}, expected ${JSON.stringify(expectedCls)}`
+      );
+    }
+  }
+});
+
+test('cross-lang: by_classification vectors', () => {
+  for (const block of (vectors.classification_tests || [])) {
+    if (block.method !== 'by_classification') continue;
+    const method = registry[FILTER_METHOD_MAP[block.method]];
+    assert(typeof method === 'function', 'byClassification is not a function');
+    const results = method.call(registry, block.argument);
+    const codes = new Set(results.map(c => c.code));
+
+    for (const expected of (block.expected_contains || [])) {
+      assert(codes.has(expected), `byClassification(${block.argument}) should contain ${expected}`);
+    }
+    for (const excluded of (block.expected_not_contains || [])) {
+      assert(!codes.has(excluded), `byClassification(${block.argument}) should NOT contain ${excluded}`);
     }
   }
 });
