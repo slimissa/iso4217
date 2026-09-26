@@ -343,6 +343,50 @@ Withdrawn currencies include withdrawal dates, replacement codes, and official c
 
 ---
 
+## Enums
+
+Four closed vocabularies appear in the registry. Every value is one of
+the listed options; no other value is valid.
+
+### `classification` — active currencies only
+
+| Value | Meaning |
+|-------|---------|
+| `circulating` | Primary legal tender — the default. USD, EUR, JPY. |
+| `fund` | Fund, unit of account, or complementary currency. CLF, USN, CHE. |
+| `settlement` | Reserved for a companion to a circulating currency. |
+| `indexation` | Indexation unit. VED. |
+
+### `peg_type` — active currencies only, when `pegged_to` is set
+
+| Value | Meaning |
+|-------|---------|
+| `single` | `pegged_to` is a bare 3-letter ISO code. AED → `"USD"`. |
+| `basket` | `pegged_to` is a free-text description of a weighted basket. MAD → `"EUR+USD basket"`. |
+| `undisclosed` | Pegged, but the mechanism is not public. KWD → `"Currency basket"`. |
+
+### `countries[].relationship` — active currencies only
+
+| Value | Meaning |
+|-------|---------|
+| `issuing` | Sovereign issuer — exactly one per currency. |
+| `adopting` | Uses the currency without issuing it. Ecuador, Panama. |
+| `territory` | Dependent territory of the issuing country. |
+| `parallel` | Circulates alongside a local currency at fixed parity. |
+| `local_issue` | Issues local banknotes or coins denominated in this currency. |
+
+### `status` — derived, SQL/CSV/Parquet only
+
+| Value | Meaning |
+|-------|---------|
+| `active` | Entry is in `currencies.active`. |
+| `withdrawn` | Entry is in `currencies.withdrawn`. |
+
+Not a JSON field. The exporters derive it from which array the entry
+lives in. The JSON represents status by position, not by value.
+
+---
+
 ## Wrappers
 
 Each wrapper is idiomatic to its language while maintaining identical behavior across all four:
