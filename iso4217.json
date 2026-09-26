@@ -27,6 +27,8 @@
     "active": [
       {
         "code": "USD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "840",
         "name": "US Dollar",
         "minor_units": 2,
@@ -130,6 +132,8 @@
       },
       {
         "code": "EUR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "978",
         "name": "Euro",
         "minor_units": 2,
@@ -313,6 +317,8 @@
       },
       {
         "code": "JPY",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "392",
         "name": "Japanese Yen",
         "minor_units": 0,
@@ -331,6 +337,8 @@
       },
       {
         "code": "GBP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "826",
         "name": "Pound Sterling",
         "minor_units": 2,
@@ -384,6 +392,8 @@
       },
       {
         "code": "CHF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "756",
         "name": "Swiss Franc",
         "minor_units": 2,
@@ -407,6 +417,8 @@
       },
       {
         "code": "CNY",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "156",
         "name": "Chinese Yuan",
         "minor_units": 2,
@@ -426,6 +438,8 @@
       },
       {
         "code": "AUD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "036",
         "name": "Australian Dollar",
         "minor_units": 2,
@@ -479,6 +493,8 @@
       },
       {
         "code": "CAD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "124",
         "name": "Canadian Dollar",
         "minor_units": 2,
@@ -497,6 +513,8 @@
       },
       {
         "code": "NZD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "554",
         "name": "New Zealand Dollar",
         "minor_units": 2,
@@ -535,6 +553,8 @@
       },
       {
         "code": "SEK",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "752",
         "name": "Swedish Krona",
         "minor_units": 2,
@@ -553,6 +573,8 @@
       },
       {
         "code": "NOK",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "578",
         "name": "Norwegian Krone",
         "minor_units": 2,
@@ -581,6 +603,8 @@
       },
       {
         "code": "DKK",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "208",
         "name": "Danish Krone",
         "minor_units": 2,
@@ -614,6 +638,8 @@
       },
       {
         "code": "SGD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "702",
         "name": "Singapore Dollar",
         "minor_units": 2,
@@ -633,6 +659,8 @@
       },
       {
         "code": "HKD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "344",
         "name": "Hong Kong Dollar",
         "minor_units": 2,
@@ -656,6 +684,8 @@
       },
       {
         "code": "KRW",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "410",
         "name": "South Korean Won",
         "minor_units": 0,
@@ -674,6 +704,8 @@
       },
       {
         "code": "INR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "356",
         "name": "Indian Rupee",
         "minor_units": 2,
@@ -697,6 +729,8 @@
       },
       {
         "code": "MXN",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "484",
         "name": "Mexican Peso",
         "minor_units": 2,
@@ -715,6 +749,8 @@
       },
       {
         "code": "BRL",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "986",
         "name": "Brazilian Real",
         "minor_units": 2,
@@ -733,6 +769,8 @@
       },
       {
         "code": "ZAR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "710",
         "name": "South African Rand",
         "minor_units": 2,
@@ -767,6 +805,8 @@
       },
       {
         "code": "TRY",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "949",
         "name": "Turkish Lira",
         "minor_units": 2,
@@ -785,6 +825,8 @@
       },
       {
         "code": "RUB",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "643",
         "name": "Russian Ruble",
         "minor_units": 2,
@@ -803,6 +845,8 @@
       },
       {
         "code": "AED",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "784",
         "name": "UAE Dirham",
         "minor_units": 2,
@@ -825,6 +869,8 @@
       },
       {
         "code": "SAR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "682",
         "name": "Saudi Riyal",
         "minor_units": 2,
@@ -847,6 +893,8 @@
       },
       {
         "code": "THB",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "764",
         "name": "Thai Baht",
         "minor_units": 2,
@@ -865,6 +913,8 @@
       },
       {
         "code": "MYR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "458",
         "name": "Malaysian Ringgit",
         "minor_units": 2,
@@ -883,6 +933,8 @@
       },
       {
         "code": "IDR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "360",
         "name": "Indonesian Rupiah",
         "minor_units": 2,
@@ -902,6 +954,8 @@
       },
       {
         "code": "PHP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "608",
         "name": "Philippine Peso",
         "minor_units": 2,
@@ -920,6 +974,8 @@
       },
       {
         "code": "TWD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "901",
         "name": "New Taiwan Dollar",
         "minor_units": 2,
@@ -938,6 +994,8 @@
       },
       {
         "code": "VND",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "704",
         "name": "Vietnamese Dong",
         "minor_units": 0,
@@ -956,6 +1014,8 @@
       },
       {
         "code": "PLN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "985",
         "name": "Polish Zloty",
         "minor_units": 2,
@@ -974,6 +1034,8 @@
       },
       {
         "code": "CZK",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "203",
         "name": "Czech Koruna",
         "minor_units": 2,
@@ -992,6 +1054,8 @@
       },
       {
         "code": "HUF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "348",
         "name": "Hungarian Forint",
         "minor_units": 2,
@@ -1010,6 +1074,8 @@
       },
       {
         "code": "RON",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "946",
         "name": "Romanian Leu",
         "minor_units": 2,
@@ -1028,6 +1094,8 @@
       },
       {
         "code": "ILS",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "376",
         "name": "Israeli New Shekel",
         "minor_units": 2,
@@ -1051,6 +1119,8 @@
       },
       {
         "code": "CLP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "152",
         "name": "Chilean Peso",
         "minor_units": 0,
@@ -1069,6 +1139,8 @@
       },
       {
         "code": "COP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "170",
         "name": "Colombian Peso",
         "minor_units": 2,
@@ -1087,6 +1159,8 @@
       },
       {
         "code": "ARS",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "032",
         "name": "Argentine Peso",
         "minor_units": 2,
@@ -1105,6 +1179,8 @@
       },
       {
         "code": "PEN",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "604",
         "name": "Peruvian Sol",
         "minor_units": 2,
@@ -1123,6 +1199,8 @@
       },
       {
         "code": "NGN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "566",
         "name": "Nigerian Naira",
         "minor_units": 2,
@@ -1141,6 +1219,8 @@
       },
       {
         "code": "EGP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "818",
         "name": "Egyptian Pound",
         "minor_units": 2,
@@ -1159,6 +1239,8 @@
       },
       {
         "code": "KES",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "404",
         "name": "Kenyan Shilling",
         "minor_units": 2,
@@ -1177,6 +1259,8 @@
       },
       {
         "code": "GHS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "936",
         "name": "Ghanaian Cedi",
         "minor_units": 2,
@@ -1195,6 +1279,8 @@
       },
       {
         "code": "MAD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "504",
         "name": "Moroccan Dirham",
         "minor_units": 2,
@@ -1223,6 +1309,8 @@
       },
       {
         "code": "DZD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "012",
         "name": "Algerian Dinar",
         "minor_units": 2,
@@ -1241,6 +1329,8 @@
       },
       {
         "code": "TND",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "788",
         "name": "Tunisian Dinar",
         "minor_units": 3,
@@ -1259,6 +1349,8 @@
       },
       {
         "code": "LYD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "434",
         "name": "Libyan Dinar",
         "minor_units": 3,
@@ -1277,6 +1369,8 @@
       },
       {
         "code": "KWD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "414",
         "name": "Kuwaiti Dinar",
         "minor_units": 3,
@@ -1300,6 +1394,8 @@
       },
       {
         "code": "BHD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "048",
         "name": "Bahraini Dinar",
         "minor_units": 3,
@@ -1322,6 +1418,8 @@
       },
       {
         "code": "OMR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "512",
         "name": "Omani Rial",
         "minor_units": 3,
@@ -1344,6 +1442,8 @@
       },
       {
         "code": "QAR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "634",
         "name": "Qatari Riyal",
         "minor_units": 2,
@@ -1366,6 +1466,8 @@
       },
       {
         "code": "JOD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "400",
         "name": "Jordanian Dinar",
         "minor_units": 3,
@@ -1388,6 +1490,8 @@
       },
       {
         "code": "LBP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "422",
         "name": "Lebanese Pound",
         "minor_units": 2,
@@ -1407,6 +1511,8 @@
       },
       {
         "code": "IQD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "368",
         "name": "Iraqi Dinar",
         "minor_units": 3,
@@ -1425,6 +1531,8 @@
       },
       {
         "code": "PKR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "586",
         "name": "Pakistani Rupee",
         "minor_units": 2,
@@ -1443,6 +1551,8 @@
       },
       {
         "code": "BDT",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "050",
         "name": "Bangladeshi Taka",
         "minor_units": 2,
@@ -1461,6 +1571,8 @@
       },
       {
         "code": "LKR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "144",
         "name": "Sri Lankan Rupee",
         "minor_units": 2,
@@ -1479,6 +1591,8 @@
       },
       {
         "code": "KZT",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "398",
         "name": "Kazakhstani Tenge",
         "minor_units": 2,
@@ -1497,6 +1611,8 @@
       },
       {
         "code": "UAH",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "980",
         "name": "Ukrainian Hryvnia",
         "minor_units": 2,
@@ -1515,6 +1631,8 @@
       },
       {
         "code": "CRC",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "188",
         "name": "Costa Rican Colon",
         "minor_units": 2,
@@ -1533,6 +1651,8 @@
       },
       {
         "code": "ISK",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "352",
         "name": "Icelandic Krona",
         "minor_units": 0,
@@ -1551,6 +1671,8 @@
       },
       {
         "code": "BGN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "975",
         "name": "Bulgarian Lev",
         "minor_units": 2,
@@ -1574,6 +1696,8 @@
       },
       {
         "code": "BOV",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "984",
         "name": "Bolivian Mvdol",
         "minor_units": 2,
@@ -1594,6 +1718,8 @@
       },
       {
         "code": "CHE",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "947",
         "name": "WIR Euro",
         "minor_units": 2,
@@ -1617,6 +1743,8 @@
       },
       {
         "code": "CHW",
+        "numeric_reused": true,
+        "classification": "fund",
         "numeric": "948",
         "name": "WIR Franc",
         "minor_units": 2,
@@ -1640,6 +1768,8 @@
       },
       {
         "code": "CLF",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "990",
         "name": "Unidad de Fomento",
         "minor_units": 4,
@@ -1660,6 +1790,8 @@
       },
       {
         "code": "COU",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "970",
         "name": "Unidad de Valor Real",
         "minor_units": 2,
@@ -1680,6 +1812,8 @@
       },
       {
         "code": "MXV",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "979",
         "name": "Mexican Unidad de Inversion",
         "minor_units": 2,
@@ -1700,6 +1834,8 @@
       },
       {
         "code": "USN",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "997",
         "name": "US Dollar (next day)",
         "minor_units": 2,
@@ -1723,6 +1859,8 @@
       },
       {
         "code": "USS",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "998",
         "name": "US Dollar (same day)",
         "minor_units": 2,
@@ -1746,6 +1884,8 @@
       },
       {
         "code": "UYI",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "940",
         "name": "Uruguay Peso en Unidades Indexadas",
         "minor_units": 0,
@@ -1766,6 +1906,8 @@
       },
       {
         "code": "UYW",
+        "numeric_reused": false,
+        "classification": "fund",
         "numeric": "927",
         "name": "Unidad Previsional",
         "minor_units": 4,
@@ -1786,6 +1928,8 @@
       },
       {
         "code": "VED",
+        "numeric_reused": false,
+        "classification": "indexation",
         "numeric": "926",
         "name": "Venezuelan Digital Bolívar",
         "minor_units": 2,
@@ -1806,6 +1950,8 @@
       },
       {
         "code": "XOF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "952",
         "name": "West African CFA Franc",
         "minor_units": 0,
@@ -1864,6 +2010,8 @@
       },
       {
         "code": "XAF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "950",
         "name": "Central African CFA Franc",
         "minor_units": 0,
@@ -1912,6 +2060,8 @@
       },
       {
         "code": "XPF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "953",
         "name": "CFP Franc",
         "minor_units": 0,
@@ -1945,6 +2095,8 @@
       },
       {
         "code": "XCD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "951",
         "name": "East Caribbean Dollar",
         "minor_units": 2,
@@ -2003,6 +2155,8 @@
       },
       {
         "code": "BBD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "052",
         "name": "Barbadian Dollar",
         "minor_units": 2,
@@ -2026,6 +2180,8 @@
       },
       {
         "code": "BMD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "060",
         "name": "Bermudian Dollar",
         "minor_units": 2,
@@ -2049,6 +2205,8 @@
       },
       {
         "code": "BSD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "044",
         "name": "Bahamian Dollar",
         "minor_units": 2,
@@ -2072,6 +2230,8 @@
       },
       {
         "code": "BZD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "084",
         "name": "Belize Dollar",
         "minor_units": 2,
@@ -2095,6 +2255,8 @@
       },
       {
         "code": "KYD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "136",
         "name": "Cayman Islands Dollar",
         "minor_units": 2,
@@ -2118,6 +2280,8 @@
       },
       {
         "code": "ALL",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "008",
         "name": "Albanian Lek",
         "minor_units": 2,
@@ -2137,6 +2301,8 @@
       },
       {
         "code": "BAM",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "977",
         "name": "Bosnia and Herzegovina Convertible Mark",
         "minor_units": 2,
@@ -2160,6 +2326,8 @@
       },
       {
         "code": "BYN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "933",
         "name": "Belarusian Ruble",
         "minor_units": 2,
@@ -2179,6 +2347,8 @@
       },
       {
         "code": "MDL",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "498",
         "name": "Moldovan Leu",
         "minor_units": 2,
@@ -2198,6 +2368,8 @@
       },
       {
         "code": "MKD",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "807",
         "name": "Macedonian Denar",
         "minor_units": 2,
@@ -2221,6 +2393,8 @@
       },
       {
         "code": "RSD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "941",
         "name": "Serbian Dinar",
         "minor_units": 2,
@@ -2240,6 +2414,8 @@
       },
       {
         "code": "AMD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "051",
         "name": "Armenian Dram",
         "minor_units": 2,
@@ -2259,6 +2435,8 @@
       },
       {
         "code": "AZN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "944",
         "name": "Azerbaijani Manat",
         "minor_units": 2,
@@ -2278,6 +2456,8 @@
       },
       {
         "code": "KGS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "417",
         "name": "Kyrgyzstani Som",
         "minor_units": 2,
@@ -2297,6 +2477,8 @@
       },
       {
         "code": "TJS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "972",
         "name": "Tajikistani Somoni",
         "minor_units": 2,
@@ -2316,6 +2498,8 @@
       },
       {
         "code": "TMT",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "934",
         "name": "Turkmenistani Manat",
         "minor_units": 2,
@@ -2335,6 +2519,8 @@
       },
       {
         "code": "UZS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "860",
         "name": "Uzbekistani Som",
         "minor_units": 2,
@@ -2354,6 +2540,8 @@
       },
       {
         "code": "AFN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "971",
         "name": "Afghan Afghani",
         "minor_units": 2,
@@ -2373,6 +2561,8 @@
       },
       {
         "code": "IRR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "364",
         "name": "Iranian Rial",
         "minor_units": 2,
@@ -2392,6 +2582,8 @@
       },
       {
         "code": "SYP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "760",
         "name": "Syrian Pound",
         "minor_units": 2,
@@ -2411,6 +2603,8 @@
       },
       {
         "code": "YER",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "886",
         "name": "Yemeni Rial",
         "minor_units": 2,
@@ -2430,6 +2624,8 @@
       },
       {
         "code": "BOB",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "068",
         "name": "Bolivian Boliviano",
         "minor_units": 2,
@@ -2449,6 +2645,8 @@
       },
       {
         "code": "GTQ",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "320",
         "name": "Guatemalan Quetzal",
         "minor_units": 2,
@@ -2468,6 +2666,8 @@
       },
       {
         "code": "HNL",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "340",
         "name": "Honduran Lempira",
         "minor_units": 2,
@@ -2487,6 +2687,8 @@
       },
       {
         "code": "NIO",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "558",
         "name": "Nicaraguan Córdoba",
         "minor_units": 2,
@@ -2506,6 +2708,8 @@
       },
       {
         "code": "PAB",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "590",
         "name": "Panamanian Balboa",
         "minor_units": 2,
@@ -2529,6 +2733,8 @@
       },
       {
         "code": "PYG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "600",
         "name": "Paraguayan Guaraní",
         "minor_units": 0,
@@ -2548,6 +2754,8 @@
       },
       {
         "code": "SRD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "968",
         "name": "Surinamese Dollar",
         "minor_units": 2,
@@ -2567,6 +2775,8 @@
       },
       {
         "code": "UYU",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "858",
         "name": "Uruguayan Peso",
         "minor_units": 2,
@@ -2586,6 +2796,8 @@
       },
       {
         "code": "VES",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "928",
         "name": "Venezuelan Bolívar Soberano",
         "minor_units": 2,
@@ -2606,6 +2818,8 @@
       },
       {
         "code": "BWP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "072",
         "name": "Botswana Pula",
         "minor_units": 2,
@@ -2625,6 +2839,8 @@
       },
       {
         "code": "LSL",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "426",
         "name": "Lesotho Loti",
         "minor_units": 2,
@@ -2648,6 +2864,8 @@
       },
       {
         "code": "NAD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "516",
         "name": "Namibian Dollar",
         "minor_units": 2,
@@ -2671,6 +2889,8 @@
       },
       {
         "code": "SZL",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "748",
         "name": "Swazi Lilangeni",
         "minor_units": 2,
@@ -2694,6 +2914,8 @@
       },
       {
         "code": "ZMW",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "967",
         "name": "Zambian Kwacha",
         "minor_units": 2,
@@ -2713,6 +2935,8 @@
       },
       {
         "code": "ZWG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "924",
         "name": "Zimbabwe Gold",
         "minor_units": 2,
@@ -2733,6 +2957,8 @@
       },
       {
         "code": "MWK",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "454",
         "name": "Malawian Kwacha",
         "minor_units": 2,
@@ -2752,6 +2978,8 @@
       },
       {
         "code": "MZN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "943",
         "name": "Mozambican Metical",
         "minor_units": 2,
@@ -2771,6 +2999,8 @@
       },
       {
         "code": "AOA",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "973",
         "name": "Angolan Kwanza",
         "minor_units": 2,
@@ -2790,6 +3020,8 @@
       },
       {
         "code": "BIF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "108",
         "name": "Burundian Franc",
         "minor_units": 0,
@@ -2809,6 +3041,8 @@
       },
       {
         "code": "CDF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "976",
         "name": "Congolese Franc",
         "minor_units": 2,
@@ -2828,6 +3062,8 @@
       },
       {
         "code": "DJF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "262",
         "name": "Djiboutian Franc",
         "minor_units": 0,
@@ -2851,6 +3087,8 @@
       },
       {
         "code": "ERN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "232",
         "name": "Eritrean Nakfa",
         "minor_units": 2,
@@ -2874,6 +3112,8 @@
       },
       {
         "code": "ETB",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "230",
         "name": "Ethiopian Birr",
         "minor_units": 2,
@@ -2893,6 +3133,8 @@
       },
       {
         "code": "KMF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "174",
         "name": "Comorian Franc",
         "minor_units": 0,
@@ -2916,6 +3158,8 @@
       },
       {
         "code": "MGA",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "969",
         "name": "Malagasy Ariary",
         "minor_units": 2,
@@ -2935,6 +3179,8 @@
       },
       {
         "code": "MRU",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "929",
         "name": "Mauritanian Ouguiya",
         "minor_units": 2,
@@ -2954,6 +3200,8 @@
       },
       {
         "code": "MUR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "480",
         "name": "Mauritian Rupee",
         "minor_units": 2,
@@ -2973,6 +3221,8 @@
       },
       {
         "code": "RWF",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "646",
         "name": "Rwandan Franc",
         "minor_units": 0,
@@ -2992,6 +3242,8 @@
       },
       {
         "code": "SCR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "690",
         "name": "Seychellois Rupee",
         "minor_units": 2,
@@ -3011,6 +3263,8 @@
       },
       {
         "code": "SDG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "938",
         "name": "Sudanese Pound",
         "minor_units": 2,
@@ -3030,6 +3284,8 @@
       },
       {
         "code": "SLE",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "925",
         "name": "Sierra Leonean Leone",
         "minor_units": 2,
@@ -3049,6 +3305,8 @@
       },
       {
         "code": "SOS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "706",
         "name": "Somali Shilling",
         "minor_units": 2,
@@ -3068,6 +3326,8 @@
       },
       {
         "code": "SSP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "728",
         "name": "South Sudanese Pound",
         "minor_units": 2,
@@ -3087,6 +3347,8 @@
       },
       {
         "code": "STN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "930",
         "name": "São Tomé and Príncipe Dobra",
         "minor_units": 2,
@@ -3110,6 +3372,8 @@
       },
       {
         "code": "TZS",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "834",
         "name": "Tanzanian Shilling",
         "minor_units": 2,
@@ -3129,6 +3393,8 @@
       },
       {
         "code": "UGX",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "800",
         "name": "Ugandan Shilling",
         "minor_units": 0,
@@ -3148,6 +3414,8 @@
       },
       {
         "code": "CVE",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "132",
         "name": "Cape Verdean Escudo",
         "minor_units": 2,
@@ -3171,6 +3439,8 @@
       },
       {
         "code": "GMD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "270",
         "name": "Gambian Dalasi",
         "minor_units": 2,
@@ -3190,6 +3460,8 @@
       },
       {
         "code": "GNF",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "324",
         "name": "Guinean Franc",
         "minor_units": 0,
@@ -3209,6 +3481,8 @@
       },
       {
         "code": "LRD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "430",
         "name": "Liberian Dollar",
         "minor_units": 2,
@@ -3228,6 +3502,8 @@
       },
       {
         "code": "ANG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "532",
         "name": "Netherlands Antillean Guilder",
         "minor_units": 2,
@@ -3256,6 +3532,8 @@
       },
       {
         "code": "AWG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "533",
         "name": "Aruban Florin",
         "minor_units": 2,
@@ -3279,6 +3557,8 @@
       },
       {
         "code": "BND",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "096",
         "name": "Brunei Dollar",
         "minor_units": 2,
@@ -3302,6 +3582,8 @@
       },
       {
         "code": "BTN",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "064",
         "name": "Bhutanese Ngultrum",
         "minor_units": 2,
@@ -3325,6 +3607,8 @@
       },
       {
         "code": "CUC",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "931",
         "name": "Cuban Convertible Peso",
         "minor_units": 2,
@@ -3348,6 +3632,8 @@
       },
       {
         "code": "CUP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "192",
         "name": "Cuban Peso",
         "minor_units": 2,
@@ -3367,6 +3653,8 @@
       },
       {
         "code": "DOP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "214",
         "name": "Dominican Peso",
         "minor_units": 2,
@@ -3386,6 +3674,8 @@
       },
       {
         "code": "FJD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "242",
         "name": "Fijian Dollar",
         "minor_units": 2,
@@ -3405,6 +3695,8 @@
       },
       {
         "code": "FKP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "238",
         "name": "Falkland Islands Pound",
         "minor_units": 2,
@@ -3428,6 +3720,8 @@
       },
       {
         "code": "GEL",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "981",
         "name": "Georgian Lari",
         "minor_units": 2,
@@ -3447,6 +3741,8 @@
       },
       {
         "code": "GIP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "292",
         "name": "Gibraltar Pound",
         "minor_units": 2,
@@ -3470,6 +3766,8 @@
       },
       {
         "code": "GYD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "328",
         "name": "Guyanese Dollar",
         "minor_units": 2,
@@ -3489,6 +3787,8 @@
       },
       {
         "code": "HTG",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "332",
         "name": "Haitian Gourde",
         "minor_units": 2,
@@ -3508,6 +3808,8 @@
       },
       {
         "code": "JMD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "388",
         "name": "Jamaican Dollar",
         "minor_units": 2,
@@ -3527,6 +3829,8 @@
       },
       {
         "code": "KHR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "116",
         "name": "Cambodian Riel",
         "minor_units": 2,
@@ -3546,6 +3850,8 @@
       },
       {
         "code": "KPW",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "408",
         "name": "North Korean Won",
         "minor_units": 2,
@@ -3565,6 +3871,8 @@
       },
       {
         "code": "LAK",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "418",
         "name": "Lao Kip",
         "minor_units": 2,
@@ -3584,6 +3892,8 @@
       },
       {
         "code": "MMK",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "104",
         "name": "Myanmar Kyat",
         "minor_units": 2,
@@ -3603,6 +3913,8 @@
       },
       {
         "code": "MNT",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "496",
         "name": "Mongolian Tögrög",
         "minor_units": 2,
@@ -3622,6 +3934,8 @@
       },
       {
         "code": "MOP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "446",
         "name": "Macanese Pataca",
         "minor_units": 2,
@@ -3645,6 +3959,8 @@
       },
       {
         "code": "MVR",
+        "numeric_reused": true,
+        "classification": "circulating",
         "numeric": "462",
         "name": "Maldivian Rufiyaa",
         "minor_units": 2,
@@ -3664,6 +3980,8 @@
       },
       {
         "code": "NPR",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "524",
         "name": "Nepalese Rupee",
         "minor_units": 2,
@@ -3687,6 +4005,8 @@
       },
       {
         "code": "PGK",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "598",
         "name": "Papua New Guinean Kina",
         "minor_units": 2,
@@ -3706,6 +4026,8 @@
       },
       {
         "code": "SBD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "090",
         "name": "Solomon Islands Dollar",
         "minor_units": 2,
@@ -3725,6 +4047,8 @@
       },
       {
         "code": "SHP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "654",
         "name": "Saint Helena Pound",
         "minor_units": 2,
@@ -3748,6 +4072,8 @@
       },
       {
         "code": "SVC",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "222",
         "name": "Salvadoran Colón",
         "minor_units": 2,
@@ -3771,6 +4097,8 @@
       },
       {
         "code": "TOP",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "776",
         "name": "Tongan Paʻanga",
         "minor_units": 2,
@@ -3790,6 +4118,8 @@
       },
       {
         "code": "TTD",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "780",
         "name": "Trinidad and Tobago Dollar",
         "minor_units": 2,
@@ -3809,6 +4139,8 @@
       },
       {
         "code": "VUV",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "548",
         "name": "Vanuatu Vatu",
         "minor_units": 0,
@@ -3828,6 +4160,8 @@
       },
       {
         "code": "WST",
+        "numeric_reused": false,
+        "classification": "circulating",
         "numeric": "882",
         "name": "Samoan Tala",
         "minor_units": 2,
