@@ -113,14 +113,33 @@ def extract_version_file(root: Path) -> Optional[str]:
 
 
 def extract_changelog_version(root: Path) -> Optional[str]:
+    """
+    Find the first *released* version heading in CHANGELOG.md.
+
+    A heading whose trailing text starts with "Unreleased" is skipped.
+    It marks a staged release whose version sites have not yet been
+    bumped. Before the release script runs, VERSION still points at the
+    previous release, so requiring the top heading to match would make
+    the release precondition unsatisfiable.
+
+    Example:
+        ## [1.6.0] — Unreleased      <- skipped
+        ## [1.5.4] — 2026-09-26     <- returned
+    """
     p = root / "CHANGELOG.md"
     if not p.is_file():
         return None
     text = p.read_text(encoding="utf-8")
-    # First "## [X.Y.Z]" or "## X.Y.Z" heading. Trailing text after the
-    # version (e.g. "— Unreleased" or "— 2026-09-16") is ignored.
-    m = re.search(r"^##\s+\[?(\d+\.\d+\.\d+)\]?", text, re.MULTILINE)
-    return m.group(1) if m else None
+    for m in re.finditer(
+        r"^##\s+\[?(\d+\.\d+\.\d+)\]?\s*(?:—|-)?\s*(.*)$",
+        text,
+        re.MULTILINE,
+    ):
+        trailing = m.group(2).strip()
+        if trailing.lower().startswith("unreleased"):
+            continue
+        return m.group(1)
+    return None
 
 
 def extract_registry_meta_version(root: Path) -> Optional[str]:
