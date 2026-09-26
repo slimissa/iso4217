@@ -3,18 +3,29 @@
 Mojibake detector for text files in the repository.
 
 Mojibake is UTF-8 bytes reinterpreted as Latin-1/Windows-1252 and re-saved
-as UTF-8. The three telltale byte prefixes are what you get when a UTF-8
-em-dash, checkmark, or box-drawing character has been round-tripped
-through a legacy code page:
+as UTF-8. The telltale byte signatures come in two classes:
 
-    \xe2\x80\x9a   from — (em dash)
-    \xc3\xa2\xc2\x88   from ✅ (check mark)
-    \xc3\xa2\xc2\x80   from ├ ─ │ └ ┐ ┘ (box drawing)
+  Literal signatures (three chars):
+    \\xe2\\x80\\x9a    from — (em-dash)
+    \\xc3\\xa2\\xc2\\x88    from ✅ (check mark)
+    \\xc3\\xa2\\xc2\\x80    from ├ ─ │ └ ┐ ┘ (box drawing)
+
+  Range signatures (four chars, one pattern):
+    \\xc3[\\x83-\\x89]\\xc2[\\x80-\\xbf]
+      Covers every Latin-1 accented character round-trip in one rule:
+      é, ö, å, ü, ç, è, ñ, and the Latin Extended-A range.
+      Corrupted form example: Côte → CÃ´te, Curaçao → CuraÃ§ao.
 
 Any hit is a real bug: the file is valid UTF-8, but a human reading it
 sees garbage and downstream tools (grep, sed, diff) silently fail to
-match intended strings. The fix is to re-export the file from a source
-that was never corrupted.
+match intended strings.
+
+A file can opt out of scanning by placing the marker
+`# mojibake-scan: skip` within its first 200 bytes. Intended for test
+fixtures that deliberately contain corrupted bytes.
+
+Scanned extensions: md, txt, json, jsonl, py, sh, js, ts, rs, go, toml,
+yaml, yml, csv, tsv, sql, html, cfg, ini.
 
 Usage:
     python3 tools/check_mojibake.py
@@ -33,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -52,6 +64,7 @@ SCAN_SUFFIXES = {
     ".rs", ".go",
     ".toml", ".yaml", ".yml",
     ".csv", ".tsv",
+    ".sql", ".html",
     ".cfg", ".ini",
 }
 
@@ -64,10 +77,14 @@ SKIP_DIRS = {
 }
 
 MOJIBAKE_PATTERNS: tuple[bytes, ...] = (
-    b"\xe2\x80\x9a",
-    b"\xc3\xa2\xc2\x88",
-    b"\xc3\xa2\xc2\x80",
+    rb"\xe2\x80\x9a",
+    rb"\xc3\xa2\xc2\x88",
+    rb"\xc3\xa2\xc2\x80",
+    rb"\xc3[\x83-\x89]\xc2[\x80-\xbf]",
 )
+
+SKIP_MARKER = b"# mojibake-scan: skip"
+SKIP_MARKER_WINDOW = 200
 
 CONTEXT_BYTES = 40
 
@@ -94,29 +111,40 @@ def scan_file(path: Path) -> list[tuple[int, bytes]]:
     """
     Return a list of (byte_offset, context_bytes) for every mojibake hit.
 
-    The file is read as raw bytes; a hit does not require the file to be
+    Reads the file as raw bytes; a hit does not require the file to be
     valid UTF-8, and context is decoded with errors='replace' so a
     preview is always printable.
+
+    Returns [] when the skip marker appears in the first 200 bytes.
     """
     try:
         data = path.read_bytes()
     except OSError:
         return []
 
-    hits: list[tuple[int, bytes]] = []
-    for pattern in MOJIBAKE_PATTERNS:
-        start = 0
-        while True:
-            idx = data.find(pattern, start)
-            if idx == -1:
-                break
-            ctx_start = max(0, idx - CONTEXT_BYTES // 2)
-            ctx_end = min(len(data), idx + len(pattern) + CONTEXT_BYTES // 2)
-            hits.append((idx, data[ctx_start:ctx_end]))
-            start = idx + len(pattern)
+    if SKIP_MARKER in data[:SKIP_MARKER_WINDOW]:
+        return []
 
-    hits.sort(key=lambda t: t[0])
-    return hits
+    hits: list[tuple[int, bytes]] = []
+    for pattern_bytes in MOJIBAKE_PATTERNS:
+        pattern = re.compile(pattern_bytes)
+        for m in pattern.finditer(data):
+            idx = m.start()
+            end = m.end()
+            ctx_start = max(0, idx - CONTEXT_BYTES // 2)
+            ctx_end = min(len(data), end + CONTEXT_BYTES // 2)
+            hits.append((idx, data[ctx_start:ctx_end]))
+
+    # Deduplicate by offset — a byte position that matches two patterns
+    # is reported once.
+    seen: set[int] = set()
+    deduped: list[tuple[int, bytes]] = []
+    for offset, ctx in hits:
+        if offset not in seen:
+            seen.add(offset)
+            deduped.append((offset, ctx))
+    deduped.sort(key=lambda t: t[0])
+    return deduped
 
 
 def report_text(
