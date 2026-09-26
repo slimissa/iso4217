@@ -27,6 +27,7 @@
     "active": [
       {
         "code": "USD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:USD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "840",
@@ -132,6 +133,7 @@
       },
       {
         "code": "EUR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:EUR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "978",
@@ -317,6 +319,7 @@
       },
       {
         "code": "JPY",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:JPY",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "392",
@@ -337,6 +340,7 @@
       },
       {
         "code": "GBP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GBP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "826",
@@ -392,6 +396,7 @@
       },
       {
         "code": "CHF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CHF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "756",
@@ -417,6 +422,7 @@
       },
       {
         "code": "CNY",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CNY",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "156",
@@ -438,6 +444,7 @@
       },
       {
         "code": "AUD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AUD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "036",
@@ -493,6 +500,7 @@
       },
       {
         "code": "CAD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CAD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "124",
@@ -513,6 +521,7 @@
       },
       {
         "code": "NZD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NZD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "554",
@@ -553,6 +562,7 @@
       },
       {
         "code": "SEK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SEK",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "752",
@@ -573,6 +583,7 @@
       },
       {
         "code": "NOK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NOK",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "578",
@@ -603,6 +614,7 @@
       },
       {
         "code": "DKK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DKK",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "208",
@@ -638,6 +650,7 @@
       },
       {
         "code": "SGD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SGD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "702",
@@ -659,6 +672,7 @@
       },
       {
         "code": "HKD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HKD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "344",
@@ -684,6 +698,7 @@
       },
       {
         "code": "KRW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KRW",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "410",
@@ -704,6 +719,7 @@
       },
       {
         "code": "INR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:INR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "356",
@@ -729,6 +745,7 @@
       },
       {
         "code": "MXN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXN",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "484",
@@ -749,6 +766,7 @@
       },
       {
         "code": "BRL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRL",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "986",
@@ -769,6 +787,7 @@
       },
       {
         "code": "ZAR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZAR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "710",
@@ -805,6 +824,7 @@
       },
       {
         "code": "TRY",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TRY",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "949",
@@ -825,6 +845,7 @@
       },
       {
         "code": "RUB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RUB",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "643",
@@ -845,6 +866,7 @@
       },
       {
         "code": "AED",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AED",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "784",
@@ -869,6 +891,7 @@
       },
       {
         "code": "SAR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SAR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "682",
@@ -893,6 +916,7 @@
       },
       {
         "code": "THB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:THB",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "764",
@@ -913,6 +937,7 @@
       },
       {
         "code": "MYR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MYR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "458",
@@ -933,6 +958,7 @@
       },
       {
         "code": "IDR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:IDR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "360",
@@ -954,6 +980,7 @@
       },
       {
         "code": "PHP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PHP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "608",
@@ -974,6 +1001,7 @@
       },
       {
         "code": "TWD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TWD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "901",
@@ -994,6 +1022,7 @@
       },
       {
         "code": "VND",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VND",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "704",
@@ -1014,6 +1043,7 @@
       },
       {
         "code": "PLN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PLN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "985",
@@ -1034,6 +1064,7 @@
       },
       {
         "code": "CZK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CZK",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "203",
@@ -1054,6 +1085,7 @@
       },
       {
         "code": "HUF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HUF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "348",
@@ -1074,6 +1106,7 @@
       },
       {
         "code": "RON",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RON",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "946",
@@ -1094,6 +1127,7 @@
       },
       {
         "code": "ILS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ILS",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "376",
@@ -1119,6 +1153,7 @@
       },
       {
         "code": "CLP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CLP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "152",
@@ -1139,6 +1174,7 @@
       },
       {
         "code": "COP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:COP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "170",
@@ -1159,6 +1195,7 @@
       },
       {
         "code": "ARS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARS",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "032",
@@ -1179,6 +1216,7 @@
       },
       {
         "code": "PEN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PEN",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "604",
@@ -1199,6 +1237,7 @@
       },
       {
         "code": "NGN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NGN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "566",
@@ -1219,6 +1258,7 @@
       },
       {
         "code": "EGP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:EGP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "818",
@@ -1239,6 +1279,7 @@
       },
       {
         "code": "KES",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KES",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "404",
@@ -1259,6 +1300,7 @@
       },
       {
         "code": "GHS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GHS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "936",
@@ -1279,6 +1321,7 @@
       },
       {
         "code": "MAD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MAD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "504",
@@ -1309,6 +1352,7 @@
       },
       {
         "code": "DZD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DZD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "012",
@@ -1329,6 +1373,7 @@
       },
       {
         "code": "TND",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TND",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "788",
@@ -1349,6 +1394,7 @@
       },
       {
         "code": "LYD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LYD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "434",
@@ -1369,6 +1415,7 @@
       },
       {
         "code": "KWD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KWD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "414",
@@ -1394,6 +1441,7 @@
       },
       {
         "code": "BHD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BHD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "048",
@@ -1418,6 +1466,7 @@
       },
       {
         "code": "OMR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:OMR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "512",
@@ -1442,6 +1491,7 @@
       },
       {
         "code": "QAR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:QAR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "634",
@@ -1466,6 +1516,7 @@
       },
       {
         "code": "JOD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:JOD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "400",
@@ -1490,6 +1541,7 @@
       },
       {
         "code": "LBP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LBP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "422",
@@ -1511,6 +1563,7 @@
       },
       {
         "code": "IQD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:IQD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "368",
@@ -1531,6 +1584,7 @@
       },
       {
         "code": "PKR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PKR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "586",
@@ -1551,6 +1605,7 @@
       },
       {
         "code": "BDT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BDT",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "050",
@@ -1571,6 +1626,7 @@
       },
       {
         "code": "LKR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LKR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "144",
@@ -1591,6 +1647,7 @@
       },
       {
         "code": "KZT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KZT",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "398",
@@ -1611,6 +1668,7 @@
       },
       {
         "code": "UAH",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UAH",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "980",
@@ -1631,6 +1689,7 @@
       },
       {
         "code": "CRC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CRC",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "188",
@@ -1651,6 +1710,7 @@
       },
       {
         "code": "ISK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ISK",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "352",
@@ -1671,6 +1731,7 @@
       },
       {
         "code": "BGN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "975",
@@ -1696,6 +1757,7 @@
       },
       {
         "code": "BOV",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BOV",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "984",
@@ -1718,6 +1780,7 @@
       },
       {
         "code": "CHE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CHE",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "947",
@@ -1743,6 +1806,7 @@
       },
       {
         "code": "CHW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CHW",
         "numeric_reused": true,
         "classification": "fund",
         "numeric": "948",
@@ -1768,6 +1832,7 @@
       },
       {
         "code": "CLF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CLF",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "990",
@@ -1790,6 +1855,7 @@
       },
       {
         "code": "COU",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:COU",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "970",
@@ -1812,6 +1878,7 @@
       },
       {
         "code": "MXV",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXV",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "979",
@@ -1834,6 +1901,7 @@
       },
       {
         "code": "USN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:USN",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "997",
@@ -1859,6 +1927,7 @@
       },
       {
         "code": "USS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:USS",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "998",
@@ -1884,6 +1953,7 @@
       },
       {
         "code": "UYI",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYI",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "940",
@@ -1906,6 +1976,7 @@
       },
       {
         "code": "UYW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYW",
         "numeric_reused": false,
         "classification": "fund",
         "numeric": "927",
@@ -1928,6 +1999,7 @@
       },
       {
         "code": "VED",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VED",
         "numeric_reused": false,
         "classification": "indexation",
         "numeric": "926",
@@ -1950,6 +2022,7 @@
       },
       {
         "code": "XOF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XOF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "952",
@@ -2010,6 +2083,7 @@
       },
       {
         "code": "XAF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XAF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "950",
@@ -2060,6 +2134,7 @@
       },
       {
         "code": "XPF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XPF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "953",
@@ -2095,6 +2170,7 @@
       },
       {
         "code": "XCD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XCD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "951",
@@ -2155,6 +2231,7 @@
       },
       {
         "code": "BBD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BBD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "052",
@@ -2180,6 +2257,7 @@
       },
       {
         "code": "BMD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BMD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "060",
@@ -2205,6 +2283,7 @@
       },
       {
         "code": "BSD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BSD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "044",
@@ -2230,6 +2309,7 @@
       },
       {
         "code": "BZD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BZD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "084",
@@ -2255,6 +2335,7 @@
       },
       {
         "code": "KYD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KYD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "136",
@@ -2280,6 +2361,7 @@
       },
       {
         "code": "ALL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ALL",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "008",
@@ -2301,6 +2383,7 @@
       },
       {
         "code": "BAM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BAM",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "977",
@@ -2326,6 +2409,7 @@
       },
       {
         "code": "BYN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BYN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "933",
@@ -2347,6 +2431,7 @@
       },
       {
         "code": "MDL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MDL",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "498",
@@ -2368,6 +2453,7 @@
       },
       {
         "code": "MKD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MKD",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "807",
@@ -2393,6 +2479,7 @@
       },
       {
         "code": "RSD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RSD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "941",
@@ -2414,6 +2501,7 @@
       },
       {
         "code": "AMD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AMD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "051",
@@ -2435,6 +2523,7 @@
       },
       {
         "code": "AZN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AZN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "944",
@@ -2456,6 +2545,7 @@
       },
       {
         "code": "KGS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KGS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "417",
@@ -2477,6 +2567,7 @@
       },
       {
         "code": "TJS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TJS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "972",
@@ -2498,6 +2589,7 @@
       },
       {
         "code": "TMT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TMT",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "934",
@@ -2519,6 +2611,7 @@
       },
       {
         "code": "UZS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UZS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "860",
@@ -2540,6 +2633,7 @@
       },
       {
         "code": "AFN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AFN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "971",
@@ -2561,6 +2655,7 @@
       },
       {
         "code": "IRR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:IRR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "364",
@@ -2582,6 +2677,7 @@
       },
       {
         "code": "SYP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SYP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "760",
@@ -2603,6 +2699,7 @@
       },
       {
         "code": "YER",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YER",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "886",
@@ -2624,6 +2721,7 @@
       },
       {
         "code": "BOB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BOB",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "068",
@@ -2645,6 +2743,7 @@
       },
       {
         "code": "GTQ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GTQ",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "320",
@@ -2666,6 +2765,7 @@
       },
       {
         "code": "HNL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HNL",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "340",
@@ -2687,6 +2787,7 @@
       },
       {
         "code": "NIO",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NIO",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "558",
@@ -2708,6 +2809,7 @@
       },
       {
         "code": "PAB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PAB",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "590",
@@ -2733,6 +2835,7 @@
       },
       {
         "code": "PYG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PYG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "600",
@@ -2754,6 +2857,7 @@
       },
       {
         "code": "SRD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SRD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "968",
@@ -2775,6 +2879,7 @@
       },
       {
         "code": "UYU",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYU",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "858",
@@ -2796,6 +2901,7 @@
       },
       {
         "code": "VES",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VES",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "928",
@@ -2818,6 +2924,7 @@
       },
       {
         "code": "BWP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BWP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "072",
@@ -2839,6 +2946,7 @@
       },
       {
         "code": "LSL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LSL",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "426",
@@ -2864,6 +2972,7 @@
       },
       {
         "code": "NAD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NAD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "516",
@@ -2889,6 +2998,7 @@
       },
       {
         "code": "SZL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SZL",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "748",
@@ -2914,6 +3024,7 @@
       },
       {
         "code": "ZMW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZMW",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "967",
@@ -2935,6 +3046,7 @@
       },
       {
         "code": "ZWG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "924",
@@ -2957,6 +3069,7 @@
       },
       {
         "code": "MWK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MWK",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "454",
@@ -2978,6 +3091,7 @@
       },
       {
         "code": "MZN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MZN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "943",
@@ -2999,6 +3113,7 @@
       },
       {
         "code": "AOA",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AOA",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "973",
@@ -3020,6 +3135,7 @@
       },
       {
         "code": "BIF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BIF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "108",
@@ -3041,6 +3157,7 @@
       },
       {
         "code": "CDF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CDF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "976",
@@ -3062,6 +3179,7 @@
       },
       {
         "code": "DJF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DJF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "262",
@@ -3087,6 +3205,7 @@
       },
       {
         "code": "ERN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ERN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "232",
@@ -3112,6 +3231,7 @@
       },
       {
         "code": "ETB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ETB",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "230",
@@ -3133,6 +3253,7 @@
       },
       {
         "code": "KMF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KMF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "174",
@@ -3158,6 +3279,7 @@
       },
       {
         "code": "MGA",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MGA",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "969",
@@ -3179,6 +3301,7 @@
       },
       {
         "code": "MRU",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MRU",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "929",
@@ -3200,6 +3323,7 @@
       },
       {
         "code": "MUR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MUR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "480",
@@ -3221,6 +3345,7 @@
       },
       {
         "code": "RWF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RWF",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "646",
@@ -3242,6 +3367,7 @@
       },
       {
         "code": "SCR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SCR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "690",
@@ -3263,6 +3389,7 @@
       },
       {
         "code": "SDG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SDG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "938",
@@ -3284,6 +3411,7 @@
       },
       {
         "code": "SLE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SLE",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "925",
@@ -3305,6 +3433,7 @@
       },
       {
         "code": "SOS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SOS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "706",
@@ -3326,6 +3455,7 @@
       },
       {
         "code": "SSP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SSP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "728",
@@ -3347,6 +3477,7 @@
       },
       {
         "code": "STN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:STN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "930",
@@ -3372,6 +3503,7 @@
       },
       {
         "code": "TZS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TZS",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "834",
@@ -3393,6 +3525,7 @@
       },
       {
         "code": "UGX",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UGX",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "800",
@@ -3414,6 +3547,7 @@
       },
       {
         "code": "CVE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CVE",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "132",
@@ -3439,6 +3573,7 @@
       },
       {
         "code": "GMD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GMD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "270",
@@ -3460,6 +3595,7 @@
       },
       {
         "code": "GNF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GNF",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "324",
@@ -3481,6 +3617,7 @@
       },
       {
         "code": "LRD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LRD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "430",
@@ -3502,6 +3639,7 @@
       },
       {
         "code": "ANG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ANG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "532",
@@ -3532,6 +3670,7 @@
       },
       {
         "code": "AWG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AWG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "533",
@@ -3557,6 +3696,7 @@
       },
       {
         "code": "BND",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BND",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "096",
@@ -3582,6 +3722,7 @@
       },
       {
         "code": "BTN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BTN",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "064",
@@ -3607,6 +3748,7 @@
       },
       {
         "code": "CUC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CUC",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "931",
@@ -3632,6 +3774,7 @@
       },
       {
         "code": "CUP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CUP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "192",
@@ -3653,6 +3796,7 @@
       },
       {
         "code": "DOP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DOP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "214",
@@ -3674,6 +3818,7 @@
       },
       {
         "code": "FJD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FJD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "242",
@@ -3695,6 +3840,7 @@
       },
       {
         "code": "FKP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FKP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "238",
@@ -3720,6 +3866,7 @@
       },
       {
         "code": "GEL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GEL",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "981",
@@ -3741,6 +3888,7 @@
       },
       {
         "code": "GIP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GIP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "292",
@@ -3766,6 +3914,7 @@
       },
       {
         "code": "GYD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GYD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "328",
@@ -3787,6 +3936,7 @@
       },
       {
         "code": "HTG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HTG",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "332",
@@ -3808,6 +3958,7 @@
       },
       {
         "code": "JMD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:JMD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "388",
@@ -3829,6 +3980,7 @@
       },
       {
         "code": "KHR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KHR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "116",
@@ -3850,6 +4002,7 @@
       },
       {
         "code": "KPW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:KPW",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "408",
@@ -3871,6 +4024,7 @@
       },
       {
         "code": "LAK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LAK",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "418",
@@ -3892,6 +4046,7 @@
       },
       {
         "code": "MMK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MMK",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "104",
@@ -3913,6 +4068,7 @@
       },
       {
         "code": "MNT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MNT",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "496",
@@ -3934,6 +4090,7 @@
       },
       {
         "code": "MOP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MOP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "446",
@@ -3959,6 +4116,7 @@
       },
       {
         "code": "MVR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MVR",
         "numeric_reused": true,
         "classification": "circulating",
         "numeric": "462",
@@ -3980,6 +4138,7 @@
       },
       {
         "code": "NPR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NPR",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "524",
@@ -4005,6 +4164,7 @@
       },
       {
         "code": "PGK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PGK",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "598",
@@ -4026,6 +4186,7 @@
       },
       {
         "code": "SBD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SBD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "090",
@@ -4047,6 +4208,7 @@
       },
       {
         "code": "SHP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SHP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "654",
@@ -4072,6 +4234,7 @@
       },
       {
         "code": "SVC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SVC",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "222",
@@ -4097,6 +4260,7 @@
       },
       {
         "code": "TOP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TOP",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "776",
@@ -4118,6 +4282,7 @@
       },
       {
         "code": "TTD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TTD",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "780",
@@ -4139,6 +4304,7 @@
       },
       {
         "code": "VUV",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VUV",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "548",
@@ -4160,6 +4326,7 @@
       },
       {
         "code": "WST",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:WST",
         "numeric_reused": false,
         "classification": "circulating",
         "numeric": "882",
@@ -4183,6 +4350,7 @@
     "withdrawn": [
       {
         "code": "ATS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ATS",
         "numeric": "040",
         "name": "Austrian Schilling",
         "minor_units": 2,
@@ -4194,6 +4362,7 @@
       },
       {
         "code": "BEF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEF",
         "numeric": "056",
         "name": "Belgian Franc",
         "minor_units": 2,
@@ -4205,6 +4374,7 @@
       },
       {
         "code": "DEM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DEM",
         "numeric": "276",
         "name": "German Mark",
         "minor_units": 2,
@@ -4216,6 +4386,7 @@
       },
       {
         "code": "ESP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESP",
         "numeric": "724",
         "name": "Spanish Peseta",
         "minor_units": 0,
@@ -4227,6 +4398,7 @@
       },
       {
         "code": "FIM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FIM",
         "numeric": "246",
         "name": "Finnish Markka",
         "minor_units": 2,
@@ -4238,6 +4410,7 @@
       },
       {
         "code": "FRF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:FRF",
         "numeric": "250",
         "name": "French Franc",
         "minor_units": 2,
@@ -4249,6 +4422,7 @@
       },
       {
         "code": "GRD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GRD",
         "numeric": "300",
         "name": "Greek Drachma",
         "minor_units": 0,
@@ -4260,6 +4434,7 @@
       },
       {
         "code": "IEP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:IEP",
         "numeric": "372",
         "name": "Irish Pound",
         "minor_units": 2,
@@ -4271,6 +4446,7 @@
       },
       {
         "code": "ITL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ITL",
         "numeric": "380",
         "name": "Italian Lira",
         "minor_units": 0,
@@ -4282,6 +4458,7 @@
       },
       {
         "code": "LUF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUF",
         "numeric": "442",
         "name": "Luxembourg Franc",
         "minor_units": 2,
@@ -4293,6 +4470,7 @@
       },
       {
         "code": "NLG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NLG",
         "numeric": "528",
         "name": "Dutch Guilder",
         "minor_units": 2,
@@ -4304,6 +4482,7 @@
       },
       {
         "code": "PTE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PTE",
         "numeric": "620",
         "name": "Portuguese Escudo",
         "minor_units": 0,
@@ -4315,6 +4494,7 @@
       },
       {
         "code": "SKK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SKK",
         "numeric": "703",
         "name": "Slovak Koruna",
         "minor_units": 2,
@@ -4326,6 +4506,7 @@
       },
       {
         "code": "EEK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:EEK",
         "numeric": "233",
         "name": "Estonian Kroon",
         "minor_units": 2,
@@ -4337,6 +4518,7 @@
       },
       {
         "code": "LVL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LVL",
         "numeric": "428",
         "name": "Latvian Lats",
         "minor_units": 2,
@@ -4348,6 +4530,7 @@
       },
       {
         "code": "LTL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LTL",
         "numeric": "440",
         "name": "Lithuanian Litas",
         "minor_units": 2,
@@ -4359,6 +4542,7 @@
       },
       {
         "code": "HRK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HRK",
         "numeric": "191",
         "name": "Croatian Kuna",
         "minor_units": 2,
@@ -4370,6 +4554,7 @@
       },
       {
         "code": "CYP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CYP",
         "numeric": "196",
         "name": "Cypriot Pound",
         "minor_units": 2,
@@ -4381,6 +4566,7 @@
       },
       {
         "code": "MTL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MTL",
         "numeric": "470",
         "name": "Maltese Lira",
         "minor_units": 2,
@@ -4392,6 +4578,7 @@
       },
       {
         "code": "SIT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SIT",
         "numeric": "705",
         "name": "Slovenian Tolar",
         "minor_units": 2,
@@ -4403,6 +4590,7 @@
       },
       {
         "code": "ROL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ROL",
         "numeric": "642",
         "name": "Romanian Leu (old)",
         "minor_units": 2,
@@ -4414,6 +4602,7 @@
       },
       {
         "code": "TRL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TRL",
         "numeric": "792",
         "name": "Turkish Lira (old)",
         "minor_units": 0,
@@ -4425,6 +4614,7 @@
       },
       {
         "code": "MXN_OLD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXN",
         "numeric": "484",
         "name": "Mexican Peso (pre-1993)",
         "minor_units": 2,
@@ -4437,6 +4627,7 @@
       },
       {
         "code": "RUR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RUR",
         "numeric": "810",
         "name": "Russian Ruble (old)",
         "minor_units": 2,
@@ -4448,6 +4639,7 @@
       },
       {
         "code": "BRB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRB",
         "numeric": "076",
         "name": "Brazilian Cruzeiro",
         "minor_units": 2,
@@ -4460,6 +4652,7 @@
       },
       {
         "code": "BRC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRC",
         "numeric": "076",
         "name": "Brazilian Cruzado",
         "minor_units": 2,
@@ -4472,6 +4665,7 @@
       },
       {
         "code": "BRN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRN",
         "numeric": "076",
         "name": "Brazilian Cruzado Novo",
         "minor_units": 2,
@@ -4484,6 +4678,7 @@
       },
       {
         "code": "BRE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRE",
         "numeric": "076",
         "name": "Brazilian Cruzeiro (1990)",
         "minor_units": 2,
@@ -4496,6 +4691,7 @@
       },
       {
         "code": "BRR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BRR",
         "numeric": "987",
         "name": "Brazilian Cruzeiro Real",
         "minor_units": 2,
@@ -4508,6 +4704,7 @@
       },
       {
         "code": "YUD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUD",
         "numeric": "890",
         "name": "Yugoslav Dinar (1966)",
         "minor_units": 2,
@@ -4520,6 +4717,7 @@
       },
       {
         "code": "YUN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUN",
         "numeric": "890",
         "name": "Yugoslav Convertible Dinar",
         "minor_units": 2,
@@ -4532,6 +4730,7 @@
       },
       {
         "code": "YUR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUR",
         "numeric": "890",
         "name": "Yugoslav Reformed Dinar",
         "minor_units": 2,
@@ -4544,6 +4743,7 @@
       },
       {
         "code": "YUO",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUO",
         "numeric": "890",
         "name": "Yugoslav October Dinar",
         "minor_units": 2,
@@ -4556,6 +4756,7 @@
       },
       {
         "code": "YUG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUG",
         "numeric": "890",
         "name": "Yugoslav January Dinar",
         "minor_units": 2,
@@ -4568,6 +4769,7 @@
       },
       {
         "code": "YUM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YUM",
         "numeric": "891",
         "name": "Yugoslav Novi Dinar",
         "minor_units": 2,
@@ -4580,6 +4782,7 @@
       },
       {
         "code": "AOK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AOK",
         "numeric": "024",
         "name": "Angolan Kwanza (1977)",
         "minor_units": 0,
@@ -4592,6 +4795,7 @@
       },
       {
         "code": "AON",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AON",
         "numeric": "024",
         "name": "Angolan Novo Kwanza",
         "minor_units": 0,
@@ -4604,6 +4808,7 @@
       },
       {
         "code": "AOR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AOR",
         "numeric": "982",
         "name": "Angolan Kwanza Reajustado",
         "minor_units": 0,
@@ -4616,6 +4821,7 @@
       },
       {
         "code": "BGJ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGJ",
         "numeric": "100",
         "name": "Bulgarian Lev (1962)",
         "minor_units": 0,
@@ -4628,6 +4834,7 @@
       },
       {
         "code": "BGK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGK",
         "numeric": "100",
         "name": "Bulgarian Lev (1997)",
         "minor_units": 0,
@@ -4640,6 +4847,7 @@
       },
       {
         "code": "BGL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGL",
         "numeric": "100",
         "name": "Bulgarian Lev (1999)",
         "minor_units": 2,
@@ -4652,6 +4860,7 @@
       },
       {
         "code": "CSK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSK",
         "numeric": "200",
         "name": "Czechoslovak Koruna",
         "minor_units": 2,
@@ -4664,6 +4873,7 @@
       },
       {
         "code": "CSJ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSJ",
         "numeric": "203",
         "name": "Czechoslovak Koruna (1993)",
         "minor_units": 2,
@@ -4676,6 +4886,7 @@
       },
       {
         "code": "ARL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARL",
         "numeric": "032",
         "name": "Argentine Peso Ley",
         "minor_units": 2,
@@ -4688,6 +4899,7 @@
       },
       {
         "code": "ARP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARP",
         "numeric": "032",
         "name": "Argentine Peso Argentino",
         "minor_units": 2,
@@ -4700,6 +4912,7 @@
       },
       {
         "code": "ARA",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARA",
         "numeric": "032",
         "name": "Argentine Austral",
         "minor_units": 2,
@@ -4712,6 +4925,7 @@
       },
       {
         "code": "ARY",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARY",
         "numeric": "032",
         "name": "Argentine Peso Ley (alternative code)",
         "minor_units": 0,
@@ -4724,6 +4938,7 @@
       },
       {
         "code": "GNE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GNE",
         "numeric": "324",
         "name": "Guinean Syli",
         "minor_units": 0,
@@ -4736,6 +4951,7 @@
       },
       {
         "code": "GWP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GWP",
         "numeric": "624",
         "name": "Guinea-Bissau Peso",
         "minor_units": 2,
@@ -4748,6 +4964,7 @@
       },
       {
         "code": "GWE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GWE",
         "numeric": "624",
         "name": "Guinean Escudo",
         "minor_units": 0,
@@ -4760,6 +4977,7 @@
       },
       {
         "code": "GNS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GNS",
         "numeric": "324",
         "name": "Guinean Syli (alternative code)",
         "minor_units": 0,
@@ -4772,6 +4990,7 @@
       },
       {
         "code": "BYB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BYB",
         "numeric": "112",
         "name": "Belarusian Ruble (1992)",
         "minor_units": 2,
@@ -4784,6 +5003,7 @@
       },
       {
         "code": "BYR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BYR",
         "numeric": "974",
         "name": "Belarusian Ruble (2000)",
         "minor_units": 0,
@@ -4796,6 +5016,7 @@
       },
       {
         "code": "BEC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEC",
         "numeric": "993",
         "name": "Belgian Convertible Franc",
         "minor_units": 0,
@@ -4808,6 +5029,7 @@
       },
       {
         "code": "BEL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BEL",
         "numeric": "992",
         "name": "Belgian Financial Franc",
         "minor_units": 0,
@@ -4820,6 +5042,7 @@
       },
       {
         "code": "ECS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ECS",
         "numeric": "218",
         "name": "Ecuadorian Sucre",
         "minor_units": 0,
@@ -4832,6 +5055,7 @@
       },
       {
         "code": "ECV",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ECV",
         "numeric": "983",
         "name": "Ecuadorian Unidad de Valor Constante",
         "minor_units": 2,
@@ -4844,6 +5068,7 @@
       },
       {
         "code": "PEH",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PEH",
         "numeric": "604",
         "name": "Peruvian Sol de Oro",
         "minor_units": 0,
@@ -4856,6 +5081,7 @@
       },
       {
         "code": "PEI",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PEI",
         "numeric": "604",
         "name": "Peruvian Inti",
         "minor_units": 0,
@@ -4868,6 +5094,7 @@
       },
       {
         "code": "PES",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PES",
         "numeric": "604",
         "name": "Peruvian Sol (alternative code)",
         "minor_units": 2,
@@ -4880,6 +5107,7 @@
       },
       {
         "code": "NIC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:NIC",
         "numeric": "558",
         "name": "Nicaraguan Córdoba (1988)",
         "minor_units": 2,
@@ -4892,6 +5120,7 @@
       },
       {
         "code": "MXP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MXP",
         "numeric": "484",
         "name": "Mexican Peso (pre-1993)",
         "minor_units": 0,
@@ -4904,6 +5133,7 @@
       },
       {
         "code": "ZWD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWD",
         "numeric": "716",
         "name": "Zimbabwean Dollar (1980)",
         "minor_units": 2,
@@ -4916,6 +5146,7 @@
       },
       {
         "code": "ZWN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWN",
         "numeric": "942",
         "name": "Zimbabwean Dollar (2006)",
         "minor_units": 2,
@@ -4928,6 +5159,7 @@
       },
       {
         "code": "ZWR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWR",
         "numeric": "935",
         "name": "Zimbabwean Dollar (2008)",
         "minor_units": 2,
@@ -4940,6 +5172,7 @@
       },
       {
         "code": "ZWL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWL",
         "numeric": "932",
         "name": "Zimbabwean Dollar (2009)",
         "minor_units": 2,
@@ -4952,6 +5185,7 @@
       },
       {
         "code": "ZWC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZWC",
         "numeric": "716",
         "name": "Rhodesian Dollar",
         "minor_units": 2,
@@ -4964,6 +5198,7 @@
       },
       {
         "code": "ZRZ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZRZ",
         "numeric": "180",
         "name": "Zairean Zaire",
         "minor_units": 2,
@@ -4976,6 +5211,7 @@
       },
       {
         "code": "ZRN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZRN",
         "numeric": "180",
         "name": "Zairean New Zaire",
         "minor_units": 2,
@@ -4988,6 +5224,7 @@
       },
       {
         "code": "ZMK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZMK",
         "numeric": "894",
         "name": "Zambian Kwacha (1968)",
         "minor_units": 2,
@@ -5000,6 +5237,7 @@
       },
       {
         "code": "BUK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BUK",
         "numeric": "104",
         "name": "Burmese Kyat (old)",
         "minor_units": 0,
@@ -5012,6 +5250,7 @@
       },
       {
         "code": "DDM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:DDM",
         "numeric": "278",
         "name": "East German Mark",
         "minor_units": 0,
@@ -5024,6 +5263,7 @@
       },
       {
         "code": "LAJ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LAJ",
         "numeric": "418",
         "name": "Lao Kip (old)",
         "minor_units": 0,
@@ -5036,6 +5276,7 @@
       },
       {
         "code": "TJR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TJR",
         "numeric": "762",
         "name": "Tajikistani Ruble",
         "minor_units": 0,
@@ -5048,6 +5289,7 @@
       },
       {
         "code": "TMM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TMM",
         "numeric": "795",
         "name": "Turkmenistani Manat (old)",
         "minor_units": 2,
@@ -5060,6 +5302,7 @@
       },
       {
         "code": "TPE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:TPE",
         "numeric": "626",
         "name": "Portuguese Timorese Escudo",
         "minor_units": 0,
@@ -5072,6 +5315,7 @@
       },
       {
         "code": "VNC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VNC",
         "numeric": "704",
         "name": "Vietnamese Dong (old)",
         "minor_units": 0,
@@ -5084,6 +5328,7 @@
       },
       {
         "code": "YDD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:YDD",
         "numeric": "720",
         "name": "South Yemeni Dinar",
         "minor_units": 0,
@@ -5096,6 +5341,7 @@
       },
       {
         "code": "BAD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BAD",
         "numeric": "070",
         "name": "Bosnia and Herzegovina Dinar",
         "minor_units": 2,
@@ -5108,6 +5354,7 @@
       },
       {
         "code": "BOP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BOP",
         "numeric": "068",
         "name": "Bolivian Peso",
         "minor_units": 2,
@@ -5120,6 +5367,7 @@
       },
       {
         "code": "CHC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CHC",
         "numeric": "948",
         "name": "WIR Franc (electronic)",
         "minor_units": 2,
@@ -5132,6 +5380,7 @@
       },
       {
         "code": "CSD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CSD",
         "numeric": "891",
         "name": "Serbian Dinar (2003)",
         "minor_units": 2,
@@ -5144,6 +5393,7 @@
       },
       {
         "code": "GEK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GEK",
         "numeric": "268",
         "name": "Georgian Kuponi",
         "minor_units": 0,
@@ -5156,6 +5406,7 @@
       },
       {
         "code": "GHC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GHC",
         "numeric": "288",
         "name": "Ghanaian Cedi (old)",
         "minor_units": 2,
@@ -5168,6 +5419,7 @@
       },
       {
         "code": "GHP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GHP",
         "numeric": "939",
         "name": "Ghanaian Cedi (transitional)",
         "minor_units": 2,
@@ -5180,6 +5432,7 @@
       },
       {
         "code": "GQE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:GQE",
         "numeric": "226",
         "name": "Equatorial Guinean Ekwele",
         "minor_units": 0,
@@ -5192,6 +5445,7 @@
       },
       {
         "code": "HRD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:HRD",
         "numeric": "191",
         "name": "Croatian Dinar",
         "minor_units": 0,
@@ -5204,6 +5458,7 @@
       },
       {
         "code": "LTT",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LTT",
         "numeric": "440",
         "name": "Lithuanian Talonas",
         "minor_units": 2,
@@ -5216,6 +5471,7 @@
       },
       {
         "code": "LUC",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUC",
         "numeric": "989",
         "name": "Luxembourg Convertible Franc",
         "minor_units": 0,
@@ -5228,6 +5484,7 @@
       },
       {
         "code": "LUL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LUL",
         "numeric": "988",
         "name": "Luxembourg Financial Franc",
         "minor_units": 0,
@@ -5240,6 +5497,7 @@
       },
       {
         "code": "LVR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LVR",
         "numeric": "428",
         "name": "Latvian Rublis",
         "minor_units": 2,
@@ -5252,6 +5510,7 @@
       },
       {
         "code": "MGF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MGF",
         "numeric": "450",
         "name": "Malagasy Franc",
         "minor_units": 0,
@@ -5264,6 +5523,7 @@
       },
       {
         "code": "MKN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MKN",
         "numeric": "807",
         "name": "Macedonian Denar (old)",
         "minor_units": 0,
@@ -5276,6 +5536,7 @@
       },
       {
         "code": "MLF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MLF",
         "numeric": "466",
         "name": "Malian Franc",
         "minor_units": 0,
@@ -5288,6 +5549,7 @@
       },
       {
         "code": "MTP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MTP",
         "numeric": "470",
         "name": "Maltese Pound",
         "minor_units": 0,
@@ -5300,6 +5562,7 @@
       },
       {
         "code": "MVQ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MVQ",
         "numeric": "462",
         "name": "Maldivian Rupee",
         "minor_units": 0,
@@ -5312,6 +5575,7 @@
       },
       {
         "code": "MZE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MZE",
         "numeric": "508",
         "name": "Mozambican Escudo",
         "minor_units": 2,
@@ -5324,6 +5588,7 @@
       },
       {
         "code": "MZM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MZM",
         "numeric": "508",
         "name": "Mozambican Metical (old)",
         "minor_units": 2,
@@ -5336,6 +5601,7 @@
       },
       {
         "code": "MRO",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MRO",
         "numeric": "478",
         "name": "Mauritanian Ouguiya (old)",
         "minor_units": 2,
@@ -5348,6 +5614,7 @@
       },
       {
         "code": "PLZ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:PLZ",
         "numeric": "616",
         "name": "Polish Zloty (old)",
         "minor_units": 2,
@@ -5360,6 +5627,7 @@
       },
       {
         "code": "RHD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:RHD",
         "numeric": "716",
         "name": "Rhodesian Dollar",
         "minor_units": 2,
@@ -5372,6 +5640,7 @@
       },
       {
         "code": "SDD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SDD",
         "numeric": "736",
         "name": "Sudanese Dinar",
         "minor_units": 2,
@@ -5384,6 +5653,7 @@
       },
       {
         "code": "SDP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SDP",
         "numeric": "736",
         "name": "Sudanese Pound (old)",
         "minor_units": 0,
@@ -5396,6 +5666,7 @@
       },
       {
         "code": "SLL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SLL",
         "numeric": "694",
         "name": "Sierra Leonean Leone (old)",
         "minor_units": 2,
@@ -5408,6 +5679,7 @@
       },
       {
         "code": "SRG",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SRG",
         "numeric": "740",
         "name": "Surinamese Guilder",
         "minor_units": 2,
@@ -5420,6 +5692,7 @@
       },
       {
         "code": "STD",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:STD",
         "numeric": "678",
         "name": "São Tomé and Príncipe Dobra (old)",
         "minor_units": 2,
@@ -5432,6 +5705,7 @@
       },
       {
         "code": "SUR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SUR",
         "numeric": "810",
         "name": "Soviet Union Ruble",
         "minor_units": 0,
@@ -5444,6 +5718,7 @@
       },
       {
         "code": "UAK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UAK",
         "numeric": "804",
         "name": "Ukrainian Karbovanets",
         "minor_units": 2,
@@ -5456,6 +5731,7 @@
       },
       {
         "code": "UGS",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UGS",
         "numeric": "800",
         "name": "Ugandan Shilling (old)",
         "minor_units": 0,
@@ -5468,6 +5744,7 @@
       },
       {
         "code": "UGW",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UGW",
         "numeric": "800",
         "name": "Ugandan Shilling (old, alternative)",
         "minor_units": 0,
@@ -5480,6 +5757,7 @@
       },
       {
         "code": "UYN",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYN",
         "numeric": "858",
         "name": "Uruguayan Peso (old)",
         "minor_units": 2,
@@ -5492,6 +5770,7 @@
       },
       {
         "code": "UYP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:UYP",
         "numeric": "858",
         "name": "Uruguayan New Peso",
         "minor_units": 0,
@@ -5504,6 +5783,7 @@
       },
       {
         "code": "VEB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VEB",
         "numeric": "862",
         "name": "Venezuelan Bolívar (old)",
         "minor_units": 2,
@@ -5516,6 +5796,7 @@
       },
       {
         "code": "VEF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VEF",
         "numeric": "937",
         "name": "Venezuelan Bolívar Fuerte",
         "minor_units": 2,
@@ -5528,6 +5809,7 @@
       },
       {
         "code": "ZAL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ZAL",
         "numeric": "991",
         "name": "South African Financial Rand",
         "minor_units": 2,
@@ -5540,6 +5822,7 @@
       },
       {
         "code": "ADF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ADF",
         "numeric": "250",
         "name": "Andorran Franc",
         "minor_units": 2,
@@ -5552,6 +5835,7 @@
       },
       {
         "code": "ADP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ADP",
         "numeric": "020",
         "name": "Andorran Peseta",
         "minor_units": 0,
@@ -5564,6 +5848,7 @@
       },
       {
         "code": "AFA",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AFA",
         "numeric": "004",
         "name": "Afghan Afghani (old)",
         "minor_units": 2,
@@ -5576,6 +5861,7 @@
       },
       {
         "code": "ALK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ALK",
         "numeric": "008",
         "name": "Albanian Lek (old)",
         "minor_units": 0,
@@ -5588,6 +5874,7 @@
       },
       {
         "code": "AZM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:AZM",
         "numeric": "031",
         "name": "Azerbaijani Manat (old)",
         "minor_units": 2,
@@ -5600,6 +5887,7 @@
       },
       {
         "code": "ESA",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESA",
         "numeric": "996",
         "name": "Spanish Peseta (Account A)",
         "minor_units": 0,
@@ -5612,6 +5900,7 @@
       },
       {
         "code": "ESB",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ESB",
         "numeric": "995",
         "name": "Spanish Peseta (Account B)",
         "minor_units": 0,
@@ -5624,6 +5913,7 @@
       },
       {
         "code": "ILP",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ILP",
         "numeric": "376",
         "name": "Israeli Pound",
         "minor_units": 0,
@@ -5636,6 +5926,7 @@
       },
       {
         "code": "ILR",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ILR",
         "numeric": "376",
         "name": "Israeli Shekel (old)",
         "minor_units": 2,
@@ -5648,6 +5939,7 @@
       },
       {
         "code": "ISJ",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ISJ",
         "numeric": "352",
         "name": "Icelandic Króna (old)",
         "minor_units": 2,
@@ -5660,6 +5952,7 @@
       },
       {
         "code": "LSM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:LSM",
         "numeric": "426",
         "name": "Lesotho Loti (old)",
         "minor_units": 0,
@@ -5672,6 +5965,7 @@
       },
       {
         "code": "MCF",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:MCF",
         "numeric": "250",
         "name": "Monégasque Franc",
         "minor_units": 2,
@@ -5684,6 +5978,7 @@
       },
       {
         "code": "ROK",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ROK",
         "numeric": "642",
         "name": "Romanian Leu (old)",
         "minor_units": 0,
@@ -5696,6 +5991,7 @@
       },
       {
         "code": "SML",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:SML",
         "numeric": "380",
         "name": "San Marinese Lira",
         "minor_units": 0,
@@ -5708,6 +6004,7 @@
       },
       {
         "code": "VAL",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:VAL",
         "numeric": "380",
         "name": "Vatican Lira",
         "minor_units": 0,
@@ -5720,6 +6017,7 @@
       },
       {
         "code": "ARM",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:ARM",
         "numeric": "032",
         "name": "Argentine Peso Moneda Nacional",
         "minor_units": 2,
@@ -5732,6 +6030,7 @@
       },
       {
         "code": "XEU",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XEU",
         "numeric": "954",
         "name": "European Currency Unit",
         "minor_units": 0,
@@ -5744,6 +6043,7 @@
       },
       {
         "code": "XFO",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XFO",
         "numeric": "955",
         "name": "Gold Franc",
         "minor_units": 0,
@@ -5756,6 +6056,7 @@
       },
       {
         "code": "XFU",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XFU",
         "numeric": "956",
         "name": "UIC Franc",
         "minor_units": 0,
@@ -5768,6 +6069,7 @@
       },
       {
         "code": "XRE",
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:XRE",
         "numeric": "957",
         "name": "RINET Funds Code",
         "minor_units": 0,
