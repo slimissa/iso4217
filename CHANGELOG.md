@@ -25,11 +25,12 @@ changes; no schema changes.
 ### Changed
 
 - `tools/check_mojibake.py` — signature set extended from three
-  literal byte sequences to four patterns, the fourth being a
-  range check that catches every Latin-1 accented-character
-  round-trip (`Côte` → `CÃ´te`, `Curaçao` → `CuraÃ§ao`, etc.).
-  Added `.sql` and `.html` to the scan suffixes. Added a
-  `# mojibake-scan: skip` marker for test fixtures.
+  literal byte sequences to four patterns. The fourth is a range
+  check covering every Latin-1 accented-character round-trip:
+  circumflexed, cedilla, tilde, and acute accents, and the
+  Latin Extended-A range. Added `.sql` and `.html` to the scan
+  suffixes. Added a `# mojibake-scan: skip` marker for test
+  fixtures that deliberately contain corrupted bytes.
 - `README.md` — ISO 3166 added to the "Consumed by" table with the
   vendored version.
 - `docs/LAYERS.md` — vendored-snapshots subsection under CURATED.
