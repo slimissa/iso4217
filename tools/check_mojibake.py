@@ -63,7 +63,7 @@ SKIP_DIRS = {
     ".idea", ".vscode",
 }
 
-MOJIBAKE_SIGNATURES: tuple[bytes, ...] = (
+MOJIBAKE_PATTERNS: tuple[bytes, ...] = (
     b"\xe2\x80\x9a",
     b"\xc3\xa2\xc2\x88",
     b"\xc3\xa2\xc2\x80",
@@ -104,16 +104,16 @@ def scan_file(path: Path) -> list[tuple[int, bytes]]:
         return []
 
     hits: list[tuple[int, bytes]] = []
-    for signature in MOJIBAKE_SIGNATURES:
+    for pattern in MOJIBAKE_PATTERNS:
         start = 0
         while True:
-            idx = data.find(signature, start)
+            idx = data.find(pattern, start)
             if idx == -1:
                 break
             ctx_start = max(0, idx - CONTEXT_BYTES // 2)
-            ctx_end = min(len(data), idx + len(signature) + CONTEXT_BYTES // 2)
+            ctx_end = min(len(data), idx + len(pattern) + CONTEXT_BYTES // 2)
             hits.append((idx, data[ctx_start:ctx_end]))
-            start = idx + len(signature)
+            start = idx + len(pattern)
 
     hits.sort(key=lambda t: t[0])
     return hits
