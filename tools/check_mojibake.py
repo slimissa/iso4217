@@ -12,9 +12,12 @@ as UTF-8. The telltale byte signatures come in two classes:
 
   Range signatures (four chars, one pattern):
     \\xc3[\\x83-\\x89]\\xc2[\\x80-\\xbf]
-      Covers every Latin-1 accented character round-trip in one rule:
-      é, ö, å, ü, ç, è, ñ, and the Latin Extended-A range.
-      Corrupted form example: Côte → CÃ´te, Curaçao → CuraÃ§ao.
+      Covers every Latin-1 accented character round-trip in one rule.
+      The corruption class: a two-byte accented character such as
+      the circumflexed o in a French city name (\\xc3\\xb4) becomes
+      four bytes (\\xc3\\x83\\xc2\\xb4) when a file is decoded as
+      Latin-1 and re-encoded as UTF-8. Same for the cedilla-c in a
+      Portuguese name, the tilde-n in Spanish, and so on.
 
 Any hit is a real bug: the file is valid UTF-8, but a human reading it
 sees garbage and downstream tools (grep, sed, diff) silently fail to
