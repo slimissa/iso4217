@@ -1,7 +1,7 @@
 {
   "name": "iso4217-registry",
   "version": "1.5.4",
-  "description": "Canonical ISO 4217 currency registry — machine-readable, versioned, language-agnostic. JavaScript/Node.js wrapper with zero dependencies.",
+  "description": "Canonical ISO 4217 currency registry \u2014 machine-readable, versioned, language-agnostic. JavaScript/Node.js wrapper with zero dependencies.",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
@@ -50,7 +50,7 @@
     "quantitative-finance"
   ],
   "author": {
-    "name": "Le P’tit",
+    "name": "Le P\u2019tit",
     "url": "https://github.com/slimissa"
   },
   "license": "Apache-2.0",

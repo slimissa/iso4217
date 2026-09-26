@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.5.4] — Unreleased
+## [1.5.4] — 2026-09-26
 
 Port the convention: add the VERSION file, the version consistency check
 tool, and reconcile every version site. No data changes; no schema changes.
