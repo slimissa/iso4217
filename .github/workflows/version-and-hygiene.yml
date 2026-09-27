@@ -79,6 +79,17 @@ jobs:
       - name: Verify country codes
         run: python3 tools/check_country_codes.py
   
+  check-registry-freshness:
+    name: Registry freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check registry freshness
+        run: python3 tools/check_registry_freshness.py
+
   check-snapshot-freshness:
     name: Snapshot freshness
     runs-on: ubuntu-latest
