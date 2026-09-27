@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.0] — Unreleased
+
+Closes the schema-version-consistency gap and (optionally) the
+cross-wrapper is_independent default. No data changes; no schema
+changes.
+
+### Fixed
+
+- `tools/validate.py` — removed the hardcoded schema-version check.
+  It warned on every run since v1.6.0 because the constant drifted
+  from the schema. Version agreement is owned by
+  `tools/check_version_consistency.py`. Warning count returns to 26.
+- Wrapper `is_independent` default aligned across Python, JavaScript,
+  Go, and Rust. Absent field reads as `False` in all four, matching
+  the CSV export. Previously JS/Go/Rust defaulted to `True`.
+
+### Added
+
+- `docs/decisions/schema-version-consistency.md` — ADR 0006.
+- `RELEASE_PATTERN.md` — subsection on registry freshness vs.
+  snapshot freshness, co-authored with ISO 3166.
+
+---
+
 ## [1.6.3] — 2026-09-27
 
 Adopts ISO 3166's multi-source snapshot freshness check and restores
