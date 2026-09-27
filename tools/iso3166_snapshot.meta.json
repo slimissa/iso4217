@@ -1,0 +1,14 @@
+{
+  "$comment": "Vendoring metadata for tools/iso3166_snapshot.json. The snapshot itself stays byte-for-byte identical to ISO 3166's iso3166.json. Read by tools/check_snapshot_freshness.py once the multi-source version is adopted (ISO 3166 v1.6.1).",
+  "source": "iso3166",
+  "source_version": "1.5.2",
+  "vendored_at": "2026-09-27",
+  "vendored_from": "https://github.com/slimissa/iso3166/blob/v1.5.2/iso3166.json",
+  "refresh_cadence": "rare",
+  "review_by": "2027-09-27",
+  "notes": [
+    "The underlying data — alpha-2 codes, names, statuses — changes on the order of years.",
+    "ISO 3166 v1.5.3, v1.5.4, and v1.6.0 were tooling-only; the alpha-2 codes are identical to v1.5.2.",
+    "When ISO 3166 ships an alpha-2 change, the notification rule fires and the snapshot is refreshed in the same PR."
+  ]
+}
