@@ -200,17 +200,10 @@ def validate_meta(registry: Dict) -> List[ValidationError]:
                 message=f"Updated date '{updated}' is not valid ISO 8601 (YYYY-MM-DD)."
             ))
 
-    # Schema version matches
-    schema_version = meta.get("schema_version", "")
-    if schema_version != "1.3.0":
-        errors.append(ValidationError(
-            severity="warning",
-            category="integrity",
-            field="meta.schema_version",
-            code="SCHEMA_VERSION_MISMATCH",
-            message=f"Schema version is '{schema_version}', but validator expects '1.0.0'.",
-            suggestion="Update schema_version or update the validator."
-        ))
+    # Schema version agreement is checked by tools/check_version_consistency.py,
+    # which compares iso4217.json → meta.schema_version against schema.json → $id.
+    # This validator does not hardcode a schema version — doing so is a second
+    # source of truth that drifts on every schema bump. See ADR 0006.
 
     # v1.6.0 — meta.amendment and meta.amendment_date
     amendment = meta.get("amendment")
