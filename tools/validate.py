@@ -20,6 +20,7 @@ Exit codes:
     2 — Fatal error (file not found, invalid JSON, etc.)
 """
 
+from email import errors
 import json
 import re
 import sys
@@ -29,6 +30,8 @@ from datetime import date, datetime
 from typing import Dict, List, Optional, Any, Tuple
 from collections import Counter
 from dataclasses import dataclass, field
+
+from wrappers.python.iso4217 import active
 
 
 # ---------------------------------------------------------------------------
@@ -1312,19 +1315,28 @@ def validate_statistics(registry: Dict, allow_partial: bool = False) -> Tuple[Li
             )
         ))
 
-    # Distribution of minor_units
-    mu_dist = Counter(c.get("minor_units") for c in active if "minor_units" in c)
-    stats["minor_units_distribution"] = dict(sorted(mu_dist.items()))
+    # Check for unexpected minor_units values, restricted to circulating
+    # currencies. Fund and indexation units (CLF, UYW) carry their ISO 4217
+    # precision without firing the warning — their precision is documented
+    # in the ISO standard, not a data anomaly. See ADR 0005 for the
+    # complementary treatment of numeric-code reuse.
+    circulating_mu_dist = Counter(
+        c.get("minor_units")
+        for c in active
+            if c.get("classification") == "circulating" and "minor_units" in c
+    )
 
-    # Check for unexpected minor_units values
-    for mu, count in mu_dist.items():
+    for mu, count in circulating_mu_dist.items():
         if mu not in [0, 2, 3] and count > 0:
             errors.append(ValidationError(
                 severity="warning",
                 category="statistical",
                 field="currencies.active[*].minor_units",
                 code="UNUSUAL_MINOR_UNITS_COUNT",
-                message=f"{count} active currencies have minor_units={mu}. This is unusual — most currencies use 0, 2, or 3.",
+                message=(
+                    f"{count} circulating currencies have minor_units={mu}. "
+                    f"This is unusual — most circulating currencies use 0, 2, or 3."
+                ),
                 suggestion="Verify these currencies against ISO 4217 specifications."
             ))
 
