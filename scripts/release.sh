@@ -343,7 +343,8 @@ run_gate() {
     run_gate_step "sync_wrappers.py --check"        python3 tools/sync_wrappers.py --check
     run_gate_step "check_mojibake.py"               python3 tools/check_mojibake.py
     run_gate_step "check_snapshot_freshness.py"     python3 tools/check_snapshot_freshness.py
-    
+    run_gate_step "check_registry_freshness.py"     python3 tools/check_registry_freshness.py
+        
     if [[ -f tools/check_cross_language.sh ]]; then
         run_gate_step "check_cross_language.sh"     bash tools/check_cross_language.sh
     fi
