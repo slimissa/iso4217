@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.6.3] — Unreleased
+
+Adopts ISO 3166's multi-source snapshot freshness check and restores
+the registry freshness check as a separate tool. No data changes; no
+schema changes.
+
+### Added
+
+- `tools/check_registry_freshness.py` — the registry's own freshness
+  check, restored under a name that describes its purpose. Reads
+  `iso4217.json → meta.updated` and fails if older than 180 days.
+- CI job `check-registry-freshness`.
+
+### Changed
+
+- `tools/check_snapshot_freshness.py` — adopted from ISO 3166 v1.6.1.
+  Now reads a sibling `<stem>.meta.json` when present, falling back
+  to the snapshot's own `meta` block. Scoped to vendored snapshots;
+  the registry's own freshness is checked separately.
+- `tools/iso3166_snapshot.meta.json` — `review_by` and
+  `refresh_cadence` moved under a `meta` object to match the shape
+  the adopted tool reads.
+- CI job `check-snapshot-freshness` — replaces the previous
+  `check-freshness`, which had been named for the wrong scope.
+- `scripts/release.sh` — the release gate now runs both freshness
+  checks.
+
+### Adopted from
+
+- ISO 3166 v1.6.1 (`check_snapshot_freshness.py` sibling-metadata
+  support)
+
+---
+
 ## [1.6.2] — 2026-09-27
 
 Two release-script fixes and two validator-doc updates. No data
