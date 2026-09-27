@@ -108,6 +108,50 @@ CURRENT_VERSION="$(cat "$VERSION_FILE" 2>/dev/null || echo "unknown")"
 # Preconditions
 # ---------------------------------------------------------------------------
 
+check_head_at_origin() {
+    if ! git fetch origin main --quiet 2>/dev/null; then
+        fail "cannot fetch origin/main; check network and remote access"
+    fi
+    local local_head remote_head
+    local_head="$(git rev-parse HEAD)"
+    remote_head="$(git rev-parse origin/main 2>/dev/null || echo "")"
+    if [ -z "$remote_head" ]; then
+        fail "cannot resolve origin/main after fetch"
+    fi
+    if [ "$local_head" != "$remote_head" ]; then
+        fail "HEAD is not at origin/main (local: ${local_head:0:8}, origin/main: ${remote_head:0:8})"
+    fi
+}
+
+check_workflows_covered() {
+    local declared=("$@")
+    local actual
+    actual="$(find .github/workflows -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' \) \
+        -exec basename {} \; 2>/dev/null \
+        | grep -v -E '^(monitor|fetch|refresh|update|schedule)' || true)"
+    if [ -z "$actual" ]; then
+        return
+    fi
+    while read -r wf; do
+        [ -z "$wf" ] && continue
+        local found=0
+        for d in "${declared[@]}"; do
+            if [ "$wf" = "$d" ]; then
+                found=1
+                break
+            fi
+        done
+        if [ "$found" -eq 0 ]; then
+            fail "workflow $wf is not in the poll list (add it to POLLED_WORKFLOWS)"
+        fi
+    done <<< "$actual"
+}
+
+POLLED_WORKFLOWS=(
+    "validate.yml"
+    "version-and-hygiene.yml"
+)
+
 check_clean_tree() {
     if [[ -n "$(git status --porcelain)" ]]; then
         git status --short >&2
@@ -337,21 +381,41 @@ poll_ci() {
 
     local sha
     sha="$(git rev-parse HEAD)"
-    info "waiting for CI on $sha (up to 5 minutes)"
+    info "waiting for CI on ${sha:0:8} (up to 5 minutes)"
 
-    local i status conclusion
+    local i
     for i in $(seq 1 30); do
-        status="$(gh run list --limit 10 --json headSha,status \
-            --jq ".[] | select(.headSha == \"$sha\") | .status" 2>/dev/null | head -1)"
+        local runs
+        runs="$(gh run list --limit 30 \
+            --json databaseId,headSha,status,conclusion,workflowName \
+            --jq ".[] | select(.headSha == \"$sha\") | \"\(.databaseId)|\(.status)|\(.conclusion // \"pending\")|\(.workflowName)\"" \
+            2>/dev/null || echo "")"
 
-        if [[ "$status" == "completed" ]]; then
-            conclusion="$(gh run list --limit 10 --json headSha,conclusion \
-                --jq ".[] | select(.headSha == \"$sha\") | .conclusion" 2>/dev/null | head -1)"
-            if [[ "$conclusion" == "success" ]]; then
-                info "CI green"
-                return
+        if [ -z "$runs" ]; then
+            sleep 10
+            continue
+        fi
+
+        local all_complete=true
+        local failed=false
+        while IFS='|' read -r id status conclusion name; do
+            if [ "$status" != "completed" ]; then
+                all_complete=false
+                break
             fi
-            fail "CI failed on $sha: $conclusion"
+            if [ "$conclusion" != "success" ]; then
+                failed=true
+                info "✗ workflow '$name' (run $id) concluded '$conclusion'"
+            fi
+        done <<< "$runs"
+
+        if $failed; then
+            fail "CI failed on ${sha:0:8}"
+        fi
+
+        if $all_complete; then
+            info "✓ all workflows for ${sha:0:8} are completed success"
+            return
         fi
 
         sleep 10
@@ -519,8 +583,14 @@ step "Preconditions"
 check_clean_tree
 info "✓ clean tree"
 
+check_head_at_origin
+info "✓ HEAD is at origin/main"
+
 check_on_main
 info "✓ on main"
+
+check_workflows_covered "${POLLED_WORKFLOWS[@]}"
+info "✓ all per-push workflows are in the poll list"
 
 check_tag_free
 info "✓ tag $TAG is free"
