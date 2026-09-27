@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
 """
-Snapshot freshness check for the ISO 4217 Currency Registry.
+tools/check_snapshot_freshness.py
 
-Reads iso4217.json's meta.updated field and fails if it is older than
-a configurable threshold (default: 180 days).
+Reads every tools/*_snapshot.json and verifies that its
+meta.review_by field is not in the past.
 
-Rationale for the 180-day default: ISO 4217 amendments are published
-irregularly, and this registry detects new amendments but does not
-ingest them automatically — a human applies each change. A single
-missed cycle, roughly two quarterly windows, is a signal that the
-review loop has stalled, not that the source is late. 180 days is one
-clearly-missed cycle without being noisy on a healthy schedule.
+For each snapshot, the tool first looks for a sibling metadata
+file at tools/<stem>.meta.json. If that file exists, review_by
+and refresh_cadence are read from it. This is the vendored-
+snapshot shape: when a snapshot is a byte-for-byte copy of an
+external source, the cadence metadata lives in the sibling file
+so the snapshot itself stays unmodified.
 
-The threshold is a suggestion, not a fact. Override it with
---threshold when a stricter or looser policy is warranted.
+If no sibling exists, review_by is read from the snapshot's own
+meta block.
 
-Exit codes:
-    0  meta.updated is within threshold
-    1  meta.updated is older than threshold
-    2  fatal (missing file, invalid JSON, unparseable or future date)
+Three-state design:
+
+  - ISO date (YYYY-MM-DD)   fail if past, pass if future or today
+  - "closed"                never checked; snapshot is static
+  - null or missing         warn (not fail); review_by is unset
 
 Usage:
     python3 tools/check_snapshot_freshness.py
-    python3 tools/check_snapshot_freshness.py --threshold 365
     python3 tools/check_snapshot_freshness.py --json
-    python3 tools/check_snapshot_freshness.py --root /path/to/checkout
-"""
+    python3 tools/check_snapshot_freshness.py --today 2027-01-01
 
+Exit codes:
+    0  all snapshots fresh
+    1  at least one snapshot is past due
+    2  fatal (no snapshots found, malformed file)
+"""
 from __future__ import annotations
 
 import argparse
@@ -34,195 +38,213 @@ import json
 import sys
 from datetime import date
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SNAPSHOT_GLOB = "tools/*_snapshot.json"
+
+
+def sibling_meta_path(snapshot_path: Path) -> Path:
+    """Return tools/<stem>.meta.json for tools/<stem>.json."""
+    return snapshot_path.with_name(snapshot_path.stem + ".meta.json")
 
 EXIT_OK = 0
 EXIT_STALE = 1
 EXIT_FATAL = 2
 
-DEFAULT_THRESHOLD_DAYS = 180
 
-
-# ---------------------------------------------------------------------------
-# Extraction
-# ---------------------------------------------------------------------------
-
-def read_meta_updated(root: Path) -> str:
-    """
-    Read iso4217.json's meta.updated field. Exits with EXIT_FATAL on any
-    structural problem.
-    """
-    p = root / "iso4217.json"
-    if not p.is_file():
-        print(f"FATAL: registry not found: {p}", file=sys.stderr)
-        sys.exit(EXIT_FATAL)
-
-    try:
-        data = json.loads(p.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        print(f"FATAL: invalid JSON in {p}: {e}", file=sys.stderr)
-        sys.exit(EXIT_FATAL)
-
-    updated = data.get("meta", {}).get("updated")
-    if not isinstance(updated, str) or not updated:
-        print(
-            f"FATAL: meta.updated is missing or not a string in {p}",
-            file=sys.stderr,
-        )
-        sys.exit(EXIT_FATAL)
-
-    return updated
+class FatalError(SystemExit):
+    def __init__(self, message: str, code: int = EXIT_FATAL) -> None:
+        print(f"error: {message}", file=sys.stderr)
+        super().__init__(code)
 
 
 def parse_iso_date(value: str) -> date:
-    """Parse YYYY-MM-DD into a date object. Exits with EXIT_FATAL on failure."""
     try:
         return date.fromisoformat(value)
-    except ValueError:
-        print(
-            f"FATAL: meta.updated is not a valid ISO 8601 date: {value!r}",
-            file=sys.stderr,
-        )
-        sys.exit(EXIT_FATAL)
+    except ValueError as exc:
+        raise FatalError(f"invalid ISO date: {value!r}") from exc
 
 
-# ---------------------------------------------------------------------------
-# Reporting
-# ---------------------------------------------------------------------------
+def evaluate(path: Path, today: date) -> dict[str, Any]:
+    """
+    Return a dict with keys: file, status, detail, review_by, meta_source.
 
-def report_text(
-    updated: str,
-    age_days: int,
-    threshold: int,
-    stale: bool,
-    future: bool,
-) -> str:
-    lines = []
-    rule = "=" * 78
-    lines.append(rule)
-    lines.append("  Snapshot Freshness Check - ISO 4217 Currency Registry")
-    lines.append(rule)
-    lines.append(f"  meta.updated:   {updated}")
-    lines.append(f"  Age:            {age_days} day(s)")
-    lines.append(f"  Threshold:      {threshold} day(s)")
-    lines.append(rule)
+    meta_source is one of:
+      "sibling"   metadata was read from tools/<stem>.meta.json
+      "snapshot"  metadata was read from the snapshot's own meta block
 
-    if future:
-        lines.append(f"  ! meta.updated is in the future by {abs(age_days)} day(s)")
-        lines.append("  ! This is a data error, not a freshness problem")
-    elif stale:
-        lines.append(
-            f"  \u2717 STALE - {age_days} days since the last update "
-            f"(threshold {threshold})"
-        )
-        lines.append("")
-        lines.append("  Check for pending ISO amendments:")
-        lines.append("    python3 tools/check_amendments.py")
-        lines.append("")
-        lines.append("  If no amendment is pending, update meta.updated")
-        lines.append("  and document the reason in CHANGELOG.md.")
+    status is one of:
+      "fresh"    review_by is in the future or today
+      "closed"   snapshot is static; never checked
+      "unset"    review_by is missing or null; warning only
+      "stale"    review_by is in the past
+    """
+    rel = str(path.relative_to(PROJECT_ROOT))
+
+    # Prefer the sibling metadata file when it exists.
+    sibling = sibling_meta_path(path)
+    meta_source = "snapshot"
+    if sibling.exists():
+        try:
+            data = json.loads(sibling.read_text(encoding="utf-8"))
+        except OSError as exc:
+            raise FatalError(f"{sibling}: cannot read: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise FatalError(f"{sibling}: invalid JSON: {exc}") from exc
+        meta_source = "sibling"
     else:
-        lines.append(
-            f"  \u2713 OK - {age_days} day(s) old "
-            f"(threshold {threshold})"
-        )
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except OSError as exc:
+            raise FatalError(f"{path}: cannot read: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise FatalError(f"{path}: invalid JSON: {exc}") from exc
 
-    lines.append(rule)
-    return "\n".join(lines)
+    meta = data.get("meta")
+
+    if not isinstance(meta, dict):
+        return {
+            "file": rel,
+            "status": "unset",
+            "detail": "meta is missing or not an object",
+            "review_by": None,
+            "meta_source": meta_source,
+        }
+
+    review_by = meta.get("review_by")
+
+    if review_by is None:
+        return {
+            "file": rel,
+            "status": "unset",
+            "detail": "review_by is not set",
+            "review_by": None,
+            "meta_source": meta_source,
+        }
+
+    if review_by == "closed":
+        return {
+            "file": rel,
+            "status": "closed",
+            "detail": "static snapshot, no review required",
+            "review_by": "closed",
+            "meta_source": meta_source,
+        }
+
+    if not isinstance(review_by, str):
+        return {
+            "file": rel,
+            "status": "unset",
+            "detail": f"review_by has unexpected type: {type(review_by).__name__}",
+            "review_by": None,
+            "meta_source": meta_source,
+        }
+
+    d = parse_iso_date(review_by)
+    if d < today:
+        return {
+            "file": rel,
+            "status": "stale",
+            "detail": f"review_by {review_by} is past due",
+            "review_by": review_by,
+            "meta_source": meta_source,
+        }
+
+    return {
+        "file": rel,
+        "status": "fresh",
+        "detail": f"review_by {review_by}",
+        "review_by": review_by,
+        "meta_source": meta_source,
+    }
 
 
-def report_json(
-    updated: str,
-    age_days: int,
-    threshold: int,
-    stale: bool,
-    future: bool,
-) -> str:
-    return json.dumps(
-        {
-            "meta_updated": updated,
-            "age_days": age_days,
-            "threshold_days": threshold,
-            "stale": stale,
-            "future": future,
-            "pass": (not stale) and (not future),
-        },
-        indent=2,
-        ensure_ascii=False,
-    )
-
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="check_snapshot_freshness.py",
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="check_snapshot_freshness",
         description=(
-            "Check that iso4217.json's meta.updated field is within "
-            "the freshness threshold."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Exit codes:\n"
-            "  0  within threshold\n"
-            "  1  older than threshold\n"
-            "  2  fatal (missing file, invalid JSON, unparseable date)\n"
+            "Verify meta.review_by on every tools/*_snapshot.json. "
+            "Exit 0 if all snapshots are fresh or marked closed."
         ),
     )
-    parser.add_argument(
-        "--threshold", type=int, default=DEFAULT_THRESHOLD_DAYS,
-        metavar="DAYS",
-        help=(
-            f"maximum allowed age in days "
-            f"(default: {DEFAULT_THRESHOLD_DAYS})"
-        ),
-    )
-    parser.add_argument(
-        "--json", "-j", action="store_true",
-        help="emit machine-readable JSON instead of the text report",
-    )
-    parser.add_argument(
-        "--root", type=Path, default=PROJECT_ROOT,
-        help=f"project root to check (default: {PROJECT_ROOT})",
-    )
-    return parser.parse_args(argv)
+    p.add_argument("--json", action="store_true",
+                   help="Emit machine-readable JSON.")
+    p.add_argument("--today", metavar="YYYY-MM-DD", default=None,
+                   help="Override today's date, for testing.")
+    return p
 
 
-def main(argv: Optional[list[str]] = None) -> int:
-    args = parse_args(argv)
+def report_text(results: list[dict[str, Any]], today: date) -> None:
+    rule = "=" * 78
+    print(rule)
+    print("  Snapshot freshness check")
+    print(rule)
+    print(f"  Today:     {today.isoformat()}")
+    print(f"  Snapshots: {len(results)}")
+    print(rule)
+    for r in results:
+        marker = {
+            "fresh":  "OK  ",
+            "closed": "SKIP",
+            "unset":  "WARN",
+            "stale":  "FAIL",
+        }[r["status"]]
+        source = r.get("meta_source", "snapshot")
+        suffix = " (sibling)" if source == "sibling" else ""
+        print(f"  [{marker}] {r['file']}: {r['detail']}{suffix}")
+    print(rule)
 
-    if args.threshold < 1:
-        print(
-            f"FATAL: --threshold must be >= 1, got {args.threshold}",
-            file=sys.stderr,
-        )
-        return EXIT_FATAL
+    stale = [r for r in results if r["status"] == "stale"]
+    unset = [r for r in results if r["status"] == "unset"]
 
-    updated = read_meta_updated(args.root)
-    snapshot_date = parse_iso_date(updated)
-    today = date.today()
-    delta = (today - snapshot_date).days
+    if stale:
+        print(f"  FAIL: {len(stale)} snapshot(s) past due")
+    elif unset:
+        print(f"  OK with {len(unset)} warning(s): review_by unset")
+    else:
+        print("  OK: all snapshots fresh")
+    print(rule)
 
-    # A future meta.updated is a data error, not a freshness issue.
-    # Report it and fail — a snapshot dated in the future cannot be
-    # trusted as "as of" any real moment.
-    future = delta < 0
-    stale = delta > args.threshold
+
+def report_json(results: list[dict[str, Any]], today: date) -> None:
+    payload = {
+        "today": today.isoformat(),
+        "total": len(results),
+        "fresh": sum(1 for r in results if r["status"] == "fresh"),
+        "closed": sum(1 for r in results if r["status"] == "closed"),
+        "unset": sum(1 for r in results if r["status"] == "unset"),
+        "stale": sum(1 for r in results if r["status"] == "stale"),
+        "results": results,
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+
+    today = parse_iso_date(args.today) if args.today else date.today()
+
+    snapshots = sorted(PROJECT_ROOT.glob(SNAPSHOT_GLOB))
+    if not snapshots:
+        raise FatalError(f"no files matched {SNAPSHOT_GLOB} under {PROJECT_ROOT}")
+
+    results = [evaluate(p, today) for p in snapshots]
 
     if args.json:
-        print(report_json(updated, delta, args.threshold, stale, future))
+        report_json(results, today)
     else:
-        print(report_text(updated, delta, args.threshold, stale, future))
+        report_text(results, today)
 
-    if future or stale:
-        return EXIT_STALE
-    return EXIT_OK
+    return EXIT_STALE if any(r["status"] == "stale" for r in results) else EXIT_OK
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except FatalError as exc:
+        sys.exit(exc.code)
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        sys.exit(130)
