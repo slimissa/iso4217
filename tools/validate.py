@@ -31,7 +31,6 @@ from typing import Dict, List, Optional, Any, Tuple
 from collections import Counter
 from dataclasses import dataclass, field
 
-from wrappers.python.iso4217 import active
 
 
 # ---------------------------------------------------------------------------
