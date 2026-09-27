@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.6.2] — Unreleased
+
+Two release-script fixes and two validator-doc updates. No data
+changes; no schema changes.
+
+### Fixed
+
+- `scripts/release.sh` now polls **every** workflow triggered by the
+  release commit, not just the first. The previous `head -1` only
+  checked one run per SHA; a second workflow still in progress could
+  let a tag land on a partially-green commit. Verified against the
+  release commit's `gh run list` output.
+- `scripts/release.sh` now fetches `origin/main` and refuses to
+  release when local `HEAD` differs from the remote. A local main one
+  commit behind origin could previously proceed.
+- `scripts/release.sh` now verifies that every per-push workflow in
+  `.github/workflows/` is in the poll list. A newly-added workflow
+  could previously be missed by the poll silently.
+
+### Added
+
+- `docs/decisions/numeric-code-reuse.md` — ADR 0005, documenting the
+  26 permanent, expected warnings from the validator.
+- `tools/iso3166_snapshot.meta.json` — vendoring metadata for the
+  ISO 3166 snapshot, carrying `review_by` and `refresh_cadence`. The
+  snapshot itself stays byte-for-byte.
+
+### Changed
+
+- `tools/validate.py` — `UNUSUAL_MINOR_UNITS_COUNT` now checks only
+  circulating currencies. Fund and indexation units (CLF, UYW) carry
+  their ISO 4217 precision without firing the warning. Warning count
+  drops from 27 to 26.
+
+---
+
 ## [1.6.1] — 2026-09-26
 
 Convention extension and the first cross-registry snapshot. No data
