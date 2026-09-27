@@ -223,7 +223,7 @@ class Currency {
    * @returns {boolean}
    */
   get isIndependent() {
-    return this._data.is_independent !== false;
+    return this._data.is_independent === true;
   }
 
   /** @returns {boolean} True if this currency is pegged to something */

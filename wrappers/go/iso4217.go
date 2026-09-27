@@ -481,9 +481,9 @@ func loadRegistry() (*CurrencyRegistry, error) {
 }
 
 func newCurrency(raw rawCurrency) *Currency {
-	isIndependent := true
+	isIndependent := false
 	if raw.IsIndependent != nil {
-		isIndependent = *raw.IsIndependent
+    	isIndependent = *raw.IsIndependent
 	}
 
 	return &Currency{

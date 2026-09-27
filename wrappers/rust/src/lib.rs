@@ -96,7 +96,7 @@ struct RawCurrency {
     pegged_since: Option<String>,
     peg_rate: Option<f64>,
     peg_band_pct: Option<f64>,
-    #[serde(default = "default_true")]
+    #[serde(default)]
     is_independent: bool,
     // Optional fields
     note: Option<String>,
@@ -140,10 +140,6 @@ struct RawCountry {
     name: String,
     #[serde(default)]
     relationship: String,
-}
-
-fn default_true() -> bool {
-    true
 }
 
 // ---------------------------------------------------------------------------
