@@ -152,6 +152,30 @@ POLLED_WORKFLOWS=(
     "version-and-hygiene.yml"
 )
 
+# Ported from ISO 3166 v1.6.3, commit db74f96.
+# Shell-side only. Inline Python in bump_* functions is checked at
+# runtime by NameError; extending this check to cover it is deferred
+# until 4217 hits the failure mode.
+check_no_orphan_variables() {
+    local orphans
+    orphans="$(grep -nE '\$\{[A-Z_]+\}|\$[A-Z_]{3,}' scripts/release.sh \
+        | grep -vE '^\s*#' \
+        | grep -oE '\$\{?[A-Z_]+' \
+        | sort -u \
+        | while read -r v; do
+            v="${v#\$}"
+            v="${v#\{}"
+            if ! grep -qE "(^|\s)${v}=" scripts/release.sh; then
+                echo "$v"
+            fi
+        done || true)"
+
+    if [ -n "$orphans" ]; then
+        echo "  WARN orphan variables (defined nowhere, expanded somewhere):"
+        echo "$orphans" | sed 's/^/    /'
+    fi
+}
+
 check_clean_tree() {
     if [[ -n "$(git status --porcelain)" ]]; then
         git status --short >&2
@@ -341,6 +365,7 @@ run_gate() {
     run_gate_step "export_csv.py --check"           python3 tools/export_csv.py --check
     run_gate_step "export_parquet.py --check"       python3 tools/export_parquet.py --check
     run_gate_step "sync_wrappers.py --check"        python3 tools/sync_wrappers.py --check
+    run_gate_step "check_release_claims.py"         python3 tools/check_release_claims.py "$VERSION"
     run_gate_step "check_mojibake.py"               python3 tools/check_mojibake.py
     run_gate_step "check_snapshot_freshness.py"     python3 tools/check_snapshot_freshness.py
     run_gate_step "check_registry_freshness.py"     python3 tools/check_registry_freshness.py
@@ -546,14 +571,27 @@ print_plan() {
     echo "  wrappers/go/iso4217.json"
     echo "  wrappers/rust/iso4217.json"
     echo
+    echo "Preconditions:"
+    echo "  clean tree"
+    echo "  HEAD at origin/main"
+    echo "  on main branch"
+    echo "  all per-push workflows in poll list"
+    echo "  tag free"
+    echo "  CHANGELOG section present"
+    echo "  check_version_consistency.py passes"
+    echo "  no orphaned variables in release.sh"
+    echo
     echo "Gate:"
     echo "  python3 tools/validate.py"
     echo "  python3 tools/check_version_consistency.py"
+    echo "  python3 tools/check_release_claims.py \$VERSION"
     echo "  python3 tools/export_sql.py --check"
     echo "  python3 tools/export_csv.py --check"
     echo "  python3 tools/export_parquet.py --check"
     echo "  python3 tools/sync_wrappers.py --check"
     echo "  python3 tools/check_mojibake.py"
+    echo "  python3 tools/check_snapshot_freshness.py"
+    echo "  python3 tools/check_registry_freshness.py"
     [[ -f tools/check_cross_language.sh ]] && \
         echo "  bash tools/check_cross_language.sh"
     echo
