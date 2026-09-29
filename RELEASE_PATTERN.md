@@ -217,6 +217,31 @@ truth is updated by an automated pipeline that runs on every push
 does not — the pipeline is the freshness guarantee. ISO 3166 is in
 the second category today; ISO 4217 is in the first.
 
+### Cadence variations
+
+The threshold and the field name are repo-specific. Two reference
+shapes as of 2026-09-28:
+
+| Registry | Field read | Threshold | Cadence |
+|----------|-----------|-----------|---------|
+| ISO 4217 | `iso4217.json → meta.updated` | 180 days | irregular (ISO amendments) |
+| ISO 10383 | `iso10383.json → meta.source_snapshot` | 60 days | monthly (SWIFT, second Monday) |
+
+**`meta.updated` vs. `meta.source_snapshot`.** Two different questions.
+`meta.updated` is when the file last changed. `meta.source_snapshot` is
+which upstream release the file reflects. A file can be edited without
+its upstream snapshot changing (formatting, bug fix), and the reverse
+(a new snapshot lands without a human edit). A registry whose upstream
+publishes on a calendar should track the second; a registry whose
+upstream publishes irregularly tracks the first.
+
+**Threshold rule.** The threshold is two publication cycles, not one.
+A single missed cycle is late; two is stalled. 180 days for an
+irregular quarterly-ish cadence; 60 days for a monthly cadence.
+
+The pattern is shared; the field and the number are not. A port
+between registries copies the pattern, not the parameters.
+
 ---
 
 ## The wrapper-copy test question
@@ -328,6 +353,27 @@ The failure mode: a validator ran with a broken import, exited 1,
 and the piped `tail -3` printed `0`. The release proceeded with the
 validator broken.
 
+### 6. Every artifact that quotes an implementation detail is coupled to that implementation
+
+When a script's expression changes, every test that asserts on it
+and every doc line or claim that quotes it change in the same commit.
+The failure mode is silent: the script works, the doc lies.
+
+The 10383 case: `\(.conclusion)` became
+`\(.conclusion // \"pending\")` in a jq expression. The release-claims
+manifest still asserted the old shape, and a test still checked for it.
+Neither failed until the claim was verified against the tree.
+
+Applies to:
+
+- CHANGELOG entries that quote command output
+- Verification docs that paste captured results
+- README sections that show example invocations
+- Release-claims manifests that assert on script internals
+
+The rule: if an artifact reproduces text from a running program,
+that artifact is a copy, not a reference. Copies drift.
+
 ---
 
 ## The mojibake self-trigger rule
@@ -393,3 +439,11 @@ Reviewed by:
   Names the two reference implementations in ISO 4217 v1.6.3.
 - 2026-09-27 — post-review addition: "Operator hygiene" rule 5,
   on pipeline exit codes.
+- 2026-09-28 — post-review addition: "Cadence variations" subsection,
+  sourced from ISO 10383 v1.0.4. Names the `meta.updated` vs.
+  `meta.source_snapshot` distinction and the two-cycle threshold rule.
+- 2026-09-28 — post-review addition: operator-hygiene rule 6
+  ("Every artifact that quotes an implementation detail is coupled to
+  that implementation"), sourced from ISO 10383 v1.0.4. Generalizes
+  the release-claims-manifest coupling failure to every artifact that
+  reproduces program output.

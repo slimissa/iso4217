@@ -505,6 +505,7 @@ CI rejects PRs where any derived file is stale. The three export checks (`check-
 |---------|------------------------------|
 | **[Tempus](https://github.com/slimissa/Tempus)** | Compile-time `Price<CCY>` validation. The compiler generates its currency table from this registry via `make update-registry`. |
 | **[ISO 3166](https://github.com/slimissa/iso3166)** | **Vendors a byte-for-byte snapshot at `tools/iso3166_snapshot.json` (v1.5.2).** Every `countries[].code` in the registry must resolve in `countries.active[].alpha_2`. Checked in CI. |
+| **[ISO 10383](https://github.com/slimissa/iso10383)** | **Hosts the cross-registry FK graph at [`docs/JOINS.md`](https://github.com/slimissa/iso10383/blob/main/docs/JOINS.md).** Every registry that references an exchange MIC joins against ISO 10383's `mic` field. The document names which registries reference `mic`, the field on each, and the granularity (`operating` / `segment` / `either`). |
 | **[LAS_Shell](https://github.com/slimissa/Las_shell)** | *(planned)* Pipeline-stage currency validation — risk gates and audit logging will consume the same registry. |
 
 The Tempus integration is the reference example. Its generator reads `iso4217.json`, filters out non-ISO instruments, and emits a C array that the compiler links into every binary:

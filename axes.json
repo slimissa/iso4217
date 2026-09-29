@@ -1,6 +1,5 @@
 {
-  "$comment": "Version axes for the ISO 4217 Currency Registry. Declares which files carry which version, how to extract each version, and what each site means. This file is a stable contract — the reference implementation of the axes shape for the QuantOS registries. tools/check_version_consistency.py does not yet read it; the refactor that makes it data-driven waits for ISO 10383's version, making three implementations.",
-  "version": "1.0.0",
+  "$comment": "Version axes for the ISO 4217 Currency Registry. Declares which files carry which version, how to extract each version, and what each site means. This file is a stable contract — the reference implementation of the axes shape for the QuantOS registries. tools/check_version_consistency.py does not read it; the file declares the shape for registries that adopt it. Three registries evaluated the shape as of 2026-09-28: ISO 4217 (two axes, source), ISO 3166 (one axis, adopted for the v2.0.0 schema bump), ISO 10383 (one axis, declined — no separate schema version to track). The refactor that would make 4217's check read this file was closed as no-behavior-change.",  "version": "1.0.0",
   "notes": [
     "Two independent axes are declared because the data version and the format-contract version can move separately. A patch correction to the data does not change the schema; a new optional field in the schema does not change the data.",
     "Each axis has one source of truth. Every other site on that axis must equal it, or CI fails.",
