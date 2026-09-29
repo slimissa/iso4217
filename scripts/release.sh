@@ -180,6 +180,20 @@ check_no_orphan_variables() {
     fi
 }
 
+check_manifest_has_version() {
+    local manifest="tools/release_claims.json"
+    if [ ! -f "$manifest" ]; then
+        fail "$manifest not found"
+    fi
+    if ! python3 -c "
+import json, sys
+manifest = json.load(open('$manifest'))
+sys.exit(0 if '$VERSION' in manifest else 1)
+" 2>/dev/null; then
+        fail "$manifest has no entry for version $VERSION"
+    fi
+}
+
 check_clean_tree() {
     if [[ -n "$(git status --porcelain)" ]]; then
         git status --short >&2
@@ -641,6 +655,9 @@ info "✓ tag $TAG is free"
 
 check_changelog_section
 info "✓ CHANGELOG.md has section ## [$VERSION]"
+
+check_manifest_has_version
+info "✓ release_claims.json has entry for $VERSION"
 
 check_version_consistency
 info "✓ check_version_consistency.py passes"
