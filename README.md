@@ -5,9 +5,11 @@
 One JSON file. Zero dependencies. Every language, database, spreadsheet, and shell.
 
 [![Validate](https://github.com/slimissa/iso4217/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/validate.yml)
+[![Version and Hygiene](https://github.com/slimissa/iso4217/actions/workflows/version-and-hygiene.yml/badge.svg?branch=main)](https://github.com/slimissa/iso4217/actions/workflows/version-and-hygiene.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Schema Version](https://img.shields.io/badge/schema-1.4.0-green.svg)](./schema.json)
 [![Registry Version](https://img.shields.io/badge/registry-1.7.3-orange.svg)](./iso4217.json)
+
 ---
 
 ## Why?
@@ -21,12 +23,12 @@ Every quant library, trading system, payment processor, and fintech app maintain
 - **Go trading systems** use it for foreign key constraints
 - **Rust finance crates** use it for compile-time currency verification
 - **JavaScript fintech apps** use it for payment processing
-- **Database teams** get a ready-made seed file — one command, no JSON parsing.
-- **Analysts, engineers, and researchers** each get a zero-friction entry point — no JSON parser, no driver, no setup.
-- **Shell users, CI pipelines, and scripts** get the same registry with one command — no Python, no CSV, no JSON, no jq.
-- **Analytics teams** get a typed, columnar file that every dataframe library and SQL engine reads natively — no casting, no null sentinels.
+- **Database teams** get a ready-made seed file — one command, no JSON parsing
+- **Analysts, engineers, and researchers** each get a zero-friction entry point — no JSON parser, no driver, no setup
+- **Shell users, CI pipelines, and scripts** get the same registry with one command — no Python, no CSV, no JSON, no jq
+- **Analytics teams** get a typed, columnar file that every dataframe library and SQL engine reads natively — no casting, no null sentinels
 
-The registry is language-agnostic by design. The JSON is the contract. The SQL, CSV, and CLI exports are three ways to consume it without writing a parser.
+The registry is language-agnostic by design. The JSON is the contract. The SQL, CSV, Parquet, and CLI exports are four ways to consume it without writing a parser.
 
 ---
 
@@ -35,7 +37,7 @@ The registry is language-agnostic by design. The JSON is the contract. The SQL, 
 ### Direct download
 
 ```bash
-curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.5.0/iso4217.json
+curl -O https://raw.githubusercontent.com/slimissa/iso4217/v1.7.3/iso4217.json
 ```
 
 ### Python
@@ -253,7 +255,7 @@ Color is on when stdout is a TTY, off when piped. Override with `ISO4217_COLOR=n
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| Active ISO 4217 currencies | **167 of 167** | **Complete ISO 4217 active coverage** — every currently-assigned alphabetic code |
+| Active ISO 4217 currencies | **167 of 167** | Complete ISO 4217 active coverage — every currently-assigned alphabetic code |
 | Withdrawn ISO currencies | **135 of 135** | Complete historical coverage with revaluation chains and conversion rates |
 | Cryptocurrencies | 7 | BTC, ETH, and five others from the top 10 by market cap |
 | Stablecoins | 6 | USDT, USDC, DAI, and three others from the top 10 by market cap |
@@ -292,8 +294,7 @@ The `code_lifetime.from` row is honest about a real gap: none of the 135 withdra
 
 ## Enums
 
-Four closed vocabularies appear in the registry. Every value is one of
-the listed options; no other value is valid.
+Four closed vocabularies appear in the registry. Every value is one of the listed options; no other value is valid.
 
 ### `classification` — active currencies only
 
@@ -329,8 +330,7 @@ the listed options; no other value is valid.
 | `active` | Entry is in `currencies.active`. |
 | `withdrawn` | Entry is in `currencies.withdrawn`. |
 
-Not a JSON field. The exporters derive it from which array the entry
-lives in. The JSON represents status by position, not by value.
+Not a JSON field. The exporters derive it from which array the entry lives in. The JSON represents status by position, not by value.
 
 ---
 
@@ -358,6 +358,8 @@ The Python package also installs the `iso4217` CLI. See [Command-line interface]
 | Format with symbol | `.format(100.50)` | `.format(100.50)` | `.format(100.50)` | `.Format(100.50)` |
 | Filter pegged to USD | `.pegged_to("USD")` | `.peggedTo("USD")` | `.pegged_to("USD")` | `.PeggedTo("USD")` |
 | Peg type discrimination | `.peg_type` | `.pegType` | `.peg_type` | `.PegType` |
+| Classification | `.classification` | `.classification` | `.classification` | `.Classification` |
+| Filter by classification | `.by_classification(...)` | `.byClassification(...)` | `.by_classification(...)` | `.ByClassification(...)` |
 
 ### Exports (all regenerated from the same JSON)
 
@@ -365,6 +367,7 @@ The Python package also installs the `iso4217` CLI. See [Command-line interface]
 |--------|----------|----------------|-------------|
 | SQL | ANSI, PostgreSQL, MySQL, SQLite | `tools/export_sql.py` | `tools/export_sql.py --check` in CI |
 | CSV / TSV | RFC 4180, Excel, European, TSV | `tools/export_csv.py` | `tools/export_csv.py --check` in CI |
+| Parquet | one file, snappy-compressed | `tools/export_parquet.py` | `tools/export_parquet.py --check` in CI |
 | CLI | one binary, eight subcommands, five output modes | *(part of the wrapper)* | `pytest wrappers/python/tests/test_cli.py` in CI |
 
 Every export is committed to the repository and re-verified on every push. A stale artifact fails CI before it reaches `main`.
@@ -383,8 +386,14 @@ The registry is validated through a multi-layer defense:
 | **Cross-reference** | No duplicate codes, valid peg targets, no ISO/non-ISO overlap | `tools/validate.py` |
 | **Ground truth** | Historical facts — Eurozone rates, numeric codes, peg relationships | `tests/test_iso_codes.py` |
 | **Cross-language** | Identical behavior across all four wrappers | `tests/cross_language_consistency.json` |
+| **Country codes** | Every `countries[].code` resolves in the ISO 3166 snapshot | `tools/check_country_codes.py` |
 | **Coverage** | Active count ≥ 150 (MIN_ACTIVE_CURRENCIES) — enforced without flag | `tools/validate.py` |
-| **Export drift** | SQL, CSV, and CLI outputs match the current registry | CI jobs `check-sql-export`, `check-csv-export`, `check-cli` |
+| **Mojibake** | No UTF-8 / Latin-1 round-trip corruption in any text file | `tools/check_mojibake.py` |
+| **Registry freshness** | `meta.updated` within 180 days | `tools/check_registry_freshness.py` |
+| **Snapshot freshness** | Vendored snapshots within their `review_by` window | `tools/check_snapshot_freshness.py` |
+| **Version consistency** | All 11 version sites across 2 axes agree | `tools/check_version_consistency.py` |
+| **Wrapper sync** | Python / Go / Rust wrapper copies match the root registry | `tools/sync_wrappers.py --check` |
+| **Export drift** | SQL, CSV, Parquet outputs match the current registry | CI jobs `check-sql-export`, `check-csv-export`, `check-parquet-export` |
 
 For the full provenance story — where each field comes from, how often it is refreshed, what the amendment monitor actually checks, and what the registry's known limitations are — see [docs/PROVENANCE.md](./docs/PROVENANCE.md).
 
@@ -393,12 +402,39 @@ For the full provenance story — where each field comes from, how often it is r
 python3 tools/validate.py
 
 # Run the full test suite
-python3 -m pytest tests/ -v
+python3 -m pytest tests/ -q
 
 # Verify exports are in sync with the registry
 python3 tools/export_sql.py --check
 python3 tools/export_csv.py --check
+python3 tools/export_parquet.py --check
+python3 tools/sync_wrappers.py --check
+
+# Run the fast convention checks
+python3 tools/check_version_consistency.py
+python3 tools/check_mojibake.py
+python3 tools/check_country_codes.py
+python3 tools/check_registry_freshness.py
+python3 tools/check_snapshot_freshness.py
+
+# Run all four wrapper test suites against the shared fixture
+bash tools/check_cross_language.sh
 ```
+
+---
+
+## Release pipeline
+
+Releases are cut by `scripts/release.sh`. The script refuses on unclean state, wrong branch, HEAD not at origin, missing CHANGELOG section, missing manifest entry, or a tag that already exists. It then bumps eight version sites, regenerates nine artifacts, runs an eleven-check gate, commits, pushes, polls every workflow, tags, and writes a verification doc.
+
+```bash
+bash scripts/release.sh 1.7.4 --dry-run   # preview
+bash scripts/release.sh 1.7.4             # release
+```
+
+The eight invariants every release refuses on, plus five operator-hygiene rules, are documented in [`RELEASE_PATTERN.md`](./RELEASE_PATTERN.md). The document is shared with ISO 3166 and ISO 10383 — three independent `release.sh` implementations, one convention.
+
+The version axes and their sites are declared in [`axes.json`](./axes.json). Registry version lives in [`VERSION`](./VERSION). Schema version lives in `schema.json`'s `$id`.
 
 ---
 
@@ -406,58 +442,110 @@ python3 tools/export_csv.py --check
 
 ```
 iso4217/
-├── iso4217.json              # The registry — single source of truth
-├── schema.json               # JSON Schema for validation
-├── README.md                 # This file
-├── LICENSE                   # Apache 2.0
-├── CHANGELOG.md              # Version history
-├── CONTRIBUTING.md           # How to contribute
+├── VERSION                       # Registry version — single source of truth
+├── axes.json                     # Declares the two version axes and 11 sites
+├── iso4217.json                  # The registry — single source of truth
+├── schema.json                   # JSON Schema for validation
+├── README.md                     # This file
+├── RELEASE_PATTERN.md            # The release convention shared across 3 registries
+├── LICENSE                       # Apache 2.0
+├── CHANGELOG.md                  # Version history
+├── CONTRIBUTING.md               # How to contribute
+├── .gitattributes
 ├── .gitignore
 │
-├── iso4217.sql               # SQL export — ANSI SQL-92 (portable)
-├── iso4217.postgresql.sql    # SQL export — PostgreSQL 12+
-├── iso4217.mysql.sql         # SQL export — MySQL 8+ / MariaDB 10.4+
-├── iso4217.sqlite.sql        # SQL export — SQLite 3.37+
-├── iso4217.csv               # CSV export — RFC 4180
-├── iso4217.excel.csv         # CSV export — Excel-compatible (UTF-8 BOM)
-├── iso4217.european.csv      # CSV export — semicolon-delimited
-├── iso4217.tsv               # TSV export — tab-separated
-├── iso4217.parquet           # Parquet export — typed, columnar, snappy-compressed
+├── iso4217.sql                   # SQL export — ANSI SQL-92 (portable)
+├── iso4217.postgresql.sql        # SQL export — PostgreSQL 12+
+├── iso4217.mysql.sql             # SQL export — MySQL 8+ / MariaDB 10.4+
+├── iso4217.sqlite.sql            # SQL export — SQLite 3.37+
+├── iso4217.csv                   # CSV export — RFC 4180
+├── iso4217.excel.csv             # CSV export — Excel-compatible (UTF-8 BOM)
+├── iso4217.european.csv          # CSV export — semicolon-delimited
+├── iso4217.tsv                   # TSV export — tab-separated
+├── iso4217.parquet               # Parquet export — typed, columnar, snappy-compressed
 │
 ├── wrappers/
-│   ├── python/               # pip install iso4217-registry
-│   │   ├── iso4217.py        # Currency, CurrencyRegistry
-│   │   ├── iso4217_cli.py    # iso4217 command-line interface
+│   ├── python/                   # pip install iso4217-registry
+│   │   ├── iso4217.py            # Currency, CurrencyRegistry
+│   │   ├── iso4217_cli.py        # iso4217 command-line interface
 │   │   ├── setup.py
 │   │   └── tests/
-│   │       └── test_cli.py   # CLI test suite
-│   ├── javascript/           # npm install iso4217-registry
-│   ├── rust/                 # cargo add iso4217
-│   └── go/                   # go get github.com/slimissa/iso4217-go
+│   │       └── test_cli.py       # CLI test suite
+│   ├── javascript/               # npm install iso4217-registry
+│   ├── rust/                     # cargo add iso4217
+│   └── go/                       # go get github.com/slimissa/iso4217-go
 │
 ├── tests/
-│   ├── cross_language_consistency.json
+│   ├── cross_language_consistency.json  # Shared fixture for all four wrappers
 │   ├── test_iso_codes.py
 │   ├── test_validate_schema.py
 │   ├── test_export_sql.py
 │   ├── test_export_csv.py
+│   ├── test_export_parquet.py
+│   ├── test_update_from_iso.py
+│   ├── test_refresh_market_caps.py
 │   └── test_wrappers.py
 │
 ├── tools/
-│   ├── validate.py           # 6-layer validation
-│   ├── export_sql.py         # SQL export generator (--check for CI)
-│   ├── export_csv.py         # CSV/TSV export generator (--check for CI)
-│   ├── refresh_market_caps.py # Crypto/stablecoin rank refresh
-│   ├── sync_wrappers.py      # Wrapper copy synchronization
-│   ├── check_amendments.py   # Weekly ISO amendment monitor
-│   ├── update_from_iso.py    # Fetch + diff + apply pipeline
-│   ├── parse_source.py       # Wikipedia table classifier
-│   └── generate_v1_2_skeletons.py  # Skeleton generator (historical tool)
+│   ├── validate.py                       # 6-layer validation
+│   ├── enrich_field.py                   # v1.6.0 field enrichment
+│   ├── parse_source.py                   # Wikipedia table classifier
+│   ├── update_from_iso.py                # Fetch + diff + apply pipeline
+│   ├── refresh_market_caps.py            # Crypto/stablecoin rank refresh
+│   ├── check_amendments.py               # Weekly ISO amendment monitor
+│   │
+│   ├── export_sql.py                     # SQL export generator (--check for CI)
+│   ├── export_csv.py                     # CSV/TSV export generator (--check for CI)
+│   ├── export_parquet.py                 # Parquet export generator (--check for CI)
+│   ├── sync_wrappers.py                  # Wrapper copy sync (--check for CI)
+│   │
+│   ├── check_version_consistency.py      # 11 sites, 2 axes
+│   ├── check_mojibake.py                 # UTF-8 / Latin-1 round-trip detector
+│   ├── check_country_codes.py            # ISO 3166 join check
+│   ├── check_registry_freshness.py       # meta.updated within 180 days
+│   ├── check_snapshot_freshness.py       # Vendored snapshot review_by check
+│   ├── check_release_claims.py           # Manifest verification at release time
+│   ├── check_cross_language.sh           # Four wrappers, one fixture
+│   │
+│   ├── iso3166_snapshot.json             # Vendored ISO 3166 alpha-2 set
+│   ├── iso3166_snapshot.meta.json        # Vendoring metadata + review_by
+│   └── release_claims.json               # Per-version claims for check_release_claims
+│
+├── scripts/
+│   └── release.sh                        # Deterministic release pipeline
+│
+├── docs/
+│   ├── PROVENANCE.md                     # Per-field sourcing
+│   ├── LAYERS.md                         # RAW / CURATED / AGGREGATED model
+│   ├── JOINS.md                          # Cross-registry FK graph (currency side)
+│   ├── v1.5.0-verification.md
+│   ├── v1.5.1-verification.md
+│   ├── v1.5.2-verification.md
+│   ├── v1.5.3-verification.md
+│   ├── v1.6.0-verification.md
+│   ├── v1.6.1-verification.md
+│   ├── v1.6.2-verification.md
+│   ├── v1.6.3-verification.md
+│   ├── v1.7.0-verification.md
+│   ├── v1.7.1-verification.md
+│   ├── v1.7.2-verification.md
+│   ├── v1.7.3-verification.md
+│   └── decisions/
+│       ├── withdrawn-codes.md            # ADR 0001
+│       ├── parquet-schema.md             # ADR 0002
+│       ├── classification-enum.md        # ADR 0003
+│       ├── numeric-reuse-flag.md         # ADR 0004
+│       ├── numeric-code-reuse.md         # ADR 0005
+│       ├── schema-version-consistency.md # ADR 0006
+│       ├── note-source-split.md
+│       ├── code-lifetime.md
+│       └── v1.6.0-candidates.md          # Deferred decisions
 │
 └── .github/
     ├── workflows/
-    │   ├── validate.yml      # CI on every push
-    │   └── monitor-amendments.yml  # Weekly ISO amendment monitor
+    │   ├── validate.yml                  # CI on every push (SLOW — export matrix, wrappers)
+    │   ├── version-and-hygiene.yml       # CI on every push (FAST — 6 convention checks)
+    │   └── monitor-amendments.yml        # Weekly ISO amendment monitor
     └── ISSUE_TEMPLATE/
         └── currency_update.md
 ```
@@ -467,11 +555,21 @@ iso4217/
 ## Versioning
 
 The registry follows [Semantic Versioning](https://semver.org/):
+
 - **Major**: Breaking schema changes (removed or renamed required fields)
 - **Minor**: New currencies added, or new optional fields added (backward-compatible)
-- **Patch**: Data corrections
+- **Patch**: Data corrections and non-breaking bug fixes
 
-The current version is always in `iso4217.json` → `meta.version`. The Python package version (`wrappers/python/setup.py`) is independent — it tracks the wrapper's own API, not the registry data. As of v1.5.0, the registry is at `1.5.0` and the Python package at `1.1.0`.
+Two version axes are tracked independently:
+
+| Axis | Source of truth | Current |
+|------|-----------------|---------|
+| **Registry** | [`VERSION`](./VERSION) | `1.7.3` |
+| **Schema** | `schema.json`'s `$id` | `1.4.0` |
+
+The 11 sites that carry these versions, and the two axes they belong to, are declared in [`axes.json`](./axes.json). `tools/check_version_consistency.py` verifies all 11 sites agree on every push.
+
+Wrapper package versions track the registry version. `pip install iso4217-registry` at `1.7.3` ships the `1.7.3` registry.
 
 ---
 
@@ -483,17 +581,29 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on data corrections, new
 
 1. Edit `iso4217.json`
 2. Run `python3 tools/validate.py` — must pass with 0 errors
-3. Regenerate every derived artifact:
+3. Run `python3 tools/enrich_field.py --field <name> --check` if the change touches a v1.6.0 field
+4. Regenerate every derived artifact:
+
    ```bash
    python3 tools/export_sql.py       # four SQL files
    python3 tools/export_csv.py       # four CSV/TSV files
+   python3 tools/export_parquet.py   # one Parquet file
    python3 tools/sync_wrappers.py    # Go and Rust embedded copies
    ```
-4. Run the full suite — `python3 -m pytest tests/ wrappers/python/tests/ -q` — all tests must pass
-5. Run `pytest wrappers/python/tests/test_cli.py -q` to confirm the CLI still resolves against the updated registry
-6. Submit a PR with your source cited, including all regenerated artifacts
 
-CI rejects PRs where any derived file is stale. The three export checks (`check-sql-export`, `check-csv-export`, `check-cli`) run in parallel and gate the slower wrapper matrix.
+5. Run the fast convention checks:
+
+   ```bash
+   python3 tools/check_version_consistency.py
+   python3 tools/check_mojibake.py
+   python3 tools/check_country_codes.py
+   bash tools/check_cross_language.sh
+   ```
+
+6. Run the full suite — `python3 -m pytest tests/ wrappers/python/tests/ -q` — all tests must pass
+7. Submit a PR with your source cited, including all regenerated artifacts
+
+CI rejects PRs where any derived file is stale. The three export checks (`check-sql-export`, `check-csv-export`, `check-parquet-export`) run in parallel and gate the slower wrapper matrix.
 
 ---
 
@@ -534,7 +644,7 @@ The registry is designed to be consumed three ways:
 
 - **From the JSON directly** — the file is the contract. Pin a tag, read it, done.
 - **Via a wrapper** — `pip install iso4217-registry` (Python), `npm install iso4217-registry` (JavaScript), `cargo add iso4217` (Rust), `go get github.com/slimissa/iso4217-go` (Go).
-- **Via an export** — SQL, CSV, or CLI. All three regenerate from the same source, and CI rejects PRs where any derived file is stale.
+- **Via an export** — SQL, CSV, Parquet, or CLI. All four regenerate from the same source, and CI rejects PRs where any derived file is stale.
 
 ---
 
@@ -552,6 +662,15 @@ Apache 2.0 — use it anywhere, no attribution required. The currency data in th
 
 ## What's next
 
-The registry is usable from every language and every tool the ecosystem touches. The next release is a second registry — ISO 3166 country codes — built to the same shape: same JSON schema discipline, same four wrappers, same SQL/CSV/CLI exports, same CI gates. Any table that joins against `currencies` will eventually be able to join against `countries`.
+The registry is complete. Both sibling registries have shipped under the same convention: ISO 3166 at v1.6.5 and ISO 10383 at v1.0.4. Three independent implementations of the shared release pattern now exist, and `RELEASE_PATTERN.md` documents the eight invariants plus five operator-hygiene rules they share.
+
+Remaining work is deferred with concrete triggers:
+
+- **Exchange Calendar** — the fourth registry, waiting on a third per-push workflow before the poll-all-runs check becomes relevant.
+- **Asset Identifiers and Corporate Actions** — convention adoption when each ships its next release.
+- **Wrapper publication to PyPI, npm, and crates.io** — when a downstream consumer needs a package registry install rather than a repo clone.
+- **Additional cross-registry JOIN edges** — when a downstream registry adds a currency field that references `iso4217.code`.
+
+None are imminent. The registry layer is done.
 
 *One source of truth per standard. One consumption pattern across all of them.*
