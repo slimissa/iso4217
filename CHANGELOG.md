@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.3] — Unreleased
+
+Hardens the release-claims workflow and documents two release
+patterns. No data changes; no schema changes.
+
+### Added
+
+- `check_manifest_has_version` precondition in `scripts/release.sh`.
+  Fails before version bump when the manifest has no entry for the
+  version being released. The v1.7.2 release caught the same
+  condition at gate time, after artifact regeneration; the
+  precondition moves the catch two seconds in.
+- `--audit` mode in `tools/check_release_claims.py`. Iterates every
+  manifest entry and reports per-entry pass counts. Diagnostic
+  tool for verifying new claims before committing them.
+- `RELEASE_PATTERN.md` operator-hygiene rule 6c — "Manifest claims
+  describe state, not intent," sourced from ISO 3166 v1.6.7.
+- `RELEASE_PATTERN.md` gate-block shape rule under invariant 5.
+  Names per-check capture and subshell-with-set-e as valid; the
+  bare brace group as invalid. Sourced from ISO 3166 v1.6.6 and
+  confirmed against 4217's per-check capture.
+
+### Changed
+
+- `print_plan()` lists the new manifest precondition.
+
+### Adopted from
+
+- ISO 3166 v1.6.6 (gate-block shape)
+- ISO 3166 v1.6.7 (rule 6c)
+
+---
+
 ## [1.7.2] — 2026-09-29
 
 Fixes the orphan check to fail on finding, records the gate-only
