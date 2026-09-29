@@ -22,9 +22,10 @@ Each claim is one of:
   {"file": "path", "contains": "text"} — path must exist and include text
 
 Usage:
-    python3 tools/check_release_claims.py 1.6.5
-    python3 tools/check_release_claims.py 1.6.5 --list
-    python3 tools/check_release_claims.py 1.6.5 --json
+    python3 tools/check_release_claims.py 1.7.3
+    python3 tools/check_release_claims.py 1.7.3 --list
+    python3 tools/check_release_claims.py 1.7.3 --json
+    python3 tools/check_release_claims.py --audit
 
 Exit codes:
     0  all claims verified
@@ -34,7 +35,6 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
-from email import parser
 import json
 import sys
 from pathlib import Path
@@ -72,15 +72,21 @@ def check_claim(claim: dict) -> tuple[bool, str]:
         return True, f"{claim['file']} contains {needle!r}"
     return True, f"{claim['file']} exists"
 
-def run_audit(manifest_path: Path) -> int:
+
+def run_audit() -> int:
     """
     Iterate every manifest entry and check its claims against the
-    current tree. Version-string claims (VERSION contains 'X.Y.Z')
-    will fail for entries whose version has already been superseded.
-    That is expected; the audit reports per-entry pass counts so a
+    current tree.
+
+    Version-string claims (VERSION contains 'X.Y.Z') will fail for
+    entries whose version has already been superseded. That is
+    expected; the audit reports per-entry pass counts so a
     maintainer can see which entries are current.
+
+    Exit code is 0 if every claim in every entry passes; 1 if any
+    fail. Diagnostic tool — not a gate.
     """
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = load_manifest()
     versions = sorted(k for k in manifest if not k.startswith("_"))
 
     if not versions:
@@ -96,7 +102,8 @@ def run_audit(manifest_path: Path) -> int:
         claims = manifest[version]
         fails = 0
         for claim in claims:
-            if not check_claim(claim):
+            ok, _ = check_claim(claim)
+            if not ok:
                 fails += 1
         status = "OK" if fails == 0 else f"{fails} fail"
         print(f"  {version}: {len(claims) - fails}/{len(claims)} pass  [{status}]")
@@ -111,22 +118,33 @@ def run_audit(manifest_path: Path) -> int:
 
     return 1 if overall_fail else 0
 
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="check_release_claims")
-    p.add_argument("version")
-    p.add_argument("--list", action="store_true",
-                   help="Print claims without checking")
-    p.add_argument("--json", action="store_true",
-                   help="Machine-readable output")
     p.add_argument(
         "version", nargs="?", default=None,
-        help="Version to check. Required unless --audit or --list is used with --audit.",
+        help="Version to check. Required unless --audit is used.",
+    )
+    p.add_argument(
+        "--list", action="store_true",
+        help="Print claims without checking (requires version).",
+    )
+    p.add_argument(
+        "--json", action="store_true",
+        help="Machine-readable output (requires version).",
     )
     p.add_argument(
         "--audit", action="store_true",
-    help="Check every manifest entry against the current tree.",
+        help="Check every manifest entry against the current tree.",
     )
     args = p.parse_args(argv)
+
+    # --audit takes precedence; version is ignored.
+    if args.audit:
+        return run_audit()
+
+    if args.version is None:
+        raise FatalError("version argument is required (or use --audit)")
 
     manifest = load_manifest()
     claims = manifest.get(args.version)
@@ -153,8 +171,9 @@ def main(argv: list[str] | None = None) -> int:
             "failed": sum(1 for ok, _ in results if not ok),
             "results": [{"ok": ok, "detail": d} for ok, d in results],
         }, indent=2))
-    elif args.audit:
-        return run_audit(manifest_path)
+    elif args.list:
+        for _, detail in results:
+            print(detail)
     else:
         rule = "=" * 60
         print(rule)
