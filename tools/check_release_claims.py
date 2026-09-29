@@ -34,6 +34,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+from email import parser
 import json
 import sys
 from pathlib import Path
@@ -71,6 +72,44 @@ def check_claim(claim: dict) -> tuple[bool, str]:
         return True, f"{claim['file']} contains {needle!r}"
     return True, f"{claim['file']} exists"
 
+def run_audit(manifest_path: Path) -> int:
+    """
+    Iterate every manifest entry and check its claims against the
+    current tree. Version-string claims (VERSION contains 'X.Y.Z')
+    will fail for entries whose version has already been superseded.
+    That is expected; the audit reports per-entry pass counts so a
+    maintainer can see which entries are current.
+    """
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    versions = sorted(k for k in manifest if not k.startswith("_"))
+
+    if not versions:
+        print("error: manifest has no version entries", file=sys.stderr)
+        return 2
+
+    print("=" * 60)
+    print("  release claims — audit")
+    print("=" * 60)
+
+    overall_fail = 0
+    for version in versions:
+        claims = manifest[version]
+        fails = 0
+        for claim in claims:
+            if not check_claim(claim):
+                fails += 1
+        status = "OK" if fails == 0 else f"{fails} fail"
+        print(f"  {version}: {len(claims) - fails}/{len(claims)} pass  [{status}]")
+        overall_fail += fails
+
+    print("=" * 60)
+    if overall_fail:
+        print(f"  {overall_fail} claim(s) failing across {len(versions)} entries")
+    else:
+        print("  all claims pass")
+    print("=" * 60)
+
+    return 1 if overall_fail else 0
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="check_release_claims")
@@ -79,6 +118,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="Print claims without checking")
     p.add_argument("--json", action="store_true",
                    help="Machine-readable output")
+    p.add_argument(
+        "version", nargs="?", default=None,
+        help="Version to check. Required unless --audit or --list is used with --audit.",
+    )
+    p.add_argument(
+        "--audit", action="store_true",
+    help="Check every manifest entry against the current tree.",
+    )
     args = p.parse_args(argv)
 
     manifest = load_manifest()
@@ -106,6 +153,8 @@ def main(argv: list[str] | None = None) -> int:
             "failed": sum(1 for ok, _ in results if not ok),
             "results": [{"ok": ok, "detail": d} for ok, d in results],
         }, indent=2))
+    elif args.audit:
+        return run_audit(manifest_path)
     else:
         rule = "=" * 60
         print(rule)
