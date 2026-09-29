@@ -603,6 +603,9 @@ info "✓ CHANGELOG.md has section ## [$VERSION]"
 check_version_consistency
 info "✓ check_version_consistency.py passes"
 
+check_no_orphan_variables
+info "✓ no orphaned variables in release.sh"
+
 if $DRY_RUN; then
     print_plan
     exit "$EXIT_OK"
