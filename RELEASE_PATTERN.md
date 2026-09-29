@@ -361,6 +361,43 @@ claims about a version that does not exist until the release commit
 lands. Gate-only checks are permitted; the tool's docstring names the
 reason.
 
+**Gate block shape.** The gate block must be a per-check capture
+(each check's exit read individually) or a subshell with `set -e`.
+Never a bare brace group on the left of `||`.
+
+A brace group's exit status is the last command's status. With `||`
+on the right, `set -e` is disabled inside the group — every check
+runs, and only the last gates. ISO 3166 v1.6.6 shipped a release
+where the claims check failed but the gate reported pass, because
+`pytest` ran last and succeeded.
+
+Two valid shapes:
+
+    # Per-check capture
+    GATE_FAILED=0
+    run_check() {
+        if output=$("$@" 2>&1); then
+            echo "✓ $1"
+        else
+            echo "✗ $1"; GATE_FAILED=1
+        fi
+    }
+    run_check validate.py python3 tools/validate.py
+    ...
+    [ "$GATE_FAILED" -eq 0 ] || fail "gate failed"
+
+    # Subshell with set -e
+    (
+        set -e
+        python3 tools/check_version_consistency.py
+        python3 tools/check_release_claims.py "$VERSION"
+        ...
+    ) > "$GATE_LOG" 2>&1 \
+        || { tail -20 "$GATE_LOG"; fail "gate failed"; }
+
+ISO 4217 uses the first; the ISO 3166 fix uses the second. Both
+work. The brace group does not.
+
 ### 6. Every artifact that quotes an implementation detail is coupled to that implementation
 
 When a script's expression changes, every test that asserts on it
@@ -399,6 +436,25 @@ Two instances:
 Both patches reported success. Neither diff matched its message.
 The verification is `git diff --cached --stat` before every commit,
 read against the intended change.
+
+### 6c. Manifest claims describe state, not intent.**
+
+A claim in `release_claims.json` that asserts `file contains X`
+must be verified against the file before the manifest is committed.
+If X isn't there, the fix hasn't landed — not the claim.
+
+Two failure classes:
+
+- A claim describing a change that was intended but did not land.
+- A claim whose string was edited to match the file, when the file
+  was wrong.
+
+Both turn the manifest into a check that always passes. The manifest
+is a contract; a claim that describes intent instead of state is a
+contract with nothing to enforce.
+
+The `--audit` mode in `check_release_claims.py` runs every claim
+against the current tree. Verify new claims before committing them.
 ---
 
 ## The mojibake self-trigger rule
@@ -489,3 +545,10 @@ than one registry.
   that implementation"), sourced from ISO 10383 v1.0.4. Generalizes
   the release-claims-manifest coupling failure to every artifact that
   reproduces program output.
+- 2026-09-29 — post-review addition: operator-hygiene rule 6c
+  ("Manifest claims describe state, not intent"), sourced from
+  ISO 3166 v1.6.7.
+- 2026-09-29 — post-review addition: gate-block shape rule under
+  invariant 5. Names per-check capture and subshell-with-set-e as
+  valid; the brace group as invalid. Sourced from ISO 3166 v1.6.6
+  and confirmed against ISO 4217's per-check capture shape.
