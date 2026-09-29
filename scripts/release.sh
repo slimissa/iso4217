@@ -165,14 +165,18 @@ check_no_orphan_variables() {
         | while read -r v; do
             v="${v#\$}"
             v="${v#\{}"
+            case "$v" in
+                BASH_SOURCE|BASH_VERSION|BASH|BASHPID|LINENO|FUNCNAME|PIPESTATUS|EUID|UID|IFS|HOME|PATH|PWD|USER|OLDPWD|OPTARG|OPTIND|REPLY|RANDOM|SECONDS|SHELL|SHLVL|HOSTNAME|HOSTTYPE|MACHTYPE|OSTYPE|PPID|GROUPS|DIRSTACK|BASH_REMATCH) continue ;;
+            esac
             if ! grep -qE "(^|\s)${v}=" scripts/release.sh; then
                 echo "$v"
             fi
         done || true)"
 
     if [ -n "$orphans" ]; then
-        echo "  WARN orphan variables (defined nowhere, expanded somewhere):"
-        echo "$orphans" | sed 's/^/    /'
+        echo "orphan variables (defined nowhere, expanded somewhere):" >&2
+        echo "$orphans" | sed 's/^/  /' >&2
+        die "release script references undefined variables"
     fi
 }
 
