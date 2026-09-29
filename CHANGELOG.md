@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.1] — Unreleased
+
+Ports two release checks from ISO 3166. No data changes; no schema
+changes.
+
+### Added
+
+- `check_no_orphan_variables` in `scripts/release.sh` preflight,
+  ported from ISO 3166 v1.6.3. Warns (does not fail) on names
+  referenced in the script but defined nowhere.
+- `tools/check_release_claims.py` and `tools/release_claims.json`,
+  ported from ISO 3166 v1.6.5. The release gate runs the claims
+  check after version consistency. Mechanically enforces
+  operator-hygiene rule 6 (implementation-detail coupling). Claims
+  are checked at release time, not in CI.
+
+### Changed
+
+- `scripts/release.sh` gate now runs eleven checks.
+- `print_plan()` output aligned with the actual preconditions and
+  gate steps.
+
+---
+
 ## [1.7.0] — 2026-09-27
 
 Closes the schema-version-consistency gap and (optionally) the
