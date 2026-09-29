@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.2] — Unreleased
+
+Fixes the orphan check to fail on finding, records the gate-only
+design for the release-claims check, and adds two conventions to
+`RELEASE_PATTERN.md`. No data changes; no schema changes.
+
+### Fixed
+
+- `check_no_orphan_variables` now `die`s on finding. The warn-only
+  behavior in v1.6.3 of the source was a bug: the check's name implies
+  failing, and the failure class it catches is exactly what produced
+  a partial release in an earlier registry. Reciprocal port from the
+  source, matching the source's own v1.6.6 fix.
+
+### Added
+
+- `RELEASE_PATTERN.md` operator hygiene rule 6b — "the commit is not
+  the working tree." Names two instances of the same failure class.
+- `RELEASE_PATTERN.md` "Review history format" — the attribution
+  convention from the ISO 10383 exchange. Every entry names its
+  source repo.
+- `tools/check_release_claims.py` docstring — the gate-only design
+  rationale, plus a note in `RELEASE_PATTERN.md` invariant 5.
+
+### Changed
+
+- `RELEASE_PATTERN.md` invariant 5 — "gate before commit" softened to
+  allow gate-only checks whose inputs are version-scoped.
+
+---
+
 ## [1.7.1] — 2026-09-29
 
 Ports two release checks from ISO 3166. No data changes; no schema
