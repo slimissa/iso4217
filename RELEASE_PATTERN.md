@@ -382,6 +382,23 @@ Applies to:
 The rule: if an artifact reproduces text from a running program,
 that artifact is a copy, not a reference. Copies drift.
 
+### 6b. The commit is not the working tree
+
+`git diff --cached --stat` before every commit. The message is a
+claim about what the commit contains, not about what's on disk. If
+the diff doesn't match the message, the message is wrong.
+
+Two instances:
+- ISO 4217 `3687bc2` — the commit's message described the orphan
+  check landing; the diff only carried the call site. The function
+  body followed two commits later.
+- ISO 3166 v1.6.4 — the CHANGELOG section named the ISO 10383
+  reviewer entry and the orphan-preflight convention. Neither
+  landed; a one-character anchor mismatch dropped both edits.
+
+Both patches reported success. Neither diff matched its message.
+The verification is `git diff --cached --stat` before every commit,
+read against the intended change.
 ---
 
 ## The mojibake self-trigger rule
@@ -436,6 +453,23 @@ Reviewed by:
 - ISO 4217 (`slimissa/iso4217`) — 2026-09-27
 - ISO 3166 (`slimissa/iso3166`) — 2026-09-27
 - Exchange Calendar (`slimissa/exchange-calendar`) — review pending
+
+## Review history format
+
+Every entry in a document's review history names the source repo,
+not just the date and what changed.
+
+Format:
+
+    - YYYY-MM-DD — reviewed by <repo>. <what changed>.
+      <attribution if the addition came from a specific exchange>.
+
+`sourced from ISO 10383 v1.0.4` is a source. `co-authored` is not.
+A reader tracing a rule's origin wants a specific commit to look up.
+
+The convention was requested by the ISO 10383 builder, adopted by
+ISO 4217 and ISO 3166, and applies to any document produced by more
+than one registry.
 
 ## Review history
 
