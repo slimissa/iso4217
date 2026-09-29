@@ -5,6 +5,17 @@ tools/check_release_claims.py
 Read tools/release_claims.json and verify every claim for a given
 version against the current repository state.
 
+This check runs in the release gate, not in CI. The manifest is
+version-scoped: between the CHANGELOG commit and the release commit,
+VERSION still reads the old value while the manifest has future-version
+claims that don't hold yet. Running it in CI would fail on every push
+in that window, and there's no clean scope that fixes it — a tag-scoped
+job runs after the release, a workflow input makes the check manual,
+and merging on red trains people to ignore red CI.
+
+Gate-only is the design, not a workaround. The check is only meaningful
+at release time against the state that's about to be tagged.
+
 Each claim is one of:
 
   {"file": "path"}                     — path must exist

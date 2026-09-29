@@ -353,6 +353,14 @@ The failure mode: a validator ran with a broken import, exited 1,
 and the piped `tail -3` printed `0`. The release proceeded with the
 validator broken.
 
+Most checks that run in the gate also run in CI, so the gate is a
+faster, local copy of the same signal. Some checks are gate-only by
+design: their inputs are version-scoped in a way CI cannot reproduce.
+`check_release_claims.py` is the reference case — the manifest has
+claims about a version that does not exist until the release commit
+lands. Gate-only checks are permitted; the tool's docstring names the
+reason.
+
 ### 6. Every artifact that quotes an implementation detail is coupled to that implementation
 
 When a script's expression changes, every test that asserts on it
