@@ -95,5 +95,53 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.2\""
     }
+  ],
+  "1.7.3": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.3"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.3\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.3]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.3"
+    },
+    {
+      "file": "tools/check_release_claims.py"
+    },
+    {
+      "file": "tools/release_claims.json"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "check_manifest_has_version"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "check_no_orphan_variables"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "all workflows for"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.3"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.3\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.3\""
+    }
   ]
 }
