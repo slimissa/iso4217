@@ -215,7 +215,17 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     updated = read_meta_updated(args.root)
     snapshot_date = parse_iso_date(updated)
-    today = date.fromisoformat(args.today) if args.today else date.today()
+    if args.today:
+        try:
+            today = date.fromisoformat(args.today)
+        except ValueError:
+            print(
+                f"FATAL: --today is not a valid ISO 8601 date: {args.today!r}",
+                file=sys.stderr,
+            )
+            return EXIT_FATAL
+    else:
+        today = date.today()
     delta = (today - snapshot_date).days
 
     # A future meta.updated is a data error, not a freshness issue.
