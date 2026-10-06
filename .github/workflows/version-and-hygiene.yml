@@ -92,3 +92,29 @@ jobs:
 
 
     
+
+  check-countries-parquet:
+    name: Countries Parquet in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pyarrow
+        run: python3 -m pip install --upgrade pip pyarrow
+      - name: Check countries Parquet is in sync
+        run: python3 tools/export_countries_parquet.py --check
+
+  check-aggregated-export:
+    name: Aggregated exports in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pyarrow
+        run: python3 -m pip install --upgrade pip pyarrow
+      - name: Check aggregated Parquet files are in sync
+        run: python3 tools/export_aggregated.py --check
