@@ -581,12 +581,19 @@ class TestCoverageTimelineRealData:
                 assert r["withdrawn_count"] is None
                 assert r["non_iso_count"] is None
 
-    def test_1_5_3_has_null_date_and_a_stderr_note(self, tmp_path, capsys):
+    def test_1_5_3_has_real_date(self, tmp_path, capsys):
+        # Since v1.7.5 the v1.5.3 CHANGELOG heading carries its actual
+        # tag date instead of the placeholder '2026-09-XX'. The
+        # placeholder-handling code path in the tool is therefore not
+        # exercised by the real data anymore; a synthetic-fixture test
+        # would be needed to cover it (tracked as a follow-up).
         assert main(["--output-dir", str(tmp_path)]) == EXIT_OK
-        assert "1.5.3" in capsys.readouterr().err
+        err = capsys.readouterr().err
+        assert "1.5.3" not in err
         rows = pq.read_table(tmp_path / TIMELINE_FILE).to_pylist()
-        assert next(r for r in rows if r["version"] == "1.5.3")["date"] is None
-        assert all(r["date"] for r in rows if r["version"] != "1.5.3")
+        row = next(r for r in rows if r["version"] == "1.5.3")
+        assert row["date"] == "2026-09-18"
+        assert all(r["date"] for r in rows)
 
 
 # ---------------------------------------------------------------------------
