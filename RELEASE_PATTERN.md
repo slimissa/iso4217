@@ -79,6 +79,14 @@ Why: a release that fails CI is a release that needs a revert
 commit. A release that fails the gate locally is a release that
 was never created.
 
+**The gate must include every check that runs in CI's fast
+workflow.** A check that runs in CI but not in the gate is a
+check that a release can bypass: the release commit lands on
+`main` with a red CI before the tag is created. The v1.7.5
+incident is the reference case. Pytest was not in the gate; a
+stale test passed locally and failed in CI. Fixed by adding
+`pytest tests/` as the fourteenth gate step in `release.sh`.
+
 ### 6. Poll every workflow
 
 After the release commit is pushed, poll every workflow that runs
