@@ -196,6 +196,10 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         "--root", type=Path, default=PROJECT_ROOT,
         help=f"project root to check (default: {PROJECT_ROOT})",
     )
+    parser.add_argument(
+        "--today", metavar="YYYY-MM-DD", default=None,
+        help="Override today's date, for testing.",
+    )
     return parser.parse_args(argv)
 
 
@@ -211,7 +215,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     updated = read_meta_updated(args.root)
     snapshot_date = parse_iso_date(updated)
-    today = date.today()
+    today = date.fromisoformat(args.today) if args.today else date.today()
     delta = (today - snapshot_date).days
 
     # A future meta.updated is a data error, not a freshness issue.
