@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.6] — Unreleased
+
+Two follow-ups from the v1.7.5 incidents. No data changes; no
+schema changes.
+
+### Added
+
+- `--today YYYY-MM-DD` on `tools/check_registry_freshness.py`.
+  Matches the shape already on `check_snapshot_freshness.py`. The
+  timezone-tolerance fix from v1.7.5 is now testable without
+  changing the system clock.
+- `RELEASE_PATTERN.md` invariant 5 gains the rule: "the gate must
+  include every check that runs in CI's fast workflow." Names the
+  v1.7.5 pytest incident as the reference case.
+
+### Note
+
+The `--today` flag has no test yet. A synthetic test that exercises
+the one-day tolerance and the two-day failure is a follow-up.
+
+---
+
 ## [1.7.5] — 2026-10-07
 
 Documentation-only patch. Fixes a CHANGELOG placeholder date and

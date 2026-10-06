@@ -237,5 +237,43 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.5\""
     }
+  ],
+  "1.7.6": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.6"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.6\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.6]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.6"
+    },
+    {
+      "file": "tools/check_registry_freshness.py",
+      "contains": "--today"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "The gate must include every check"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.6"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.6\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.6\""
+    }
   ]
 }
