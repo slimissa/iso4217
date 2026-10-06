@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.7] — Unreleased
+
+Test-only patch. Adds coverage for the two freshness tools'
+date-handling paths. No data changes; no schema changes.
+
+### Added
+
+- `tests/test_check_registry_freshness.py` — 18 tests covering the
+  `--today` flag, the one-day timezone tolerance, the threshold
+  flag, the fatal paths, the `--json` output, and one assertion
+  against the committed registry.
+- `tests/test_check_snapshot_freshness.py` — 8 tests covering the
+  three-state design (`ISO date` / `"closed"` / `null`), the
+  sibling-metadata preference, and the no-snapshots fatal case.
+
+### Note
+
+The `--today` flag on `check_registry_freshness.py` was added in
+v1.7.6 with no test. The v1.7.6 verification report named this as
+a follow-up. This release closes it.
+
+---
+
 ## [1.7.6] — 2026-10-07
 
 Two follow-ups from the v1.7.5 incidents. No data changes; no
