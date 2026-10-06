@@ -21,6 +21,13 @@ date-handling paths. No data changes; no schema changes.
   three-state design (`ISO date` / `"closed"` / `null`), the
   sibling-metadata preference, and the no-snapshots fatal case.
 
+### Fixed
+
+- `tools/check_registry_freshness.py` — an invalid `--today`
+  value previously raised an uncaught `ValueError`. It now returns
+  `EXIT_FATAL` with a diagnostic message. Found by the new test
+  suite.
+
 ### Note
 
 The `--today` flag on `check_registry_freshness.py` was added in
