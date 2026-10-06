@@ -1,4 +1,4 @@
-# ADR 0006 — Schema version consistency belongs in check_version_consistency.py
+# ADR 0009 — Schema version consistency belongs in check_version_consistency.py
 
 **Status:** Accepted
 **Date:** 2026-09-27

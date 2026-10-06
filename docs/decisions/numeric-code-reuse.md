@@ -1,4 +1,4 @@
-# ADR 0005 — Numeric code reuse is expected
+# ADR 0008 — Numeric code reuse is expected
 
 **Status:** Accepted
 **Date:** 2026-09-27
