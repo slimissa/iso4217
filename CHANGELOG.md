@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.5] — Unreleased
+
+Documentation-only patch. Fixes a CHANGELOG placeholder date and
+resolves an ADR numbering collision. No data changes; no schema
+changes.
+
+### Fixed
+
+- `CHANGELOG.md` — the v1.5.3 heading carried the placeholder
+  `2026-09-XX` instead of the tag's actual date. Corrected to the
+  date recorded on the `v1.5.3` tag. The
+  `export_aggregated.py --check` note about the placeholder no
+  longer fires.
+- `docs/decisions/numeric-code-reuse.md` — renumbered from ADR 0005
+  to ADR 0008. The number 0005 was already claimed by
+  `note-source-split.md` (v1.6.0).
+- `docs/decisions/schema-version-consistency.md` — renumbered from
+  ADR 0006 to ADR 0009. The number 0006 was already claimed by
+  `code-lifetime.md` (v1.6.0).
+- Cross-references updated to name the new numbers.
+
+### Note
+
+The numbering is unique but not strictly chronological: 0007 was
+assigned to `aggregated-layer-0007.md` at v1.7.4, and 0008/0009
+renumber the two duplicates that followed in release order. A
+future renumber to restore full chronological order is possible
+but not necessary.
+
+---
+
 ## [1.7.4] — 2026-10-06
 
 Ships the AGGREGATED layer. Adds one CURATED projection, three
