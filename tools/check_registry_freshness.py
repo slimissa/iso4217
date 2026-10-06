@@ -44,6 +44,12 @@ EXIT_STALE = 1
 EXIT_FATAL = 2
 
 DEFAULT_THRESHOLD_DAYS = 180
+# A date one day ahead of the runner's clock is a timezone artifact,
+# not a data error. CI runs on UTC; a maintainer whose local time is
+# ahead of UTC can set meta.updated to what is, from the runner's
+# perspective, tomorrow. Allow up to this many days of skew before
+# treating a future date as a real error.
+FUTURE_TOLERANCE_DAYS = 1
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +217,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # A future meta.updated is a data error, not a freshness issue.
     # Report it and fail — a snapshot dated in the future cannot be
     # trusted as "as of" any real moment.
-    future = delta < 0
+    future = delta < -FUTURE_TOLERANCE_DAYS
     stale = delta > args.threshold
 
     if args.json:
