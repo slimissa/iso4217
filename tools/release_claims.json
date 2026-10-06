@@ -199,5 +199,43 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.4\""
     }
+  ],
+  "1.7.5": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.5"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.5\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.5]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.5"
+    },
+    {
+      "file": "docs/decisions/numeric-code-reuse.md",
+      "contains": "ADR 0008"
+    },
+    {
+      "file": "docs/decisions/schema-version-consistency.md",
+      "contains": "ADR 0009"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.5"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.5\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.5\""
+    }
   ]
 }
