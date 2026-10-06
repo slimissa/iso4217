@@ -11,6 +11,13 @@ Two independent version axes are tracked:
       package manifests (Python setup.py, JavaScript package.json,
       Rust Cargo.toml).
 
+      The Parquet footer site is limited to the flat iso4217.parquet.
+      iso4217.countries.parquet and the three aggregated Parquet files
+      also carry iso4217.version, but they are deliberately not sites:
+      their own --check modes already fail when the footer is stale
+      (ADR 0007, docs/decisions/aggregated-layer-0007.md), so a site here
+      would add maintenance without adding detection.
+
   Schema axis — source of truth: schema.json's $id trailing /vX.Y.Z/.
       Three sites must agree: iso4217.json's meta.schema_version,
       schema.json's $id itself, and the README's schema-X.Y.Z badge.

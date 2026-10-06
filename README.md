@@ -372,6 +372,19 @@ The Python package also installs the `iso4217` CLI. See [Command-line interface]
 
 Every export is committed to the repository and re-verified on every push. A stale artifact fails CI before it reaches `main`.
 
+#### Aggregated exports
+
+Beyond the flat exports, the registry ships files that answer questions rather than reproduce facts. One is a CURATED projection; three are AGGREGATED. The aggregated files are built only from CURATED artifacts — see [`docs/LAYERS.md`](./docs/LAYERS.md).
+
+| File | Layer | The question it answers |
+|------|-------|-------------------------|
+| [`iso4217.countries.parquet`](./iso4217.countries.parquet) | CURATED | Which countries use which currency, and in what relationship (issuing, adopting, territory, parallel, local issue)? |
+| [`currencies_by_region.parquet`](./currencies_by_region.parquet) | AGGREGATED | Which currencies circulate in each world region, and in how many of its countries? |
+| [`pegs_summary.parquet`](./pegs_summary.parquet) | AGGREGATED | Which currencies anchor single-currency pegs, how many currencies hang off each, and at what rates? |
+| [`coverage_timeline.parquet`](./coverage_timeline.parquet) | AGGREGATED | How did the registry's active, withdrawn, and non-ISO coverage change across releases? |
+
+Regenerate with `python3 tools/export_countries_parquet.py` then `python3 tools/export_aggregated.py`; CI re-verifies both with `--check`.
+
 ---
 
 ## Validation
@@ -463,6 +476,10 @@ iso4217/
 ├── iso4217.european.csv          # CSV export — semicolon-delimited
 ├── iso4217.tsv                   # TSV export — tab-separated
 ├── iso4217.parquet               # Parquet export — typed, columnar, snappy-compressed
+├── iso4217.countries.parquet     # CURATED — one row per (currency, country)
+├── currencies_by_region.parquet  # AGGREGATED — one row per (region, currency)
+├── pegs_summary.parquet          # AGGREGATED — one row per anchor currency
+├── coverage_timeline.parquet     # AGGREGATED — one row per released version
 │
 ├── wrappers/
 │   ├── python/                   # pip install iso4217-registry
@@ -482,6 +499,8 @@ iso4217/
 │   ├── test_export_sql.py
 │   ├── test_export_csv.py
 │   ├── test_export_parquet.py
+│   ├── test_export_countries_parquet.py
+│   ├── test_export_aggregated.py
 │   ├── test_update_from_iso.py
 │   ├── test_refresh_market_caps.py
 │   └── test_wrappers.py
@@ -497,6 +516,8 @@ iso4217/
 │   ├── export_sql.py                     # SQL export generator (--check for CI)
 │   ├── export_csv.py                     # CSV/TSV export generator (--check for CI)
 │   ├── export_parquet.py                 # Parquet export generator (--check for CI)
+│   ├── export_countries_parquet.py       # Countries Parquet generator (--check for CI)
+│   ├── export_aggregated.py              # AGGREGATED-layer generator, 3 files (--check for CI)
 │   ├── sync_wrappers.py                  # Wrapper copy sync (--check for CI)
 │   │
 │   ├── check_version_consistency.py      # 11 sites, 2 axes
@@ -533,6 +554,7 @@ iso4217/
 │   └── decisions/
 │       ├── withdrawn-codes.md            # ADR 0001
 │       ├── parquet-schema.md             # ADR 0002
+│       ├── aggregated-layer-0007.md      # ADR 0007
 │       ├── classification-enum.md        # ADR 0003
 │       ├── numeric-reuse-flag.md         # ADR 0004
 │       ├── numeric-code-reuse.md         # ADR 0005
