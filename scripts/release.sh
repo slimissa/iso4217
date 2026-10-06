@@ -18,6 +18,17 @@
 #   - tag v<version> does not already exist (unless --force)
 #   - CHANGELOG.md contains a '## [<version>]' section
 #   - tools/check_version_consistency.py currently passes
+#
+# Dependencies:
+#   pyarrow is a build-time dependency of this script. The Parquet
+#   generators (export_parquet.py, export_countries_parquet.py,
+#   export_aggregated.py) and their --check modes import it, so
+#   regenerate_artifacts() and run_gate() fail without it.
+#
+# Regeneration order follows the data layers (docs/LAYERS.md):
+#   RAW -> CURATED (SQL, CSV, Parquet, countries Parquet, wrapper copies)
+#       -> AGGREGATED. export_aggregated.py reads iso4217.parquet and
+#   iso4217.countries.parquet, so it must run after both.
 
 set -euo pipefail
 
@@ -343,7 +354,7 @@ bump_all_sites() {
 }
 
 # ---------------------------------------------------------------------------
-# Artifact regeneration — nine files from four generators
+# Artifact regeneration — sixteen files from six generators
 # ---------------------------------------------------------------------------
 
 regenerate_artifacts() {
@@ -351,6 +362,8 @@ regenerate_artifacts() {
     python3 tools/export_sql.py       >/dev/null && info "✓ SQL exports (4 files)"
     python3 tools/export_csv.py       >/dev/null && info "✓ CSV/TSV exports (4 files)"
     python3 tools/export_parquet.py   >/dev/null && info "✓ Parquet export (1 file)"
+    python3 tools/export_countries_parquet.py >/dev/null && info "✓ Countries Parquet (1 file)"
+    python3 tools/export_aggregated.py        >/dev/null && info "✓ Aggregated exports (3 files)"
     python3 tools/sync_wrappers.py    >/dev/null && info "✓ Wrapper copies (3 files)"
 }
 
@@ -382,6 +395,8 @@ run_gate() {
     run_gate_step "export_sql.py --check"           python3 tools/export_sql.py --check
     run_gate_step "export_csv.py --check"           python3 tools/export_csv.py --check
     run_gate_step "export_parquet.py --check"       python3 tools/export_parquet.py --check
+    run_gate_step "export_countries_parquet.py --check"  python3 tools/export_countries_parquet.py --check
+    run_gate_step "export_aggregated.py --check"         python3 tools/export_aggregated.py --check
     run_gate_step "sync_wrappers.py --check"        python3 tools/sync_wrappers.py --check
     run_gate_step "check_release_claims.py"         python3 tools/check_release_claims.py "$VERSION"
     run_gate_step "check_mojibake.py"               python3 tools/check_mojibake.py
@@ -585,6 +600,8 @@ print_plan() {
     echo "  iso4217.sql, iso4217.postgresql.sql, iso4217.mysql.sql, iso4217.sqlite.sql"
     echo "  iso4217.csv, iso4217.excel.csv, iso4217.european.csv, iso4217.tsv"
     echo "  iso4217.parquet"
+    echo "  iso4217.countries.parquet"
+    echo "  currencies_by_region.parquet, pegs_summary.parquet, coverage_timeline.parquet"
     echo "  wrappers/python/iso4217.json"
     echo "  wrappers/go/iso4217.json"
     echo "  wrappers/rust/iso4217.json"
@@ -606,6 +623,8 @@ print_plan() {
     echo "  python3 tools/export_sql.py --check"
     echo "  python3 tools/export_csv.py --check"
     echo "  python3 tools/export_parquet.py --check"
+    echo "  python3 tools/export_countries_parquet.py --check"
+    echo "  python3 tools/export_aggregated.py --check"
     echo "  python3 tools/sync_wrappers.py --check"
     echo "  python3 tools/check_mojibake.py"
     echo "  python3 tools/check_snapshot_freshness.py"
