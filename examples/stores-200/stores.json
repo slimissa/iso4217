@@ -1,0 +1,1602 @@
+[
+  {
+    "store_id": "ST-0001",
+    "name": "Store 0001",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0993,
+    "opened": "2013-05-03"
+  },
+  {
+    "store_id": "ST-0002",
+    "name": "Store 0002",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0627,
+    "opened": "2019-07-29"
+  },
+  {
+    "store_id": "ST-0003",
+    "name": "Store 0003",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0241,
+    "opened": "2021-05-13"
+  },
+  {
+    "store_id": "ST-0004",
+    "name": "Store 0004",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.0842,
+    "opened": "2010-04-09"
+  },
+  {
+    "store_id": "ST-0005",
+    "name": "Store 0005",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.2556,
+    "opened": "2012-03-10"
+  },
+  {
+    "store_id": "ST-0006",
+    "name": "Store 0006",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2013-08-01"
+  },
+  {
+    "store_id": "ST-0007",
+    "name": "Store 0007",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2022-05-11"
+  },
+  {
+    "store_id": "ST-0008",
+    "name": "Store 0008",
+    "country": "ZA",
+    "currency": "ZAR",
+    "tax_rate": 0.15,
+    "opened": "2020-08-22"
+  },
+  {
+    "store_id": "ST-0009",
+    "name": "Store 0009",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.0765,
+    "opened": "2019-03-19"
+  },
+  {
+    "store_id": "ST-0010",
+    "name": "Store 0010",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2010-04-28"
+  },
+  {
+    "store_id": "ST-0011",
+    "name": "Store 0011",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2020-09-25"
+  },
+  {
+    "store_id": "ST-0012",
+    "name": "Store 0012",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0626,
+    "opened": "2023-04-05"
+  },
+  {
+    "store_id": "ST-0013",
+    "name": "Store 0013",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0861,
+    "opened": "2018-08-06"
+  },
+  {
+    "store_id": "ST-0014",
+    "name": "Store 0014",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.0965,
+    "opened": "2019-11-25"
+  },
+  {
+    "store_id": "ST-0015",
+    "name": "Store 0015",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.1675,
+    "opened": "2019-07-15"
+  },
+  {
+    "store_id": "ST-0016",
+    "name": "Store 0016",
+    "country": "ZA",
+    "currency": "ZAR",
+    "tax_rate": 0.15,
+    "opened": "2020-02-14"
+  },
+  {
+    "store_id": "ST-0017",
+    "name": "Store 0017",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1445,
+    "opened": "2023-05-25"
+  },
+  {
+    "store_id": "ST-0018",
+    "name": "Store 0018",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.1767,
+    "opened": "2017-01-26"
+  },
+  {
+    "store_id": "ST-0019",
+    "name": "Store 0019",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.2422,
+    "opened": "2015-11-24"
+  },
+  {
+    "store_id": "ST-0020",
+    "name": "Store 0020",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2018-04-17"
+  },
+  {
+    "store_id": "ST-0021",
+    "name": "Store 0021",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2011-02-14"
+  },
+  {
+    "store_id": "ST-0022",
+    "name": "Store 0022",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2018-08-20"
+  },
+  {
+    "store_id": "ST-0023",
+    "name": "Store 0023",
+    "country": "DK",
+    "currency": "DKK",
+    "tax_rate": 0.25,
+    "opened": "2019-05-29"
+  },
+  {
+    "store_id": "ST-0024",
+    "name": "Store 0024",
+    "country": "NG",
+    "currency": "NGN",
+    "tax_rate": 0.075,
+    "opened": "2012-05-30"
+  },
+  {
+    "store_id": "ST-0025",
+    "name": "Store 0025",
+    "country": "SK",
+    "currency": "EUR",
+    "tax_rate": 0.1181,
+    "opened": "2011-09-21"
+  },
+  {
+    "store_id": "ST-0026",
+    "name": "Store 0026",
+    "country": "MA",
+    "currency": "MAD",
+    "tax_rate": 0.1852,
+    "opened": "2017-11-21"
+  },
+  {
+    "store_id": "ST-0027",
+    "name": "Store 0027",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2014-12-30"
+  },
+  {
+    "store_id": "ST-0028",
+    "name": "Store 0028",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0462,
+    "opened": "2023-08-06"
+  },
+  {
+    "store_id": "ST-0029",
+    "name": "Store 0029",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2018-07-11"
+  },
+  {
+    "store_id": "ST-0030",
+    "name": "Store 0030",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.1208,
+    "opened": "2013-03-20"
+  },
+  {
+    "store_id": "ST-0031",
+    "name": "Store 0031",
+    "country": "BH",
+    "currency": "BHD",
+    "tax_rate": 0.1,
+    "opened": "2010-09-20"
+  },
+  {
+    "store_id": "ST-0032",
+    "name": "Store 0032",
+    "country": "BH",
+    "currency": "BHD",
+    "tax_rate": 0.1,
+    "opened": "2021-05-15"
+  },
+  {
+    "store_id": "ST-0033",
+    "name": "Store 0033",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.2722,
+    "opened": "2011-04-07"
+  },
+  {
+    "store_id": "ST-0034",
+    "name": "Store 0034",
+    "country": "TW",
+    "currency": "TWD",
+    "tax_rate": 0.05,
+    "opened": "2023-11-22"
+  },
+  {
+    "store_id": "ST-0035",
+    "name": "Store 0035",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0733,
+    "opened": "2010-08-30"
+  },
+  {
+    "store_id": "ST-0036",
+    "name": "Store 0036",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.1182,
+    "opened": "2014-05-18"
+  },
+  {
+    "store_id": "ST-0037",
+    "name": "Store 0037",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2021-10-07"
+  },
+  {
+    "store_id": "ST-0038",
+    "name": "Store 0038",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0895,
+    "opened": "2017-10-25"
+  },
+  {
+    "store_id": "ST-0039",
+    "name": "Store 0039",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.0712,
+    "opened": "2019-04-27"
+  },
+  {
+    "store_id": "ST-0040",
+    "name": "Store 0040",
+    "country": "SN",
+    "currency": "XOF",
+    "tax_rate": 0.18,
+    "opened": "2022-10-09"
+  },
+  {
+    "store_id": "ST-0041",
+    "name": "Store 0041",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2022-02-02"
+  },
+  {
+    "store_id": "ST-0042",
+    "name": "Store 0042",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0782,
+    "opened": "2010-10-17"
+  },
+  {
+    "store_id": "ST-0043",
+    "name": "Store 0043",
+    "country": "SK",
+    "currency": "EUR",
+    "tax_rate": 0.1728,
+    "opened": "2010-07-21"
+  },
+  {
+    "store_id": "ST-0044",
+    "name": "Store 0044",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0324,
+    "opened": "2021-01-22"
+  },
+  {
+    "store_id": "ST-0045",
+    "name": "Store 0045",
+    "country": "SA",
+    "currency": "SAR",
+    "tax_rate": 0.15,
+    "opened": "2013-03-21"
+  },
+  {
+    "store_id": "ST-0046",
+    "name": "Store 0046",
+    "country": "SN",
+    "currency": "XOF",
+    "tax_rate": 0.18,
+    "opened": "2020-01-03"
+  },
+  {
+    "store_id": "ST-0047",
+    "name": "Store 0047",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0801,
+    "opened": "2020-12-17"
+  },
+  {
+    "store_id": "ST-0048",
+    "name": "Store 0048",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2016-04-17"
+  },
+  {
+    "store_id": "ST-0049",
+    "name": "Store 0049",
+    "country": "TW",
+    "currency": "TWD",
+    "tax_rate": 0.05,
+    "opened": "2019-01-01"
+  },
+  {
+    "store_id": "ST-0050",
+    "name": "Store 0050",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.011,
+    "opened": "2011-05-16"
+  },
+  {
+    "store_id": "ST-0051",
+    "name": "Store 0051",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0241,
+    "opened": "2018-06-14"
+  },
+  {
+    "store_id": "ST-0052",
+    "name": "Store 0052",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1975,
+    "opened": "2015-08-07"
+  },
+  {
+    "store_id": "ST-0053",
+    "name": "Store 0053",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2015-10-03"
+  },
+  {
+    "store_id": "ST-0054",
+    "name": "Store 0054",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0872,
+    "opened": "2023-06-21"
+  },
+  {
+    "store_id": "ST-0055",
+    "name": "Store 0055",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0976,
+    "opened": "2013-07-06"
+  },
+  {
+    "store_id": "ST-0056",
+    "name": "Store 0056",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.1749,
+    "opened": "2010-01-28"
+  },
+  {
+    "store_id": "ST-0057",
+    "name": "Store 0057",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0663,
+    "opened": "2016-12-13"
+  },
+  {
+    "store_id": "ST-0058",
+    "name": "Store 0058",
+    "country": "CH",
+    "currency": "CHF",
+    "tax_rate": 0.0658,
+    "opened": "2012-06-04"
+  },
+  {
+    "store_id": "ST-0059",
+    "name": "Store 0059",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0507,
+    "opened": "2014-01-31"
+  },
+  {
+    "store_id": "ST-0060",
+    "name": "Store 0060",
+    "country": "XK",
+    "currency": "EUR",
+    "tax_rate": 0.18,
+    "opened": "2011-02-15"
+  },
+  {
+    "store_id": "ST-0061",
+    "name": "Store 0061",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.0812,
+    "opened": "2021-11-06"
+  },
+  {
+    "store_id": "ST-0062",
+    "name": "Store 0062",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1409,
+    "opened": "2020-10-15"
+  },
+  {
+    "store_id": "ST-0063",
+    "name": "Store 0063",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1161,
+    "opened": "2013-08-26"
+  },
+  {
+    "store_id": "ST-0064",
+    "name": "Store 0064",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0784,
+    "opened": "2023-07-30"
+  },
+  {
+    "store_id": "ST-0065",
+    "name": "Store 0065",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.1003,
+    "opened": "2018-03-02"
+  },
+  {
+    "store_id": "ST-0066",
+    "name": "Store 0066",
+    "country": "SN",
+    "currency": "XOF",
+    "tax_rate": 0.18,
+    "opened": "2018-06-13"
+  },
+  {
+    "store_id": "ST-0067",
+    "name": "Store 0067",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2011-01-17"
+  },
+  {
+    "store_id": "ST-0068",
+    "name": "Store 0068",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2021-10-04"
+  },
+  {
+    "store_id": "ST-0069",
+    "name": "Store 0069",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0605,
+    "opened": "2013-03-10"
+  },
+  {
+    "store_id": "ST-0070",
+    "name": "Store 0070",
+    "country": "TW",
+    "currency": "TWD",
+    "tax_rate": 0.05,
+    "opened": "2013-07-24"
+  },
+  {
+    "store_id": "ST-0071",
+    "name": "Store 0071",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2012-10-16"
+  },
+  {
+    "store_id": "ST-0072",
+    "name": "Store 0072",
+    "country": "CL",
+    "currency": "CLP",
+    "tax_rate": 0.19,
+    "opened": "2012-02-26"
+  },
+  {
+    "store_id": "ST-0073",
+    "name": "Store 0073",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.093,
+    "opened": "2013-06-11"
+  },
+  {
+    "store_id": "ST-0074",
+    "name": "Store 0074",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2020-05-08"
+  },
+  {
+    "store_id": "ST-0075",
+    "name": "Store 0075",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.129,
+    "opened": "2018-09-25"
+  },
+  {
+    "store_id": "ST-0076",
+    "name": "Store 0076",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0386,
+    "opened": "2018-01-20"
+  },
+  {
+    "store_id": "ST-0077",
+    "name": "Store 0077",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.1705,
+    "opened": "2019-07-07"
+  },
+  {
+    "store_id": "ST-0078",
+    "name": "Store 0078",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2019-03-30"
+  },
+  {
+    "store_id": "ST-0079",
+    "name": "Store 0079",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2018-06-03"
+  },
+  {
+    "store_id": "ST-0080",
+    "name": "Store 0080",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0079,
+    "opened": "2019-09-05"
+  },
+  {
+    "store_id": "ST-0081",
+    "name": "Store 0081",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2022-04-13"
+  },
+  {
+    "store_id": "ST-0082",
+    "name": "Store 0082",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0723,
+    "opened": "2012-03-08"
+  },
+  {
+    "store_id": "ST-0083",
+    "name": "Store 0083",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0837,
+    "opened": "2021-04-09"
+  },
+  {
+    "store_id": "ST-0084",
+    "name": "Store 0084",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1788,
+    "opened": "2013-03-10"
+  },
+  {
+    "store_id": "ST-0085",
+    "name": "Store 0085",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.2547,
+    "opened": "2015-07-30"
+  },
+  {
+    "store_id": "ST-0086",
+    "name": "Store 0086",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1523,
+    "opened": "2011-09-25"
+  },
+  {
+    "store_id": "ST-0087",
+    "name": "Store 0087",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0685,
+    "opened": "2023-02-27"
+  },
+  {
+    "store_id": "ST-0088",
+    "name": "Store 0088",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2013-08-22"
+  },
+  {
+    "store_id": "ST-0089",
+    "name": "Store 0089",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0123,
+    "opened": "2019-10-07"
+  },
+  {
+    "store_id": "ST-0090",
+    "name": "Store 0090",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.069,
+    "opened": "2014-10-09"
+  },
+  {
+    "store_id": "ST-0091",
+    "name": "Store 0091",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0128,
+    "opened": "2016-01-01"
+  },
+  {
+    "store_id": "ST-0092",
+    "name": "Store 0092",
+    "country": "DK",
+    "currency": "DKK",
+    "tax_rate": 0.25,
+    "opened": "2021-11-15"
+  },
+  {
+    "store_id": "ST-0093",
+    "name": "Store 0093",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.0997,
+    "opened": "2022-08-05"
+  },
+  {
+    "store_id": "ST-0094",
+    "name": "Store 0094",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.0676,
+    "opened": "2020-03-17"
+  },
+  {
+    "store_id": "ST-0095",
+    "name": "Store 0095",
+    "country": "CH",
+    "currency": "CHF",
+    "tax_rate": 0.0565,
+    "opened": "2020-10-25"
+  },
+  {
+    "store_id": "ST-0096",
+    "name": "Store 0096",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2010-08-06"
+  },
+  {
+    "store_id": "ST-0097",
+    "name": "Store 0097",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1436,
+    "opened": "2023-02-13"
+  },
+  {
+    "store_id": "ST-0098",
+    "name": "Store 0098",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1652,
+    "opened": "2018-09-24"
+  },
+  {
+    "store_id": "ST-0099",
+    "name": "Store 0099",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1173,
+    "opened": "2012-06-22"
+  },
+  {
+    "store_id": "ST-0100",
+    "name": "Store 0100",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0965,
+    "opened": "2018-04-26"
+  },
+  {
+    "store_id": "ST-0101",
+    "name": "Store 0101",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0694,
+    "opened": "2022-04-17"
+  },
+  {
+    "store_id": "ST-0102",
+    "name": "Store 0102",
+    "country": "SK",
+    "currency": "EUR",
+    "tax_rate": 0.1473,
+    "opened": "2023-04-27"
+  },
+  {
+    "store_id": "ST-0103",
+    "name": "Store 0103",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0441,
+    "opened": "2017-03-29"
+  },
+  {
+    "store_id": "ST-0104",
+    "name": "Store 0104",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.049,
+    "opened": "2013-09-21"
+  },
+  {
+    "store_id": "ST-0105",
+    "name": "Store 0105",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0919,
+    "opened": "2010-12-30"
+  },
+  {
+    "store_id": "ST-0106",
+    "name": "Store 0106",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2023-10-14"
+  },
+  {
+    "store_id": "ST-0107",
+    "name": "Store 0107",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2023-01-05"
+  },
+  {
+    "store_id": "ST-0108",
+    "name": "Store 0108",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.0907,
+    "opened": "2010-08-19"
+  },
+  {
+    "store_id": "ST-0109",
+    "name": "Store 0109",
+    "country": "MA",
+    "currency": "MAD",
+    "tax_rate": 0.1547,
+    "opened": "2014-06-26"
+  },
+  {
+    "store_id": "ST-0110",
+    "name": "Store 0110",
+    "country": "SA",
+    "currency": "SAR",
+    "tax_rate": 0.15,
+    "opened": "2016-04-30"
+  },
+  {
+    "store_id": "ST-0111",
+    "name": "Store 0111",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0761,
+    "opened": "2022-02-07"
+  },
+  {
+    "store_id": "ST-0112",
+    "name": "Store 0112",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0396,
+    "opened": "2011-08-26"
+  },
+  {
+    "store_id": "ST-0113",
+    "name": "Store 0113",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.2441,
+    "opened": "2020-11-20"
+  },
+  {
+    "store_id": "ST-0114",
+    "name": "Store 0114",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.1886,
+    "opened": "2017-06-29"
+  },
+  {
+    "store_id": "ST-0115",
+    "name": "Store 0115",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.0934,
+    "opened": "2021-06-22"
+  },
+  {
+    "store_id": "ST-0116",
+    "name": "Store 0116",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0297,
+    "opened": "2011-01-18"
+  },
+  {
+    "store_id": "ST-0117",
+    "name": "Store 0117",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2017-09-01"
+  },
+  {
+    "store_id": "ST-0118",
+    "name": "Store 0118",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.1903,
+    "opened": "2020-12-21"
+  },
+  {
+    "store_id": "ST-0119",
+    "name": "Store 0119",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0978,
+    "opened": "2019-12-05"
+  },
+  {
+    "store_id": "ST-0120",
+    "name": "Store 0120",
+    "country": "NG",
+    "currency": "NGN",
+    "tax_rate": 0.075,
+    "opened": "2023-02-26"
+  },
+  {
+    "store_id": "ST-0121",
+    "name": "Store 0121",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1226,
+    "opened": "2016-02-06"
+  },
+  {
+    "store_id": "ST-0122",
+    "name": "Store 0122",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2017-12-30"
+  },
+  {
+    "store_id": "ST-0123",
+    "name": "Store 0123",
+    "country": "TW",
+    "currency": "TWD",
+    "tax_rate": 0.05,
+    "opened": "2014-09-18"
+  },
+  {
+    "store_id": "ST-0124",
+    "name": "Store 0124",
+    "country": "ZA",
+    "currency": "ZAR",
+    "tax_rate": 0.15,
+    "opened": "2022-07-20"
+  },
+  {
+    "store_id": "ST-0125",
+    "name": "Store 0125",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1181,
+    "opened": "2017-11-30"
+  },
+  {
+    "store_id": "ST-0126",
+    "name": "Store 0126",
+    "country": "CH",
+    "currency": "CHF",
+    "tax_rate": 0.034,
+    "opened": "2013-06-05"
+  },
+  {
+    "store_id": "ST-0127",
+    "name": "Store 0127",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0236,
+    "opened": "2014-02-15"
+  },
+  {
+    "store_id": "ST-0128",
+    "name": "Store 0128",
+    "country": "SK",
+    "currency": "EUR",
+    "tax_rate": 0.1945,
+    "opened": "2014-07-27"
+  },
+  {
+    "store_id": "ST-0129",
+    "name": "Store 0129",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.1022,
+    "opened": "2023-05-26"
+  },
+  {
+    "store_id": "ST-0130",
+    "name": "Store 0130",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2014-08-27"
+  },
+  {
+    "store_id": "ST-0131",
+    "name": "Store 0131",
+    "country": "NG",
+    "currency": "NGN",
+    "tax_rate": 0.075,
+    "opened": "2011-12-13"
+  },
+  {
+    "store_id": "ST-0132",
+    "name": "Store 0132",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.165,
+    "opened": "2012-11-05"
+  },
+  {
+    "store_id": "ST-0133",
+    "name": "Store 0133",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.095,
+    "opened": "2020-08-11"
+  },
+  {
+    "store_id": "ST-0134",
+    "name": "Store 0134",
+    "country": "DK",
+    "currency": "DKK",
+    "tax_rate": 0.25,
+    "opened": "2022-05-17"
+  },
+  {
+    "store_id": "ST-0135",
+    "name": "Store 0135",
+    "country": "CH",
+    "currency": "CHF",
+    "tax_rate": 0.0578,
+    "opened": "2019-06-21"
+  },
+  {
+    "store_id": "ST-0136",
+    "name": "Store 0136",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.191,
+    "opened": "2018-08-23"
+  },
+  {
+    "store_id": "ST-0137",
+    "name": "Store 0137",
+    "country": "MA",
+    "currency": "MAD",
+    "tax_rate": 0.1239,
+    "opened": "2016-05-29"
+  },
+  {
+    "store_id": "ST-0138",
+    "name": "Store 0138",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2017-05-15"
+  },
+  {
+    "store_id": "ST-0139",
+    "name": "Store 0139",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.088,
+    "opened": "2019-04-15"
+  },
+  {
+    "store_id": "ST-0140",
+    "name": "Store 0140",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0465,
+    "opened": "2012-04-11"
+  },
+  {
+    "store_id": "ST-0141",
+    "name": "Store 0141",
+    "country": "SA",
+    "currency": "SAR",
+    "tax_rate": 0.15,
+    "opened": "2019-09-03"
+  },
+  {
+    "store_id": "ST-0142",
+    "name": "Store 0142",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1024,
+    "opened": "2016-06-04"
+  },
+  {
+    "store_id": "ST-0143",
+    "name": "Store 0143",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1246,
+    "opened": "2019-10-27"
+  },
+  {
+    "store_id": "ST-0144",
+    "name": "Store 0144",
+    "country": "MA",
+    "currency": "MAD",
+    "tax_rate": 0.1303,
+    "opened": "2020-02-09"
+  },
+  {
+    "store_id": "ST-0145",
+    "name": "Store 0145",
+    "country": "TW",
+    "currency": "TWD",
+    "tax_rate": 0.05,
+    "opened": "2020-01-17"
+  },
+  {
+    "store_id": "ST-0146",
+    "name": "Store 0146",
+    "country": "AE",
+    "currency": "AED",
+    "tax_rate": 0.05,
+    "opened": "2018-07-11"
+  },
+  {
+    "store_id": "ST-0147",
+    "name": "Store 0147",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0189,
+    "opened": "2015-01-30"
+  },
+  {
+    "store_id": "ST-0148",
+    "name": "Store 0148",
+    "country": "AE",
+    "currency": "AED",
+    "tax_rate": 0.05,
+    "opened": "2013-07-05"
+  },
+  {
+    "store_id": "ST-0149",
+    "name": "Store 0149",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1861,
+    "opened": "2023-12-19"
+  },
+  {
+    "store_id": "ST-0150",
+    "name": "Store 0150",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2021-10-02"
+  },
+  {
+    "store_id": "ST-0151",
+    "name": "Store 0151",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2023-08-24"
+  },
+  {
+    "store_id": "ST-0152",
+    "name": "Store 0152",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2022-04-28"
+  },
+  {
+    "store_id": "ST-0153",
+    "name": "Store 0153",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2014-05-23"
+  },
+  {
+    "store_id": "ST-0154",
+    "name": "Store 0154",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0682,
+    "opened": "2012-10-03"
+  },
+  {
+    "store_id": "ST-0155",
+    "name": "Store 0155",
+    "country": "AE",
+    "currency": "AED",
+    "tax_rate": 0.05,
+    "opened": "2016-12-25"
+  },
+  {
+    "store_id": "ST-0156",
+    "name": "Store 0156",
+    "country": "CL",
+    "currency": "CLP",
+    "tax_rate": 0.19,
+    "opened": "2020-07-10"
+  },
+  {
+    "store_id": "ST-0157",
+    "name": "Store 0157",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1301,
+    "opened": "2021-11-24"
+  },
+  {
+    "store_id": "ST-0158",
+    "name": "Store 0158",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.1475,
+    "opened": "2021-02-22"
+  },
+  {
+    "store_id": "ST-0159",
+    "name": "Store 0159",
+    "country": "CL",
+    "currency": "CLP",
+    "tax_rate": 0.19,
+    "opened": "2020-07-14"
+  },
+  {
+    "store_id": "ST-0160",
+    "name": "Store 0160",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0887,
+    "opened": "2022-04-10"
+  },
+  {
+    "store_id": "ST-0161",
+    "name": "Store 0161",
+    "country": "ZA",
+    "currency": "ZAR",
+    "tax_rate": 0.15,
+    "opened": "2015-10-24"
+  },
+  {
+    "store_id": "ST-0162",
+    "name": "Store 0162",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0979,
+    "opened": "2019-08-23"
+  },
+  {
+    "store_id": "ST-0163",
+    "name": "Store 0163",
+    "country": "MX",
+    "currency": "MXN",
+    "tax_rate": 0.16,
+    "opened": "2020-02-23"
+  },
+  {
+    "store_id": "ST-0164",
+    "name": "Store 0164",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1202,
+    "opened": "2010-05-21"
+  },
+  {
+    "store_id": "ST-0165",
+    "name": "Store 0165",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2016-02-29"
+  },
+  {
+    "store_id": "ST-0166",
+    "name": "Store 0166",
+    "country": "GB",
+    "currency": "GBP",
+    "tax_rate": 0.2,
+    "opened": "2020-02-03"
+  },
+  {
+    "store_id": "ST-0167",
+    "name": "Store 0167",
+    "country": "JP",
+    "currency": "JPY",
+    "tax_rate": 0.0853,
+    "opened": "2013-05-28"
+  },
+  {
+    "store_id": "ST-0168",
+    "name": "Store 0168",
+    "country": "CH",
+    "currency": "CHF",
+    "tax_rate": 0.067,
+    "opened": "2022-02-17"
+  },
+  {
+    "store_id": "ST-0169",
+    "name": "Store 0169",
+    "country": "KR",
+    "currency": "KRW",
+    "tax_rate": 0.1,
+    "opened": "2022-07-27"
+  },
+  {
+    "store_id": "ST-0170",
+    "name": "Store 0170",
+    "country": "AE",
+    "currency": "AED",
+    "tax_rate": 0.05,
+    "opened": "2017-06-08"
+  },
+  {
+    "store_id": "ST-0171",
+    "name": "Store 0171",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.0558,
+    "opened": "2019-09-30"
+  },
+  {
+    "store_id": "ST-0172",
+    "name": "Store 0172",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0362,
+    "opened": "2017-10-01"
+  },
+  {
+    "store_id": "ST-0173",
+    "name": "Store 0173",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0728,
+    "opened": "2019-11-24"
+  },
+  {
+    "store_id": "ST-0174",
+    "name": "Store 0174",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.0983,
+    "opened": "2015-01-16"
+  },
+  {
+    "store_id": "ST-0175",
+    "name": "Store 0175",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2013-10-13"
+  },
+  {
+    "store_id": "ST-0176",
+    "name": "Store 0176",
+    "country": "XK",
+    "currency": "EUR",
+    "tax_rate": 0.18,
+    "opened": "2013-09-19"
+  },
+  {
+    "store_id": "ST-0177",
+    "name": "Store 0177",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.2162,
+    "opened": "2016-09-23"
+  },
+  {
+    "store_id": "ST-0178",
+    "name": "Store 0178",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1667,
+    "opened": "2022-05-09"
+  },
+  {
+    "store_id": "ST-0179",
+    "name": "Store 0179",
+    "country": "AE",
+    "currency": "AED",
+    "tax_rate": 0.05,
+    "opened": "2013-04-20"
+  },
+  {
+    "store_id": "ST-0180",
+    "name": "Store 0180",
+    "country": "AU",
+    "currency": "AUD",
+    "tax_rate": 0.1,
+    "opened": "2021-12-29"
+  },
+  {
+    "store_id": "ST-0181",
+    "name": "Store 0181",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.0987,
+    "opened": "2015-07-12"
+  },
+  {
+    "store_id": "ST-0182",
+    "name": "Store 0182",
+    "country": "BR",
+    "currency": "BRL",
+    "tax_rate": 0.212,
+    "opened": "2020-06-02"
+  },
+  {
+    "store_id": "ST-0183",
+    "name": "Store 0183",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0707,
+    "opened": "2021-08-01"
+  },
+  {
+    "store_id": "ST-0184",
+    "name": "Store 0184",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0984,
+    "opened": "2014-03-23"
+  },
+  {
+    "store_id": "ST-0185",
+    "name": "Store 0185",
+    "country": "ZA",
+    "currency": "ZAR",
+    "tax_rate": 0.15,
+    "opened": "2010-08-08"
+  },
+  {
+    "store_id": "ST-0186",
+    "name": "Store 0186",
+    "country": "DK",
+    "currency": "DKK",
+    "tax_rate": 0.25,
+    "opened": "2022-06-13"
+  },
+  {
+    "store_id": "ST-0187",
+    "name": "Store 0187",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.072,
+    "opened": "2017-11-19"
+  },
+  {
+    "store_id": "ST-0188",
+    "name": "Store 0188",
+    "country": "FR",
+    "currency": "EUR",
+    "tax_rate": 0.1957,
+    "opened": "2023-02-16"
+  },
+  {
+    "store_id": "ST-0189",
+    "name": "Store 0189",
+    "country": "DE",
+    "currency": "EUR",
+    "tax_rate": 0.1144,
+    "opened": "2014-02-07"
+  },
+  {
+    "store_id": "ST-0190",
+    "name": "Store 0190",
+    "country": "SA",
+    "currency": "SAR",
+    "tax_rate": 0.15,
+    "opened": "2017-07-26"
+  },
+  {
+    "store_id": "ST-0191",
+    "name": "Store 0191",
+    "country": "CA",
+    "currency": "CAD",
+    "tax_rate": 0.1036,
+    "opened": "2014-06-24"
+  },
+  {
+    "store_id": "ST-0192",
+    "name": "Store 0192",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0351,
+    "opened": "2023-02-22"
+  },
+  {
+    "store_id": "ST-0193",
+    "name": "Store 0193",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0577,
+    "opened": "2010-10-25"
+  },
+  {
+    "store_id": "ST-0194",
+    "name": "Store 0194",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0703,
+    "opened": "2016-11-17"
+  },
+  {
+    "store_id": "ST-0195",
+    "name": "Store 0195",
+    "country": "CN",
+    "currency": "CNY",
+    "tax_rate": 0.0799,
+    "opened": "2023-11-22"
+  },
+  {
+    "store_id": "ST-0196",
+    "name": "Store 0196",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.092,
+    "opened": "2013-04-11"
+  },
+  {
+    "store_id": "ST-0197",
+    "name": "Store 0197",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0141,
+    "opened": "2018-04-27"
+  },
+  {
+    "store_id": "ST-0198",
+    "name": "Store 0198",
+    "country": "US",
+    "currency": "USD",
+    "tax_rate": 0.0557,
+    "opened": "2013-07-28"
+  },
+  {
+    "store_id": "ST-0199",
+    "name": "Store 0199",
+    "country": "BH",
+    "currency": "BHD",
+    "tax_rate": 0.1,
+    "opened": "2016-07-03"
+  },
+  {
+    "store_id": "ST-0200",
+    "name": "Store 0200",
+    "country": "IN",
+    "currency": "INR",
+    "tax_rate": 0.2492,
+    "opened": "2020-11-17"
+  }
+]

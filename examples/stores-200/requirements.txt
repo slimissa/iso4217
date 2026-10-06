@@ -1,0 +1,4 @@
+# Demo-only dependencies. The registry itself needs neither duckdb nor
+# (outside its build tools) pyarrow.
+pyarrow>=14
+duckdb>=0.9
