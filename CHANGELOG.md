@@ -6,6 +6,71 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.4] — Unreleased
+
+Ships the AGGREGATED layer. Adds one CURATED projection, three
+aggregated artifacts, and two new CI jobs. No data changes; no
+schema changes.
+
+### Added
+
+#### CURATED
+
+- `iso4217.countries.parquet` — one row per (currency, country,
+  relationship). Five columns: `currency_code`, `country_code`,
+  `country_name`, `relationship`, `status`. A sixth column,
+  `classification`, is nullable and carries the currency's v1.6.0
+  classification alongside the country join.
+- `tools/export_countries_parquet.py` — the generator, in the shape
+  of `tools/export_parquet.py` (`--check`, atomic writes, exit codes
+  0/1/2/3, deterministic output).
+
+#### AGGREGATED
+
+- `currencies_by_region.parquet` — one row per (region, currency).
+  Joins `iso4217.countries.parquet` with the vendored ISO 3166
+  snapshot. `subregion` is populated only when every country in a
+  group shares it, and is null otherwise. `XK` (Kosovo) and `TW`
+  (Taiwan) have no region in the snapshot; those rows are retained
+  with a null region, sorted last.
+- `pegs_summary.parquet` — one row per anchor currency, aggregating
+  the 44 single-peg currencies across 8 anchors.
+- `coverage_timeline.parquet` — one row per released version,
+  parsed from CHANGELOG headings. Counts are null for versions
+  whose totals aren't in the CHANGELOG; no extrapolation.
+- `tools/export_aggregated.py` — reads only from the CURATED layer
+  and the vendored snapshot. It never opens `iso4217.json`.
+
+#### Infrastructure
+
+- CI jobs `check-countries-parquet` and `check-aggregated-export`
+  in `version-and-hygiene.yml`.
+- `docs/decisions/aggregated-layer-0007.md` — ADR 0007.
+- `tests/test_export_countries_parquet.py` (37 tests) and
+  `tests/test_export_aggregated.py` (68 tests).
+
+### Changed
+
+- `scripts/release.sh` — regenerates the four new artifacts; the
+  gate runs thirteen checks (was eleven).
+- `docs/LAYERS.md` — the AGGREGATED layer is now shipped, with the
+  three artifacts and the rule that it reads CURATED only.
+- `README.md` — new "Aggregated exports" subsection; Project
+  Structure tree updated.
+- `tools/check_version_consistency.py` — docstring notes why only
+  the flat `iso4217.parquet` is a version site; the four new
+  Parquet files' footers are checked by their own `--check` modes.
+
+### Note
+
+- The ISO 3166 snapshot contains `SK` and `AI` in both the active
+  and withdrawn lists (Sikkim, Afars and Issas — historical codes
+  reassigned to Slovakia and Anguilla). The country join resolves
+  against `countries.active` only. Merging the lists would have
+  misclassified both countries.
+
+---
+
 ## [1.7.3] — 2026-09-29
 
 Hardens the release-claims workflow and documents two release
