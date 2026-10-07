@@ -66,7 +66,9 @@ jobs:
           python-version: "3.12"
       - name: Verify country codes
         run: python3 tools/check_country_codes.py
-  
+      - name: check-readme-drift
+        run: python3 tools/check_readme_drift.py
+        
   check-registry-freshness:
     name: Registry freshness
     runs-on: ubuntu-latest
