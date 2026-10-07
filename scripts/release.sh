@@ -402,6 +402,7 @@ run_gate() {
     run_gate_step "check_mojibake.py"               python3 tools/check_mojibake.py
     run_gate_step "check_snapshot_freshness.py"     python3 tools/check_snapshot_freshness.py
     run_gate_step "check_registry_freshness.py"     python3 tools/check_registry_freshness.py
+    run_gate_step "check_country_codes.py"          python3 tools/check_country_codes.py
         
     if [[ -f tools/check_cross_language.sh ]]; then
         run_gate_step "check_cross_language.sh"     bash tools/check_cross_language.sh
@@ -631,6 +632,7 @@ print_plan() {
     echo "  python3 tools/check_mojibake.py"
     echo "  python3 tools/check_snapshot_freshness.py"
     echo "  python3 tools/check_registry_freshness.py"
+    echo "  python3 tools/check_country_codes.py"
     [[ -f tools/check_cross_language.sh ]] && \
         echo "  bash tools/check_cross_language.sh"
     echo "  python3 -m pytest tests/ -q"
