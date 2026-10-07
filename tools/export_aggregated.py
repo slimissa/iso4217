@@ -145,8 +145,12 @@ null. They are not extrapolated from neighbouring rows: "unchanged since
 states. At the time of writing the table ends at 1.5.0, so the 12
 versions after it have null counts.
 
-A heading whose date is a placeholder (`2026-09-XX`, as in 1.5.3) yields
-a null `date` plus a note on stderr. A heading with a malformed or
+A heading whose date is the word `Unreleased` is skipped: it names a
+version that has not been released, so it has no row. The release script
+replaces `Unreleased` with the release date before it regenerates this
+file, which is when the version first appears. A heading whose date is a
+placeholder (`2026-09-XX`, as in 1.5.3) yields a null `date` plus a note
+on stderr. A heading with a malformed or
 impossible date, a duplicate version, a table row without a matching
 heading, a table date that disagrees with its heading, or a non-integer
 count are all EXIT_FATAL.
@@ -608,6 +612,8 @@ def parse_changelog(path: Path) -> tuple:
     for lineno, line in enumerate(lines, start=1):
         m = _HEADING_RE.match(line)
         if not m:
+            continue
+        if m.group(4).lower() == "unreleased":
             continue
         version = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
         if version in versions:

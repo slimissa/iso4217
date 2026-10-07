@@ -518,6 +518,17 @@ class TestCoverageTimeline:
         assert "1.2.0" in err and "placeholder" in err
         assert next(r for r in env.rows(TIMELINE_FILE) if r["version"] == "1.2.0")["date"] is None
 
+    def test_unreleased_heading_has_no_row(self, env, built):
+        before = (built.out / TIMELINE_FILE).read_bytes()
+        env.changelog.write_text(
+            CHANGELOG.replace("## [1.2.0]", "## [1.3.0] \u2014 Unreleased\n\nNext release.\n\n---\n## [1.2.0]", 1),
+            encoding="utf-8",
+        )
+        assert env.run() == EXIT_OK
+        assert "1.3.0" not in [r["version"] for r in env.rows(TIMELINE_FILE)]
+        assert (env.out / TIMELINE_FILE).read_bytes() == before
+        assert env.run("--check") == EXIT_OK
+
     def test_source_is_changelog(self, built):
         assert {r["source"] for r in built.rows(TIMELINE_FILE)} == {"changelog"}
 
