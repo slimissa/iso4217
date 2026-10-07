@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.8] — Unreleased
+
+Three defects surfaced after the v1.7.7 verification; a fourth, in
+`tools/export_aggregated.py`, was found while preparing this patch.
+No data changes; no schema changes.
+
+### Fixed
+
+- `scripts/release.sh` — `tools/check_country_codes.py` was not in
+  the gate. `docs/JOINS.md` claimed it ran "in the release gate and
+  in CI"; only CI ran it. Added as the fifteenth gate step, after
+  `check_registry_freshness.py` and before `check_cross_language.sh`.
+  This restores the invariant 5 rule added in v1.7.6: the gate must
+  include every check that runs in CI's fast workflow.
+- `wrappers/python/iso4217_cli.py` — piping the CLI into a reader
+  that closes early (`head`, `less`) raised an uncaught
+  `BrokenPipeError` traceback. The CLI now exits 141 quietly and
+  suppresses the final flush traceback. Subprocess tests cover
+  the behavior.
+- `tools/export_aggregated.py` — a `## [X.Y.Z] — Unreleased`
+  CHANGELOG heading, which `release.sh` expects to find, was rejected
+  as a malformed date and failed `--check` (exit 2). Such a heading
+  is now skipped: an unreleased version has no row in
+  `coverage_timeline.parquet` until the release script dates it.
+
+### Changed
+
+- `README.md` — rewritten against the v1.7.7 tree. The previous
+  README pinned v1.7.3, described a nine-artifact eleven-check
+  release, carried the wrong ADR numbers, claimed packages were
+  published to PyPI/npm/crates.io, and said `axes.json` was read
+  by the version check. None of that was true.
+
+---
 ## [1.7.7] — 2026-10-07
 
 Test-only patch. Adds coverage for the two freshness tools'
