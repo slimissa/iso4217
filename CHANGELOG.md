@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.9] — Unreleased
+
+Tooling-only patch. Adds a check that verifies README.md's structural
+claims against the repository, wired into both CI's fast workflow and
+the release gate. No data changes; no schema changes.
+
+### Added
+
+- `tools/check_readme_drift.py` — four checks against `README.md`:
+  every relative link resolves, every file named in the Project
+  Structure block exists, every count claim (`167 active currencies`,
+  `sixteen-check gate`, ...) matches its source of truth, and every
+  ADR number is unique with every README reference resolved.
+- `tests/test_check_readme_drift.py` — eight tests, one per check
+  plus the fatal path, each against a minimal fake repo in `tmp_path`.
+- The check runs in CI's fast workflow (`version-and-hygiene.yml`)
+  and as the fifteenth step of `release.sh`'s gate.
+
+### Changed
+
+- `README.md` — the release-pipeline section now says
+  `sixteen-check gate`, matching the gate's sixteen steps. The check
+  found this drift the moment it was added; it is the check's first
+  catch.
+
+---
+
 ## [1.7.8] — 2026-10-07
 
 Three defects surfaced after the v1.7.7 verification; a fourth, in

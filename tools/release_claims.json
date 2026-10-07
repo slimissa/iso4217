@@ -355,5 +355,46 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.8\""
     }
+  ],
+  "1.7.9": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.9"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.9\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.9]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.9"
+    },
+    {
+      "file": "README.md",
+      "contains": "sixteen-check gate"
+    },
+    {
+      "file": "tools/check_readme_drift.py"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "check_readme_drift.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.9"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.9\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.9\""
+    }
   ]
 }
