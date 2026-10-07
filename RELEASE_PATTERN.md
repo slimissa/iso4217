@@ -433,7 +433,9 @@ that artifact is a copy, not a reference. Copies drift.
 claim about what the commit contains, not about what's on disk. If
 the diff doesn't match the message, the message is wrong.
 
-Two instances:
+Three instances:
+- ISO 4217 `82668a0` — the commit's title was "Run stores-200 demo
+  test in CI"; the diff carried only a trailing-whitespace change.
 - ISO 4217 `3687bc2` — the commit's message described the orphan
   check landing; the diff only carried the call site. The function
   body followed two commits later.
@@ -444,6 +446,16 @@ Two instances:
 Both patches reported success. Neither diff matched its message.
 The verification is `git diff --cached --stat` before every commit,
 read against the intended change.
+
+A `--stat` confirms *which files* changed, not
+*what* changed. When the change is a specific line in a file — a
+step added, a claim updated, a version bumped — read
+`git diff --cached` in full, not just the stat. The stat catches a
+missing edit; the full diff catches the wrong edit. The ISO 4217
+v1.7.11 attempt is the reference case: the patch that installed
+`duckdb` substituted a line inside a step rather than replacing
+the step, producing an orphan `name:` in the YAML. The stat
+named the workflow file; the diff would have named the orphan.
 
 ### 6c. Manifest claims describe state, not intent.**
 
