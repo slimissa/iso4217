@@ -71,6 +71,7 @@ EXIT_OK = 0
 EXIT_NOT_FOUND = 1
 EXIT_USAGE = 2
 EXIT_DATA = 3
+EXIT_BROKEN_PIPE = 141  # 128 + SIGPIPE: the reader closed the pipe early
 
 SUBCOMMANDS = (
     "lookup",
@@ -931,9 +932,50 @@ def _normalize_argv(argv: list[str]) -> list[str]:
     return prefix + argv
 
 
+def _silence_broken_pipe() -> None:
+    """
+    Point stdout at /dev/null after the downstream reader has gone away.
+
+    The interpreter flushes sys.stdout again at shutdown. With the pipe
+    still closed that flush raises a second BrokenPipeError and Python
+    prints "Exception ignored ..." to stderr. Replacing the file
+    descriptor makes the final flush succeed, silently.
+    """
+    try:
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        os.close(devnull)
+    except (OSError, ValueError):
+        # stdout has no file descriptor (it was replaced, as under pytest's
+        # capture): there is no pipe to silence.
+        pass
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """
     CLI entry point. Returns the process exit code.
+
+    A reader that closes the pipe early (`head`, `less`, `grep -q`) is not
+    an error in this program: the exit code is EXIT_BROKEN_PIPE and nothing
+    is written to stderr. This lives in main(), not under
+    `if __name__ == "__main__"`, because the installed `iso4217` command is
+    a console_scripts wrapper that calls main() directly.
+    """
+    try:
+        code = _run(argv)
+        # Output is block-buffered when piped, so a short result is only
+        # written at flush time. Flush here, inside the try, so a closed
+        # pipe is caught now rather than at interpreter shutdown.
+        sys.stdout.flush()
+        return code
+    except BrokenPipeError:
+        _silence_broken_pipe()
+        return EXIT_BROKEN_PIPE
+
+
+def _run(argv: Optional[list[str]] = None) -> int:
+    """
+    Parse argv, dispatch to the subcommand handler, return its exit code.
 
     Accepts argv for testability; when None, uses sys.argv[1:].
     Bare-argument shorthand: if the first token is neither a known

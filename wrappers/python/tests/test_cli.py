@@ -14,8 +14,9 @@ Covers the CLI's full surface:
   - cross-check: CLI --tsv output matches committed iso4217.tsv row for row
 
 Every test runs `iso4217_cli.main(argv)` in-process and captures stdout
-and stderr via pytest's capsys fixture. No subprocess, no venv required,
-no dependency on the console_scripts entry point being installed.
+and stderr via pytest's capsys fixture. No venv required, no dependency on
+the console_scripts entry point being installed. The one exception is
+TestBrokenPipe, which needs a real pipe and therefore a subprocess.
 """
 
 from __future__ import annotations
@@ -23,7 +24,9 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Iterable, Optional
@@ -996,7 +999,14 @@ class TestWrapperReuse:
         src = (_WRAPPER_DIR / "iso4217_cli.py").read_text(encoding="utf-8")
         # _load_registry delegates to CurrencyRegistry(path); there should
         # be no `open(...iso4217.json...)` anywhere in the CLI.
-        assert "iso4217.json" not in src or "open(" not in src
+        # Checked per line: the CLI legitimately calls os.open() on os.devnull
+        # when a reader closes the pipe early (see TestBrokenPipe), so the
+        # mere presence of "open(" anywhere in the file is not the signal.
+        offenders = [
+            line for line in src.splitlines()
+            if "open(" in line and "iso4217.json" in line
+        ]
+        assert offenders == []
 
     def test_pegged_to_matches_wrapper_exactly(self, run_cli, registry):
         _, out, _ = run_cli(["list", "--pegged-to", "EUR", "--raw", "code"])
@@ -1094,3 +1104,81 @@ class TestRealRegistry:
         assert set(out.strip().splitlines()) == {
             "BHD", "IQD", "JOD", "KWD", "LYD", "OMR", "TND",
         }
+
+
+# ---------------------------------------------------------------------------
+# Closed pipe
+# ---------------------------------------------------------------------------
+
+_CLI_PATH = _WRAPPER_DIR / "iso4217_cli.py"
+
+
+def _run_against_closed_reader(args: list, via_entry_point: bool):
+    """
+    Run the CLI with its stdout connected to a pipe that has no reader.
+
+    The read end is closed *before* the child starts, so every write fails
+    with EPIPE no matter how fast the child is. Closing the reader after
+    the child has begun would race: a short result can be fully written
+    into the pipe buffer before the close, and the failure would never
+    happen.
+
+    via_entry_point=False runs the file as a script, which exercises the
+    `if __name__ == "__main__"` path. True imports the module and calls
+    main() the way the console_scripts wrapper that pip installs does,
+    which does not pass through that block.
+
+    Returns (exit code, stderr text).
+    """
+    read_fd, write_fd = os.pipe()
+    os.close(read_fd)
+    env = dict(os.environ, PYTHONPATH=str(_WRAPPER_DIR))
+    if via_entry_point:
+        cmd = [sys.executable, "-c", "import sys; from iso4217_cli import main; sys.exit(main())", *args]
+    else:
+        cmd = [sys.executable, str(_CLI_PATH), *args]
+    try:
+        proc = subprocess.run(
+            cmd, stdout=write_fd, stderr=subprocess.PIPE, env=env, timeout=60
+        )
+    finally:
+        os.close(write_fd)
+    return proc.returncode, proc.stderr.decode("utf-8", errors="replace")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pipe semantics (EPIPE, exit 141)")
+class TestBrokenPipe:
+    """
+    A reader that closes early (`head`, `less`, `grep -q`) is not an error.
+
+    Expect exit 141 (128 + SIGPIPE) and an empty stderr: no traceback from
+    the failed write, and no "Exception ignored" message from the
+    interpreter's final flush.
+    """
+
+    @pytest.mark.parametrize("via_entry_point", [False, True], ids=["script", "entry-point"])
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["info"],
+            ["lookup", "USD", "--json"],
+            # Large enough to overflow the stdout buffer, so the failure
+            # happens in the middle of printing rather than at the flush.
+            ["list", "--json"],
+        ],
+        ids=["info", "lookup-json", "list-json"],
+    )
+    def test_closed_reader_exits_141_quietly(self, args, via_entry_point):
+        code, stderr = _run_against_closed_reader(args, via_entry_point)
+        assert stderr == ""
+        assert code == iso4217_cli.EXIT_BROKEN_PIPE == 141
+
+    def test_working_pipe_is_unaffected(self):
+        """Control: the same invocation with a live reader still exits 0."""
+        proc = subprocess.run(
+            [sys.executable, str(_CLI_PATH), "info"],
+            capture_output=True, timeout=60,
+        )
+        assert proc.returncode == 0
+        assert proc.stderr == b""
+        assert proc.stdout
