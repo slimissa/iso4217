@@ -396,5 +396,38 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.9\""
     }
+  ],
+  "1.7.10": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.10"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.10\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.10]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.10"
+    },
+    {
+      "file": "tests/test_stores_200.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.10"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.10\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.10\""
+    }
   ]
 }

@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.10] — Unreleased
+
+Test-only patch. Adds an end-to-end test for `examples/stores-200`,
+the companion demo. No data changes; no schema changes.
+
+### Added
+
+- `tests/test_stores_200.py` — reproduces the repository layout in a
+  tmp directory, runs the demo unchanged, and asserts the specific
+  numbers it prints: the 508-row join fan-out and the
+  2,589,336,423 USD-equivalent overcount (Q1), the 7 stores whose
+  countries have no region and the 193-of-200 naive join (Q4), the
+  0-of-200 negative result (Q5), and the 13.2% pegged revenue share
+  (Q6). The module skips cleanly when `duckdb` or `pyarrow` is
+  unavailable.
+- The test runs in CI alongside the main suite.
+
+### Note
+
+The fixture symlinks the registry's Parquet files and the whole
+`tools/` directory into the tmp root, because the demo reads its
+inputs from two directories above its own cwd. The fixture was
+corrected twice during development, both times because a file the
+demo reads was not enumerated. Symlinking `tools/` as a directory
+covers any future read from there without a fixture change.
+
+---
+
 ## [1.7.9] — 2026-10-07
 
 Tooling-only patch. Adds a check that verifies README.md's structural
