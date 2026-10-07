@@ -305,8 +305,12 @@ jobs:
         run: python3 tools/validate.py
 
       - name: Run tests
+      - name: Install duckdb
+        run: pip install duckdb --quiet
+
+      - name: Run tests
         run: python3 -m pytest tests/ -v
-          
+
   # --- Job 3: Wrapper tests — matrix across 4 languages ------------------
   # Each language runs in its own parallel job with its own toolchain.
   # A failure in one language doesn't block the others from running,
