@@ -68,6 +68,9 @@ jobs:
         run: python3 tools/check_country_codes.py
       - name: check-readme-drift
         run: python3 tools/check_readme_drift.py
+
+      - name: check-verification-doc
+        run: python3 tools/check_verification_doc.py
         
   check-registry-freshness:
     name: Registry freshness

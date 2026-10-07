@@ -457,6 +457,52 @@ v1.7.11 attempt is the reference case: the patch that installed
 the step, producing an orphan `name:` in the YAML. The stat
 named the workflow file; the diff would have named the orphan.
 
+### 6d. A check is only meaningful against the artifact it was designed for
+
+The v1.7.11 release had three checks return a clean result against
+the wrong file, and the release was cut three times before the
+placeholder in its verification doc was caught.
+
+Three concrete instances, all in one session:
+
+- `grep -c TODO` on the verification doc returned 0, because the
+  doc contained a placeholder (`<the real line>`) that is not the
+  string `TODO`.
+- `grep -c "986 passed\|test_stores_200"` on the same doc returned
+  2, because the doc's own placeholder text contains both strings.
+- `grep -c pytest` on a captured CI log returned 0, because the log
+  was from the `Version and Hygiene` workflow, which does not run
+  pytest. The `Validate Registry` workflow does.
+
+A zero from a check pointed at the wrong file looks identical to a
+zero from a check that correctly found nothing. The failure mode is
+silent and it is the operator's responsibility to notice.
+
+The rule:
+
+- **Record which artifact each check reads, in the check's own
+  output.** When a check produces a summary line, print the path or
+  the run ID it was run against. `OK: 1 verification doc(s) clean`
+  is weaker than `OK: 1 verification doc(s) clean under /repo/docs`.
+  The second cannot be true if the check was pointed at the wrong
+  place.
+- **When a check returns zero unexpectedly, first confirm the
+  artifact is the one intended.** Re-read the path or the command
+  that produced it. A correct check against a wrong artifact is
+  indistinguishable from a wrong check against the right artifact
+  until you look.
+- **Never write a check whose passing state is supplied by the
+  artifact's own template.** A check on a doc that asks "does this
+  contain X?" is a check that cannot fail if the doc's placeholder
+  text contains X. Substituting a specific known-bad string for a
+  general pattern is not a fix; it moves the failure to the next
+  string.
+
+This rule was added after v1.7.11. The check that closes the class is
+`tools/check_verification_doc.py`: it holds the list of known
+placeholder patterns in code, and its output names the file it
+checked. Sourced from ISO 4217 v1.7.11.
+
 ### 6c. Manifest claims describe state, not intent.**
 
 A claim in `release_claims.json` that asserts `file contains X`
@@ -572,12 +618,9 @@ than one registry.
   invariant 5. Names per-check capture and subshell-with-set-e as
   valid; the brace group as invalid. Sourced from ISO 3166 v1.6.6
   and confirmed against ISO 4217's per-check capture shape.
-- 2026-10-07 — post-review addition: operator-hygiene rule 6b's
-  fourth instance. The v1.7.9 release applied two edits by hand,
-  the edits did not land, `git diff --cached --stat` showed one
-  file instead of two, and the release was cut anyway. The gate's
-  `check_release_claims.py` caught it twice: once at the manifest
-  claims, once at the README's `sixteen-check gate` line. Fix
-  applied by writing both edits into a script
-  (`/tmp/finish_v179.py`), which fails loudly on anchor mismatch.
-  Sourced from ISO 4217 v1.7.9.
+- 2026-10-07 — post-review addition: operator-hygiene rule 6d
+  ("A check is only meaningful against the artifact it was
+  designed for"). Sourced from ISO 4217 v1.7.11, where three
+  checks returned clean against the wrong file in one session.
+  Names `tools/check_verification_doc.py` as the check that
+  closes the class for verification docs.
