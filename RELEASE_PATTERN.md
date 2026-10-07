@@ -560,3 +560,12 @@ than one registry.
   invariant 5. Names per-check capture and subshell-with-set-e as
   valid; the brace group as invalid. Sourced from ISO 3166 v1.6.6
   and confirmed against ISO 4217's per-check capture shape.
+- 2026-10-07 — post-review addition: operator-hygiene rule 6b's
+  fourth instance. The v1.7.9 release applied two edits by hand,
+  the edits did not land, `git diff --cached --stat` showed one
+  file instead of two, and the release was cut anyway. The gate's
+  `check_release_claims.py` caught it twice: once at the manifest
+  claims, once at the README's `sixteen-check gate` line. Fix
+  applied by writing both edits into a script
+  (`/tmp/finish_v179.py`), which fails loudly on anchor mismatch.
+  Sourced from ISO 4217 v1.7.9.
