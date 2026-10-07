@@ -655,7 +655,7 @@ Three workflows in [`.github/workflows`](./.github/workflows):
 
 | Workflow | Runs on | Jobs |
 |----------|---------|------|
-| **Version and Hygiene** (fast) | every push to `main`, every tag push, pull requests | `check-version`, `check-mojibake`, `sync-wrappers-check`, `check-country-codes`, `check-registry-freshness`, `check-snapshot-freshness`, `check-countries-parquet`, `check-aggregated-export` |
+| **Version and Hygiene** (fast) | every push to `main`, every tag push, pull requests | `check-version`, `check-mojibake`, `sync-wrappers-check`, `check-country-codes`, `check-registry-freshness`, `check-snapshot-freshness`, `check-countries-parquet`, `check-aggregated-export`, `check-readme-drift`, `check-verification-doc` |
 | **Validate Registry** (slow) | push | `check-wrapper-sync`, `check-sql-export`, `check-csv-export`, `check-parquet-export`, `check-cli`, `validate-json`, and a `validate-wrappers` matrix, one per language |
 | **Monitor ISO Amendments** | weekly, Monday 08:00 UTC | `check-amendments` |
 
@@ -765,6 +765,8 @@ iso4217/
 │   ├── check_version_consistency.py      # 11 sites, 2 axes
 │   ├── check_mojibake.py                 # UTF-8 / Latin-1 round-trip detector
 │   ├── check_country_codes.py            # ISO 3166 join check
+│   ├── check_readme_drift.py             # README claims vs the tree
+│   ├── check_verification_doc.py         # Refuse to ship a placeholder doc
 │   ├── check_registry_freshness.py       # meta.updated within 180 days
 │   ├── check_snapshot_freshness.py       # Vendored snapshot review_by check
 │   ├── check_release_claims.py           # Manifest verification at release time
