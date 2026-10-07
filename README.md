@@ -677,7 +677,7 @@ The script is deterministic and refuses to start unless the working tree is clea
 
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date, `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
-3. **Runs a fifteen-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, snapshot freshness, registry freshness, country codes, the cross-language suite, and `pytest tests/`.
+3. **Runs a sixteen-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, snapshot freshness, registry freshness, country codes, README drift, the cross-language suite, and `pytest tests/`.
 4. **Commits and pushes**, then **polls every workflow** until each completes.
 5. **Tags** (annotated, with the first lines of the changelog section) only when everything is green.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.

@@ -403,6 +403,7 @@ run_gate() {
     run_gate_step "check_snapshot_freshness.py"     python3 tools/check_snapshot_freshness.py
     run_gate_step "check_registry_freshness.py"     python3 tools/check_registry_freshness.py
     run_gate_step "check_country_codes.py"          python3 tools/check_country_codes.py
+    run_gate_step "check_readme_drift.py"           python3 tools/check_readme_drift.py
         
     if [[ -f tools/check_cross_language.sh ]]; then
         run_gate_step "check_cross_language.sh"     bash tools/check_cross_language.sh
