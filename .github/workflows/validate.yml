@@ -304,7 +304,6 @@ jobs:
       - name: Validate registry
         run: python3 tools/validate.py
 
-      - name: Run tests
       - name: Install duckdb
         run: pip install duckdb --quiet
 
