@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.11] — Unreleased
+
+CI-only patch. Wires the stores-200 demo test into the `validate-json`
+CI job, and acknowledges a divergence recorded by v1.7.10's
+verification doc.
+
+### Fixed
+
+- `.github/workflows/validate.yml` — the `validate-json` job did not
+  install `duckdb`, so `tests/test_stores_200.py` skipped at
+  collection in CI even though it ran in the release gate. The job
+  now installs `duckdb` before the test step.
+- `.github/workflows/validate.yml` — trailing whitespace left on the
+  blank line after the pytest step by commit `82668a0` is removed.
+
+### Note
+
+v1.7.10's CHANGELOG stated that the demo test runs in CI. It did
+not: commit `82668a0`, titled "Run stores-200 demo test in CI",
+carried only a whitespace change to the workflow file. The tag is
+immutable and stays where it is. This release makes the claim true.
+`docs/v1.7.10-verification.md` records the divergence.
+
+---
+
 ## [1.7.10] — 2026-10-07
 
 Test-only patch. Adds an end-to-end test for `examples/stores-200`,
