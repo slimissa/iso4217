@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.7.8] — Unreleased
+## [1.7.8] — 2026-10-07
 
 Three defects surfaced after the v1.7.7 verification; a fourth, in
 `tools/export_aggregated.py`, was found while preparing this patch.
