@@ -306,7 +306,7 @@ jobs:
 
       - name: Run tests
         run: python3 -m pytest tests/ -v
-
+          
   # --- Job 3: Wrapper tests — matrix across 4 languages ------------------
   # Each language runs in its own parallel job with its own toolchain.
   # A failure in one language doesn't block the others from running,
