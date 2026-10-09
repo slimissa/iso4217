@@ -1,6 +1,6 @@
 -- ISO 4217 Currency Registry — SQL Export (MySQL 8+ / MariaDB 10.4+)
--- Source:      iso4217.json v1.7.11
--- Updated:     2026-10-07
+-- Source:      iso4217.json v1.7.12
+-- Updated:     2026-10-09
 -- Amendment:   179
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0
