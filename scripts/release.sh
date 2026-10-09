@@ -61,7 +61,7 @@ fail()  { printf 'FAIL: %s\n' "$*" >&2; exit "$EXIT_PRECOND"; }
 
 usage() {
     cat <<'EOF'
-Usage: bash scripts/release.sh <version> [--dry-run] [--force]
+Usage: bash scripts/release.sh <version> [--dry-run] [--force] [--poll-timeout N]
 
 Arguments:
   <version>    Target version, X.Y.Z format.
@@ -69,6 +69,12 @@ Arguments:
 Flags:
   --dry-run    Print every site and gate without mutating anything.
   --force      Allow releasing a version that is already tagged.
+  --poll-timeout N
+               Seconds to wait for CI after the push (positive integer,
+               default 300). A timeout fails the release; it never tags.
+
+Prerequisite: the gh CLI, installed and able to list this repository's
+workflow runs. The release refuses to start without it.
 
 Exit codes:
   0  success (or successful dry-run)
@@ -81,14 +87,33 @@ EOF
 # Argument parsing
 # ---------------------------------------------------------------------------
 
+# A positive integer, at most six digits, no leading zero (bash would read
+# 08 as octal). Checked when the flag is parsed, so a bad value is a usage
+# error before anything else runs.
+check_poll_timeout() {
+    if ! [[ "$1" =~ ^[1-9][0-9]{0,5}$ ]]; then
+        printf 'ERROR: --poll-timeout needs a positive integer (seconds), got: %s\n' "$1" >&2
+        exit "$EXIT_USAGE"
+    fi
+}
+
 DRY_RUN=false
 FORCE=false
 VERSION=""
+POLL_TIMEOUT=300
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --dry-run|-n) DRY_RUN=true; shift ;;
         --force|-f)   FORCE=true; shift ;;
+        --poll-timeout)
+            if [[ $# -lt 2 ]]; then
+                printf 'ERROR: --poll-timeout needs a value\n' >&2
+                exit "$EXIT_USAGE"
+            fi
+            check_poll_timeout "$2"; POLL_TIMEOUT="$2"; shift 2 ;;
+        --poll-timeout=*)
+            check_poll_timeout "${1#--poll-timeout=}"; POLL_TIMEOUT="${1#--poll-timeout=}"; shift ;;
         --help|-h)    usage; exit 0 ;;
         -*)           printf 'ERROR: unknown flag: %s\n' "$1" >&2; usage >&2; exit "$EXIT_USAGE" ;;
         *)
@@ -163,6 +188,13 @@ POLLED_WORKFLOWS=(
     "version-and-hygiene.yml"
 )
 
+# poll_ci timing. POLL_GRACE is how long a polled workflow may have no run
+# for the release SHA before the push is treated as having failed to trigger
+# it. Constants, not flags: a missing run is a misconfiguration, not a slow
+# CI. POLL_TIMEOUT (the --poll-timeout flag) bounds the whole wait.
+POLL_GRACE=60
+POLL_INTERVAL=10
+
 # Ported from ISO 3166 v1.6.3, commit db74f96.
 # Shell-side only. Inline Python in bump_* functions is checked at
 # runtime by NameError; extending this check to cover it is deferred
@@ -217,6 +249,19 @@ check_on_main() {
     branch="$(git rev-parse --abbrev-ref HEAD)"
     if [[ "$branch" != "main" ]]; then
         fail "not on main (currently on: $branch)"
+    fi
+}
+
+# gh is a prerequisite, not an option: invariant 7 (tag only on green) cannot
+# be honoured without it. The probe is the same call poll_ci makes, so it
+# proves installation, authentication, repository access, and Actions access
+# together, and it runs before anything is changed (also under --dry-run).
+check_gh_ready() {
+    if ! command -v gh >/dev/null 2>&1; then
+        fail "gh CLI not found; release.sh needs it to verify CI before tagging (https://cli.github.com)"
+    fi
+    if ! gh run list --limit 1 --json databaseId >/dev/null 2>&1; then
+        fail "gh cannot list workflow runs; run 'gh auth login' and check access to this repository"
     fi
 }
 
@@ -439,54 +484,67 @@ commit_and_push() {
 poll_ci() {
     step "Polling CI"
 
-    if ! command -v gh >/dev/null 2>&1; then
-        info "gh CLI not available; skipping CI poll"
-        return
-    fi
-
-    local sha
+    # Fail closed. This function returns only when every workflow in
+    # POLLED_WORKFLOWS has a run for the release SHA and every run is
+    # completed/success. Every other outcome calls fail:
+    #   - gh errors              -> immediately, with gh's own message
+    #   - a run is not green     -> immediately, naming workflow and run
+    #   - a workflow has no run  -> after POLL_GRACE seconds
+    #   - still running          -> after POLL_TIMEOUT seconds
+    # $SECONDS has whole-second granularity, so a wait can end up to one
+    # second early; that is irrelevant at a 300 s default.
+    local sha start elapsed wf out errf err id status conclusion
+    local missing pending
     sha="$(git rev-parse HEAD)"
-    info "waiting for CI on ${sha:0:8} (up to 5 minutes)"
+    start=$SECONDS
+    errf="$(mktemp "${TMPDIR:-/tmp}/poll_ci.XXXXXX")"
+    info "waiting for ${#POLLED_WORKFLOWS[@]} workflow(s) on ${sha:0:8} (timeout ${POLL_TIMEOUT}s, ${POLL_GRACE}s for each to appear)"
 
-    local i
-    for i in $(seq 1 30); do
-        local runs
-        runs="$(gh run list --limit 30 \
-            --json databaseId,headSha,status,conclusion,workflowName \
-            --jq ".[] | select(.headSha == \"$sha\") | \"\(.databaseId)|\(.status)|\(.conclusion // \"pending\")|\(.workflowName)\"" \
-            2>/dev/null || echo "")"
-
-        if [ -z "$runs" ]; then
-            sleep 10
-            continue
-        fi
-
-        local all_complete=true
-        local failed=false
-        while IFS='|' read -r id status conclusion name; do
-            if [ "$status" != "completed" ]; then
-                all_complete=false
-                break
+    while true; do
+        missing=""
+        pending=""
+        for wf in "${POLLED_WORKFLOWS[@]}"; do
+            if ! out="$(gh run list --workflow "$wf" --event push --limit 20 \
+                --json databaseId,headSha,status,conclusion \
+                --jq ".[] | select(.headSha == \"$sha\") | \"\(.databaseId)|\(.status)|\(.conclusion // \"pending\")\"" \
+                2>"$errf")"; then
+                err="$(head -c 300 "$errf")"
+                rm -f "$errf"
+                fail "gh run list failed for $wf: ${err:-no error text}"
             fi
-            if [ "$conclusion" != "success" ]; then
-                failed=true
-                info "✗ workflow '$name' (run $id) concluded '$conclusion'"
+            if [ -z "$out" ]; then
+                missing="$missing $wf"
+                continue
             fi
-        done <<< "$runs"
+            while IFS='|' read -r id status conclusion; do
+                if [ "$status" != "completed" ]; then
+                    pending="$pending $wf"
+                    continue
+                fi
+                if [ "$conclusion" != "success" ]; then
+                    rm -f "$errf"
+                    fail "workflow $wf (run $id) concluded '$conclusion' on ${sha:0:8}"
+                fi
+            done <<< "$out"
+        done
 
-        if $failed; then
-            fail "CI failed on ${sha:0:8}"
+        if [ -z "$missing" ] && [ -z "$pending" ]; then
+            rm -f "$errf"
+            info "✓ all ${#POLLED_WORKFLOWS[@]} workflow(s) for ${sha:0:8} are completed success"
+            return 0
         fi
 
-        if $all_complete; then
-            info "✓ all workflows for ${sha:0:8} are completed success"
-            return
+        elapsed=$((SECONDS - start))
+        if [ -n "$missing" ] && [ "$elapsed" -ge "$POLL_GRACE" ]; then
+            rm -f "$errf"
+            fail "no run for${missing} on ${sha:0:8} after ${POLL_GRACE}s: the push did not trigger it"
         fi
-
-        sleep 10
+        if [ "$elapsed" -ge "$POLL_TIMEOUT" ]; then
+            rm -f "$errf"
+            fail "CI poll timed out after ${POLL_TIMEOUT}s on ${sha:0:8}; still waiting on:${missing}${pending}"
+        fi
+        sleep "$POLL_INTERVAL"
     done
-
-    info "CI poll timed out; the run may still be in progress"
 }
 
 # ---------------------------------------------------------------------------
@@ -616,6 +674,7 @@ print_plan() {
     echo "  HEAD at origin/main"
     echo "  on main branch"
     echo "  all per-push workflows in poll list"
+    echo "  gh installed and able to list workflow runs"
     echo "  tag free"
     echo "  CHANGELOG section present"
     echo "  check_version_consistency.py passes"
@@ -642,7 +701,9 @@ print_plan() {
     echo "Post-gate:"
     echo "  git add -A && git commit -m 'Release $TAG'"
     echo "  git push origin main"
-    echo "  gh run list  (poll until completed)"
+    echo "  poll CI: gh run list per workflow in POLLED_WORKFLOWS;"
+    echo "    each must appear within ${POLL_GRACE}s and be completed/success;"
+    echo "    timeout ${POLL_TIMEOUT}s (--poll-timeout); any other outcome fails, nothing is tagged"
     echo "  git tag -a $TAG -m '<first 15 lines of CHANGELOG section>'"
     echo "  git push origin $TAG"
     echo "  write docs/$TAG-verification.md"
@@ -675,6 +736,9 @@ info "✓ on main"
 
 check_workflows_covered "${POLLED_WORKFLOWS[@]}"
 info "✓ all per-push workflows are in the poll list"
+
+check_gh_ready
+info "✓ gh can list workflow runs"
 
 check_tag_free
 info "✓ tag $TAG is free"

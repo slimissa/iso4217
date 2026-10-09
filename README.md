@@ -671,14 +671,15 @@ Releases are cut by [`scripts/release.sh`](./scripts/release.sh):
 bash scripts/release.sh <version> --dry-run   # preview every site and gate
 bash scripts/release.sh <version>             # release
 bash scripts/release.sh <version> --force     # re-run on an existing tag
+bash scripts/release.sh <version> --poll-timeout 900   # wait up to 900 s for CI (default 300)
 ```
 
-The script is deterministic and refuses to start unless the working tree is clean, the branch is `main`, `HEAD` is at `origin/main`, the tag is free, the changelog has a section for the version, and the version-consistency check currently passes. Then it:
+The script is deterministic and refuses to start unless the `gh` CLI is installed and can list this repository's workflow runs (CI is polled before anything is tagged, and there is no flag to skip it), the working tree is clean, the branch is `main`, `HEAD` is at `origin/main`, the tag is free, the changelog has a section for the version, and the version-consistency check currently passes. Then it:
 
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date, `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
 3. **Runs a seventeen-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, snapshot freshness, registry freshness, country codes, README drift, verification doc, the cross-language suite, and `pytest tests/`.
-4. **Commits and pushes**, then **polls every workflow** until each completes.
+4. **Commits and pushes**, then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
 5. **Tags** (annotated, with the first lines of the changelog section) only when everything is green.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.
 
