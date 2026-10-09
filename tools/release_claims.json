@@ -463,5 +463,46 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.11\""
     }
+  ],
+  "1.7.12": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.12"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.12\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.12]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.12"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "check_gh_ready"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "--poll-timeout"
+    },
+    {
+      "file": "tests/test_release_poll_ci.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.12"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.12\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.12\""
+    }
   ]
 }

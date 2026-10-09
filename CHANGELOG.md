@@ -6,6 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.12] — Unreleased
+
+Release-script patch. `poll_ci` no longer returns success on any path where
+it did not see every polled workflow complete green. Finding F1 of the
+v1.7.11 audit. No data changes; no schema changes.
+
+### Fixed
+
+- `scripts/release.sh` — `poll_ci` returned success on three paths where it
+  had not polled: `gh` not installed, a run that never appeared (the loop ran
+  to the timeout), and the 5-minute timeout itself. `tag_release` ran next, so
+  a commit whose CI had not passed could be tagged, contradicting invariant 7
+  (tag only on green). Every one of those paths now fails the release.
+- `scripts/release.sh` — `gh run list ... 2>/dev/null || echo ""` made a `gh`
+  authentication or API error indistinguishable from "no runs yet". A `gh`
+  error now fails at once and prints `gh`'s own message.
+- `scripts/release.sh` — `poll_ci` returned as soon as the runs it could see
+  were green, so a workflow whose run had not been created yet (for example
+  `validate.yml` while `version-and-hygiene.yml` had finished) was not waited
+  for. It now requires a run for every workflow in `POLLED_WORKFLOWS`.
+
+### Added
+
+- `--poll-timeout N` (seconds, positive integer, default 300). Validated when
+  parsed; a bad value is a usage error (exit 2) before anything runs.
+- `check_gh_ready` in the preconditions: `gh` must be installed and able to
+  list this repository's workflow runs. It runs under `--dry-run` too, so a
+  dry-run on a machine that cannot poll CI fails instead of passing. There is
+  deliberately no flag to skip polling.
+- `tests/test_release_poll_ci.py` — runs `poll_ci` and `check_gh_ready` in a
+  bash subshell with stub `gh`, `git`, and `sleep`; covers all of the above.
+
+### Changed
+
+- `README.md` — the release-pipeline section names the `gh` prerequisite and
+  the `--poll-timeout` flag.
+
+---
 ## [1.7.11] — 2026-10-07
 
 CI-only patch. Wires the stores-200 demo test into the `validate-json`
