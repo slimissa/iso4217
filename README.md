@@ -641,7 +641,9 @@ python3 tools/check_registry_freshness.py
 python3 tools/check_snapshot_freshness.py
 python3 tools/check_release_claims.py <version>
 
-# Run all four wrapper test suites against the shared fixture
+# Run all four wrapper test suites against the shared fixture.
+# All four toolchains are required (python3, node, go, cargo); a suite that cannot
+# run fails the check. Excuse one on purpose with --allow-skip go (repeatable).
 bash tools/check_cross_language.sh
 ```
 
@@ -873,7 +875,7 @@ Quick correction workflow:
    python3 tools/check_version_consistency.py
    python3 tools/check_mojibake.py
    python3 tools/check_country_codes.py
-   bash tools/check_cross_language.sh
+   bash tools/check_cross_language.sh   # needs go and cargo too, or: --allow-skip go --allow-skip rust
    ```
 
 5. Run the full suite — `python3 -m pytest tests/ wrappers/python/tests/ -q` — all tests must pass.

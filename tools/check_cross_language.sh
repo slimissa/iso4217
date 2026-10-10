@@ -8,19 +8,26 @@
 # in one language surfaces without a maintainer having to remember
 # that there are four places to look.
 #
-# Missing toolchains are reported as SKIP, not FAIL. A developer who
-# has Python and Node but not Rust is not blocked; CI, which installs
-# all four, runs the strict path.
+# All four suites are required. A suite whose toolchain is missing is
+# reported as NOT RUN and fails the check: "could not check" is not
+# "passed". The one way to excuse a suite is to name it, so the exception
+# is visible in the command line and in the output:
+#
+#   bash tools/check_cross_language.sh --allow-skip go --allow-skip rust
 #
 # Usage:
 #   bash tools/check_cross_language.sh
-#   bash tools/check_cross_language.sh --strict    # treat SKIP as FAIL
-#   bash tools/check_cross_language.sh --verbose   # stream suite output
+#   bash tools/check_cross_language.sh --allow-skip LANG   # repeatable
+#   bash tools/check_cross_language.sh --verbose           # stream suite output
+#
+#   LANG is one of: python, javascript, go, rust (any case).
 #
 # Exit codes:
-#   0  every available suite passed
-#   1  at least one suite failed
-#   2  no suite could be run at all
+#   0  every required suite ran and passed
+#   1  at least one suite that ran failed
+#   2  usage error, or no suite ran at all
+#   3  no suite failed, but a required suite did not run (toolchain missing
+#      and not named in --allow-skip)
 
 set -u
 
@@ -30,19 +37,65 @@ cd "$REPO_ROOT"
 EXIT_OK=0
 EXIT_FAIL=1
 EXIT_FATAL=2
+EXIT_NOT_RUN=3
 
-STRICT=false
 VERBOSE=false
+ALLOWED=""        # lowercase language keys named by --allow-skip
+
+usage() {
+    cat <<'USAGE'
+Usage: bash tools/check_cross_language.sh [--allow-skip LANG]... [--verbose]
+
+Runs the Python, JavaScript, Go, and Rust wrapper suites against
+tests/cross_language_consistency.json. All four are required: a suite whose
+toolchain is missing is reported as NOT RUN and fails the check.
+
+  --allow-skip LANG  excuse one suite (python, javascript, go, or rust);
+                     repeatable; the exception is printed
+  --verbose, -v      stream suite output
+
+Exit codes:
+  0  every required suite ran and passed
+  1  at least one suite that ran failed
+  2  usage error, or no suite ran at all
+  3  a required suite did not run
+USAGE
+}
+
+usage_error() {
+    printf 'error: %s\n' "$1" >&2
+    exit "$EXIT_FATAL"
+}
+
+add_allowed() {
+    local key
+    key="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+    case "$key" in
+        python|javascript|go|rust) ALLOWED="$ALLOWED $key" ;;
+        *) usage_error "unknown language '$1' (expected python, javascript, go, or rust)" ;;
+    esac
+}
+
+is_allowed() {
+    case " $ALLOWED " in
+        *" $1 "*) return 0 ;;
+    esac
+    return 1
+}
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --strict)  STRICT=true; shift ;;
+        --allow-skip)
+            if [[ $# -lt 2 ]]; then
+                usage_error "--allow-skip needs a language (python, javascript, go, or rust)"
+            fi
+            add_allowed "$2"; shift 2 ;;
+        --allow-skip=*) add_allowed "${1#--allow-skip=}"; shift ;;
         --verbose|-v) VERBOSE=true; shift ;;
-        --help|-h)
-            sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
-            exit 0
-            ;;
-        *) printf 'unknown flag: %s\n' "$1" >&2; exit 2 ;;
+        --strict)
+            usage_error "--strict was removed: a suite that does not run now fails by default (use --allow-skip LANG to excuse one)" ;;
+        --help|-h) usage; exit 0 ;;
+        *) usage_error "unknown flag: $1" ;;
     esac
 done
 
@@ -52,7 +105,10 @@ done
 
 PASSED=0
 FAILED=0
-SKIPPED=0
+NOT_RUN=0
+NOT_RUN_NAMES=""      # display names of required suites that did not run
+NOT_RUN_KEYS=""       # their --allow-skip keys, for the hint
+ALLOWED_NAMES=""      # display names of suites excused by --allow-skip
 
 # ---------------------------------------------------------------------------
 # Reporters
@@ -71,9 +127,18 @@ report_fail() {
     FAILED=$((FAILED + 1))
 }
 
-report_skip() {
-    printf '  %-12s \u00b7 skipped (%s)\n' "$1" "$2"
-    SKIPPED=$((SKIPPED + 1))
+# A suite that could not run. Excused only if --allow-skip named it.
+report_not_run() {
+    local name="$1" key="$2" reason="$3"
+    if is_allowed "$key"; then
+        printf '  %-12s - allowed skip (%s)\n' "$name" "$reason"
+        ALLOWED_NAMES="$ALLOWED_NAMES $name"
+    else
+        printf '  %-12s ! NOT RUN (%s)\n' "$name" "$reason"
+        NOT_RUN=$((NOT_RUN + 1))
+        NOT_RUN_NAMES="$NOT_RUN_NAMES $name"
+        NOT_RUN_KEYS="$NOT_RUN_KEYS $key"
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -119,7 +184,7 @@ echo
 if command -v python3 >/dev/null 2>&1; then
     run_suite "Python" python3 -m pytest tests/test_wrappers.py -q
 else
-    report_skip "Python" "python3 not found"
+    report_not_run "Python" python "python3 not found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -129,7 +194,7 @@ fi
 if command -v node >/dev/null 2>&1; then
     run_suite "JavaScript" node wrappers/javascript/test.js
 else
-    report_skip "JavaScript" "node not found"
+    report_not_run "JavaScript" javascript "node not found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -139,7 +204,7 @@ fi
 if command -v go >/dev/null 2>&1; then
     run_suite "Go" bash -c 'cd wrappers/go && go test ./... -count=1'
 else
-    report_skip "Go" "go not found"
+    report_not_run "Go" go "go not found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -149,7 +214,7 @@ fi
 if command -v cargo >/dev/null 2>&1; then
     run_suite "Rust" bash -c 'cd wrappers/rust && cargo test --quiet'
 else
-    report_skip "Rust" "cargo not found"
+    report_not_run "Rust" rust "cargo not found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -158,25 +223,37 @@ fi
 
 echo
 
-TOTAL=$((PASSED + FAILED + SKIPPED))
+RAN=$((PASSED + FAILED))
 
-if [[ "$TOTAL" -eq 0 ]]; then
-    echo "FATAL: no wrapper suites could be run"
+# "Go Rust" -> "Go, Rust"
+not_run_list="${NOT_RUN_NAMES# }"; not_run_list="${not_run_list// /, }"
+allowed_list="${ALLOWED_NAMES# }"; allowed_list="${allowed_list// /, }"
+
+if [[ "$FAILED" -gt 0 ]]; then
+    echo "FAIL: $FAILED of $RAN wrapper suite(s) that ran failed"
+    if [[ "$NOT_RUN" -gt 0 ]]; then
+        echo "FAIL: $NOT_RUN required suite(s) did not run: $not_run_list"
+    fi
+    exit "$EXIT_FAIL"
+fi
+
+if [[ "$RAN" -eq 0 ]]; then
+    echo "FATAL: no wrapper suite ran"
     exit "$EXIT_FATAL"
 fi
 
-if [[ "$FAILED" -gt 0 ]]; then
-    echo "FAIL: $FAILED of $TOTAL wrapper suite(s) failed"
-    exit "$EXIT_FAIL"
+if [[ "$NOT_RUN" -gt 0 ]]; then
+    echo "FAIL: $NOT_RUN required suite(s) did not run: $not_run_list"
+    hint=""
+    for key in $NOT_RUN_KEYS; do
+        hint="$hint --allow-skip $key"
+    done
+    echo "      To skip on purpose: bash tools/check_cross_language.sh${hint}"
+    exit "$EXIT_NOT_RUN"
 fi
 
-if $STRICT && [[ "$SKIPPED" -gt 0 ]]; then
-    echo "FAIL (--strict): $SKIPPED suite(s) skipped"
-    exit "$EXIT_FAIL"
-fi
-
-if [[ "$SKIPPED" -gt 0 ]]; then
-    echo "OK: $PASSED wrapper suite(s) passed, $SKIPPED skipped"
+if [[ -n "$ALLOWED_NAMES" ]]; then
+    echo "OK: $PASSED wrapper suite(s) passed; allowed to skip: $allowed_list"
 else
     echo "OK: all $PASSED wrapper suites passed"
 fi

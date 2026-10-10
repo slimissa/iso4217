@@ -451,9 +451,7 @@ run_gate() {
     run_gate_step "check_readme_drift.py"           python3 tools/check_readme_drift.py
     run_gate_step "check_verification_doc.py"       python3 tools/check_verification_doc.py
         
-    if [[ -f tools/check_cross_language.sh ]]; then
-        run_gate_step "check_cross_language.sh"     bash tools/check_cross_language.sh
-    fi
+    run_gate_step "check_cross_language.sh"         bash tools/check_cross_language.sh
 
     run_gate_step "pytest tests/"                   python3 -m pytest tests/ -q
 
@@ -694,8 +692,7 @@ print_plan() {
     echo "  python3 tools/check_snapshot_freshness.py"
     echo "  python3 tools/check_registry_freshness.py"
     echo "  python3 tools/check_country_codes.py"
-    [[ -f tools/check_cross_language.sh ]] && \
-        echo "  bash tools/check_cross_language.sh"
+    echo "  bash tools/check_cross_language.sh"
     echo "  python3 -m pytest tests/ -q"
     echo
     echo "Post-gate:"
