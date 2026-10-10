@@ -504,5 +504,46 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.12\""
     }
+  ],
+  "1.7.13": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.13"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.13\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.13]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.13"
+    },
+    {
+      "file": "tools/check_cross_language.sh",
+      "contains": "--allow-skip"
+    },
+    {
+      "file": "tools/check_cross_language.sh",
+      "contains": "NOT RUN"
+    },
+    {
+      "file": "tests/test_check_cross_language.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.13"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.13\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.13\""
+    }
   ]
 }

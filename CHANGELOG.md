@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.13] — Unreleased
+
+Cross-language check fails closed. Finding F2 of the v1.7.11 audit. No data
+changes; no schema changes.
+
+### Fixed
+
+- `tools/check_cross_language.sh` — a wrapper suite whose toolchain was
+  missing was reported as `skipped` and the script still exited 0
+  (`OK: 2 wrapper suite(s) passed, 2 skipped`), so the release gate could pass
+  having run two of four suites. Every suite is now required: a suite that
+  cannot run is `NOT RUN` and the script exits 3.
+- `tools/check_cross_language.sh` — with no toolchain installed it printed
+  `OK: 0 wrapper suite(s) passed, 4 skipped` and exited 0; the documented exit 2
+  ("no suite could be run at all") was unreachable because skipped suites
+  counted toward the total. That case now exits 2.
+- `tools/check_cross_language.sh` — the header said CI runs the strict path.
+  No workflow calls the script; CI's wrapper matrix runs each suite directly.
+  The header is rewritten.
+- `scripts/release.sh` — the gate and the dry-run plan wrapped the
+  cross-language step in `if [[ -f tools/check_cross_language.sh ]]`, so a
+  missing script dropped the step silently. Both guards are removed; a missing
+  script now fails the gate step by name.
+
+### Added
+
+- `--allow-skip LANG` (repeatable; python, javascript, go, or rust, any case):
+  the only way to excuse a suite. The exception is printed in the output.
+- Exit code 3: no suite failed, but a required suite did not run.
+- `tests/test_check_cross_language.py` — runs the real script against stub
+  toolchains and covers every exit code, the skip path, and `--allow-skip`.
+
+### Removed
+
+- `--strict`. A suite that does not run is now a failure by default, so the flag
+  has nothing left to do. Passing it is a usage error that says so.
+
+### Changed
+
+- `README.md` — states that all four toolchains are required and how to excuse
+  one.
+
+---
 ## [1.7.12] — 2026-10-09
 
 Release-script patch. `poll_ci` no longer returns success on any path where
