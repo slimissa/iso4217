@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.14] — Unreleased
+
+Release-script and test-gate patch. Findings F3, F17, F19, and F25 of the
+v1.7.11 audit, and operator-hygiene rule 7. No data changes; no schema changes.
+
+### Fixed
+
+- Skipped tests counted as passes. Without pandas, 8 tests were skipped and
+  `pytest tests/` still exited 0, so CI and the release gate could be green
+  without them (and without the demo test when duckdb was missing). CI now
+  installs pandas, and both CI and the gate run `pytest tests/` with the new
+  `--fail-on-skip` option; the allowed number of skips is 0.
+- The release commit could contain files the release did not mean to change.
+  `commit_and_push` ran `git add -A` and committed without showing what was
+  staged. It now aborts on any untracked file, prints `git diff --cached --stat`,
+  and aborts (unstaging first) if any staged path is not a plain modification.
+- Dates were taken from the machine's local clock while CI runs in UTC. The
+  release date, `meta.updated`, the CHANGELOG date, `last_verified`,
+  `withdrawn_date`, and the freshness and validation comparisons now use UTC.
+  The one-day tolerance in `check_registry_freshness.py` stays.
+- `RELEASE_PATTERN.md` invariant 7 described a tag message written to a file and
+  read back; `release.sh` used `git tag -a -m`. Both `-m` and `-F` also stripped
+  every line beginning with `#`, so tag messages lost their `### Fixed` and
+  `### Added` headings. The message is now written to a file, tagged with
+  `-F <file> --cleanup=whitespace`, read back from the tag object and compared;
+  a mismatch deletes the local tag and stops before the push. Tags before this
+  release are immutable and unchanged. The stale "nine artifacts" count in
+  `RELEASE_PATTERN.md` is removed.
+
+### Added
+
+- `tests/conftest.py` with `--fail-on-skip`.
+- Operator-hygiene rule 7 in `RELEASE_PATTERN.md`: a check that cannot run must
+  fail, not pass.
+- Tests: `test_fail_on_skip.py`, `test_release_commit_and_push.py`,
+  `test_utc_dates.py`, `test_release_tag.py`.
+
+### Changed
+
+- `RELEASE_PATTERN.md` — hygiene rule 6c now precedes 6d, and its heading has no
+  stray `**`.
+- `README.md` — the release-pipeline section describes the four behaviours above.
+
+---
 ## [1.7.13] — 2026-10-10
 
 Cross-language check fails closed. Finding F2 of the v1.7.11 audit. No data

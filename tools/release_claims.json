@@ -545,5 +545,71 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.13\""
     }
+  ],
+  "1.7.14": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.14"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.14\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.14]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.14"
+    },
+    {
+      "file": "tests/conftest.py",
+      "contains": "--fail-on-skip"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "--fail-on-skip"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "--cleanup=whitespace"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "date -u +%Y-%m-%d"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "git ls-files --others --exclude-standard"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "A check that cannot run must fail, not pass"
+    },
+    {
+      "file": "tests/test_fail_on_skip.py"
+    },
+    {
+      "file": "tests/test_release_commit_and_push.py"
+    },
+    {
+      "file": "tests/test_utc_dates.py"
+    },
+    {
+      "file": "tests/test_release_tag.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.14"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.14\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.14\""
+    }
   ]
 }
