@@ -35,7 +35,7 @@ import argparse
 import hashlib
 import subprocess
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -449,7 +449,7 @@ def generate_diff(registry: Dict, source_data: Dict, field_mapping: Dict[str, st
     report = UpdateReport(
         timestamp=datetime.now().isoformat(),
         source_amendment=registry.get("source", {}).get("last_amendment_applied", 0),
-        source_date=str(date.today()),
+        source_date=str(datetime.now(timezone.utc).date()),  # UTC, matching the freshness checks and release.sh
     )
 
     # Build indices
@@ -544,7 +544,7 @@ def apply_changes(registry: Dict, report: UpdateReport, interactive: bool = True
             for i, c in enumerate(active):
                 if c["code"] == change.code:
                     moved = active.pop(i)
-                    moved["withdrawn_date"] = str(date.today())
+                    moved["withdrawn_date"] = str(datetime.now(timezone.utc).date())  # UTC, matching the freshness checks and release.sh
                     moved["replaced_by"] = ""
                     moved["conversion_rate"] = 0
                     moved["note"] = f"Withdrawn per ISO 4217 amendment. {change.note}"
@@ -567,8 +567,8 @@ def apply_changes(registry: Dict, report: UpdateReport, interactive: bool = True
                         break
 
     # Update metadata
-    updated["meta"]["updated"] = str(date.today())
-    updated["source"]["last_verified"] = str(date.today())
+    updated["meta"]["updated"] = str(datetime.now(timezone.utc).date())  # UTC, matching the freshness checks and release.sh
+    updated["source"]["last_verified"] = str(datetime.now(timezone.utc).date())  # UTC, matching the freshness checks and release.sh
     updated["source"]["last_amendment_applied"] = report.source_amendment
 
     return updated
@@ -838,7 +838,7 @@ Workflow Examples:
         confirm = input("\nAdd this currency to the active list? [y/N]: ").strip().lower()
         if confirm == 'y':
             registry["currencies"]["active"].append(new_entry)
-            registry["meta"]["updated"] = str(date.today())
+            registry["meta"]["updated"] = str(datetime.now(timezone.utc).date())  # UTC, matching the freshness checks and release.sh
             backup_path = backup_registry()
             print(f"Backup saved to: {backup_path}")
             save_registry(registry)

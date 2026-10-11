@@ -36,7 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -224,7 +224,7 @@ def report_json(results: list[dict[str, Any]], today: date) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
-    today = parse_iso_date(args.today) if args.today else date.today()
+    today = parse_iso_date(args.today) if args.today else datetime.now(timezone.utc).date()  # UTC, matching CI and release.sh
 
     snapshots = sorted(PROJECT_ROOT.glob(SNAPSHOT_GLOB))
     if not snapshots:

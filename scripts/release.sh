@@ -137,7 +137,7 @@ if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 TAG="v$VERSION"
-TODAY="$(date +%Y-%m-%d)"
+TODAY="$(date -u +%Y-%m-%d)"   # UTC: CI and the freshness checks run in UTC
 CURRENT_VERSION="$(cat "$VERSION_FILE" 2>/dev/null || echo "unknown")"
 
 # ---------------------------------------------------------------------------

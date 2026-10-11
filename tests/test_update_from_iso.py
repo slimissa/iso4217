@@ -737,8 +737,8 @@ class TestApplyChanges:
     def test_meta_updated_is_refreshed(self, sample_registry: dict):
         report = UpdateReport(timestamp="t", source_amendment=179, source_date="d")
         updated = apply_changes(sample_registry, report, interactive=False)
-        from datetime import date
-        assert updated["meta"]["updated"] == str(date.today())
+        from datetime import datetime, timezone
+        assert updated["meta"]["updated"] == str(datetime.now(timezone.utc).date())
 
     def test_empty_report_is_a_noop_on_content(self, sample_registry: dict):
         report = UpdateReport(timestamp="t", source_amendment=179, source_date="d")

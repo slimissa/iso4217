@@ -26,7 +26,7 @@ import re
 import sys
 import argparse
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from collections import Counter
 from dataclasses import dataclass, field
@@ -182,7 +182,7 @@ def validate_meta(registry: Dict) -> List[ValidationError]:
     if updated:
         try:
             updated_date = date.fromisoformat(updated)
-            if updated_date > date.today():
+            if updated_date > datetime.now(timezone.utc).date():  # UTC, matching the freshness checks
                 errors.append(ValidationError(
                     severity="warning",
                     category="integrity",
@@ -285,7 +285,7 @@ def validate_source(registry: Dict) -> List[ValidationError]:
     if verified:
         try:
             verified_date = date.fromisoformat(verified)
-            days_since = (date.today() - verified_date).days
+            days_since = (datetime.now(timezone.utc).date() - verified_date).days  # UTC, matching the freshness checks
             if days_since > 365:
                 errors.append(ValidationError(
                     severity="warning",
@@ -619,7 +619,7 @@ def validate_withdrawn_currencies(withdrawn: List[Dict]) -> List[ValidationError
         if wd_date:
             try:
                 wd = date.fromisoformat(wd_date)
-                if wd > date.today():
+                if wd > datetime.now(timezone.utc).date():  # UTC, matching the freshness checks
                     errors.append(ValidationError(
                         severity="warning",
                         category="integrity",

@@ -32,7 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -225,7 +225,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             )
             return EXIT_FATAL
     else:
-        today = date.today()
+        today = datetime.now(timezone.utc).date()  # UTC: CI runs in UTC (the v1.7.5 skew)
     delta = (today - snapshot_date).days
 
     # A future meta.updated is a data error, not a freshness issue.
