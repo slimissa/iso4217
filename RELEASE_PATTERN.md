@@ -463,6 +463,25 @@ v1.7.11 attempt is the reference case: the patch that installed
 the step, producing an orphan `name:` in the YAML. The stat
 named the workflow file; the diff would have named the orphan.
 
+### 6c. Manifest claims describe state, not intent.
+
+A claim in `release_claims.json` that asserts `file contains X`
+must be verified against the file before the manifest is committed.
+If X isn't there, the fix hasn't landed — not the claim.
+
+Two failure classes:
+
+- A claim describing a change that was intended but did not land.
+- A claim whose string was edited to match the file, when the file
+  was wrong.
+
+Both turn the manifest into a check that always passes. The manifest
+is a contract; a claim that describes intent instead of state is a
+contract with nothing to enforce.
+
+The `--audit` mode in `check_release_claims.py` runs every claim
+against the current tree. Verify new claims before committing them.
+
 ### 6d. A check is only meaningful against the artifact it was designed for
 
 The v1.7.11 release had three checks return a clean result against
@@ -509,24 +528,28 @@ This rule was added after v1.7.11. The check that closes the class is
 placeholder patterns in code, and its output names the file it
 checked. Sourced from ISO 4217 v1.7.11.
 
-### 6c. Manifest claims describe state, not intent.**
+### 7. A check that cannot run must fail, not pass
 
-A claim in `release_claims.json` that asserts `file contains X`
-must be verified against the file before the manifest is committed.
-If X isn't there, the fix hasn't landed — not the claim.
+A built-in check that cannot execute — a missing toolchain, an absent
+dependency, a network failure, a skipped test — is not a pass. It is an
+unverified state, and the check must say so and exit non-zero.
 
-Two failure classes:
+Four consequences:
 
-- A claim describing a change that was intended but did not land.
-- A claim whose string was edited to match the file, when the file
-  was wrong.
+- A missing prerequisite is a failure, reported by name. The prerequisite
+  is checked before anything is changed, and also under `--dry-run`.
+- An exception must be explicit and visible: a flag on the command line
+  that appears in the output. Not a silent default, not an environment
+  variable, not a `skipped` line that still exits 0.
+- "Nothing ran" is never success, even when every part of the check was
+  excused.
+- A check that wraps other checks reports how many ran, not only how many
+  passed.
 
-Both turn the manifest into a check that always passes. The manifest
-is a contract; a claim that describes intent instead of state is a
-contract with nothing to enforce.
+Sourced from ISO 4217 v1.7.12 (`poll_ci` returned success when it could
+not poll), v1.7.13 (`check_cross_language.sh` reported a skipped suite as
+OK), and v1.7.14 (skipped tests counted as passes in the gate).
 
-The `--audit` mode in `check_release_claims.py` runs every claim
-against the current tree. Verify new claims before committing them.
 ---
 
 ## The mojibake self-trigger rule
