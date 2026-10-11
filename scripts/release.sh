@@ -467,7 +467,28 @@ run_gate() {
 commit_and_push() {
     step "Committing and pushing"
 
+    # A release only modifies tracked files: version bumps and regenerated
+    # artifacts. Anything else is something the gate or a generator left
+    # behind, or a deletion nobody asked for. Stop before it can enter the
+    # release commit, and leave the tree as it was found.
+    local untracked staged_other
+    untracked="$(git ls-files --others --exclude-standard)"
+    if [ -n "$untracked" ]; then
+        fail "untracked file(s) would be added to the release commit:
+$untracked"
+    fi
+
     git add -A
+
+    staged_other="$(git diff --cached --name-status | awk '$1 != "M"')"
+    if [ -n "$staged_other" ]; then
+        git reset -q
+        fail "the release commit would add, delete, or rename files (only modifications are expected); unstaged:
+$staged_other"
+    fi
+
+    git diff --cached --stat
+
     if git diff --cached --quiet; then
         info "no changes to commit"
     else

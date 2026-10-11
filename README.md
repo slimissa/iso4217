@@ -681,7 +681,7 @@ The script is deterministic and refuses to start unless the `gh` CLI is installe
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date, `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
 3. **Runs a seventeen-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, snapshot freshness, registry freshness, country codes, README drift, verification doc, the cross-language suite, and `pytest tests/ --fail-on-skip` (a skipped test fails the gate).
-4. **Commits and pushes**, then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
+4. **Commits and pushes** (it first checks that the gate left no untracked file and that every staged path is a plain modification, and prints the staged stat), then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
 5. **Tags** (annotated, with the first lines of the changelog section) only when everything is green.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.
 
