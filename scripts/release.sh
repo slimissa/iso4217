@@ -453,7 +453,7 @@ run_gate() {
         
     run_gate_step "check_cross_language.sh"         bash tools/check_cross_language.sh
 
-    run_gate_step "pytest tests/"                   python3 -m pytest tests/ -q
+    run_gate_step "pytest tests/"                   python3 -m pytest tests/ -q --fail-on-skip
 
     if [[ "$GATE_FAILED" -ne 0 ]]; then
         fail "gate failed; see output above"
@@ -693,7 +693,7 @@ print_plan() {
     echo "  python3 tools/check_registry_freshness.py"
     echo "  python3 tools/check_country_codes.py"
     echo "  bash tools/check_cross_language.sh"
-    echo "  python3 -m pytest tests/ -q"
+    echo "  python3 -m pytest tests/ -q --fail-on-skip"
     echo
     echo "Post-gate:"
     echo "  git add -A && git commit -m 'Release $TAG'"

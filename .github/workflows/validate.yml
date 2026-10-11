@@ -299,7 +299,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install jsonschema pytest pyarrow --quiet
+        run: pip install jsonschema pytest pyarrow pandas --quiet
 
       - name: Validate registry
         run: python3 tools/validate.py
@@ -307,8 +307,9 @@ jobs:
       - name: Install duckdb
         run: pip install duckdb --quiet
 
+      # --fail-on-skip: a skipped test verified nothing (RELEASE_PATTERN.md, hygiene rule 7).
       - name: Run tests
-        run: python3 -m pytest tests/ -v
+        run: python3 -m pytest tests/ -v --fail-on-skip
 
   # --- Job 3: Wrapper tests — matrix across 4 languages ------------------
   # Each language runs in its own parallel job with its own toolchain.
