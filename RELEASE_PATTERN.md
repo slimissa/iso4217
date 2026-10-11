@@ -119,7 +119,13 @@ added to `POLLED_WORKFLOWS`.
 
 The tag is created only after all polled workflows report
 `completed success`. No manual override, no force. The tag message
-is written to a file first, read back, then passed to `git tag -F`.
+is written to a file, passed to `git tag -a -F <file> --cleanup=whitespace`,
+then read back from the tag object and compared with the file; a
+mismatch deletes the local tag and stops before the push, so a tag
+that differs from what was meant never leaves the machine.
+`--cleanup=whitespace` is deliberate: git's default cleanup removes
+every line that begins with `#`, which drops the Markdown section
+headings (`### Fixed`) from a CHANGELOG-derived message.
 
 Why: this is the rule that the release process exists to enforce.
 `CONTRIBUTING.md` says "don't tag on red"; the script says "you
@@ -168,7 +174,7 @@ The gate centralizes the comparison. The failure message names
 which artifact is stale, but the failure point is the gate, not the
 rebuild step.
 
-ISO 4217 and ISO 3166 use this shape: nine artifacts regenerate,
+ISO 4217 and ISO 3166 use this shape: every artifact regenerates,
 then `check_version_consistency.py` compares all of them.
 
 ### How to pick

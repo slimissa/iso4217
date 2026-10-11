@@ -573,18 +573,32 @@ poll_ci() {
 tag_release() {
     step "Tagging release"
 
-    local message
+    local message msgfile recorded
     message="$(awk -v v="$VERSION" '
         $0 ~ "^## \\[" v "\\]" { capturing=1; next }
         capturing && /^## \[/ { exit }
         capturing && NF { print }
-    ' "$CHANGELOG" | head -15)"
+    ' "$CHANGELOG" | head -15 | sed 's/[[:space:]]*$//')"
 
     if [[ -z "$message" ]]; then
         message="Release $TAG"
     fi
 
-    git tag -a "$TAG" -m "$message"
+    # Written to a file and passed with -F, so what git records can be compared
+    # with what was meant. --cleanup=whitespace is deliberate: git's default
+    # removes every line that begins with '#', which drops the Markdown section
+    # headings (### Fixed) from this message.
+    msgfile="$(mktemp "${TMPDIR:-/tmp}/tagmsg.XXXXXX")"
+    printf '%s\n' "$message" > "$msgfile"
+    git tag -a "$TAG" --cleanup=whitespace -F "$msgfile"
+
+    recorded="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
+    rm -f "$msgfile"
+    if [[ "$recorded" != "$message" ]]; then
+        git tag -d "$TAG" >/dev/null
+        fail "git recorded a different tag message than the CHANGELOG text; local tag $TAG deleted, nothing pushed"
+    fi
+
     git push origin "$TAG"
     info "tagged and pushed: $TAG"
 }
