@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.7.14] — Unreleased
+## [1.7.14] — 2026-10-11
 
 Release-script and test-gate patch. Findings F3, F17, F19, and F25 of the
 v1.7.11 audit, and operator-hygiene rule 7. No data changes; no schema changes.
