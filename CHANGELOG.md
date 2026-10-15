@@ -6,6 +6,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.7.15] — Unreleased
+
+The amendment monitor fails closed, CI is pinned, and three release-script
+rough edges are gone. Findings F4, F7, F8, F9, and F24 of the v1.7.11 audit, and
+the three release-script items from `docs/v1.7.14-verification.md`. No data
+changes; no schema changes.
+
+### Fixed
+
+- The amendment monitor could go blind and stay green (F9). When it could not
+  read the SIX page, `tools/check_amendments.py` exited 0 and reported the
+  hard-coded 179; a page that parsed to no amendment number did the same
+  (`parse_failed`, which is what the page does today). It now exits 3, retries
+  transient failures three times first, and turns an uncaught exception into
+  exit 2 instead of Python's 1 (which meant "new amendment"). The workflow no
+  longer uses `continue-on-error`: exit 1 opens the "amendment N detected" issue,
+  exit 3 opens or updates a separate "cannot read the SIX page" issue (label
+  `monitor-blind`) and turns the run red.
+  The page parser is repaired as well: the amendment number is also read from
+  the download link's file name (`dl-currency-iso-amendment-180.pdf`; the
+  redesigned page shows it nowhere else in its text), so the monitor reads
+  amendment 180, which the registry does not yet apply.
+- `monitor-amendments.yml` had no `permissions:` block and the repository's
+  default token is read-only, so its `issues.create` call could not have
+  worked (F8). The job now holds `contents: read` and `issues: write`.
+- `validate.yml` ran only when a listed path changed, and the list omitted
+  files whose tests live in the suite it runs (F4). It now runs on every push
+  to main and every pull request, with no path filter.
+- `version-and-hygiene.yml` ran two checks as steps of a job named "Country
+  codes resolve" (F24). Each check now has its own job; "Country codes resolve"
+  keeps its name. The header no longer states a count.
+- `release.sh`: `commit_and_push` no longer opens a pager when run
+  interactively; `check_no_orphan_variables` called an undefined `die` and
+  now calls `fail`; `print_plan` lists all 17 gate steps, in gate order.
+
+### Added
+
+- Supply-chain pins (F7): all six workflow actions are pinned by commit SHA
+  with a version comment; `requirements-ci.txt` pins the CI Python
+  dependencies (duckdb exactly) and every pip install reads it;
+  `--upgrade pip` and `npm install` are gone; `.github/dependabot.yml`
+  covers `github-actions`, `pip`, `gomod`, and `cargo`.
+- `check_amendments.py --simulate undetermined|new-amendment`, and a
+  `simulate` input on `workflow_dispatch`, to exercise both alert paths
+  without contacting SIX.
+- Tests (1088 → 1177): `test_check_amendments.py`, `test_monitor_workflow.py`, `test_check_amendments_page.py`,
+  `test_ci_supply_chain.py`, `test_ci_job_layout.py`, `test_ci_triggers.py`,
+  `test_release_hygiene.py`.
+
+### Changed
+
+- `RELEASE_PATTERN.md` rule 7 cites v1.7.15 (F9) as its fourth instance.
+- `docs/PROVENANCE.md` §2 says what the monitor does when it cannot read the
+  page.
+
+---
 ## [1.7.14] — 2026-10-11
 
 Release-script and test-gate patch. Findings F3, F17, F19, and F25 of the

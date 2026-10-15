@@ -611,5 +611,84 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.14\""
     }
+  ],
+  "1.7.15": [
+    {
+      "file": "VERSION",
+      "contains": "1.7.15"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.7.15\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.7.15]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.7.15"
+    },
+    {
+      "file": "tools/check_amendments.py",
+      "contains": "EXIT_UNDETERMINED = 3"
+    },
+    {
+      "file": ".github/workflows/monitor-amendments.yml",
+      "contains": "issues: write"
+    },
+    {
+      "file": "requirements-ci.txt",
+      "contains": "duckdb==1.5.6"
+    },
+    {
+      "file": ".github/dependabot.yml",
+      "contains": "package-ecosystem: github-actions"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "git --no-pager diff --cached --stat"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "exited 0 when it could not read the SIX page"
+    },
+    {
+      "file": "tests/test_check_amendments.py"
+    },
+    {
+      "file": "tests/test_monitor_workflow.py"
+    },
+    {
+      "file": "tests/test_ci_supply_chain.py"
+    },
+    {
+      "file": "tests/test_ci_job_layout.py"
+    },
+    {
+      "file": "tests/test_ci_triggers.py"
+    },
+    {
+      "file": "tests/test_release_hygiene.py"
+    },
+    {
+      "file": "tools/check_amendments.py",
+      "contains": "amendment[-_]"
+    },
+    {
+      "file": "tests/test_check_amendments_page.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.7.15"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.7.15\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.7.15\""
+    }
   ]
 }
