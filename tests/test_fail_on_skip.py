@@ -112,7 +112,8 @@ class TestCallers:
 
     def test_ci_installs_pandas_and_runs_the_suite_with_the_flag(self):
         text = VALIDATE_YML.read_text(encoding="utf-8")
-        assert re.search(r"pip install [^\n]*\bpandas\b", text)
+        assert "pip install -r requirements-ci.txt" in text
+        assert re.search(r"(?m)^pandas\b", (PROJECT_ROOT / "requirements-ci.txt").read_text(encoding="utf-8"))
         assert re.search(r"python3 -m pytest tests/ [^\n]*--fail-on-skip", text)
 
     def test_the_gate_runs_pytest_with_the_flag(self):

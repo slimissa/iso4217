@@ -1,0 +1,35 @@
+# Dependabot version updates (v1.7.15, finding F7).
+#
+# Not configured: npm. wrappers/javascript has no dependencies, so there is
+# nothing for it to update; add the ecosystem the day that changes.
+version: 2
+updates:
+  # Workflow actions are pinned by commit SHA with a version comment.
+  # Dependabot rewrites the SHA and the comment together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # requirements-ci.txt at the repository root.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: gomod
+    directory: /wrappers/go
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: cargo
+    directory: /wrappers/rust
+    schedule:
+      interval: weekly
+      day: monday
