@@ -1,6 +1,11 @@
 name: Version and Hygiene
 
-# Four fast checks that enforce the convention ported in v1.5.4.
+# Fast checks that enforce the convention ported in v1.5.4: one job per check.
+#
+# Each job's `name:` is the check name GitHub shows and the name a
+# branch-protection rule refers to. Renaming a job breaks any rule that
+# names it, and a new job is not required by anything until it is added
+# to the rule by hand.
 #
 # These live in their own workflow, not in validate.yml, so they can
 # run in parallel with the slower test matrix and finish in under a
@@ -56,6 +61,7 @@ jobs:
           python-version: "3.12"
       - name: Verify wrapper copies
         run: python3 tools/sync_wrappers.py --check
+
   check-country-codes:
     name: Country codes resolve
     runs-on: ubuntu-latest
@@ -66,12 +72,29 @@ jobs:
           python-version: "3.12"
       - name: Verify country codes
         run: python3 tools/check_country_codes.py
-      - name: check-readme-drift
+
+  check-readme-drift:
+    name: README drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Check README against the tree
         run: python3 tools/check_readme_drift.py
 
-      - name: check-verification-doc
+  check-verification-doc:
+    name: Verification docs complete
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Check verification docs for placeholders
         run: python3 tools/check_verification_doc.py
-        
+
   check-registry-freshness:
     name: Registry freshness
     runs-on: ubuntu-latest
@@ -93,10 +116,6 @@ jobs:
           python-version: "3.12"
       - name: Check snapshot freshness
         run: python3 tools/check_snapshot_freshness.py
-
-
-
-    
 
   check-countries-parquet:
     name: Countries Parquet in sync
