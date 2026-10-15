@@ -40,6 +40,8 @@ What this means in practice:
 
 The monitor is a **detection** tool, not an **ingestion** tool. It tells you that something changed; it does not tell you what.
 
+It also tells you when it cannot see. A run that cannot read the SIX page, or finds no amendment number in it, exits 3: the workflow goes red and opens (or comments on) an issue titled "Amendment monitor cannot read the SIX page". Before v1.7.15 that case exited 0, so a change to the page made the monitor report success every week while detecting nothing.
+
 This is deliberate. Automated ingestion of ISO amendments would require parsing PDFs published in a variety of formats, and the failure mode — silently ingesting a mis-parsed entry — is worse than the failure mode of a human doing the update slowly. The registry's correctness guarantee depends on human review, and the monitor's only job is to make sure the review happens.
 
 ---
