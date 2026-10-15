@@ -4,11 +4,22 @@ on:
   schedule:
     - cron: '0 8 * * 1'
   workflow_dispatch:
+    inputs:
+      simulate:
+        description: 'Test only: exercise an alert path without contacting SIX'
+        type: choice
+        options: [none, undetermined, new-amendment]
+        default: none
 
 jobs:
   check-amendments:
     name: Check for new ISO 4217 amendments
     runs-on: ubuntu-latest
+    # Least privilege for the one job that opens issues. The repository default
+    # is read-only, so without this block issues.create fails with 403.
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout repository
@@ -21,29 +32,43 @@ jobs:
 
       - name: Check for amendments
         id: amendment_check
+        env:
+          SIMULATE: ${{ inputs.simulate }}
         run: |
-          python3 tools/check_amendments.py --json > /tmp/amendment_result.json
+          # The step does not excuse its own failure: the exit code is captured
+          # here and acted on by the steps below.
+          #   0 up to date   1 new amendment   2 fatal   3 could not determine
+          args=(--json)
+          if [ -n "${SIMULATE:-}" ] && [ "${SIMULATE}" != "none" ]; then
+            args+=(--simulate "${SIMULATE}")
+          fi
+          rc=0
+          python3 tools/check_amendments.py "${args[@]}" > /tmp/amendment_result.json || rc=$?
           cat /tmp/amendment_result.json
-        continue-on-error: true
+          echo "exit_code=${rc}" >> "$GITHUB_OUTPUT"
+          echo "check_amendments.py exited ${rc}"
 
       - name: Create issue if new amendment detected
-        if: steps.amendment_check.outcome == 'failure'
+        if: steps.amendment_check.outputs.exit_code == '1'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const result = JSON.parse(fs.readFileSync('/tmp/amendment_result.json', 'utf8').trim());
+            if (result.new_amendment_detected !== true) {
+              core.setFailed('check_amendments.py exited 1 without reporting a new amendment; exit 1 is reserved for that');
+              return;
+            }
             const current = result.current_amendment;
             const latest = result.latest_amendment;
-            const source = result.source;
-            const checkedDate = result.date_checked;
+            const prefix = result.simulated ? '[dispatch test] ' : '';
             const response = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: 'data'
             });
-            const issueTitle = 'ISO 4217 amendment ' + latest + ' detected';
+            const issueTitle = prefix + 'ISO 4217 amendment ' + latest + ' detected';
             const exists = response.data.some(function(i) { return i.title === issueTitle; });
             if (exists) {
               console.log('Already exists, skipping');
@@ -57,6 +82,61 @@ jobs:
               body: 'New ISO 4217 amendment ' + latest + ' detected. Registry has ' + current + '. Review at https://www.currency-iso.org/en/home/amendments.html'
             });
 
+      - name: Open or update the "cannot read the SIX page" issue
+        if: steps.amendment_check.outputs.exit_code == '3'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const result = JSON.parse(fs.readFileSync('/tmp/amendment_result.json', 'utf8').trim());
+            const prefix = result.simulated ? '[dispatch test] ' : '';
+            const issueTitle = prefix + 'Amendment monitor cannot read the SIX page';
+            const runUrl = context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
+            const entry = result.date_checked + ': fetch_status=' + result.fetch_status + ' (' + runUrl + ')';
+            const response = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'monitor-blind'
+            });
+            const existing = response.data.find(function(i) { return i.title === issueTitle; });
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: 'Still undetermined. ' + entry
+              });
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              labels: ['maintenance', 'monitor-blind'],
+              body: [
+                'The weekly amendment monitor could not read the latest amendment number from the SIX Group page, so it cannot tell whether a new ISO 4217 amendment exists. It is blind, not clear.',
+                '',
+                '- First seen: ' + entry,
+                '- fetch_status http_error, url_error, timeout: the SIX site or the network. parse_failed: the page no longer matches the patterns in tools/check_amendments.py. unexpected_error: a bug.',
+                '- Reproduce: python3 tools/check_amendments.py --json -v',
+                '- This issue gets a comment on every further undetermined run. Close it by hand once a run reads the page again.'
+              ].join('\n')
+            });
+
       - name: Log result summary
+        if: always()
         run: |
-          cat /tmp/amendment_result.json | python3 -m json.tool
+          if [ -s /tmp/amendment_result.json ]; then
+            python3 -m json.tool /tmp/amendment_result.json
+          else
+            echo "no JSON output; see the check step"
+          fi
+
+      - name: Fail unless the check read the SIX page
+        if: always() && steps.amendment_check.outputs.exit_code != '0' && steps.amendment_check.outputs.exit_code != '1'
+        env:
+          EXIT_CODE: ${{ steps.amendment_check.outputs.exit_code }}
+        run: |
+          echo "::error title=Amendment monitor could not determine the latest amendment::check_amendments.py exited ${EXIT_CODE:-unknown}; a run that verified nothing is not a pass. See the check step."
+          exit 1
