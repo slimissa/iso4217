@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.7.15] — Unreleased
+## [1.7.15] — 2026-10-15
 
 The amendment monitor fails closed, CI is pinned, and three release-script
 rough edges are gone. Findings F4, F7, F8, F9, and F24 of the v1.7.11 audit, and
