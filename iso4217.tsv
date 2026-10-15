@@ -12,7 +12,6 @@ AZN	944	Azerbaijani Manat	2	₼	Azerbaijan	active	true
 BAM	977	Bosnia and Herzegovina Convertible Mark	2	KM	Bosnia and Herzegovina	active	false	EUR	single	1.95583
 BBD	052	Barbadian Dollar	2	Bds$	Barbados	active	false	USD	single	2.0
 BDT	050	Bangladeshi Taka	2	৳	Bangladesh	active	true			
-BGN	975	Bulgarian Lev	2	лв	Bulgaria	active	false	EUR	single	1.95583
 BHD	048	Bahraini Dinar	3	ب.د	Bahrain	active	false	USD	single	0.376
 BIF	108	Burundian Franc	0	FBu	Burundi	active	true			
 BMD	060	Bermudian Dollar	2	BD$	Bermuda	active	false	USD	single	1.0
@@ -187,6 +186,7 @@ BEL	992	Belgian Financial Franc	0	FB	Belgium	withdrawn	false
 BGJ	100	Bulgarian Lev (1962)	0	лв	Bulgaria	withdrawn	false			
 BGK	100	Bulgarian Lev (1997)	0	лв	Bulgaria	withdrawn	false			
 BGL	100	Bulgarian Lev (1999)	2	лв	Bulgaria	withdrawn	false			
+BGN	975	Bulgarian Lev	2	лв	Bulgaria	withdrawn	false			
 BOP	068	Bolivian Peso	2	b$	Bolivia	withdrawn	false			
 BRB	076	Brazilian Cruzeiro	2	Cr$	Brazil	withdrawn	false			
 BRC	076	Brazilian Cruzado	2	Cz$	Brazil	withdrawn	false			

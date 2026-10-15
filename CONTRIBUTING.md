@@ -176,7 +176,7 @@ Every derived artifact must be regenerated in the same commit. CI rejects PRs wh
    pytest wrappers/python/tests/test_cli.py -q
    ```
 6. Update `CHANGELOG.md` under `[Unreleased]`
-7. If adding currencies, update `source.last_amendment_applied` and `source.last_verified`
+7. If applying an ISO amendment, move all five fields together: `meta.amendment`, `meta.amendment_date`, `source.last_amendment_applied`, `source.last_amendment_date` (the date printed on the amendment's PDF, not an effective date) and `source.last_verified` (the UTC date you last read the PDF)
 8. Commit `iso4217.json`, the eight flat-file artifacts (`iso4217.sql`, `iso4217.postgresql.sql`, `iso4217.mysql.sql`, `iso4217.sqlite.sql`, `iso4217.csv`, `iso4217.excel.csv`, `iso4217.european.csv`, `iso4217.tsv`), and the regenerated `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json` in the same commit
 9. Commit with a descriptive message: `Add AFN, ALL, AMD to active currencies (ISO amendment 179)`
 

@@ -187,15 +187,6 @@ class TestPegs:
         assert dkk["peg_type"] == "single"
         assert dkk["peg_band_pct"] == 2.25
 
-    def test_bgn_pegged_to_eur(self):
-        r = _registry()
-        bgn = _active(r, "BGN")
-        assert bgn is not None
-        assert bgn["pegged_to"] == "EUR"
-        assert bgn["peg_type"] == "single"
-        assert bgn["peg_band_pct"] == 0.0
-        assert bgn["is_independent"] is False
-
     def test_mad_pegged_to_basket(self):
         r = _registry()
         mad = _active(r, "MAD")
@@ -323,6 +314,19 @@ class TestWithdrawn:
         assert dem is not None, "DEM not found in withdrawn"
         assert dem["replaced_by"] == "EUR"
         assert dem["conversion_rate"] == 1.95583
+
+    def test_bgn_replaced_by_eur_on_2026_01_01(self):
+        """Amendment 180: BGN is a historic code from 2026-01-01."""
+        r = _registry()
+        assert _active(r, "BGN") is None, "BGN must not be active"
+        bgn = _withdrawn(r, "BGN")
+        assert bgn is not None, "BGN not found in withdrawn"
+        assert bgn["replaced_by"] == "EUR"
+        assert bgn["conversion_rate"] == 1.95583
+        assert bgn["withdrawn_date"] == "2026-01-01"
+        assert bgn["code_lifetime"] == {"from": None, "to": "2026-01-01"}
+        # Same shape as HRK, the previous euro changeover.
+        assert list(bgn) == list(_withdrawn(r, "HRK"))
 
     def test_itl_replaced_by_eur(self):
         r = _registry()
@@ -584,6 +588,15 @@ class TestCountries:
         issuers = [c for c in usd.get("countries", []) if c["relationship"] == "issuing"]
         assert len(issuers) == 1, f"USD has {len(issuers)} issuing countries, expected 1"
         assert issuers[0]["code"] == "US"
+
+    def test_bulgaria_uses_eur_only(self):
+        """Amendment 180: BG belongs to EUR and to no other active currency."""
+        r = _registry()
+        holders = [c["code"] for c in r["currencies"]["active"]
+                   for x in c.get("countries", []) if x["code"] == "BG"]
+        assert holders == ["EUR"]
+        eur = _active(r, "EUR")
+        assert {"code": "BG", "name": "Bulgaria", "relationship": "issuing"} in eur["countries"]
 
     def test_chf_used_in_liechtenstein(self):
         r = _registry()

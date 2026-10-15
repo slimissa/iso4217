@@ -10,7 +10,7 @@ This document exists because "canonical registry" is a claim, and claims about d
 
 | Data category | Primary source | Cross-check | Refresh cadence |
 |---------------|---------------|-------------|-----------------|
-| Active ISO 4217 alphabetic codes | ISO 4217:2015 plus all published amendments through Amendment 179 | SIX Group amendment summary (`currency-iso.org`) | Per amendment (quarterly or slower) |
+| Active ISO 4217 alphabetic codes | ISO 4217:2015 plus all published amendments through Amendment 180 | SIX Group amendment summary (`currency-iso.org`) | Per amendment (quarterly or slower) |
 | Withdrawn ISO 4217 codes | ISO 4217 historical record, supplemented by national central bank archives | SIX Group revaluation tables and the ISO online browsing platform | Per amendment |
 | Numeric codes | ISO 4217:2015 Table A.1 | SIX Group amendment PDFs | Per amendment |
 | Minor units (decimal places) | ISO 4217:2015 | Central bank specification for the currency (e.g., Bank of Japan for JPY, Central Bank of Kuwait for KWD) | Annual spot-check |
@@ -188,3 +188,12 @@ cycle without being noisy on a healthy schedule.
 
 The threshold can be overridden at the command line
 (`--threshold 365`) but the CI job uses the default.
+
+## Amendment dates
+
+`meta.amendment_date` and `source.last_amendment_date` hold the date printed on the amendment's PDF at
+`currency-iso.org` (amendment 180: 2025-09-22). They are not effective dates: one amendment has one issue
+date and can carry several effective dates (180: 2026-01-01, with BGN and EUR in parallel circulation until
+2026-01-31). `source.last_verified` is the UTC date the PDF was last read. Before v1.8.0 these fields read
+`2025-06-15` for amendment 179, which matches neither that PDF's date (2025-05-02) nor its effective date
+(2025-05-12).

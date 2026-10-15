@@ -223,7 +223,7 @@ class TestDeterminedResults:
         assert result["new_amendment_detected"] is True and result["latest_amendment"] == 180
 
     def test_offline_is_the_explicit_exception_and_does_not_fetch(self, registry, monkeypatch, capsys):
-        registry(179)
+        registry(ca.KNOWN_LATEST_AMENDMENT)
         code, out, _ = _run(capsys, monkeypatch, "--json", "--offline")
         result = json.loads(out)
         assert code == EXIT_OK

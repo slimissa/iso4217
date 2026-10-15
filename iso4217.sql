@@ -1,11 +1,11 @@
 -- ISO 4217 Currency Registry — SQL Export (ANSI SQL-92 (portable))
 -- Source:      iso4217.json v1.7.15
 -- Updated:     2026-10-15
--- Amendment:   179
+-- Amendment:   180
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0
 --
--- Contents:    167 active + 135 withdrawn = 302 rows
+-- Contents:    166 active + 136 withdrawn = 302 rows
 --
 -- Note:        Active codes are 3 chars (e.g., USD). Withdrawn codes
 --              may be up to 7 chars (e.g., MXN_OLD) for revaluation cases.
@@ -48,7 +48,6 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BAM', '977', 'Bosnia and Herzegovina Convertible Mark', 2, 'KM', 'Bosnia and Herzegovina', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BBD', '052', 'Barbadian Dollar', 2, 'Bds$', 'Barbados', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BDT', '050', 'Bangladeshi Taka', 2, '৳', 'Bangladesh', 'active');
-INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BGN', '975', 'Bulgarian Lev', 2, 'лв', 'Bulgaria', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BHD', '048', 'Bahraini Dinar', 3, 'ب.د', 'Bahrain', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BIF', '108', 'Burundian Franc', 0, 'FBu', 'Burundi', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BMD', '060', 'Bermudian Dollar', 2, 'BD$', 'Bermuda', 'active');
@@ -223,6 +222,7 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BGJ', '100', 'Bulgarian Lev (1962)', 0, 'лв', 'Bulgaria', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BGK', '100', 'Bulgarian Lev (1997)', 0, 'лв', 'Bulgaria', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BGL', '100', 'Bulgarian Lev (1999)', 2, 'лв', 'Bulgaria', 'withdrawn');
+INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BGN', '975', 'Bulgarian Lev', 2, 'лв', 'Bulgaria', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BOP', '068', 'Bolivian Peso', 2, 'b$', 'Bolivia', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BRB', '076', 'Brazilian Cruzeiro', 2, 'Cr$', 'Brazil', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('BRC', '076', 'Brazilian Cruzado', 2, 'Cz$', 'Brazil', 'withdrawn');
@@ -339,6 +339,6 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('ZWR', '935', 'Zimbabwean Dollar (2008)', 2, 'Z$', 'Zimbabwe', 'withdrawn');
 
 -- End of export
--- Active rows:    167
--- Withdrawn rows: 135
+-- Active rows:    166
+-- Withdrawn rows: 136
 -- Total rows:     302

@@ -67,22 +67,30 @@ RETRY_DELAY_SECONDS = 5  # doubles after each failed attempt: 5 s, then 10 s
 # Update this when ISO publishes a new amendment.
 # The value here is the highest amendment number we believe exists.
 # It serves as a fallback when the SIX website cannot be fetched.
-KNOWN_LATEST_AMENDMENT = 179
+KNOWN_LATEST_AMENDMENT = 180
 
 # Known amendment details (for issue body generation).
 # Update manually as new amendments are confirmed.
 AMENDMENT_HISTORY: dict[int, dict] = {
     179: {
-        "date": "2025-06-15",
-        "summary": "Minor updates to currency names and numeric codes",
+        "date": "2025-05-02",
+        "summary": "Arab Accounting Dinar (XAD, 396) added, effective 2025-05-12",
         "changes": [
-            "No currency additions or removals",
-            "Minor corrections to entity names",
+            "XAD added: Arab Monetary Fund, minor unit 2",
+        ],
+    },
+    180: {
+        "date": "2025-09-22",
+        "summary": "Bulgaria adopts the euro, effective 2026-01-01",
+        "changes": [
+            "EUR now also listed for Bulgaria",
+            "BGN moves to the historic list; fixed rate EUR 1 = BGN 1.95583",
+            "BGN and EUR in parallel circulation 2026-01-01 to 2026-01-31",
         ],
     },
     # Future entries:
-    # 180: {
-    #     "date": "2026-XX-XX",
+    # 181: {
+    #     "date": "YYYY-MM-DD",   # the date printed on the amendment PDF
     #     "summary": "Description of changes",
     #     "changes": ["Currency XXX added", "Currency YYY withdrawn"],
     # },
@@ -96,9 +104,11 @@ AMENDMENT_HISTORY: dict[int, dict] = {
 # Format: amendment_number -> list of change descriptions.
 KNOWN_AMENDMENT_CHANGES: dict[int, list[str]] = {
     179: [
-        "No currency additions",
-        "No currency removals",
-        "Corrected entity names for several currencies",
+        "XAD (Arab Accounting Dinar, 396) added",
+    ],
+    180: [
+        "BGN withdrawn, replaced by EUR at 1.95583, effective 2026-01-01",
+        "Bulgaria added to the EUR countries",
     ],
 }
 

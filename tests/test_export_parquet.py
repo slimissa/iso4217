@@ -1132,11 +1132,11 @@ class TestRealProject:
         assert set(dist.keys()) == {0, 2, 3, 4}
 
     def test_real_null_count_for_pegged_to(self):
-        """121 independent + 135 withdrawn = 256 nulls expected."""
+        """121 independent + 136 withdrawn = 257 nulls expected."""
         t = pq.read_table(PROJECT_ROOT / "iso4217.parquet")
         values = t.column("pegged_to").to_pylist()
         nulls = sum(1 for v in values if v is None)
-        assert nulls == 256, f"expected 256 nulls, got {nulls}"
+        assert nulls == 257, f"expected 257 nulls, got {nulls}"
 
 
 # ===========================================================================
@@ -1373,14 +1373,14 @@ class TestPandasRead:
         if not path.exists():
             pytest.skip("iso4217.parquet not present")
         df = pd.read_parquet(path)
-        # pegged_to and peg_type are null for the 256 currencies with no
-        # peg at all: 121 independent + 135 withdrawn.
-        assert df["pegged_to"].isna().sum() == 256
-        assert df["peg_type"].isna().sum() == 256
+        # pegged_to and peg_type are null for the 257 currencies with no
+        # peg at all: 121 independent + 136 withdrawn.
+        assert df["pegged_to"].isna().sum() == 257
+        assert df["peg_type"].isna().sum() == 257
         # peg_rate is additionally null for the 2 currencies that have a
         # pegged_to and a peg_type but no numeric rate: MAD (basket) and
-        # KWD (undisclosed). Total: 256 + 2 = 258.
-        assert df["peg_rate"].isna().sum() == 258
+        # KWD (undisclosed). Total: 257 + 2 = 259.
+        assert df["peg_rate"].isna().sum() == 259
 
     def test_independent_three_decimal_currencies(self):
         # Locks in the corrected value for docs/v1.5.2-verification.md

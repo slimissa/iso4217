@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.0] — Unreleased
+
+Amendment 180 applied: Bulgaria joins the euro on 2026-01-01 and BGN becomes a historic code.
+
+### Changed
+
+- **BGN moved from `currencies.active` to `currencies.withdrawn`** (withdrawn 2026-01-01, replaced by EUR at 1.95583), shaped like HRK. A consumer that looks BGN up in `active`, or lists the EUR-pegged currencies, no longer finds it. Active 167 → 166, withdrawn 135 → 136.
+- Bulgaria (`BG`) added to the EUR `countries[]` as `issuing`.
+- `meta.amendment` and `source.last_amendment_applied` 179 → 180. `meta.amendment_date` and `source.last_amendment_date` now hold the date printed on the amendment's PDF, 2025-09-22 (see `docs/PROVENANCE.md`). `source.last_verified` 2026-07-29 → 2026-10-15.
+- `tools/iso3166_snapshot.json` re-vendored from ISO 3166 1.6.7, where BG's `currency_codes` is `["EUR"]`.
+- `tools/check_amendments.py`: `KNOWN_LATEST_AMENDMENT` 179 → 180; the history entry for 179 is corrected (its date and "no currency additions" were wrong).
+
+### Added
+
+- **XAD**, Arab Accounting Dinar (numeric 396, minor unit 2, Arab Monetary Fund), in `non_iso.special_purpose` beside XDR, XUA and XSU. It is the whole content of amendment 179 (PDF 2025-05-02, effective 2025-05-12); earlier releases omitted it. Non-ISO 21 → 22.
+
+### Fixed
+
+- **The registry was created on 2026-07-29 at "amendment 179", ten months after amendment 180 was published (2025-09-22) and seven months after it took effect (2026-01-01). Every release from v1.0.0 to v1.7.15 listed BGN as active.** The amendment monitor that should have caught it reported success on a page it could not parse until v1.7.15.
+
+### Not in this release
+
+- `tools/update_from_iso.py --apply` is unchanged and still must not be used for an amendment.
+- `schema.json` still describes `meta.amendment_date` as an "effective date"; the field holds the PDF date.
+
+---
 ## [1.7.15] — 2026-10-15
 
 The amendment monitor fails closed, CI is pinned, and three release-script

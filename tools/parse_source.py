@@ -23,12 +23,12 @@ SOURCES_DIR = PROJECT_ROOT / "tools" / "sources"
 # Known classifications — ground truth that Wikipedia's table doesn't encode
 # ---------------------------------------------------------------------------
 
-# Currently active ISO 4217 currency codes (per amendment 179)
+# Currently active ISO 4217 currency codes (per amendment 180)
 # This list is manually curated against the ISO standard.
 # When ISO publishes an amendment, update this list.
 ACTIVE_ISO_CODES: Set[str] = {
     "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN",
-    "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BOV",
+    "BAM", "BBD", "BDT", "BHD", "BIF", "BMD", "BND", "BOB", "BOV",
     "BRL", "BSD", "BTN", "BWP", "BYN", "BZD",
     "CAD", "CDF", "CHE", "CHF", "CHW", "CLF", "CLP", "CNY", "COP", "COU",
     "CRC", "CUC", "CUP", "CVE", "CZK",

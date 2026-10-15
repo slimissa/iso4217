@@ -222,15 +222,23 @@ func TestCHFProperties(t *testing.T) {
 	}
 }
 
-func TestBGNProperties(t *testing.T) {
+func TestBGNWithdrawn(t *testing.T) {
 	r := testRegistry(t)
-	bgn := r.Active("BGN")
-	if bgn == nil {
-		t.Fatal("BGN not found")
+	if r.Active("BGN") != nil {
+		t.Error("BGN must not be active (historic from 2026-01-01, amendment 180)")
 	}
-
-	if bgn.IsIndependent {
-		t.Error("BGN should not be independent (pegged to EUR)")
+	bgn := r.Withdrawn("BGN")
+	if bgn == nil {
+		t.Fatal("BGN not found in withdrawn")
+	}
+	if bgn.ReplacedBy == nil || *bgn.ReplacedBy != "EUR" {
+		t.Errorf("BGN ReplacedBy = %v, want 'EUR'", bgn.ReplacedBy)
+	}
+	if bgn.ConversionRate == nil || *bgn.ConversionRate != 1.95583 {
+		t.Errorf("BGN ConversionRate = %v, want 1.95583", bgn.ConversionRate)
+	}
+	if bgn.WithdrawnDate == nil || *bgn.WithdrawnDate != "2026-01-01" {
+		t.Errorf("BGN WithdrawnDate = %v, want '2026-01-01'", bgn.WithdrawnDate)
 	}
 }
 
@@ -553,11 +561,14 @@ func TestPeggedToEUR(t *testing.T) {
 		codes[c.Code] = true
 	}
 
-	expected := []string{"DKK", "BGN"}
+	expected := []string{"DKK"}
 	for _, code := range expected {
 		if !codes[code] {
 			t.Errorf("Expected %s in EUR-pegged list, not found", code)
 		}
+	}
+	if codes["BGN"] {
+		t.Error("BGN is withdrawn and must not appear in the EUR-pegged list")
 	}
 }
 

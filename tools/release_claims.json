@@ -690,5 +690,50 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.7.15\""
     }
+  ],
+  "1.8.0": [
+    {
+      "file": "VERSION",
+      "contains": "1.8.0"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.8.0\""
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"last_amendment_applied\": 180"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.8.0]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.8.0"
+    },
+    {
+      "file": "tools/check_amendments.py",
+      "contains": "KNOWN_LATEST_AMENDMENT = 180"
+    },
+    {
+      "file": "tools/iso3166_snapshot.json"
+    },
+    {
+      "file": "docs/PROVENANCE.md",
+      "contains": "through Amendment 180"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.8.0"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.8.0\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.8.0\""
+    }
   ]
 }

@@ -88,7 +88,8 @@ CENTRAL_BANK_SOURCES = {
 
 # Known ISO 4217 amendment history (for tracking what changed when)
 KNOWN_AMENDMENTS = {
-    179: {"date": "2025-06-15", "summary": "Minor updates to currency names and numeric codes"},
+    180: {"date": "2025-09-22", "summary": "Bulgaria adopts the euro; BGN moves to the historic list"},
+    179: {"date": "2025-05-02", "summary": "Arab Accounting Dinar (XAD) added"},
     178: {"date": "2024-12-01", "summary": "Various administrative updates"},
     177: {"date": "2024-06-01", "summary": "Addition of new currency codes"},
 }

@@ -2,8 +2,8 @@
   "meta": {
     "version": "1.7.15",
     "updated": "2026-10-15",
-    "amendment": 179,
-    "amendment_date": "2025-06-15",
+    "amendment": 180,
+    "amendment_date": "2025-09-22",
     "schema_version": "1.4.0",
     "description": "Canonical ISO 4217 currency registry. Active ISO currencies, withdrawn ISO currencies, and commonly-used non-ISO currencies maintained as separate arrays. This file is the single source of truth — all wrappers, bindings, and downstream databases derive from this file.",
     "project": "https://github.com/slimissa/iso4217",
@@ -13,9 +13,9 @@
     "standard": "ISO 4217:2015",
     "maintenance_agency": "SIX Group",
     "maintenance_agency_url": "https://www.currency-iso.org",
-    "last_amendment_applied": 179,
-    "last_amendment_date": "2025-06-15",
-    "last_verified": "2026-07-29",
+    "last_amendment_applied": 180,
+    "last_amendment_date": "2025-09-22",
+    "last_verified": "2026-10-15",
     "verified_against": [
       "SWIFT ISO 4217 public table",
       "SIX Group amendment summaries",
@@ -155,6 +155,11 @@
           {
             "code": "BE",
             "name": "Belgium",
+            "relationship": "issuing"
+          },
+          {
+            "code": "BG",
+            "name": "Bulgaria",
             "relationship": "issuing"
           },
           {
@@ -1727,32 +1732,6 @@
           {
             "code": "IS",
             "name": "Iceland",
-            "relationship": "issuing"
-          }
-        ]
-      },
-      {
-        "code": "BGN",
-        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGN",
-        "numeric_reused": false,
-        "classification": "circulating",
-        "numeric": "975",
-        "name": "Bulgarian Lev",
-        "minor_units": 2,
-        "symbol": "лв",
-        "entity": "Bulgaria",
-        "central_bank": "Bulgarian National Bank",
-        "pegged_to": "EUR",
-        "peg_type": "single",
-        "pegged_since": "1999-01-01",
-        "peg_rate": 1.95583,
-        "peg_band_pct": 0.0,
-        "is_independent": false,
-        "note": "Pegged to EUR via currency board. Bulgaria is in ERM II.",
-        "countries": [
-          {
-            "code": "BG",
-            "name": "Bulgaria",
             "relationship": "issuing"
           }
         ]
@@ -4572,6 +4551,19 @@
         "conversion_rate": 7.5345
       },
       {
+        "code": "BGN",
+        "code_lifetime": {"from": null, "to": "2026-01-01"},
+        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:BGN",
+        "numeric": "975",
+        "name": "Bulgarian Lev",
+        "minor_units": 2,
+        "symbol": "лв",
+        "entity": "Bulgaria",
+        "withdrawn_date": "2026-01-01",
+        "replaced_by": "EUR",
+        "conversion_rate": 1.95583
+      },
+      {
         "code": "CYP",
         "code_lifetime": {"from": null, "to": "2008-01-01"},
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CYP",
@@ -6381,6 +6373,17 @@
         "entity": "Unified System for Regional Compensation (SUCRE / ALBA)",
         "iso_status": "iso_code",
         "note": "Genuine ISO 4217 code (numeric 994) for the SUCRE, a regional unit of account for trade settlement among ALBA member states. Not a circulating currency. It is in special_purpose because it is a unit of account, not because it lacks ISO standing."
+      },
+      {
+        "code": "XAD",
+        "numeric": "396",
+        "name": "Arab Accounting Dinar",
+        "minor_units": 2,
+        "symbol": "XAD",
+        "type": "unit_of_account",
+        "entity": "Arab Monetary Fund",
+        "iso_status": "iso_code",
+        "note": "Genuine ISO 4217 code (numeric 396) for the Arab Monetary Fund's accounting unit and reporting currency, added by amendment 179 (effective 2025-05-12) as a fund code. It is in special_purpose because it is a unit of account, not because it lacks ISO standing. Applied in v1.8.0; v1.0.0 through v1.7.15 omitted it."
       },
       {
         "code": "CNH",
