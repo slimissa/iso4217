@@ -2,105 +2,29 @@ name: Validate Registry
 
 # --- What triggers this workflow, and why ------------------------------
 #
-# GitHub Actions only supports path filters at the workflow level, not
-# per-job — so every path listed below triggers ALL jobs, not just
-# the job whose name matches. The `needs:` chain inside the jobs still
-# controls what actually runs and in what order once triggered.
+# Every push to main and every pull request runs every job. There is no path
+# filter. A path allow-list fails silent: a file that is not on it
+# (examples/**, tools/export_aggregated.py, CHANGELOG.md, ...) triggers
+# nothing, even though a test in tests/ guards it, and the gap stays
+# invisible until the release gate catches it (v1.7.11 audit, F4).
+# Running everything costs CI minutes on doc-only pushes; that is the price
+# of a trigger that cannot go stale.
 #
-# Paths grouped by what they logically belong to:
-#   - iso4217.json, schema.json                     -> the registry data itself
-#   - tools/validate.py, tools/sync_wrappers.py      -> validation/sync tooling
-#   - wrappers/go/iso4217.json, wrappers/rust/iso4217.json
-#                                                     -> the two local data copies
-#                                                        that can drift from root
-#                                                        (see check-wrapper-sync)
-#   - wrappers/**/*.py, .js, .go, .rs                -> wrapper SOURCE CODE
-#   - wrappers/**/Cargo.toml, go.mod, package.json   -> wrapper dependency manifests
-#   - tests/**                                       -> the test suites themselves
-#   - .github/workflows/validate.yml                 -> changes to this file
-#
-# NOTE: wrappers/**/*.json is listed explicitly, not merged into a source
-# glob — it's data, not code, and check-wrapper-sync treats it differently.
+# If the cost ever matters, use `paths-ignore` (fail-open: a new file runs
+# CI by default), never `paths`.
+
 permissions:
   contents: read
 
 concurrency:
   group: validate-registry-${{ github.ref }}
   cancel-in-progress: true
-  
+
 on:
   push:
     branches: [main]
-    paths:
-      - 'iso4217.json'
-      - 'schema.json'
-      - 'iso4217.sql'
-      - 'iso4217.postgresql.sql'
-      - 'iso4217.mysql.sql'
-      - 'iso4217.sqlite.sql'
-      - 'iso4217.csv'
-      - 'iso4217.excel.csv'
-      - 'iso4217.european.csv'
-      - 'iso4217.tsv'
-      - 'iso4217.parquet'
-      - 'tools/validate.py'
-      - 'wrappers/python/iso4217_cli.py'
-      - 'wrappers/python/setup.py'
-      - 'wrappers/python/tests/test_cli.py'
-      - 'tools/sync_wrappers.py'
-      - 'tools/export_sql.py'
-      - 'tools/export_csv.py'
-      - 'tools/export_parquet.py'
-      - 'wrappers/go/iso4217.json'
-      - 'wrappers/rust/iso4217.json'
-      - 'wrappers/**/*.py'
-      - 'wrappers/**/*.js'
-      - 'wrappers/**/*.go'
-      - 'wrappers/**/*.rs'
-      - 'wrappers/**/Cargo.toml'
-      - 'wrappers/**/go.mod'
-      - 'wrappers/**/package.json'
-      - 'tests/**'
-      - 'tests/test_export_sql.py'
-      - 'tests/test_export_csv.py'
-      - 'tests/test_export_parquet.py'
-      - '.github/workflows/validate.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'iso4217.json'
-      - 'schema.json'
-      - 'iso4217.sql'
-      - 'iso4217.postgresql.sql'
-      - 'iso4217.mysql.sql'
-      - 'iso4217.sqlite.sql'
-      - 'iso4217.csv'
-      - 'iso4217.excel.csv'
-      - 'iso4217.european.csv'
-      - 'iso4217.tsv'
-      - 'iso4217.parquet'
-      - 'tools/validate.py'
-      - 'wrappers/python/iso4217_cli.py'
-      - 'wrappers/python/setup.py'
-      - 'wrappers/python/tests/test_cli.py'
-      - 'tools/sync_wrappers.py'
-      - 'tools/export_sql.py'
-      - 'tools/export_csv.py'
-      - 'tools/export_parquet.py'
-      - 'wrappers/go/iso4217.json'
-      - 'wrappers/rust/iso4217.json'
-      - 'wrappers/**/*.py'
-      - 'wrappers/**/*.js'
-      - 'wrappers/**/*.go'
-      - 'wrappers/**/*.rs'
-      - 'wrappers/**/Cargo.toml'
-      - 'wrappers/**/go.mod'
-      - 'wrappers/**/package.json'
-      - 'tests/**'
-      - 'tests/test_export_sql.py'
-      - 'tests/test_export_csv.py'
-      - 'tests/test_export_parquet.py'
-      - '.github/workflows/validate.yml'
   workflow_dispatch:
 
 jobs:
