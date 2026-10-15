@@ -219,7 +219,7 @@ check_no_orphan_variables() {
     if [ -n "$orphans" ]; then
         echo "orphan variables (defined nowhere, expanded somewhere):" >&2
         echo "$orphans" | sed 's/^/  /' >&2
-        die "release script references undefined variables"
+        fail "release script references undefined variables"
     fi
 }
 
@@ -487,7 +487,8 @@ $untracked"
 $staged_other"
     fi
 
-    git diff --cached --stat
+    # --no-pager: an interactive shell would open a pager and block here until 'q'.
+    git --no-pager diff --cached --stat
 
     if git diff --cached --quiet; then
         info "no changes to commit"
@@ -716,17 +717,19 @@ print_plan() {
     echo "Gate:"
     echo "  python3 tools/validate.py"
     echo "  python3 tools/check_version_consistency.py"
-    echo "  python3 tools/check_release_claims.py \$VERSION"
     echo "  python3 tools/export_sql.py --check"
     echo "  python3 tools/export_csv.py --check"
     echo "  python3 tools/export_parquet.py --check"
     echo "  python3 tools/export_countries_parquet.py --check"
     echo "  python3 tools/export_aggregated.py --check"
     echo "  python3 tools/sync_wrappers.py --check"
+    echo "  python3 tools/check_release_claims.py \$VERSION"
     echo "  python3 tools/check_mojibake.py"
     echo "  python3 tools/check_snapshot_freshness.py"
     echo "  python3 tools/check_registry_freshness.py"
     echo "  python3 tools/check_country_codes.py"
+    echo "  python3 tools/check_readme_drift.py"
+    echo "  python3 tools/check_verification_doc.py"
     echo "  bash tools/check_cross_language.sh"
     echo "  python3 -m pytest tests/ -q --fail-on-skip"
     echo

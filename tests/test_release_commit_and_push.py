@@ -175,4 +175,4 @@ class TestSource:
 
     def test_the_stat_is_printed_before_the_commit(self):
         body = _function()
-        assert body.index("git diff --cached --stat") < body.index('git commit -m "Release $TAG"')
+        assert body.index("git --no-pager diff --cached --stat") < body.index('git commit -m "Release $TAG"')
