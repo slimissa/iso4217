@@ -548,7 +548,9 @@ Four consequences:
 
 Sourced from ISO 4217 v1.7.12 (`poll_ci` returned success when it could
 not poll), v1.7.13 (`check_cross_language.sh` reported a skipped suite as
-OK), and v1.7.14 (skipped tests counted as passes in the gate).
+OK), v1.7.14 (skipped tests counted as passes in the gate), and v1.7.15
+(`check_amendments.py` exited 0 when it could not read the SIX page, so
+the weekly monitor reported success while detecting nothing).
 
 ---
 
