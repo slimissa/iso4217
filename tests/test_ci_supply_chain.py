@@ -74,9 +74,19 @@ class TestRequirementsFile:
 
     def test_every_other_package_has_a_lower_and_an_upper_bound(self):
         for req in self._requirements():
-            if req.startswith("duckdb"):
+            if req.startswith(("duckdb", "pyarrow")):
                 continue
             assert ">=" in req and "<" in req, req
+
+    def test_pyarrow_is_pinned_exactly(self):
+        # pyarrow writes the five byte-comparable Parquet exports. A range
+        # would let a different pyarrow produce different bytes for the same
+        # logical content, and the --check modes would fail on the next
+        # machine that made the other choice. ISO 3166 Item 5 is the case.
+        reqs = list(self._requirements())
+        pinned = [r for r in reqs if r.startswith("pyarrow==")]
+        assert pinned, "pyarrow must be pinned exactly, not with a range"
+        assert pinned[0] == "pyarrow==26.0.0", pinned[0]
 
 
 class TestDependabot:
