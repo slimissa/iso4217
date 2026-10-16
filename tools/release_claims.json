@@ -735,5 +735,61 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.8.0\""
     }
+  ],
+  "1.8.1": [
+    {
+      "file": "VERSION",
+      "contains": "1.8.1"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.8.1\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.8.1]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.8.1"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "'^[0-9]+:\\s*#'"
+    },
+    {
+      "file": "requirements-ci.txt",
+      "contains": "pyarrow==26.0.0"
+    },
+    {
+      "file": "tools/check_mojibake.py",
+      "contains": "\\xef\\xbf\\xbd"
+    },
+    {
+      "file": "tools/check_snapshot_freshness.py",
+      "contains": "Do not merge them."
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "The `[Unreleased]` rule"
+    },
+    {
+      "file": "tests/test_release_hygiene.py"
+    },
+    {
+      "file": "tests/test_check_mojibake.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.8.1"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.8.1\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.8.1\""
+    }
   ]
 }

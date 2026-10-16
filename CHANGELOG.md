@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.1] — Unreleased
+
+Five tooling and documentation fixes from the ISO 3166 v1.6.8 review. No data changes; no schema changes.
+
+### Fixed
+
+- `release.sh`: the orphan-variable check never ignored comments. It filtered comment lines out of `grep -n`
+  output, where every line starts with `N:`, so the filter matched nothing and a `$VAR` named in a comment
+  aborted the release as an undefined variable. The filter now anchors after the prefix. A trailing comment
+  on a code line is still scanned.
+- `tools/check_mojibake.py`: two signatures added, the Windows-1252 reading of the prefix shared by dashes,
+  curly quotes and ellipses, and the U+FFFD replacement character. The docstring described U+201A as a
+  corrupted em dash; it is what a corrupted euro sign leaves behind. `tests/test_check_mojibake.py` is new;
+  the checker had no tests.
+
+### Changed
+
+- `requirements-ci.txt`: `pyarrow>=26,<27` → `pyarrow==26.0.0`. Every Parquet footer records the pyarrow
+  version that wrote it.
+- `tools/check_snapshot_freshness.py` docstring: names the two freshness mechanisms, scheduled re-verification
+  and the consumer's cross-reference check, and says not to merge them.
+- `RELEASE_PATTERN.md`: new section "The `[Unreleased]` rule" (presence, not position).
+
+---
 ## [1.8.0] — 2026-10-16
 
 Amendment 180 applied: Bulgaria joins the euro on 2026-01-01 and BGN becomes a historic code.
