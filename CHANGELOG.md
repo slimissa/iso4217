@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.8.1] — Unreleased
+## [1.8.1] — 2026-10-16
 
 Five tooling and documentation fixes from the ISO 3166 v1.6.8 review. No data changes; no schema changes.
 
