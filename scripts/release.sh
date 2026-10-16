@@ -202,7 +202,7 @@ POLL_INTERVAL=10
 check_no_orphan_variables() {
     local orphans
     orphans="$(grep -nE '\$\{[A-Z_]+\}|\$[A-Z_]{3,}' scripts/release.sh \
-        | grep -vE '^\s*#' \
+        | grep -vE '^[0-9]+:\s*#' \
         | grep -oE '\$\{?[A-Z_]+' \
         | sort -u \
         | while read -r v; do
