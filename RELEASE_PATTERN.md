@@ -306,6 +306,27 @@ not a rewrite.
 
 ---
 
+## The `[Unreleased]` rule
+
+`CHANGELOG.md` may carry an `[Unreleased]` section at the top at release time. Nothing in the release
+path reads the first line of the file, and nothing requires the target version's heading to be the
+first heading. Presence, not position. Four consumers, each in ISO 4217:
+
+- `release.sh` refuses unless a line beginning `## [<version>]` exists anywhere in the file.
+- The staged heading `## [<version>] — Unreleased` is found anywhere in the file and rewritten to the
+  release date. A literal `## [Unreleased]` heading is not touched.
+- The tag message is the body of the `## [<version>]` section, from that heading to the next `## [`
+  heading, wherever it sits.
+- `tools/check_version_consistency.py` skips every heading that is not a dated version number, which
+  covers both `## [Unreleased]` and `## [<version>] — Unreleased`.
+
+One position still counts: among dated version headings, the first must equal `VERSION` before the
+release script bumps it. An `[Unreleased]` section above it changes nothing.
+
+A check that finds the target heading by reading the top of the file passes until the first release
+that stages notes above it, and fails then. ISO 4217 conforms; each registry checks its own four
+sites against this list.
+
 ## Operator hygiene
 
 Four rules that emerged from specific failure modes across the
@@ -655,3 +676,6 @@ than one registry.
   checks returned clean against the wrong file in one session.
   Names `tools/check_verification_doc.py` as the check that
   closes the class for verification docs.
+- 2026-10-16 — post-review addition: "The `[Unreleased]` rule" section. Sourced from
+  ISO 3166 v1.6.8. The four consumers are those of ISO 4217's `release.sh` and
+  `tools/check_version_consistency.py`.
