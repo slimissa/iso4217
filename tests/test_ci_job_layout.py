@@ -53,6 +53,12 @@ class TestOneJobPerCheck:
         for job_id, text in _jobs().items():
             assert len(_tools(text)) == 1, f"{job_id} runs {_tools(text)}"
 
+    def test_each_enrichment_field_has_its_own_job(self):
+        for field in ("classification", "code_lifetime", "numeric_reused", "source_url"):
+            job = _jobs()["check-enrichment-" + field.replace("_", "-")]
+            assert f"tools/enrich_field.py --field {field} --check" in job
+            assert f"Enrichment: {field} up to date" in _name(job)
+
     def test_the_two_formerly_hidden_checks_have_their_own_jobs(self):
         by_tool = {_tools(text)[0]: job_id for job_id, text in _jobs().items()}
         assert by_tool["tools/check_readme_drift.py"] != by_tool["tools/check_country_codes.py"]

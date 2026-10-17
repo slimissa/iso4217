@@ -451,6 +451,10 @@ run_gate() {
     run_gate_step "vendor_iso3166.py --check"       python3 tools/vendor_iso3166.py --check
     run_gate_step "check_readme_drift.py"           python3 tools/check_readme_drift.py
     run_gate_step "check_verification_doc.py"       python3 tools/check_verification_doc.py
+    run_gate_step "enrich_field.py --field classification --check"  python3 tools/enrich_field.py --field classification --check
+    run_gate_step "enrich_field.py --field code_lifetime --check"  python3 tools/enrich_field.py --field code_lifetime --check
+    run_gate_step "enrich_field.py --field numeric_reused --check"  python3 tools/enrich_field.py --field numeric_reused --check
+    run_gate_step "enrich_field.py --field source_url --check"  python3 tools/enrich_field.py --field source_url --check
         
     run_gate_step "check_cross_language.sh"         bash tools/check_cross_language.sh
 
@@ -732,6 +736,10 @@ print_plan() {
     echo "  python3 tools/vendor_iso3166.py --check"
     echo "  python3 tools/check_readme_drift.py"
     echo "  python3 tools/check_verification_doc.py"
+    echo "  python3 tools/enrich_field.py --field classification --check"
+    echo "  python3 tools/enrich_field.py --field code_lifetime --check"
+    echo "  python3 tools/enrich_field.py --field numeric_reused --check"
+    echo "  python3 tools/enrich_field.py --field source_url --check"
     echo "  bash tools/check_cross_language.sh"
     echo "  python3 -m pytest tests/ -q --fail-on-skip"
     echo

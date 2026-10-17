@@ -19,6 +19,8 @@ Usage:
     python3 tools/enrich_field.py --field classification --check
     python3 tools/enrich_field.py --field classification --dry-run
 
+    --field is required (omitting it exits 2); there is no all-fields mode.
+
 Exit codes:
     0  success, or --check passed (no changes pending)
     1  --check found pending changes
