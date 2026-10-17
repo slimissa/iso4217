@@ -448,6 +448,7 @@ run_gate() {
     run_gate_step "check_snapshot_freshness.py"     python3 tools/check_snapshot_freshness.py
     run_gate_step "check_registry_freshness.py"     python3 tools/check_registry_freshness.py
     run_gate_step "check_country_codes.py"          python3 tools/check_country_codes.py
+    run_gate_step "vendor_iso3166.py --check"       python3 tools/vendor_iso3166.py --check
     run_gate_step "check_readme_drift.py"           python3 tools/check_readme_drift.py
     run_gate_step "check_verification_doc.py"       python3 tools/check_verification_doc.py
         
@@ -728,6 +729,7 @@ print_plan() {
     echo "  python3 tools/check_snapshot_freshness.py"
     echo "  python3 tools/check_registry_freshness.py"
     echo "  python3 tools/check_country_codes.py"
+    echo "  python3 tools/vendor_iso3166.py --check"
     echo "  python3 tools/check_readme_drift.py"
     echo "  python3 tools/check_verification_doc.py"
     echo "  bash tools/check_cross_language.sh"

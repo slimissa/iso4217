@@ -142,3 +142,14 @@ jobs:
         run: python3 -m pip install -r requirements-ci.txt
       - name: Check aggregated Parquet files are in sync
         run: python3 tools/export_aggregated.py --check
+
+  check-vendored-snapshot:
+    name: ISO 3166 snapshot matches its source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Verify the vendored snapshot against its ISO 3166 tag
+        run: python3 tools/vendor_iso3166.py --check
