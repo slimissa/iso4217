@@ -87,6 +87,13 @@ incident is the reference case. Pytest was not in the gate; a
 stale test passed locally and failed in CI. Fixed by adding
 `pytest tests/` as the fourteenth gate step in `release.sh`.
 
+**The same rule covers the commands that produce what the release commits.**
+A command that fails and isn't checked leaves stale output. The v1.6.9 snapshot
+generator ran without its required `--source` argument; the shell continued; the
+release carried the stale snapshot. Applies to artifact generators, exporters,
+sync scripts, and any command whose output the release commit includes.
+Sourced from ISO 3166 v1.6.9.
+
 ### 6. Poll every workflow
 
 After the release commit is pushed, poll every workflow that runs
@@ -679,3 +686,5 @@ than one registry.
 - 2026-10-16 — post-review addition: "The `[Unreleased]` rule" section. Sourced from
   ISO 3166 v1.6.8. The four consumers are those of ISO 4217's `release.sh` and
   `tools/check_version_consistency.py`.
+- 2026-10-17 — post-review addition: invariant 5 amendment (commands that produce what the
+  release commits). Sourced from ISO 3166 94350d6 (v1.6.9).
