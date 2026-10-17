@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.2] — Unreleased
+
+Closes the ISO 3166 v1.6.9 exchange: the vendored snapshot gets a tool and a CI check, the enrichment tool gets a CI
+check, four rules are written down, and two docstring notes are corrected. One data change: the vendored snapshot.
+
+### Fixed
+
+- **`tools/iso3166_snapshot.json` was not a copy of any ISO 3166 release.** It was labelled v1.6.7, but BG `currency_codes`
+  had been edited by hand to `["EUR"]` before ISO 3166 shipped that change (`docs/v1.8.0-verification.md` records it as vendored
+  ahead of its source). It is now byte-identical to v1.6.9. Against the old file that changes BG `last_verified` and `note`,
+  and the snapshot's own `meta.version` and `updated`; no currency code changes and `check_country_codes.py` is unaffected.
+- `tools/check_mojibake.py` docstring: the entry attributed to a check mark is the Latin-1 corruption of the Mathematical
+  Operators block, and the entry attributed to box drawing is the Latin-1 corruption of General Punctuation. Box drawing
+  corrupts to a different prefix that no pattern covers; the docstring now says so, and tests compute the provenance.
+- `tools/enrich_field.py` docstring: `--field` is required.
+- `release.sh`: `regenerate_artifacts` wrote each generator as `cmd >/dev/null && info ...`, and a failure in a
+  non-final position of an `&&` list does not trigger `set -e`. A failing generator now stops the release and is named.
+
+### Added
+
+- `tools/vendor_iso3166.py` with `--check`: the snapshot is vendored byte for byte, and `--check` calls the same builder the
+  write path calls, compares the snapshot with the ISO 3166 tag named in `tools/iso3166_snapshot.meta.json`, and compares
+  `source_version` with the source's own version. Exit 3 when the tag cannot be fetched. `tests/test_vendor_iso3166.py` is new.
+- CI: job "ISO 3166 snapshot matches its source" runs `vendor_iso3166.py --check`; `enrich_field.py --check` runs for all four
+  fields (four jobs). Both are also release-gate steps (invariant 5): the gate is now 22 steps.
+- `RELEASE_PATTERN.md`: invariant 5 covers the commands that produce what the release commits (ISO 3166 v1.6.9); operator-hygiene
+  rule 8, every tool proves its own reachability (ISO 3166 v1.6.9); a "Version-pinned byte outputs" section with its settings
+  corollary (ISO 3166 v1.6.8 and `4b272e5`).
+
+---
 ## [1.8.1] — 2026-10-16
 
 Five tooling and documentation fixes from the ISO 3166 v1.6.8 review. No data changes; no schema changes.

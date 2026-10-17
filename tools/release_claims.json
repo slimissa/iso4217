@@ -791,5 +791,82 @@
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.8.1\""
     }
+  ],
+  "1.8.2": [
+    {
+      "file": "VERSION",
+      "contains": "1.8.2"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.8.2\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.8.2]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.8.2"
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "contains": "def build_vendored("
+    },
+    {
+      "file": "tests/test_vendor_iso3166.py"
+    },
+    {
+      "file": ".github/workflows/version-and-hygiene.yml",
+      "contains": "python3 tools/vendor_iso3166.py --check"
+    },
+    {
+      "file": ".github/workflows/version-and-hygiene.yml",
+      "contains": "python3 tools/enrich_field.py --field source_url --check"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "python3 tools/vendor_iso3166.py --check"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "python3 tools/enrich_field.py --field classification --check"
+    },
+    {
+      "file": "tools/enrich_field.py",
+      "contains": "--field is required"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "exited non-zero"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "The same rule covers the commands that produce what the release commits"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "### 8. Every tool proves its own reachability"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "Corollary: pin the settings, not only the version"
+    },
+    {
+      "file": "tools/check_mojibake.py",
+      "contains": "Mathematical Operators"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.8.2"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.8.2\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.8.2\""
+    }
   ]
 }
