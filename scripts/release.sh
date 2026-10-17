@@ -404,12 +404,18 @@ bump_all_sites() {
 
 regenerate_artifacts() {
     step "Regenerating artifacts"
-    python3 tools/export_sql.py       >/dev/null && info "✓ SQL exports (4 files)"
-    python3 tools/export_csv.py       >/dev/null && info "✓ CSV/TSV exports (4 files)"
-    python3 tools/export_parquet.py   >/dev/null && info "✓ Parquet export (1 file)"
-    python3 tools/export_countries_parquet.py >/dev/null && info "✓ Countries Parquet (1 file)"
-    python3 tools/export_aggregated.py        >/dev/null && info "✓ Aggregated exports (3 files)"
-    python3 tools/sync_wrappers.py    >/dev/null && info "✓ Wrapper copies (3 files)"
+    python3 tools/export_sql.py       >/dev/null || fail "export_sql.py exited non-zero"
+    info "✓ SQL exports (4 files)"
+    python3 tools/export_csv.py       >/dev/null || fail "export_csv.py exited non-zero"
+    info "✓ CSV/TSV exports (4 files)"
+    python3 tools/export_parquet.py   >/dev/null || fail "export_parquet.py exited non-zero"
+    info "✓ Parquet export (1 file)"
+    python3 tools/export_countries_parquet.py >/dev/null || fail "export_countries_parquet.py exited non-zero"
+    info "✓ Countries Parquet (1 file)"
+    python3 tools/export_aggregated.py        >/dev/null || fail "export_aggregated.py exited non-zero"
+    info "✓ Aggregated exports (3 files)"
+    python3 tools/sync_wrappers.py    >/dev/null || fail "sync_wrappers.py exited non-zero"
+    info "✓ Wrapper copies (3 files)"
 }
 
 # ---------------------------------------------------------------------------

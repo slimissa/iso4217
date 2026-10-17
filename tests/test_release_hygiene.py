@@ -52,6 +52,37 @@ def _function(name: str) -> str:
 # die -> fail
 # ---------------------------------------------------------------------------
 
+GENERATORS = ["export_sql", "export_csv", "export_parquet", "export_countries_parquet",
+              "export_aggregated", "sync_wrappers"]
+
+
+class TestRegenerateStopsOnAFailingGenerator:
+    def _run(self, tmp_path: Path, failing: str):
+        harness = tmp_path / "harness.sh"
+        harness.write_text(
+            "set -euo pipefail\nEXIT_PRECOND=1\n" + HELPERS
+            + 'python3() { echo "$1" >> calls.txt; if [ "$1" = "tools/' + failing + '.py" ]; then return 1; fi; return 0; }\n'
+            + _function("regenerate_artifacts") + "\nregenerate_artifacts\necho REACHED_END\n"
+        )
+        result = subprocess.run([BASH, str(harness)], cwd=tmp_path, capture_output=True, text=True, timeout=60)
+        calls = (tmp_path / "calls.txt").read_text().split() if (tmp_path / "calls.txt").exists() else []
+        return result, calls
+
+    @pytest.mark.parametrize("failing", GENERATORS)
+    def test_a_failing_generator_stops_the_release_and_is_named(self, tmp_path, failing):
+        result, calls = self._run(tmp_path, failing)
+        assert result.returncode == 1
+        assert "REACHED_END" not in result.stdout
+        assert failing + ".py" in result.stderr
+        later = GENERATORS[GENERATORS.index(failing) + 1:]
+        assert not any(f"tools/{g}.py" in calls for g in later), calls
+
+    def test_when_nothing_fails_every_generator_runs_in_order(self, tmp_path):
+        result, calls = self._run(tmp_path, "none")
+        assert result.returncode == 0 and "REACHED_END" in result.stdout
+        assert calls == [f"tools/{g}.py" for g in GENERATORS]
+
+
 class TestOrphanCheck:
     def _run(self, tmp_path: Path, script_body: str):
         (tmp_path / "scripts").mkdir()
