@@ -83,3 +83,54 @@ def test_the_cli_exit_code_follows_the_scan(tmp_path, data, expected):
         capture_output=True, text=True, timeout=60,
     )
     assert r.returncode == expected
+
+
+# -- provenance of the docstring's signature notes: computed, not asserted ----------------------
+
+def _hits(pattern: bytes, text: str, codec: str = "latin-1") -> bool:
+    import re as _re
+    return _re.search(pattern, _corrupt(text, codec)) is not None
+
+
+@pytest.mark.parametrize("text", ["\u221e", "\u2211"])
+def test_pattern_two_is_the_latin1_corruption_of_mathematical_operators(text):
+    assert _hits(cm.MOJIBAKE_PATTERNS[1], text)
+
+
+@pytest.mark.parametrize("text", ["\u2705", "\u2500", "\u251c"])
+def test_pattern_two_is_not_the_check_mark_or_box_drawing(text):
+    assert not _hits(cm.MOJIBAKE_PATTERNS[1], text)
+
+
+@pytest.mark.parametrize("text", ["\u2014", "\u2013", "\u201c", "\u2026", "\u2022"])
+def test_pattern_three_is_the_latin1_corruption_of_general_punctuation(text):
+    assert _hits(cm.MOJIBAKE_PATTERNS[2], text)
+
+
+@pytest.mark.parametrize("text", ["\u2500", "\u2502", "\u251c", "\u2514"])
+def test_pattern_three_is_not_box_drawing(text):
+    assert not _hits(cm.MOJIBAKE_PATTERNS[2], text)
+
+
+@pytest.mark.parametrize("codec", ["latin-1", "cp1252"])
+@pytest.mark.parametrize("lead", [0x94, 0x95])
+def test_the_box_drawing_prefix_matches_no_pattern(lead, codec):
+    import re as _re
+    prefix = bytes([0xE2, lead]).decode(codec).encode("utf-8")
+    assert not any(_re.search(p, prefix) for p in cm.MOJIBAKE_PATTERNS)
+
+
+@pytest.mark.parametrize("text", ["\u2500", "\u2502", "\u251c", "\u2514"])
+def test_box_drawing_read_as_latin1_matches_no_pattern(text):
+    assert not any(_hits(p, text, "latin-1") for p in cm.MOJIBAKE_PATTERNS)
+
+
+def test_a_box_drawing_character_is_caught_only_by_the_accident_of_its_last_byte():
+    assert not any(_hits(p, "\u2500", "cp1252") for p in cm.MOJIBAKE_PATTERNS)
+    assert _hits(cm.MOJIBAKE_PATTERNS[0], "\u2502", "cp1252")
+
+
+def test_the_docstring_states_that_provenance():
+    doc = cm.__doc__
+    assert "Mathematical Operators" in doc and "General Punctuation" in doc
+    assert "which no pattern covers" in doc

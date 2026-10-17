@@ -9,13 +9,17 @@ as UTF-8. The telltale byte signatures come in two classes:
     The literal U+201A (single low-9 quotation mark). Windows-1252 reads the
     second byte of the euro sign, and of every other currency symbol, as this
     character. It is not an em dash.
-    \\xc3\\xa2\\xc2\\x88    from ✅ (check mark)
-    \\xc3\\xa2\\xc2\\x80    from ├ ─ │ └ ┐ ┘ (box drawing)
+    \\xc3\\xa2\\xc2\\x88    from the Mathematical Operators block (infinity sign,
+                            summation sign), read as Latin-1
+    \\xc3\\xa2\\xc2\\x80    from General Punctuation (em dash, en dash, curly quotes,
+                            ellipsis, bullet), read as Latin-1
     A-circumflex followed by the euro sign. Windows-1252 reads the first two
     bytes of an em dash, en dash, curly quote, ellipsis or bullet as exactly
     this pair.
     The replacement character U+FFFD. A decoder that met bytes it could not
     read wrote it in their place; the original characters are already gone.
+    Box-drawing characters corrupt to a different prefix, which no pattern covers; a single
+    character is caught only when its last byte happens to match another signature.
 
   Range signatures (four chars, one pattern):
     \\xc3[\\x83-\\x89]\\xc2[\\x80-\\xbf]
