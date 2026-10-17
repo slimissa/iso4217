@@ -582,6 +582,30 @@ the weekly monitor reported success while detecting nothing).
 
 ---
 
+### 8. Every tool proves its own reachability
+
+A tool with no `--check` or smoke invocation in CI may have unreachable code paths. The generator did: its
+preservation block crashed on every invocation and only appeared to work because the snapshot's `review_by` was
+set manually.
+
+Every tool that produces a committed artifact runs in CI, even on unchanged inputs: a `--check` or smoke
+invocation in the fast workflow and, under invariant 5, the same command in the release gate. The check does not
+have to verify output; it has to make the tool's code path execute. A `--check` that rebuilds with the same
+function the write path calls, and compares, satisfies both: it runs every branch and fails on an unreachable one.
+
+Reference case: ISO 3166 `tools/gen_iso4217_snapshot.py` at `07e103f`, the commit before `b9c0807`. Given a valid
+`--source` it raised `NameError` (`output_path` was undefined), in write mode and `--check` mode alike, and
+exited 1, the code `--check` uses for "snapshot stale". The defects arrived in `da186b2`; `b9c0807` fixed three:
+the undefined variable, a value assigned to a dict that was discarded before the return value was built, and a
+stray import.
+
+ISO 4217 had the same gap in v1.8.1: `tools/enrich_field.py --check` ran in neither CI nor the gate, and the vendored
+ISO 3166 snapshot had no tool at all, so it was edited by hand and drifted from every tag. v1.8.2 adds the four
+`enrich_field.py --check` steps and `tools/vendor_iso3166.py --check`.
+
+Applies to: every tool with an output path in the repo, every generator, every exporter.
+Sourced from ISO 3166 v1.6.9 (`94350d6`, `b9c0807`).
+
 ## The mojibake self-trigger rule
 
 Any pattern-based check will find its own explanation. The mojibake
@@ -688,3 +712,6 @@ than one registry.
   `tools/check_version_consistency.py`.
 - 2026-10-17 — post-review addition: invariant 5 amendment (commands that produce what the
   release commits). Sourced from ISO 3166 94350d6 (v1.6.9).
+- 2026-10-17 — post-review addition: operator-hygiene rule 8 ("Every tool proves its own
+  reachability"). Sourced from ISO 3166 94350d6 and b9c0807 (v1.6.9); reference case
+  `tools/gen_iso4217_snapshot.py` at 07e103f.
