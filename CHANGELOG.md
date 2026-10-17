@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.8.2] — Unreleased
+## [1.8.2] — 2026-10-17
 
 Closes the ISO 3166 v1.6.9 exchange: the vendored snapshot gets a tool and a CI check, the enrichment tool gets a CI
 check, four rules are written down, and two docstring notes are corrected. One data change: the vendored snapshot.

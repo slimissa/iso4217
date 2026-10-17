@@ -1,6 +1,6 @@
 -- ISO 4217 Currency Registry — SQL Export (PostgreSQL 12+)
--- Source:      iso4217.json v1.8.1
--- Updated:     2026-10-16
+-- Source:      iso4217.json v1.8.2
+-- Updated:     2026-10-17
 -- Amendment:   180
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0
