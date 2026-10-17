@@ -334,6 +334,28 @@ A check that finds the target heading by reading the top of the file passes unti
 that stages notes above it, and fails then. ISO 4217 conforms; each registry checks its own four
 sites against this list.
 
+## Version-pinned byte outputs
+
+Any build tool that produces a byte-comparable artifact must be pinned to an exact version, not a range. A different
+version can write different bytes for the same logical content.
+
+ISO 3166 v1.6.8 hit this: `pyarrow>=15.0` let CI install a different pyarrow from the one that wrote the committed
+`iso3166.parquet`, and CI's regeneration differed byte for byte. The fix was `pyarrow==25.0.1` (`aa784da`; the rule is `8902ba6`). ISO 4217
+met the same class in v1.8.1: the committed Parquet footers named pyarrow 25.0.1 while `requirements-ci.txt` allowed
+`>=26,<27`. Regenerating under 26.0.0 rewrote two bytes in each of the five files, the writer version in the footer.
+ISO 4217's exporters' `--check` modes compare content, not bytes, so they passed throughout; the verdict there was
+a sha256 comparison of regenerated against committed files. A `--check` that compares bytes would have failed.
+
+CSV and JSON are usually stable across versions. Anything binary or with a structured footer (Parquet, Arrow, Avro,
+HDF5) is not. Pin those.
+
+**Corollary: pin the settings, not only the version.** Any tool that produces a byte-comparable artifact must have
+all settings that affect those bytes pinned in the tool itself. Serialization order, encoding, and locale are
+settings, not incidental choices. If a setting can differ between two runs of the same tool version, `--check`
+will fail on a machine that made the other choice. Sourced from ISO 3166 `4b272e5`. ISO 4217's
+`tools/vendor_iso3166.py` (v1.8.2) takes the question away for the snapshot by never re-serialising it, and takes
+every setting for the one file it does serialise from a single function.
+
 ## Operator hygiene
 
 Four rules that emerged from specific failure modes across the
@@ -715,3 +737,6 @@ than one registry.
 - 2026-10-17 — post-review addition: operator-hygiene rule 8 ("Every tool proves its own
   reachability"). Sourced from ISO 3166 94350d6 and b9c0807 (v1.6.9); reference case
   `tools/gen_iso4217_snapshot.py` at 07e103f.
+- 2026-10-17 — post-review addition: "Version-pinned byte outputs" section and its settings
+  corollary. Sourced from ISO 3166 8902ba6 (v1.6.8, the rule; the pin is aa784da) and 4b272e5 (the corollary);
+  ISO 4217's instance is v1.8.1.
