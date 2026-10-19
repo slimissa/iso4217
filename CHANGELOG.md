@@ -6,6 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.3] — Unreleased
+
+Six audit findings (F5, F16, F18, F20, F22, F23), the amendment row in the versioning policy, and the lessons from the
+ISO 10383 round-trip. Tooling, tests and documentation; no data change and no schema change.
+
+### Fixed
+
+- **`tools/check_release_claims.py` silently ignored every claim key except `file` and `contains`.** A claim
+  `{"file": ..., "absent": ...}` passed as "file exists". It now supports `absent`, fails on any unknown key and on a
+  missing file for every claim shape, and checks a top-level `"doc-facts"` list on every run, for every release.
+- `tools/vendor_iso3166.py` read the clock: `--vendored-at` defaulted to `datetime.now`. It is now required in write mode.
+- `CONTRIBUTING.md` step 3 listed four generators; `release.sh` runs six. A contributor following it got a red
+  `export_aggregated.py --check`. The list is the release script's, and a test keeps the two equal (F5).
+- `tools/validate.py` cited ADR 0006 for schema-version consistency (ADR 0009) and ADR 0005 for numeric-code reuse
+  (ADR 0008). Nothing checked ADR citations in tools; a test now does (F16).
+- `tools/check_registry_freshness.py` printed `check_snapshot_freshness.py` as its own name, in `--help`, its docstring
+  and its report header; `docs/PROVENANCE.md` attributed the 180-day check to the snapshot tool (F18).
+- Exit codes (F20): `check_verification_doc.py` and `check_readme_drift.py` exited 3 for a missing local input, the
+  code the convention keeps for "could not run"; both now exit 2. `check_readme_drift.py` with git absent was an uncaught
+  traceback, exit 1, which reads as drift; it now exits 3. `check_verification_doc.py` had no tests.
+- `docs/JOINS.md` gave a hard-coded count at ISO 3166 v1.5.2; it now says what the check reports.
+
+### Added
+
+- Absence claims in `doc-facts`: `tools/vendor_iso3166.py` must not contain `date.today(`, `datetime.now(`, `time.time(`,
+  `random.` or `uuid.uuid4(`, and `scripts/release.sh` must not contain `&& info `. The tokens end at the open parenthesis
+  because `datetime.now()` is not a substring of `datetime.now(timezone.utc)`. `tests/test_check_release_claims.py`
+  evaluates them on every pytest run and parses the tool's syntax tree for aliased calls.
+- `docs/PROVENANCE.md` section 9: a per-field table, 46 rows (field, where, source, refresh trigger, checked by), and
+  `tools/check_provenance.py`, which fails when a field of `iso4217.json` has no row, a row names a missing field, a cell
+  is empty, or "Checked by" names a file that does not exist. CI job and gate step; the gate is now 23 steps (F22).
+- `docs/JOINS.md`: the `region` and `subregion` edge from ISO 3166, consumed by `export_aggregated.py` (F23).
+- Versioning policy: an ISO amendment that changes which currencies are active is Minor, not Patch (`CONTRIBUTING.md`,
+  `README.md`).
+- `RELEASE_PATTERN.md`: corollary "pin the render, not only the settings"; the exit-code convention (0 ok, 1 finding,
+  2 fatal or usage, 3 could not run); "Asserting on prose"; the rule 6d paragraph on reading a structured file as stored.
+- Tests: ADR citations, tool self-names, CONTRIBUTING against `release.sh`, the versioning policy, `check_verification_doc.py`.
+
+---
 ## [1.8.2] — 2026-10-17
 
 Closes the ISO 3166 v1.6.9 exchange: the vendored snapshot gets a tool and a CI check, the enrichment tool gets a CI
