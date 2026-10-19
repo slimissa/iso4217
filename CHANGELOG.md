@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.8.3] — Unreleased
+## [1.8.3] — 2026-10-19
 
 Six audit findings (F5, F16, F18, F20, F22, F23), the amendment row in the versioning policy, and the lessons from the
 ISO 10383 round-trip. Tooling, tests and documentation; no data change and no schema change.
