@@ -23,16 +23,51 @@ snapshot of ISO 3166 at
 [`tools/iso3166_snapshot.json`](../tools/iso3166_snapshot.json).
 
 The check is `tools/check_country_codes.py`. It runs in the release
-gate and in CI. 245 unique codes across 268 references, all
-resolving in the snapshot at ISO 3166 v1.5.2.
+gate and in CI. It reports how many unique codes and references it
+resolved and the snapshot version it resolved them against (`--json`
+gives both).
 
 The snapshot's freshness is tracked by
 `tools/check_snapshot_freshness.py` reading
 `tools/iso3166_snapshot.meta.json`. When ISO 3166 ships a new
 release, the notification rule fires and the snapshot refreshes in
-the same PR.
+the same PR. The snapshot is vendored by `tools/vendor_iso3166.py`, and
+`vendor_iso3166.py --check` (CI and the release gate) proves it is still
+byte-identical to the ISO 3166 release its meta file names.
 
 **Planned:** none. The edge is complete.
+
+### `currencies.active[].countries[].code` → ISO 3166 `region` and `subregion`
+
+**Status:** shipped, consumed by `tools/export_aggregated.py`, verified by
+its `--check` (CI job `check-aggregated-export` and the release gate).
+
+The same key as the edge above, different fields. `export_aggregated.py`
+takes each active country row of `iso4217.countries.parquet`, looks its
+code up in the vendored ISO 3166 snapshot and reads that entry's `region`
+and `subregion` to build `currencies_by_region.parquet` (one row per region
+and currency). The tool lists the snapshot as a CURATED input, a vendored
+external reference; it never reads a live ISO 3166 file and never
+`iso4217.json`.
+
+What the join guarantees, and what it does not:
+
+- It resolves against `countries.active` in the snapshot only. The
+  snapshot's `countries.withdrawn` list reuses two live codes (`SK`, `AI`)
+  for historical entities, so merging both lists would file Slovakia under
+  Southern Asia. A code found only in the withdrawn list is fatal.
+- A code that resolves nowhere stops the tool and names the code. Nothing
+  is dropped silently.
+- `region` is nullable: the snapshot has no UN M49 region for `XK` and
+  `TW`. Those rows are kept with a null region.
+- `subregion` belongs to the (region, currency) group, not to the key. It
+  holds the subregion when every country in the group shares one and is
+  null otherwise (EUR spans several).
+- Whether `region` and `subregion` are right is ISO 3166's responsibility.
+  4217 neither validates nor corrects them; `check_country_codes.py`
+  checks that codes resolve, not that regions are filled.
+
+**Planned:** none.
 
 ### `currencies.*[].numeric` → Asset Identifiers `numeric`
 
