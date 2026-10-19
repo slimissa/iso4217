@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Snapshot freshness check for the ISO 4217 Currency Registry.
+Registry freshness check for the ISO 4217 Currency Registry.
+
+This tool reads the registry's own meta.updated. Its counterpart for vendored snapshots is
+tools/check_snapshot_freshness.py, which reads review_by.
 
 Reads iso4217.json's meta.updated field and fails if it is older than
 a configurable threshold (default: 180 days).
@@ -21,10 +24,10 @@ Exit codes:
     2  fatal (missing file, invalid JSON, unparseable or future date)
 
 Usage:
-    python3 tools/check_snapshot_freshness.py
-    python3 tools/check_snapshot_freshness.py --threshold 365
-    python3 tools/check_snapshot_freshness.py --json
-    python3 tools/check_snapshot_freshness.py --root /path/to/checkout
+    python3 tools/check_registry_freshness.py
+    python3 tools/check_registry_freshness.py --threshold 365
+    python3 tools/check_registry_freshness.py --json
+    python3 tools/check_registry_freshness.py --root /path/to/checkout
 """
 
 from __future__ import annotations
@@ -109,7 +112,7 @@ def report_text(
     lines = []
     rule = "=" * 78
     lines.append(rule)
-    lines.append("  Snapshot Freshness Check - ISO 4217 Currency Registry")
+    lines.append("  Registry Freshness Check - ISO 4217 Currency Registry")
     lines.append(rule)
     lines.append(f"  meta.updated:   {updated}")
     lines.append(f"  Age:            {age_days} day(s)")
@@ -167,7 +170,7 @@ def report_json(
 
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="check_snapshot_freshness.py",
+        prog="check_registry_freshness.py",
         description=(
             "Check that iso4217.json's meta.updated field is within "
             "the freshness threshold."

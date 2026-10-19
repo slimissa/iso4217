@@ -257,3 +257,16 @@ class TestRealRegistry:
         assert code == EXIT_OK
         out = capsys.readouterr().out
         assert "OK" in out
+
+
+def test_help_names_this_tool_and_not_its_snapshot_sibling():
+    import subprocess
+    tool = Path(__file__).resolve().parent.parent / "tools" / "check_registry_freshness.py"
+    r = subprocess.run([sys.executable, str(tool), "--help"], capture_output=True, text=True, timeout=60)
+    assert r.stdout.startswith("usage: check_registry_freshness.py"), r.stdout[:80]
+
+
+def test_report_header_says_registry_not_snapshot():
+    from tools import check_registry_freshness as m
+    text = m.report_text("2026-01-01", 10, 180, False, False)
+    assert "Registry Freshness Check" in text and "Snapshot" not in text

@@ -176,7 +176,7 @@ This document describes the provenance discipline in effect as of v1.5.1. If the
 
 ## 8. Snapshot freshness
 
-`tools/check_snapshot_freshness.py` fails CI when `iso4217.json`'s
+`tools/check_registry_freshness.py` fails CI when `iso4217.json`'s
 `meta.updated` field is more than **180 days** old.
 
 Rationale: ISO 4217 amendments are published irregularly, and the
