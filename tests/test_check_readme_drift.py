@@ -115,8 +115,18 @@ def test_readme_cites_unknown_adr_fails(tmp_path):
     assert "ADR 0042" in r.stdout
 
 
-def test_readme_missing_exits_fatal(tmp_path):
+def test_readme_missing_exits_2(tmp_path):
     root = _minimal_repo(tmp_path, "# Title\n")
     (root / "README.md").unlink()
     r = _run(root)
-    assert r.returncode == 3
+    assert r.returncode == 2
+
+
+def test_git_unavailable_exits_3_not_a_traceback(tmp_path):
+    root = _minimal_repo(tmp_path, "# Title\n")
+    empty = tmp_path / "no-binaries"
+    empty.mkdir()
+    env = {**os.environ, "README_CHECK_REPO": str(root), "PATH": str(empty)}
+    r = subprocess.run([sys.executable, str(TOOL), "--quiet"], capture_output=True, text=True, env=env)
+    assert r.returncode == 3, r.stderr
+    assert "CANNOT RUN" in r.stderr and "Traceback" not in r.stderr

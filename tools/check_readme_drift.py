@@ -13,8 +13,8 @@ Checks:
 Exit codes:
   0  no drift
   1  drift detected (each instance printed to stdout)
-  2  usage error
-  3  README or repo layout unexpected
+  2  usage error, or the README is missing
+  3  cannot run: `git ls-files` failed or git is not installed
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-EXIT_OK, EXIT_DRIFT, EXIT_USAGE, EXIT_FATAL = 0, 1, 2, 3
+EXIT_OK, EXIT_DRIFT, EXIT_FATAL, EXIT_CANNOT_RUN = 0, 1, 2, 3
 
 
 def _find_repo() -> Path:
@@ -234,9 +234,9 @@ def main(argv: list[str] | None = None) -> int:
     text = README.read_text(encoding="utf-8")
     try:
         tracked = _tracked()
-    except subprocess.CalledProcessError as e:
-        print(f"FATAL: git ls-files failed: {e}", file=sys.stderr)
-        return EXIT_FATAL
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"CANNOT RUN: git ls-files failed: {e}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
 
     names = [args.only] if args.only else list(_CHECKS)
     errors: list[str] = []

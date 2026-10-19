@@ -11,10 +11,11 @@ class of mistake impossible to land on main: it fails on TODO, on
 angle-bracket placeholders like <the real line>, and on documents
 shorter than the minimum line count.
 
-Exit codes:
+Exit codes (the convention in RELEASE_PATTERN.md):
   0  every doc checked is clean
   1  at least one doc contains a placeholder
-  3  no docs found (probably the wrong directory)
+  2  usage error, or nothing to check: no docs/ directory or no docs/v*-verification.md
+     (probably the wrong directory)
 """
 from __future__ import annotations
 
@@ -23,7 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-EXIT_OK, EXIT_DIRTY, EXIT_FATAL = 0, 1, 3
+EXIT_OK, EXIT_DIRTY, EXIT_FATAL = 0, 1, 2
 
 MIN_LINES = 80
 

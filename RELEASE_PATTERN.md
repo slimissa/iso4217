@@ -643,6 +643,31 @@ ISO 3166 snapshot had no tool at all, so it was edited by hand and drifted from 
 Applies to: every tool with an output path in the repo, every generator, every exporter.
 Sourced from ISO 3166 v1.6.9 (`94350d6`, `b9c0807`).
 
+## Exit-code convention
+
+Every check in `tools/` exits with one of four codes, so a caller can tell "found a problem" from "could not look".
+
+| Code | Meaning | Examples |
+|------|---------|----------|
+| 0 | ok: the check ran and found nothing, or `--check` found nothing pending | every tool |
+| 1 | finding: the check ran and found a problem, or `--check` found pending changes | `validate.py` errors, `check_readme_drift.py` drift, `enrich_field.py --check` pending, `vendor_iso3166.py --check` mismatch |
+| 2 | fatal or usage: the invocation was wrong, or a local input is missing or malformed | argparse errors, a missing registry file, invalid JSON, no `docs/` directory |
+| 3 | could not run: a required tool, service or network resource was missing or unreachable, so the check cannot say either way | `check_amendments.py` (SIX page unreadable), `check_cross_language.sh` (toolchain absent), `vendor_iso3166.py` (tag unreachable), `check_readme_drift.py` (git unavailable) |
+
+Why 3 is separate: operator-hygiene rule 7 says a check that cannot run must fail, not pass. A caller that sees 3
+knows nothing was verified; a caller that sees 1 knows something is wrong. A tool that returns 1 for "could not
+look" sends the operator to fix data that is fine, and one that returns 0 hides that it never looked.
+
+A traceback exits 1 in Python, the code `--check` modes use for "stale" or "mismatch". A tool must catch the
+failures it expects (a missing binary, an unreadable file) and map them to 2 or 3; an uncaught exception is a bug
+that looks like a finding.
+
+Status: documented, not yet uniform. `check_verification_doc.py` and `check_readme_drift.py` were aligned in
+v1.8.3. Still different, by their docstrings: `sync_wrappers.py --check` returns 3 for a missing copy (a finding);
+`check_cross_language.sh` returns 2 for "no suite ran" (could not run); `check_version_consistency.py` returns 1
+for "or errored"; the exporters, `update_from_iso.py`, `refresh_market_caps.py` and `parse_source.py` document no
+codes. Source: audit finding F20.
+
 ## The mojibake self-trigger rule
 
 Any pattern-based check will find its own explanation. The mojibake
@@ -757,3 +782,5 @@ than one registry.
   ISO 4217's instance is v1.8.1.
 - 2026-10-19 — post-review addition: corollary "pin the render, not only the settings" (the
   clock rule). Sourced from ISO 10383 268cbd8; absence claims live in doc-facts.
+- 2026-10-19 — post-review addition: "Exit-code convention" section (0 ok, 1 finding, 2 fatal or
+  usage, 3 could not run). Source: ISO 4217 audit finding F20.
