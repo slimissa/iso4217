@@ -219,8 +219,16 @@ def test_invalid_json_in_the_source_is_fatal(tmp_path):
 
 def test_write_with_a_version_the_source_does_not_carry_is_fatal(tmp_path):
     root = _repo(tmp_path, b"{}", None)
-    r = _run(root, "--version", "1.0.0", "--source", str(_source(tmp_path, _fixture_v167_plus("9.9.9"))))
+    r = _run(root, "--version", "1.0.0", "--vendored-at", "2026-02-02",
+             "--source", str(_source(tmp_path, _fixture_v167_plus("9.9.9"))))
     assert r.returncode == 2 and "expected '1.0.0'" in r.stderr
+
+
+def test_write_mode_needs_a_date_because_the_tool_never_reads_the_clock(tmp_path):
+    root = _repo(tmp_path, b"{}", dict(META_WITH_REVIEW))
+    src = _source(tmp_path, _fixture_v167_plus())
+    r = _run(root, "--version", "9.9.9", "--source", str(src))
+    assert r.returncode == 2 and "never reads the clock" in r.stderr
 
 
 def test_write_mode_needs_a_version_and_check_refuses_write_flags(tmp_path):

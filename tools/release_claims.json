@@ -1,5 +1,5 @@
 {
-  "_comment": "Machine-checkable claims per CHANGELOG version. Each entry is {file, contains} or {file}. release.sh runs tools/check_release_claims.py against the version being released; any failing claim stops the release. A missing manifest for a released version is a hard error.",
+  "_comment": "Machine-checkable claims per CHANGELOG version. Each entry is {file}, {file, contains}, {file, absent} or {file, contains, absent}; the \"doc-facts\" list is checked on every run, for every release. release.sh runs tools/check_release_claims.py against the version being released; any failing claim stops the release. A missing manifest for a released version is a hard error.",
   "1.7.1": [
     {
       "file": "VERSION",
@@ -867,6 +867,32 @@
     {
       "file": "wrappers/rust/Cargo.toml",
       "contains": "version = \"1.8.2\""
+    }
+  ],
+  "doc-facts": [
+    {
+      "file": "tools/vendor_iso3166.py",
+      "absent": "date.today("
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "absent": "datetime.now("
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "absent": "time.time("
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "absent": "random."
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "absent": "uuid.uuid4("
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "&& info "
     }
   ]
 }

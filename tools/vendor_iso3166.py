@@ -17,7 +17,7 @@ file this tool does serialise, the meta file, takes every setting from
 serialize_meta() and nowhere else.
 
 Modes:
-    python3 tools/vendor_iso3166.py --version 1.6.9 [--vendored-at YYYY-MM-DD] [--source PATH]
+    python3 tools/vendor_iso3166.py --version 1.6.9 --vendored-at YYYY-MM-DD [--source PATH]
     python3 tools/vendor_iso3166.py --check [--source PATH]
 
 The source is the ISO 3166 tag vX.Y.Z (tags are immutable), fetched from GitHub
@@ -50,7 +50,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import date, datetime, timezone
+from datetime import date
 from pathlib import Path
 from typing import Any, Callable
 
@@ -310,7 +310,7 @@ def _run_write(args: argparse.Namespace, root: Path) -> int:
     version = args.version
     existing_meta = _read_json(meta_path) if meta_path.exists() else None
     old_snapshot = snapshot_path.read_bytes() if snapshot_path.exists() else None
-    vendored_at = args.vendored_at or datetime.now(timezone.utc).date().isoformat()
+    vendored_at = args.vendored_at
     try:
         date.fromisoformat(vendored_at)
     except ValueError as exc:
@@ -339,7 +339,7 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
     ap = argparse.ArgumentParser(description="Vendor and verify the ISO 3166 snapshot.")
     ap.add_argument("--check", action="store_true", help="verify the committed snapshot against its source")
     ap.add_argument("--version", help="ISO 3166 release to vendor, for example 1.6.9 (write mode)")
-    ap.add_argument("--vendored-at", help="date to record, YYYY-MM-DD (write mode; default today, UTC)")
+    ap.add_argument("--vendored-at", help="date to record, YYYY-MM-DD (required in write mode; the tool never reads the clock)")
     ap.add_argument("--source", help="read iso3166.json from this path instead of fetching the tag")
     ap.add_argument("--root", help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
@@ -351,6 +351,8 @@ def main(argv: list[str] | None = None, root: Path | None = None) -> int:
             return _run_check(args, base)
         if not args.version:
             raise Fatal("write mode needs --version (or use --check)")
+        if not args.vendored_at:
+            raise Fatal("write mode needs --vendored-at: the tool never reads the clock")
         return _run_write(args, base)
     except (Fatal, CannotRun) as exc:
         print(f"error: {exc}", file=sys.stderr)

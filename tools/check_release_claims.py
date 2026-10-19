@@ -20,6 +20,15 @@ Each claim is one of:
 
   {"file": "path"}                     — path must exist
   {"file": "path", "contains": "text"} — path must exist and include text
+  {"file": "path", "absent": "text"}   — path must exist and must not include text
+
+`contains` and `absent` may be combined in one claim. Any other key is an error: a misspelled key
+must not silently weaken a claim. A missing path fails every claim shape.
+
+The manifest holds one list of claims per released version, checked only for the version named on the
+command line, and a "doc-facts" list checked on every run. Put a claim in "doc-facts" when it must stay
+true for every release (an absence claim, a structural marker); put it in a version entry when it
+describes that release.
 
 Usage:
     python3 tools/check_release_claims.py 1.7.3
@@ -31,6 +40,7 @@ Exit codes:
     0  all claims verified
     1  at least one claim failed
     2  fatal (manifest missing, version not in manifest, malformed entry)
+       A claim that is malformed or has an unknown key FAILS (exit 1); it is not fatal.
 """
 from __future__ import annotations
 
@@ -42,6 +52,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = PROJECT_ROOT / "tools" / "release_claims.json"
+ALLOWED_KEYS = {"file", "contains", "absent"}
+DOC_FACTS_KEY = "doc-facts"
 
 
 class FatalError(SystemExit):
@@ -62,15 +74,30 @@ def load_manifest() -> dict:
 def check_claim(claim: dict) -> tuple[bool, str]:
     if "file" not in claim:
         return False, "claim has no 'file' key"
+    unknown = sorted(set(claim) - ALLOWED_KEYS)
+    if unknown:
+        return False, (f"{claim['file']}: unknown claim key(s) {unknown}; "
+                       f"allowed: contains, absent")
     path = PROJECT_ROOT / claim["file"]
     if not path.exists():
+        # A claim cannot be verified against a missing file. An absent-only claim on a
+        # missing file must not pass: renaming the file would silence every absence claim on it.
         return False, f"missing file: {claim['file']}"
+    text = path.read_text(encoding="utf-8")
+    notes = []
     if "contains" in claim:
         needle = claim["contains"]
-        if needle not in path.read_text(encoding="utf-8"):
+        if needle not in text:
             return False, f"{claim['file']} does not contain {needle!r}"
-        return True, f"{claim['file']} contains {needle!r}"
-    return True, f"{claim['file']} exists"
+        notes.append(f"contains {needle!r}")
+    if "absent" in claim:
+        needle = claim["absent"]
+        if needle in text:
+            return False, f"{claim['file']} contains {needle!r}, which must be absent"
+        notes.append(f"does not contain {needle!r}")
+    if not notes:
+        return True, f"{claim['file']} exists"
+    return True, f"{claim['file']} " + " and ".join(notes)
 
 
 def run_audit() -> int:
@@ -157,11 +184,17 @@ def main(argv: list[str] | None = None) -> int:
         raise FatalError(f"claims for {args.version} is not a list")
 
     results = []
-    for claim in claims:
+    doc_facts = manifest.get(DOC_FACTS_KEY, [])
+    if not isinstance(doc_facts, list):
+        raise FatalError(f"{DOC_FACTS_KEY!r} is not a list")
+    labelled = [(args.version, c) for c in claims] + [(DOC_FACTS_KEY, c) for c in doc_facts]
+    for section, claim in labelled:
+        prefix = "" if section == args.version else f"[{section}] "
         if not isinstance(claim, dict):
-            results.append((False, f"not an object: {claim!r}"))
+            results.append((False, f"{prefix}not an object: {claim!r}"))
             continue
-        results.append(check_claim(claim))
+        ok, detail = check_claim(claim)
+        results.append((ok, prefix + detail))
 
     if args.json:
         print(json.dumps({

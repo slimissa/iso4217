@@ -356,6 +356,21 @@ will fail on a machine that made the other choice. Sourced from ISO 3166 `4b272e
 `tools/vendor_iso3166.py` (v1.8.2) takes the question away for the snapshot by never re-serialising it, and takes
 every setting for the one file it does serialise from a single function.
 
+**Corollary: pin the render, not only the settings.** Any generator whose output is a committed artifact must not
+read the clock, the OS, or an unpinned dependency. A value from `date.today()`, `os.getpid()`, or an unpinned
+library version can pass `--check` only on the day (or machine) that generated the committed file. Pin the render,
+or omit the varying field.
+
+ISO 4217's instance: `tools/vendor_iso3166.py` copies the source bytes and takes the date it records from
+`--vendored-at`; it never reads the clock. Absence claims in the manifest's `doc-facts` list, which
+`tools/check_release_claims.py` checks on every run and so for every release, assert that `date.today(`,
+`datetime.now(`, `time.time(`, `random.` and `uuid.uuid4(` do not appear in it. The tokens end at the open
+parenthesis on purpose: the claim `datetime.now()` is not a substring of `datetime.now(timezone.utc)`, which is
+what the tool called until v1.8.3, so it would have passed while the clock was read. A test,
+`tests/test_check_release_claims.py`, evaluates the same claims against the tree on every pytest run and parses
+the tool's syntax tree for calls an alias could hide. Sourced from ISO 10383 `268cbd8`; the unpinned instance is
+ISO 3166's `gen_iso4217_snapshot.py`, which wrote `date.today()` into the bytes its `--check` compares (`4b272e5`).
+
 ## Operator hygiene
 
 Four rules that emerged from specific failure modes across the
@@ -740,3 +755,5 @@ than one registry.
 - 2026-10-17 — post-review addition: "Version-pinned byte outputs" section and its settings
   corollary. Sourced from ISO 3166 8902ba6 (v1.6.8, the rule; the pin is aa784da) and 4b272e5 (the corollary);
   ISO 4217's instance is v1.8.1.
+- 2026-10-19 — post-review addition: corollary "pin the render, not only the settings" (the
+  clock rule). Sourced from ISO 10383 268cbd8; absence claims live in doc-facts.
