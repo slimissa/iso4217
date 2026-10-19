@@ -203,7 +203,7 @@ def validate_meta(registry: Dict) -> List[ValidationError]:
     # Schema version agreement is checked by tools/check_version_consistency.py,
     # which compares iso4217.json → meta.schema_version against schema.json → $id.
     # This validator does not hardcode a schema version — doing so is a second
-    # source of truth that drifts on every schema bump. See ADR 0006.
+    # source of truth that drifts on every schema bump. See ADR 0009.
 
     # v1.6.0 — meta.amendment and meta.amendment_date
     amendment = meta.get("amendment")
@@ -1310,7 +1310,7 @@ def validate_statistics(registry: Dict, allow_partial: bool = False) -> Tuple[Li
     # Check for unexpected minor_units values, restricted to circulating
     # currencies. Fund and indexation units (CLF, UYW) carry their ISO 4217
     # precision without firing the warning — their precision is documented
-    # in the ISO standard, not a data anomaly. See ADR 0005 for the
+    # in the ISO standard, not a data anomaly. See ADR 0008 for the
     # complementary treatment of numeric-code reuse.
     circulating_mu_dist = Counter(
         c.get("minor_units")
