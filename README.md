@@ -699,7 +699,7 @@ The eight invariants every release refuses on, plus the operator-hygiene rules, 
 The registry follows [Semantic Versioning](https://semver.org/):
 
 - **Major** — breaking schema changes (removed or renamed required fields)
-- **Minor** — new currencies, or new optional fields (backward-compatible)
+- **Minor** — new currencies, an ISO amendment that changes which currencies are active, or new optional fields (backward-compatible)
 - **Patch** — data corrections and non-breaking fixes, including tooling-only releases
 
 Two version axes are tracked independently, because the data version and the format-contract version can move separately:

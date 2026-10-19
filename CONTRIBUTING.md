@@ -283,6 +283,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 | Breaking schema changes (removed/renamed required fields) | Major (`1.0.0` → `2.0.0`) |
 | New currencies added or new optional fields | Minor (`1.0.0` → `1.1.0`) |
 | Data corrections (no structural changes) | Patch (`1.0.0` → `1.0.1`) |
+| An ISO amendment that changes which currencies are active (a code added, or moved from active to withdrawn) | Minor (`1.7.0` → `1.8.0`), not Patch: a consumer looking a code up in `active` sees it change. An amendment that only corrects an attribute of a currency that stays active is a data correction (Patch). |
 | New export format (SQL, CSV, CLI, or a new dialect) | Minor for the registry |
 | Wrapper bug fixes | Patch for that wrapper |
 | New wrapper language | Minor for the project |
