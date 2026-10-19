@@ -68,9 +68,9 @@ def test_the_checker_does_not_trip_over_its_own_source():
 
 
 def test_the_docstring_names_u201a_and_does_not_call_it_an_em_dash():
-    doc = cm.__doc__
+    doc = " ".join(cm.__doc__.split())
     assert "U+201A" in doc
-    first_entry = doc.split("U+201A", 1)[1].split("\n\n", 1)[0]
+    first_entry = doc.split("U+201A", 1)[1][:300]
     assert "It is not an em dash." in first_entry
 
 
@@ -131,6 +131,6 @@ def test_a_box_drawing_character_is_caught_only_by_the_accident_of_its_last_byte
 
 
 def test_the_docstring_states_that_provenance():
-    doc = cm.__doc__
+    doc = " ".join(cm.__doc__.split())
     assert "Mathematical Operators" in doc and "General Punctuation" in doc
     assert "which no pattern covers" in doc

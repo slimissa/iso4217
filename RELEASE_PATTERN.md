@@ -593,6 +593,15 @@ This rule was added after v1.7.11. The check that closes the class is
 placeholder patterns in code, and its output names the file it
 checked. Sourced from ISO 4217 v1.7.11.
 
+**A diagnostic must read the artifact the way it is stored.** `grep -F` on `tools/release_claims.json` cannot see
+the defect it was written to find: the file stores a pattern as `rb"\\xc3..."` (JSON doubles each backslash), while
+the value being compared is `rb"\xc3..."`. The grep matches nothing, and the empty result reads as "no defect". Parse
+the file with `json.loads` and compare the decoded strings. The same holds for any structured file (JSON, YAML,
+TOML): searching its text instead of its values answers a question about the encoding, not about the data. ISO 4217's
+own manifest has such a claim: the v1.8.1 entry's check that `tools/check_mojibake.py` contains the U+FFFD pattern is
+stored with doubled backslashes, and `grep -F` for the pattern as it appears in the tool finds nothing in the
+manifest. Sourced from ISO 10383 `052bcbd`.
+
 ### 7. A check that cannot run must fail, not pass
 
 A built-in check that cannot execute — a missing toolchain, an absent
@@ -700,6 +709,16 @@ check, not just mojibake.
 
 ---
 
+### Asserting on prose
+
+A substring assertion on prose must normalize whitespace first: `" ".join(doc.split())`. A line break is
+formatting, not semantics. A docstring or a document is wrapped by whoever edits it, and an assertion that a
+sentence appears verbatim fails the first time the wrap moves, or passes only because the wrap happens to fall in
+the same place. The same applies to a manifest claim whose `contains` string spans a wrap: put the claim on a string
+that sits on one line, or assert it in a test that normalizes. ISO 4217 met this in v1.8.2: a draft of the
+sentence "Neither replaces the other. Do not merge them." wrapped across two lines and its check failed on the
+wrap, not on the wording. Sourced from ISO 10383 `052bcbd`.
+
 ## What this document does not cover
 
 - Specific `release.sh` implementations. See each repo's
@@ -784,3 +803,5 @@ than one registry.
   clock rule). Sourced from ISO 10383 268cbd8; absence claims live in doc-facts.
 - 2026-10-19 — post-review addition: "Exit-code convention" section (0 ok, 1 finding, 2 fatal or
   usage, 3 could not run). Source: ISO 4217 audit finding F20.
+- 2026-10-19 — post-review addition: "Asserting on prose" (mojibake section) and the
+  "read the artifact as stored" paragraph (rule 6d). Sourced from ISO 10383 052bcbd.
