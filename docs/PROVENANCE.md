@@ -166,10 +166,10 @@ A pull request that adds an entry without these checks passing will fail CI or w
 
 ## 7. Versioning of this document
 
-This document describes the provenance discipline in effect as of v1.5.1. If the discipline changes — for example, if per-entry source fields are added, or if signed releases ship — this document will be updated alongside the change, and the CHANGELOG entry will reference it.
+This document describes the provenance discipline in effect as of v1.8.3. If the discipline changes — for example, if per-entry source fields are added, or if signed releases ship — this document will be updated alongside the change, and the CHANGELOG entry will reference it.
 
-**Last updated:** 2026-09-15
-**Applies to registry version:** 1.5.0 (data), 1.5.1 (documentation)
+**Last updated:** 2026-10-19
+**Applies to registry version:** 1.8.3 (data and documentation)
 **Maintainer:** [github.com/slimissa](https://github.com/slimissa)
 
 ---
@@ -188,6 +188,66 @@ cycle without being noisy on a healthy schedule.
 
 The threshold can be overridden at the command line
 (`--threshold 365`) but the CI job uses the default.
+
+## 9. Per-field provenance
+
+Section 1 describes sources by category. This table names every field of `iso4217.json`, one row each: where the value comes from, what makes it change, and what checks it. `tools/check_provenance.py` fails CI and the release gate when a field of the data has no row here, when a row names a field that no longer exists, when a cell is empty, or when "Checked by" names a file that is not in the repository.
+
+How to read it:
+
+- **Where** lists the kinds of object the field appears in: `meta`, `source`, `active` and `withdrawn` (currency entries), `countries[]` (the objects inside `countries`), `non_iso`. A field that appears in several kinds has one row.
+- **Source** restates section 1's categories for the field. It is the primary source the value is verified against, not a record of where a specific entry came from (see "No per-entry `source` field" in section 5).
+- **Checked by** names what can fail when the value is wrong in form. `schema.json` is enforced through `tools/validate.py`. A row that says "type only" is checked for its JSON type and nothing else; a value that is the right type and wrong is caught by review, not by a tool.
+- Rows were assembled from `schema.json`, the ADRs, section 1 and the code of each checker. Refresh triggers for ISO-derived fields are the amendment; for the rest they are the annual spot-check or the release.
+
+| Field | Where | Source | Refresh trigger | Checked by |
+|---|---|---|---|---|
+| `amendment` | meta | The amendment number printed on the SIX Group amendment PDF last applied; mirrors `source.last_amendment_applied` | Each amendment | `schema.json` (integer 1-999), `tools/validate.py` |
+| `amendment_date` | meta | The date printed on that amendment's PDF (see "Amendment dates") | Each amendment | `schema.json` (date), `tools/validate.py` |
+| `central_bank` | active | The central bank's own website, English "About" page (section 1) | Annual spot-check | `schema.json` (required), `tools/validate.py` |
+| `classification` | active | ADR 0003: which ISO 4217 list the code sits on (circulating, fund, settlement, indexation) | When an amendment adds or reclassifies a code | `tools/enrich_field.py` (`--field classification --check`, CI and gate), `schema.json` (enum), `tools/validate.py` |
+| `code` | active, withdrawn, non_iso, countries[] | ISO 4217 alphabetic code (Table A.1 and amendments) for currency entries; the instrument's ticker or convention for non-ISO entries; ISO 3166-1 alpha-2 for `countries[]` | Per amendment; per ISO 3166 release for `countries[]` | `schema.json` (patterns), `tools/validate.py`, `tools/check_country_codes.py` (`countries[].code` against the vendored ISO 3166 snapshot) |
+| `code_lifetime` | withdrawn | ADR 0006: `from` is ISO's assignment date when documented, else null; `to` equals `withdrawn_date` | Each withdrawal | `tools/enrich_field.py` (`--field code_lifetime --check`), `tools/validate.py`, `tests/test_iso_codes.py` |
+| `commodity_source` | source | Names the commodity code convention the non-ISO commodities follow (LBMA, section 1) | When that convention changes | `schema.json` (type only) |
+| `conversion_rate` | withdrawn | Council Regulation (EC) No 2866/98 and successors for euro changeovers; the issuing authority's decree otherwise | Never (historical fact) | `schema.json` (number), `tools/validate.py`, `tests/test_iso_codes.py` |
+| `countries` | active | ISO 3166-1 and the UN Statistics Division membership lists (section 1) | Annual spot-check | `schema.json` (array), `tools/validate.py` (at least one country), `tools/check_country_codes.py` |
+| `crypto_source` | source | Names the CoinGecko `/coins/markets` endpoint (section 1) | Weekly (manual) | `schema.json` (type only) |
+| `description` | meta | Written by the maintainer | Rarely | `schema.json` (type only) |
+| `entity` | active, withdrawn, non_iso | The ISO 4217 table's Entity column for currency entries; the issuer or defining body for non-ISO entries | Per amendment; annual spot-check | `schema.json` (required), `tools/validate.py` |
+| `introduced` | non_iso | The instrument's own launch documentation | When the entry is added | `schema.json` (date) |
+| `is_independent` | active, non_iso | Peg information (section 1): central bank and AREAER; true when the currency floats or is a managed float, false when hard-pegged | Annual spot-check | `schema.json` (boolean), `tools/validate.py` |
+| `iso_status` | non_iso | ISO 4217's own lists: whether the code is officially defined | When an amendment adds or withdraws a code | `schema.json` (enum), `tools/validate.py` |
+| `last_amendment_applied` | source | The amendment number on the SIX Group amendment PDF | Each amendment | `tools/check_amendments.py` (weekly monitor compares it with the SIX page), `tools/validate.py`, `schema.json` |
+| `last_amendment_date` | source | The date printed on that amendment's PDF (see "Amendment dates") | Each amendment | `schema.json` (date), `tools/validate.py` |
+| `last_verified` | source | The UTC date the amendment PDF was last read (see "Amendment dates") | Each amendment or re-verification | `schema.json` (date), `tools/validate.py` |
+| `license` | meta | The maintainer's choice (Apache-2.0) | Never expected | `schema.json` (enum) |
+| `maintenance_agency` | source | ISO 4217 names SIX Group as its maintenance agency | Never expected | `schema.json` (enum) |
+| `maintenance_agency_url` | source | The agency's published address | If the agency moves | `schema.json` (https pattern) |
+| `market_cap_rank` | non_iso | CoinGecko `/coins/markets` rank (section 1) | Weekly (manual, `tools/refresh_market_caps.py`) | `schema.json` (integer, at least 1), `tests/test_refresh_market_caps.py` |
+| `minor_units` | active, withdrawn, non_iso | ISO 4217:2015 for ISO codes, cross-checked against the central bank; a price-precision convention for non-ISO entries | Annual spot-check | `schema.json` (integer range), `tools/validate.py` |
+| `name` | active, withdrawn, non_iso, countries[] | The ISO 4217 currency name for currency entries; the instrument's name for non-ISO entries; the country's English short name for `countries[]` | Per amendment; annual spot-check | `schema.json` (type only), `tools/validate.py` |
+| `note` | active, withdrawn, non_iso | Written by the maintainer. ADR 0005: `note` explains, `source_url` links. A non-ISO note must say the entry is not an ISO 4217 code (section 6) | With the entry | `tools/validate.py` (non-ISO disclaimer), `schema.json`, `tests/test_iso_codes.py` |
+| `numeric` | active, withdrawn, non_iso | ISO 4217:2015 Table A.1 and the SIX Group amendment PDFs; non-ISO entries carry one only where ISO assigned one | Per amendment | `schema.json` (three digits), `tools/validate.py`, `tools/enrich_field.py` (reuse derivation) |
+| `numeric_reused` | active | ADR 0004 and ADR 0008: derived, true when the numeric code also appears on a withdrawn entry | Whenever a code is added or withdrawn | `tools/enrich_field.py` (`--field numeric_reused --check`, CI and gate), `tools/validate.py` |
+| `peg_band_pct` | active | Central bank and the IMF AREAER (section 1) | Annual spot-check | `schema.json`, `tools/validate.py` |
+| `peg_mechanism` | non_iso | The issuer's transparency page (section 1) | Weekly (manual) | `schema.json` (enum), `tools/validate.py` |
+| `peg_rate` | active | Central bank and the IMF AREAER (section 1) | Annual spot-check | `schema.json`, `tests/test_iso_codes.py` |
+| `peg_type` | active | The maintainer's reading of `pegged_to`: single anchor, basket or undisclosed | Annual spot-check | `schema.json`, `tools/validate.py` |
+| `pegged_since` | active | The central bank, for the date the peg was established | Annual spot-check | `schema.json` (date), `tools/validate.py` |
+| `pegged_to` | active, non_iso | Central bank and AREAER for currencies; the fiat currency the issuer tracks for stablecoins | Annual spot-check; weekly for stablecoins | `schema.json` (pattern for stablecoins), `tools/validate.py` (references resolve) |
+| `project` | meta | The repository address, set by the maintainer | Never expected | `schema.json` (https://github.com/ pattern) |
+| `relationship` | countries[] | UN Statistics Division and ISO 3166-1; the five values are defined in section 4, step 4 | Annual spot-check | `schema.json` (enum), `tools/validate.py` |
+| `replaced_by` | withdrawn | The ISO 4217 amendment or national decree that names the replacement | Each withdrawal | `schema.json` (pattern), `tools/validate.py`, `tests/test_iso_codes.py` |
+| `schema_version` | meta | `schema.json`'s `$id`: the format-contract axis, separate from the data version | When the schema changes | `tools/check_version_consistency.py`, `schema.json` |
+| `source_url` | active, withdrawn | ADR 0005: the entry's primary source address | With the entry | `tools/enrich_field.py` (`--field source_url --check`, CI and gate), `schema.json`, `tools/validate.py` |
+| `stablecoin_source` | source | Names the issuer transparency pages and CoinGecko (section 1) | Weekly (manual) | `schema.json` (type only) |
+| `standard` | source | The edition of ISO 4217 the data follows | When ISO publishes a new edition | `schema.json` (enum) |
+| `symbol` | active, withdrawn, non_iso | Unicode CLDR currency data and the central bank (section 1) | Annual spot-check | `schema.json` (type only), `tools/validate.py`, `tests/test_export_csv.py` |
+| `type` | non_iso | The maintainer's classification of the instrument; an enumerated value for special-purpose entries | When the entry is added | `schema.json` (enum for special-purpose), `tools/validate.py` |
+| `updated` | meta | The UTC date of the release that last changed the data, set by `scripts/release.sh` | Every release | `tools/check_registry_freshness.py` (180 days), `tools/validate.py`, `schema.json` |
+| `verified_against` | source | The maintainer's list of sources consulted in the last verification | Each verification | `schema.json` (array only) |
+| `version` | meta | The `VERSION` file, bumped by `scripts/release.sh` | Every release | `tools/check_version_consistency.py`, `schema.json` |
+| `withdrawn_date` | withdrawn | The date the currency ceased to be legal tender: the ISO 4217 amendment's effective date or the national legislation | Each withdrawal | `schema.json` (date), `tools/validate.py`, `tools/enrich_field.py` (`code_lifetime.to` must equal it), `tests/test_iso_codes.py` |
 
 ## Amendment dates
 
