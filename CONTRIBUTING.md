@@ -160,11 +160,14 @@ Every derived artifact must be regenerated in the same commit. CI rejects PRs wh
 2. Run `python3 tools/validate.py` — must pass with 0 errors
 3. Regenerate every derived artifact:
    ```bash
-   python3 tools/export_sql.py       # four SQL files
-   python3 tools/export_csv.py       # four CSV/TSV files
-   python3 tools/export_parquet.py   # one Parquet file
-   python3 tools/sync_wrappers.py    # Go and Rust embedded copies
+   python3 tools/export_sql.py                # four SQL files
+   python3 tools/export_csv.py                # four CSV/TSV files
+   python3 tools/export_parquet.py            # one Parquet file
+   python3 tools/export_countries_parquet.py  # one Parquet file (country rows)
+   python3 tools/export_aggregated.py         # three Parquet files
+   python3 tools/sync_wrappers.py             # Go and Rust embedded copies
    ```
+   Run them in this order: `export_aggregated.py` reads `iso4217.parquet` and `iso4217.countries.parquet`, so it must run after both. This is the order `scripts/release.sh` uses.
    `sync_wrappers.py` copies the root `iso4217.json` into `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json`, which are compiled into those wrappers at build time (`go:embed`, `include_str!`) and do **not** update on their own. Skipping this step leaves Go and Rust silently running against stale data. CI will fail the build if these copies aren't in sync with root, but running it locally first saves you a failed PR.
 4. Run the full test suite:
    ```bash
