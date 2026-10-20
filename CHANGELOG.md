@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.4] — Unreleased
+
+Eleven items from the ISO 3166 and ISO 10383 review threads: a reachability table for every tool, the rule for which
+layer compares bytes and which compares content, two `release.sh` tag fixes, the coordination-note rule, four stale
+documentation lines, and dependency audits in CI. No data change. One description change in `schema.json`.
+
+### Fixed
+
+- **`release.sh` tag verification.** The message file is checked non-empty before the tag is created. The recorded
+  message is compared with `$(...)` and `[[ ]]` before the push, as before; what is new is that `git tag -d` on a
+  mismatch is checked. Under `set -e` a failing delete used to stop the script with git's own exit code before `fail`
+  printed anything, leaving a local tag that nothing reported (A12).
+- `release.sh` passes `--cleanup=verbatim` to `git tag`, so git records the message file exactly as written instead of
+  running the whitespace cleanup over it (A13).
+- `docs/LAYERS.md` named ISO 3166 v1.5.2 as the vendored snapshot; it is v1.6.9 (G1).
+- `CONTRIBUTING.md` said "As of v1.5.0: registry is `1.5.0`, Python package is `1.1.0`"; it now says 1.8.4 for both (G2).
+- The README tool tree omitted `tools/vendor_iso3166.py` (G3).
+- `schema.json` described `meta.amendment_date` as an effective date; the field holds the date printed on the amendment
+  PDF (G4). This closes the limitation recorded under "Not in this release" in 1.8.0.
+
+### Added
+
+- `docs/AUDIT.md`: every tool in `tools/`, its `--check`, its CI workflow and its gate status, in three categories, with
+  the gaps listed. Operator-hygiene rule 8 links to it (A10).
+- `RELEASE_PATTERN.md`: "CURATED vs AGGREGATED comparison" (A11), including the two CURATED Parquet files as the
+  documented exception; "Coordination notes" (A14); operator-hygiene rule 9, "Every lockfile is audited on every
+  push" (H9b).
+- CI: `cargo audit`, `npm audit --audit-level=high`, `pip-audit` and `govulncheck ./...` run in the
+  `validate-wrappers` job. The Rust and JavaScript jobs generate their lockfile first (both are gitignored);
+  `pip-audit` reads `requirements-ci.txt`. `cargo-audit` is installed with a SHA-pinned `taiki-e/install-action`. The Go
+  job's `setup-go` moves from 1.21 to a supported release so `govulncheck` is not scanning an end-of-life standard
+  library; `wrappers/go/go.mod` still says `go 1.21`. They are polled by `release.sh`, not gate steps (H9a).
+- `tests/test_release_tag.py`: a failing `git tag -d` aborts and says the tag still exists; source checks for the
+  agreed forms.
+- Claims for all of the above in `tools/release_claims.json`; `doc-facts` asserts `release.sh` contains neither
+  `diff -q` nor the old cleanup flag.
+
+### Not in this release
+
+- `tools/export_parquet.py` and `export_countries_parquet.py` compare logical content, not bytes, against the A11 rule
+  as worded. `pyarrow` is pinned, so a byte comparison is possible; it is a separate decision.
+- `docs/AUDIT.md` is not checked by any tool. `parse_source.py` runs neither in CI nor in the gate and no decision
+  records why. `update_from_iso.py` and `refresh_market_caps.py` are out of CI and the gate by design (manual,
+  network-dependent); the table says so.
+- The Go wrapper is no longer tested in CI on the minimum Go it declares (`go 1.21`).
+- The JavaScript audit has no dependencies to audit. The audits run on push only, so an advisory published between
+  pushes is seen at the next push.
+- `wrappers/python/schema.json` is not synced by `sync_wrappers.py` and differs from the root `schema.json`.
+- `docs/LAYERS.md` still names `check_country_codes.py --refresh-from` as the snapshot's refresh command;
+  `vendor_iso3166.py` writes it. `CONTRIBUTING.md` still calls wrapper versions independent; they move together.
+
+---
 ## [1.8.3] — 2026-10-19
 
 Six audit findings (F5, F16, F18, F20, F22, F23), the amendment row in the versioning policy, and the lessons from the

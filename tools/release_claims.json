@@ -986,6 +986,248 @@
       "contains": "version = \"1.8.3\""
     }
   ],
+  "1.8.4": [
+    {
+      "file": "VERSION",
+      "contains": "1.8.4"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.8.4\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.8.4]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.8.4"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.8.4"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.8.4\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.8.4\""
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `export_sql.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `export_csv.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `export_parquet.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `export_countries_parquet.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `export_aggregated.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `sync_wrappers.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `vendor_iso3166.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `validate.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_version_consistency.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_mojibake.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_snapshot_freshness.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_registry_freshness.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_country_codes.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_readme_drift.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_provenance.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_verification_doc.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_amendments.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_cross_language.sh` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_release_claims.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `enrich_field.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `update_from_iso.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `parse_source.py` |"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `refresh_market_caps.py` |"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "[`docs/AUDIT.md`](docs/AUDIT.md)"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "## CURATED vs AGGREGATED comparison"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "CURATED compares bytes; AGGREGATED compares content."
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "lets silent drift through"
+    },
+    {
+      "file": "tools/export_parquet.py",
+      "contains": "See A11 in RELEASE_PATTERN.md"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "# A12: tag-message verification."
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "[ -s \"$msgfile\" ]"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "[[ \"$recorded\" == \"$message\" ]]"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "if ! git tag -d \"$TAG\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "STILL EXISTS"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "--cleanup=verbatim"
+    },
+    {
+      "file": "tests/test_release_tag.py",
+      "contains": "test_a_failing_tag_delete_aborts_and_says_the_tag_still_exists"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "## Coordination notes"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "Downstream coordination."
+    },
+    {
+      "file": "docs/LAYERS.md",
+      "contains": "ISO 3166 (v1.6.9)"
+    },
+    {
+      "file": "docs/LAYERS.md",
+      "absent": "ISO 3166 (v1.5.2)"
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "contains": "As of v1.8.4: registry is `1.8.4`, Python package is `1.8.4`."
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "absent": "As of v1.5.0"
+    },
+    {
+      "file": "README.md",
+      "contains": "# ISO 3166 snapshot vendoring (--check)"
+    },
+    {
+      "file": "schema.json",
+      "contains": "The date printed on the amendment PDF."
+    },
+    {
+      "file": "schema.json",
+      "absent": "Effective date of the amendment."
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "cargo audit"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "npm audit --audit-level=high"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "pip-audit -r requirements-ci.txt"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "govulncheck ./..."
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "taiki-e/install-action@"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "absent": "go-version: '1.21'"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "by design, not by omission"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "### 9. Every lockfile is audited on every push"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "zmij / syn 3.0.6"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",
@@ -1010,6 +1252,14 @@
     {
       "file": "scripts/release.sh",
       "absent": "&& info "
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "diff -q"
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "--cleanup=whitespace"
     }
   ]
 }
