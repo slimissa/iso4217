@@ -138,7 +138,7 @@ the registry's own file structure.
 
 | File | Vendored from | Refreshed by | CI gate |
 |------|---------------|--------------|---------|
-| `tools/iso3166_snapshot.json` | ISO 3166 (v1.5.2) | `tools/check_country_codes.py --refresh-from <path>` | `check-country-codes` |
+| `tools/iso3166_snapshot.json` | ISO 3166 (v1.6.9) | `tools/check_country_codes.py --refresh-from <path>` | `check-country-codes` |
 
 **Read-only interfaces (no artifact on disk):**
 
