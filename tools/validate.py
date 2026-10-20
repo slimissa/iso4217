@@ -15,6 +15,10 @@ Usage:
     python tools/validate.py --json             # Output results as JSON
     python tools/validate.py --no-schema        # Skip the schema layer on purpose
 
+Hostile input: a file that is not UTF-8, is nested too deeply, holds an integer of more than 100 digits,
+or whose top-level value is not an object stops the run with exit 2 and a message that names the file and
+the failure. The same loader reads the schema.
+
 Exit codes:
     0 — All validations passed
     1 — Validation errors found
@@ -1379,29 +1383,91 @@ def validate_statistics(registry: Dict, allow_partial: bool = False) -> Tuple[Li
 # Main validation orchestrator
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Loading. Hostile or malformed input exits 2 with a message; it never reaches a traceback (audit F10).
+# An uncaught exception exits 1 in Python, the code that means "the check found a problem".
+# ---------------------------------------------------------------------------
+
+# No field of the registry or of the schema has more than a handful of digits. The cap is applied by the parser's own
+# parse_int hook, so it behaves the same on every interpreter: Python 3.11+ has a 4300-digit limit of its own, older
+# versions convert a very long literal quietly.
+MAX_INTEGER_DIGITS = 100
+
+
+class HostileInput(ValueError):
+    """Input that is well-formed JSON text but that this tool refuses to load."""
+
+
+def _parse_int(text: str) -> int:
+    digits = text.lstrip("-")
+    if len(digits) > MAX_INTEGER_DIGITS:
+        raise HostileInput(f"integer literal with {len(digits)} digits (limit {MAX_INTEGER_DIGITS})")
+    return int(text)
+
+
+def _json_type_name(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "a boolean"
+    if isinstance(value, (int, float)):
+        return "a number"
+    if isinstance(value, str):
+        return "a string"
+    if isinstance(value, list):
+        return "an array"
+    return type(value).__name__
+
+
+def _fatal(path: Path, reason: str) -> None:
+    print(f"FATAL: {path}: {reason}", file=sys.stderr)
+    sys.exit(2)
+
+
+def _parse_file(path: Path) -> Dict:
+    """Read and parse one JSON file that must hold an object.
+
+    FileNotFoundError propagates, so each caller can say what the missing file was. Every other failure prints
+    "FATAL: <path>: <reason>" and exits 2.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise
+    except UnicodeDecodeError as e:
+        _fatal(path, f"not valid UTF-8 (byte {e.start}: {e.reason})")
+    except OSError as e:
+        _fatal(path, f"cannot be read: {e.strerror or e}")
+
+    try:
+        data = json.loads(text, parse_int=_parse_int)
+    except RecursionError:
+        _fatal(path, "nested too deeply for the JSON parser (RecursionError)")
+    except json.JSONDecodeError as e:
+        _fatal(path, f"invalid JSON at line {e.lineno} column {e.colno}: {e.msg}")
+    except ValueError as e:
+        _fatal(path, str(e))
+
+    if not isinstance(data, dict):
+        _fatal(path, f"top-level value is {_json_type_name(data)}, not an object")
+    return data
+
+
 def load_registry(path: Path) -> Dict:
     """Load and parse the registry JSON file."""
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        return _parse_file(path)
     except FileNotFoundError:
         print(f"FATAL: Registry file not found: {path}", file=sys.stderr)
-        sys.exit(2)
-    except json.JSONDecodeError as e:
-        print(f"FATAL: Invalid JSON in {path}: {e}", file=sys.stderr)
         sys.exit(2)
 
 
 def load_schema(path: Path) -> Optional[Dict]:
     """Load the JSON Schema file. Returns None if not found."""
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        return _parse_file(path)
     except FileNotFoundError:
         return None
-    except json.JSONDecodeError as e:
-        print(f"FATAL: Invalid JSON Schema: {e}", file=sys.stderr)
-        sys.exit(2)
 
 
 def validate(registry_path: Path, schema_path: Optional[Path] = None, allow_partial: bool = False,
