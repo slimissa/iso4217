@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.8.4] — Unreleased
+## [1.8.4] — 2026-10-20
 
 Eleven items from the ISO 3166 and ISO 10383 review threads: a reachability table for every tool, the rule for which
 layer compares bytes and which compares content, two `release.sh` tag fixes, the coordination-note rule, four stale
