@@ -65,7 +65,7 @@
         "amendment_date": {
           "type": "string",
           "format": "date",
-          "description": "Effective date of the amendment."
+          "description": "The date printed on the amendment PDF."
         }
       }
     },
