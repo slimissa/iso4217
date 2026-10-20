@@ -371,6 +371,20 @@ what the tool called until v1.8.3, so it would have passed while the clock was r
 the tool's syntax tree for calls an alias could hide. Sourced from ISO 10383 `268cbd8`; the unpinned instance is
 ISO 3166's `gen_iso4217_snapshot.py`, which wrote `date.today()` into the bytes its `--check` compares (`4b272e5`).
 
+## CURATED vs AGGREGATED comparison
+
+CURATED compares bytes; AGGREGATED compares content. CURATED outputs are the source of truth for their content, so any
+byte change is a change of state. AGGREGATED outputs are queries over CURATED; their invariant is that the same query
+produces the same answer. Byte-comparison on AGGREGATED files couples them to a library version for no benefit;
+content-comparison on CURATED files lets silent drift through.
+
+In this registry the two CURATED Parquet files are the exception to the first sentence. `iso4217.parquet` and
+`iso4217.countries.parquet` are compared on logical content (column names, types and every value, after
+`pq.read_table`), not on bytes: a Parquet writer may choose a different row-group size, dictionary encoding or block
+boundary and still produce the same table. `pyarrow` is pinned (`pyarrow==26.0.0` in `requirements-ci.txt`), so a byte
+comparison is possible; adopting one is a separate decision that v1.8.4 does not make. The AGGREGATED files are
+compared on content, as the rule says.
+
 ## Operator hygiene
 
 Four rules that emerged from specific failure modes across the
@@ -812,3 +826,5 @@ than one registry.
 - 2026-10-19 — post-review addition: operator-hygiene rule 8 links to `docs/AUDIT.md`, the per-tool
   reachability table (`--check`, CI, gate). Source: ISO 4217 v1.8.4 (A10), from the ISO 3166 and ISO 10383
   review threads.
+- 2026-10-19 — post-review addition: "CURATED vs AGGREGATED comparison" section (A11). Source: ISO 4217 v1.8.4,
+  from the ISO 3166 and ISO 10383 review threads. Records the two CURATED Parquet files as the exception.

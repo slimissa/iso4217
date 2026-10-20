@@ -446,6 +446,8 @@ def render_parquet(registry: Registry) -> bytes:
 # ---------------------------------------------------------------------------
 # Comparison (logical, not byte-for-byte)
 # ---------------------------------------------------------------------------
+# See A11 in RELEASE_PATTERN.md (CURATED vs AGGREGATED comparison). This file is the documented Parquet
+# exception to "CURATED compares bytes": it compares logical content, on purpose.
 
 def check_parquet(registry: Registry) -> int:
     """
