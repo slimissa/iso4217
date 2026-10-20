@@ -6,6 +6,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.8.5] — Unreleased
+
+Input hardening: `tools/validate.py` stops passing when it could not run, stops crashing on hostile input, and rejects
+what `json.loads` silently accepts; the vendored ISO 3166 snapshot records its own hash. Audit findings F10, F11, F12,
+F21 and F26. No data change, no schema change, no change to `RELEASE_PATTERN.md`.
+
+### Fixed
+
+- **`tools/validate.py` exited 0 when its schema layer did not run (F11).** A missing `schema.json` appended a warning
+  and the run ended in "VALIDATION PASSED". The warning was never printed either: `validate()` rebuilds its warning list
+  from the error list at the end, so the one it had appended was discarded. A missing schema file (default location or
+  `--schema`) now exits 2, a missing `jsonschema` package exits 3, and `--no-schema` skips the layer on purpose and says
+  so (`SCHEMA_SKIPPED`). An empty schema object `{}` was treated as "not found"; it is a schema.
+- **Hostile input crashed `tools/validate.py` with a traceback and exit 1 (F10),** the code that means "a problem was
+  found". Deep nesting (`RecursionError`), an integer of thousands of digits (`ValueError`), invalid UTF-8
+  (`UnicodeDecodeError`) and a non-object root (`AttributeError`) now exit 2 with `FATAL: <file>: <reason>`. Integer
+  literals are capped at 100 digits by the parser's own hook, so the result does not depend on the Python version. The
+  schema file goes through the same loader.
+- **The loader accepted duplicate keys and non-standard numbers (F12).** A file whose first `"version"` was wrong and
+  whose second was right passed. Duplicate keys at any depth, `NaN`, `Infinity`, `-Infinity` and numbers that overflow
+  to infinity (`1e999`, not named in the finding) now exit 2.
+
+### Added
+
+- `snapshot_sha256` in `tools/iso3166_snapshot.meta.json`, written by `tools/vendor_iso3166.py` and checked first by
+  `--check`, before the tag is fetched; a missing or malformed value exits 2 (F21).
+- `tests/test_validate_schema_guard.py`, `tests/test_validate_hostile_input.py`, `tests/test_validate_strict_json.py`:
+  every case runs the tool as a subprocess and asserts the exit code and the absence of a traceback. New tests in
+  `tests/test_vendor_iso3166.py` (a mutated snapshot fails the hash check before any fetch) and
+  `tests/test_check_readme_drift.py`.
+- `tools/check_readme_drift.py` documents that it needs a git work tree and reads the index, not the disk (F26).
+- Claims for all of the above in `tools/release_claims.json`; `doc-facts` asserts `tools/validate.py` no longer carries
+  the two warning codes it used to swallow.
+
+### Not in this release
+
+- A registry whose root is an object but whose shape is wrong below it (`"currencies": []`) still reaches the domain
+  validators and ends in an `AttributeError` traceback with exit 1. Only the four input classes of F10 are caught.
+- Only `tools/validate.py` is hardened. The other loaders of `iso4217.json` (the exporters, `update_from_iso.py`) are
+  unchanged.
+- `--check` on the snapshot already byte-compared it with the tag when the network was up. The hash adds a verdict
+  before any network access, a value that shows in the meta diff, and a test that runs offline; it does not catch
+  anything the byte comparison missed.
+- F26 as written ("fails ungracefully without git") was fixed in 1.8.3 (exit 3, no traceback). 1.8.5 documents the
+  requirement; it changes no behaviour.
+- `CONTRIBUTING.md` still says "As of v1.8.4". Nothing bumps that line.
+
+---
 ## [1.8.4] — 2026-10-20
 
 Eleven items from the ISO 3166 and ISO 10383 review threads: a reachability table for every tool, the rule for which

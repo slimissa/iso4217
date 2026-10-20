@@ -1228,6 +1228,100 @@
       "contains": "zmij / syn 3.0.6"
     }
   ],
+  "1.8.5": [
+    {
+      "file": "VERSION",
+      "contains": "1.8.5"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.8.5\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.8.5]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.8.5"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.8.5"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.8.5\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.8.5\""
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "--no-schema"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "SCHEMA_SKIPPED"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "MAX_INTEGER_DIGITS = 100"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "def _parse_file"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "object_pairs_hook=_reject_duplicate_keys"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "parse_constant=_reject_constant"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "parse_float=_parse_float"
+    },
+    {
+      "file": "tools/validate.py",
+      "contains": "sys.exit(3)"
+    },
+    {
+      "file": "tests/test_validate_schema_guard.py",
+      "contains": "test_a_missing_default_schema_exits_2_and_does_not_pass"
+    },
+    {
+      "file": "tests/test_validate_hostile_input.py",
+      "contains": "test_deep_nesting_exits_2_not_with_a_recursion_traceback"
+    },
+    {
+      "file": "tests/test_validate_strict_json.py",
+      "contains": "test_a_duplicate_key_whose_last_value_is_valid_no_longer_passes"
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "contains": "def snapshot_sha256"
+    },
+    {
+      "file": "tools/iso3166_snapshot.meta.json",
+      "contains": "\"snapshot_sha256\""
+    },
+    {
+      "file": "tests/test_vendor_iso3166.py",
+      "contains": "test_a_mutated_snapshot_fails_the_hash_check_before_any_fetch"
+    },
+    {
+      "file": "tools/check_readme_drift.py",
+      "contains": "Requires a git work tree."
+    },
+    {
+      "file": "tests/test_check_readme_drift.py",
+      "contains": "test_outside_a_git_work_tree_exits_3_not_a_traceback"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",
@@ -1260,6 +1354,14 @@
     {
       "file": "scripts/release.sh",
       "absent": "--cleanup=whitespace"
+    },
+    {
+      "file": "tools/validate.py",
+      "absent": "SCHEMA_NOT_FOUND"
+    },
+    {
+      "file": "tools/validate.py",
+      "absent": "JSONSCHEMA_NOT_INSTALLED"
     }
   ]
 }
