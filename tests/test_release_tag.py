@@ -87,11 +87,18 @@ def repo(tmp_path: Path):
     return work, origin, git
 
 
-def _run(work: Path, changelog_text: str, *, tamper: bool = False):
+def _run(work: Path, changelog_text: str, *, tamper: bool | str = False):
     changelog = work.parent / "CHANGELOG.md"
     changelog.write_text(changelog_text, encoding="utf-8")
     wrapper = ""
-    if tamper:
+    if tamper == "delete_fails":
+        # a git that records something else AND cannot delete the tag again
+        wrapper = (
+            'git() { if [ "${1:-}" = "for-each-ref" ]; then echo "tampered";'
+            ' elif [ "${1:-}" = "tag" ] && [ "${2:-}" = "-d" ]; then return 1;'
+            ' else command git "$@"; fi; }\n'
+        )
+    elif tamper:
         # a git that records something other than what it was given
         wrapper = (
             'git() { if [ "${1:-}" = "for-each-ref" ]; then echo "tampered"; else command git "$@"; fi; }\n'
@@ -171,7 +178,30 @@ class TestReadBackMismatch:
         assert remote == ""                                            # never left the machine
 
 
+class TestDeleteFailure:
+    def test_a_failing_tag_delete_aborts_and_says_the_tag_still_exists(self, repo):
+        work, origin, git = repo
+        code, _, err = _run(work, SECTION, tamper="delete_fails")
+        assert code == 1
+        assert "STILL EXISTS" in err and "nothing was pushed" in err
+        assert git("tag", "-l").strip() == "v9.9.9"                   # the tag really is still there
+        remote = subprocess.run(["git", "--git-dir", str(origin), "tag", "-l"], capture_output=True, text=True).stdout
+        assert remote == ""
+
+
 class TestSource:
+    def test_the_verification_uses_the_agreed_forms(self):
+        body = _function()
+        code_lines = [l for l in body.splitlines() if not l.strip().startswith("#")]
+        assert not any(re.search(r"\bdiff\b", l) for l in code_lines)       # never diff for this
+        assert '[ -s "$msgfile" ]' in body and '[[ "$recorded" == "$message" ]]' in body
+        assert "# A12: tag-message verification." in body
+        assert 'if ! git tag -d "$TAG"' in body and "STILL EXISTS" in body
+
+    def test_the_empty_guard_comes_before_the_tag_is_created(self):
+        body = _function()
+        assert body.index('[ -s "$msgfile" ]') < body.index("git tag -a")
+
     def test_the_message_goes_through_a_file_not_m(self):
         body = _function()
         assert "-F" in body and "--cleanup=whitespace" in body

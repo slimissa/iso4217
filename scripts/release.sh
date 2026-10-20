@@ -603,13 +603,28 @@ tag_release() {
     # headings (### Fixed) from this message.
     msgfile="$(mktemp "${TMPDIR:-/tmp}/tagmsg.XXXXXX")"
     printf '%s\n' "$message" > "$msgfile"
+    if ! [ -s "$msgfile" ]; then
+        rm -f "$msgfile"
+        fail "tag message file is empty; no tag created, nothing pushed"
+    fi
     git tag -a "$TAG" --cleanup=whitespace -F "$msgfile"
 
-    recorded="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')"
+    # A12: tag-message verification. Comparison is content-equivalent after
+    # trailing-newline normalization — $(...) strips trailing newlines on both
+    # sides, so byte-for-byte identity is unachievable and not what we verify.
+    # Never use diff for this; exit 2 reads as "differ" and hides "could not run."
+    # Verification must precede push so delete-on-mismatch is safe.
+    verified=0
+    if recorded="$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')" \
+        && [[ "$recorded" == "$message" ]]; then
+        verified=1
+    fi
     rm -f "$msgfile"
-    if [[ "$recorded" != "$message" ]]; then
-        git tag -d "$TAG" >/dev/null
-        fail "git recorded a different tag message than the CHANGELOG text; local tag $TAG deleted, nothing pushed"
+    if [[ "$verified" -ne 1 ]]; then
+        if ! git tag -d "$TAG" >/dev/null; then
+            fail "git recorded a different tag message than the CHANGELOG text (or it could not be read back), and 'git tag -d $TAG' failed: local tag $TAG STILL EXISTS and nothing was pushed; run 'git tag -d $TAG' by hand before re-running"
+        fi
+        fail "git recorded a different tag message than the CHANGELOG text (or it could not be read back); local tag $TAG deleted, nothing pushed"
     fi
 
     git push origin "$TAG"
