@@ -126,16 +126,18 @@ added to `POLLED_WORKFLOWS`.
 
 The tag is created only after all polled workflows report
 `completed success`. No manual override, no force. The tag message
-is written to a file, passed to `git tag -a -F <file> --cleanup=whitespace`,
+is written to a file, passed to `git tag -a -F <file> --cleanup=verbatim`,
 then read back from the tag object and compared with the file; a
 mismatch deletes the local tag and stops before the push, so a tag
 that differs from what was meant never leaves the machine.
 An empty message file stops the release before the tag exists. If the
 delete itself fails, the release aborts and says the tag still
 exists; nothing is pushed in any of these cases.
-`--cleanup=whitespace` is deliberate: git's default cleanup removes
+`--cleanup=verbatim` is deliberate: git's default cleanup removes
 every line that begins with `#`, which drops the Markdown section
-headings (`### Fixed`) from a CHANGELOG-derived message.
+headings (`### Fixed`) from a CHANGELOG-derived message, and the
+whitespace mode still rewrites the text (trailing whitespace, runs
+of blank lines). Verbatim records the file exactly as written.
 
 Why: this is the rule that the release process exists to enforce.
 `CONTRIBUTING.md` says "don't tag on red"; the script says "you
@@ -833,3 +835,5 @@ than one registry.
   from the ISO 3166 and ISO 10383 review threads. Records the two CURATED Parquet files as the exception.
 - 2026-10-19 — post-review addition: invariant 7 states the empty-message guard and the checked tag delete (A12).
   Source: ISO 4217 v1.8.4, from the ISO 3166 and ISO 10383 review threads.
+- 2026-10-19 — post-review addition: invariant 7 names `--cleanup=verbatim` (A13). Source: ISO 4217 v1.8.4,
+  from the ISO 3166 and ISO 10383 review threads.

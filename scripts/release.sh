@@ -598,16 +598,18 @@ tag_release() {
     fi
 
     # Written to a file and passed with -F, so what git records can be compared
-    # with what was meant. --cleanup=whitespace is deliberate: git's default
+    # with what was meant. --cleanup=verbatim is deliberate: git's default
     # removes every line that begins with '#', which drops the Markdown section
-    # headings (### Fixed) from this message.
+    # headings (### Fixed) from this message, and the whitespace mode still
+    # rewrites the text (trailing whitespace, runs of blank lines). Verbatim
+    # records the file exactly as written.
     msgfile="$(mktemp "${TMPDIR:-/tmp}/tagmsg.XXXXXX")"
     printf '%s\n' "$message" > "$msgfile"
     if ! [ -s "$msgfile" ]; then
         rm -f "$msgfile"
         fail "tag message file is empty; no tag created, nothing pushed"
     fi
-    git tag -a "$TAG" --cleanup=whitespace -F "$msgfile"
+    git tag -a "$TAG" --cleanup=verbatim -F "$msgfile"
 
     # A12: tag-message verification. Comparison is content-equivalent after
     # trailing-newline normalization — $(...) strips trailing newlines on both

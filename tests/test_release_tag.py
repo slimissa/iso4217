@@ -5,7 +5,7 @@ The tag message is the first lines of the CHANGELOG section. It used to be
 passed with `git tag -a -m`, which (like -F) runs git's default cleanup and
 silently removes every line that begins with `#`. That dropped the Markdown
 section headings (`### Fixed`, `### Added`) from every tag message. The
-message is now written to a file, tagged with `-F <file> --cleanup=whitespace`,
+message is now written to a file, tagged with `-F <file> --cleanup=verbatim`,
 read back from the tag object and compared; on a mismatch the local tag is
 deleted and the release stops before the push (invariant 7).
 
@@ -204,7 +204,8 @@ class TestSource:
 
     def test_the_message_goes_through_a_file_not_m(self):
         body = _function()
-        assert "-F" in body and "--cleanup=whitespace" in body
+        assert "-F" in body and "--cleanup=verbatim" in body
+        assert "--cleanup=whitespace" not in body
         assert 'tag -a "$TAG" -m' not in body
 
     def test_the_read_back_happens_before_the_push(self):
