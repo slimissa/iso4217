@@ -649,6 +649,10 @@ ISO 4217 had the same gap in v1.8.1: `tools/enrich_field.py --check` ran in neit
 ISO 3166 snapshot had no tool at all, so it was edited by hand and drifted from every tag. v1.8.2 adds the four
 `enrich_field.py --check` steps and `tools/vendor_iso3166.py --check`.
 
+The table of every tool in `tools/`, with its `--check`, its CI workflow and its gate status, is
+[`docs/AUDIT.md`](docs/AUDIT.md). Manual, network-dependent enrichment tools are the documented exception to the
+CI and gate requirement.
+
 Applies to: every tool with an output path in the repo, every generator, every exporter.
 Sourced from ISO 3166 v1.6.9 (`94350d6`, `b9c0807`).
 
@@ -805,3 +809,6 @@ than one registry.
   usage, 3 could not run). Source: ISO 4217 audit finding F20.
 - 2026-10-19 — post-review addition: "Asserting on prose" (mojibake section) and the
   "read the artifact as stored" paragraph (rule 6d). Sourced from ISO 10383 052bcbd.
+- 2026-10-19 — post-review addition: operator-hygiene rule 8 links to `docs/AUDIT.md`, the per-tool
+  reachability table (`--check`, CI, gate). Source: ISO 4217 v1.8.4 (A10), from the ISO 3166 and ISO 10383
+  review threads.
