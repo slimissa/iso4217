@@ -13,11 +13,17 @@ Usage:
     python tools/validate.py --registry path    # Validate specific file
     python tools/validate.py --quiet            # Only print errors
     python tools/validate.py --json             # Output results as JSON
+    python tools/validate.py --no-schema        # Skip the schema layer on purpose
 
 Exit codes:
     0 — All validations passed
     1 — Validation errors found
-    2 — Fatal error (file not found, invalid JSON, etc.)
+    2 — Fatal error (file not found, invalid JSON, schema file missing, etc.)
+    3 — Could not run: the schema layer needs the jsonschema package and it is not installed
+
+A check that cannot run must fail, not pass (RELEASE_PATTERN.md, operator-hygiene rule 7). A missing
+schema.json or a missing jsonschema package therefore stops the run; --no-schema skips the schema layer
+on purpose, and the report then says so (SCHEMA_SKIPPED).
 """
 
 from email import errors
@@ -144,14 +150,9 @@ def validate_against_schema(registry: Dict, schema: Dict) -> List[ValidationErro
             ))
 
     except ImportError:
-        errors.append(ValidationError(
-            severity="warning",
-            category="schema",
-            field="(schema validation)",
-            code="JSONSCHEMA_NOT_INSTALLED",
-            message="jsonschema library not installed. Install with: pip install jsonschema",
-            suggestion="Schema validation skipped. Install jsonschema for full validation."
-        ))
+        print("FATAL: the jsonschema package is not installed, so the schema layer cannot run.", file=sys.stderr)
+        print("Install it (pip install jsonschema) or pass --no-schema to skip the layer on purpose.", file=sys.stderr)
+        sys.exit(3)
 
     return errors
 
@@ -1403,30 +1404,36 @@ def load_schema(path: Path) -> Optional[Dict]:
         sys.exit(2)
 
 
-def validate(registry_path: Path, schema_path: Optional[Path] = None, allow_partial: bool = False) -> ValidationResult:
+def validate(registry_path: Path, schema_path: Optional[Path] = None, allow_partial: bool = False,
+             skip_schema: bool = False) -> ValidationResult:
     """Run all validations and return structured results."""
     result = ValidationResult(registry_path=str(registry_path))
 
     # Load files
     registry = load_registry(registry_path)
-    schema = load_schema(schema_path) if schema_path else None
 
-    if schema_path is None:
-        default_schema = registry_path.parent / "schema.json"
-        schema = load_schema(default_schema)
-
-    # 1. Schema validation
-    if schema:
-        result.errors.extend(validate_against_schema(registry, schema))
-    else:
-        result.warnings.append(ValidationError(
+    # 1. Schema validation. A check that cannot run must fail, not pass: a missing schema file stops the run
+    #    unless the caller asked for the layer to be skipped.
+    if skip_schema:
+        # appended to result.errors on purpose: validate() splits errors and warnings by severity at the end and
+        # rebuilds result.warnings from that split, so a warning added to result.warnings directly is dropped
+        result.errors.append(ValidationError(
             severity="warning",
             category="schema",
-            field="(schema file)",
-            code="SCHEMA_NOT_FOUND",
-            message="schema.json not found. Structural validation skipped.",
-            suggestion="Create schema.json or provide path with --schema."
+            field="(schema layer)",
+            code="SCHEMA_SKIPPED",
+            message="Schema layer skipped by --no-schema. Structural validation did not run.",
+            suggestion="Run without --no-schema to validate structure."
         ))
+    else:
+        schema_file = schema_path if schema_path is not None else registry_path.parent / "schema.json"
+        schema = load_schema(schema_file)
+        if schema is None:
+            print(f"FATAL: {schema_file}: schema file not found; the schema layer cannot run.", file=sys.stderr)
+            print("Create it, point --schema at it, or pass --no-schema to skip the layer on purpose.",
+                  file=sys.stderr)
+            sys.exit(2)
+        result.errors.extend(validate_against_schema(registry, schema))
 
     # 2. Meta validation
     result.errors.extend(validate_meta(registry))
@@ -1569,6 +1576,7 @@ Examples:
   python tools/validate.py --json                   # JSON output for CI/CD
   python tools/validate.py --schema custom.json     # Use custom schema
   python tools/validate.py --allow-partial          # Allow partial ISO coverage (e.g. v1.0.0)
+  python tools/validate.py --no-schema              # Skip the schema layer on purpose
         """
     )
 
@@ -1578,11 +1586,20 @@ Examples:
         default=None,
         help="Path to iso4217.json (default: iso4217.json in project root)"
     )
-    parser.add_argument(
+    schema_group = parser.add_mutually_exclusive_group()
+    schema_group.add_argument(
         "--schema", "-s",
         type=Path,
         default=None,
         help="Path to schema.json (default: schema.json in same directory as registry)"
+    )
+    schema_group.add_argument(
+        "--no-schema",
+        action="store_true",
+        help=(
+            "Skip the schema layer on purpose. Without this flag a missing schema.json (exit 2) or a missing "
+            "jsonschema package (exit 3) stops the run, because a check that cannot run must not pass."
+        )
     )
     parser.add_argument(
         "--quiet", "-q",
@@ -1623,7 +1640,8 @@ Examples:
         sys.exit(2)
 
     # Run validation
-    result = validate(registry_path, args.schema, allow_partial=args.allow_partial)
+    result = validate(registry_path, args.schema, allow_partial=args.allow_partial,
+                      skip_schema=args.no_schema)
 
     # Output
     output = format_result(result, quiet=args.quiet, json_output=args.json)
