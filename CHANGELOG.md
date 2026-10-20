@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.8.5] — Unreleased
+## [1.8.5] — 2026-10-20
 
 Input hardening: `tools/validate.py` stops passing when it could not run, stops crashing on hostile input, and rejects
 what `json.loads` silently accepts; the vendored ISO 3166 snapshot records its own hash. Audit findings F10, F11, F12,
