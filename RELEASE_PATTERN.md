@@ -339,6 +339,14 @@ A check that finds the target heading by reading the top of the file passes unti
 that stages notes above it, and fails then. ISO 4217 conforms; each registry checks its own four
 sites against this list.
 
+## Coordination notes
+
+When a release changes data that a sibling registry vendors, the CHANGELOG entry names the sibling registries by name
+and states whether they need to re-vendor. The standard phrasing: "Downstream coordination. <Registry A>,
+<Registry B>, and <Registry C> hold snapshots of this registry. All three are waiting on this correction before
+re-vendoring. Re-vendor on <version> or later." The note appears in the release's `### Fixed` or `### Changed`
+section, as the first bullet.
+
 ## Version-pinned byte outputs
 
 Any build tool that produces a byte-comparable artifact must be pinned to an exact version, not a range. A different
@@ -837,3 +845,5 @@ than one registry.
   Source: ISO 4217 v1.8.4, from the ISO 3166 and ISO 10383 review threads.
 - 2026-10-19 — post-review addition: invariant 7 names `--cleanup=verbatim` (A13). Source: ISO 4217 v1.8.4,
   from the ISO 3166 and ISO 10383 review threads.
+- 2026-10-19 — post-review addition: "Coordination notes" section (A14). Source: ISO 4217 v1.8.4, from the
+  ISO 3166 and ISO 10383 review threads.
