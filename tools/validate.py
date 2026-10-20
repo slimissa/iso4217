@@ -19,6 +19,10 @@ Hostile input: a file that is not UTF-8, is nested too deeply, holds an integer 
 or whose top-level value is not an object stops the run with exit 2 and a message that names the file and
 the failure. The same loader reads the schema.
 
+Strict JSON: duplicate object keys (at any depth), NaN, Infinity, -Infinity and numbers that overflow to
+infinity are rejected with exit 2. Python's json module would keep the last of two equal keys and accept the
+others.
+
 Exit codes:
     0 — All validations passed
     1 — Validation errors found
@@ -1405,6 +1409,26 @@ def _parse_int(text: str) -> int:
     return int(text)
 
 
+def _reject_constant(name: str):
+    raise HostileInput(f"non-standard JSON constant {name} (NaN and Infinity are not JSON)")
+
+
+def _parse_float(text: str) -> float:
+    value = float(text)
+    if value in (float("inf"), float("-inf")):
+        raise HostileInput(f"number {text[:20]!r} overflows to infinity")
+    return value
+
+
+def _reject_duplicate_keys(pairs):
+    seen = {}
+    for key, value in pairs:
+        if key in seen:
+            raise HostileInput(f"duplicate key {key!r} (json.loads would silently keep the last one)")
+        seen[key] = value
+    return seen
+
+
 def _json_type_name(value: Any) -> str:
     if value is None:
         return "null"
@@ -1440,7 +1464,8 @@ def _parse_file(path: Path) -> Dict:
         _fatal(path, f"cannot be read: {e.strerror or e}")
 
     try:
-        data = json.loads(text, parse_int=_parse_int)
+        data = json.loads(text, object_pairs_hook=_reject_duplicate_keys, parse_constant=_reject_constant,
+                          parse_int=_parse_int, parse_float=_parse_float)
     except RecursionError:
         _fatal(path, "nested too deeply for the JSON parser (RecursionError)")
     except json.JSONDecodeError as e:
