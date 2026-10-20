@@ -683,6 +683,24 @@ CI and gate requirement.
 Applies to: every tool with an output path in the repo, every generator, every exporter.
 Sourced from ISO 3166 v1.6.9 (`94350d6`, `b9c0807`).
 
+### 9. Every lockfile is audited on every push
+
+A registry that ships a wrapper with a lockfile is shipping a transitive dependency graph that can change without
+warning. cargo audit (Rust), npm audit (JS), pip-audit (Python), govulncheck (Go) run in CI, at the same frequency as
+the wrapper's own tests. A lockfile that is not audited is a lockfile that can be compromised without the registry
+noticing until a downstream consumer reports it.
+
+Sourced from ISO 3166's v1.7.0–v1.7.1 review cycle, where a routine lockfile check surfaced zmij / syn 3.0.6 in review
+materials. Both crates were legitimate; the check was right to run anyway.
+
+A lockfile that is not tracked is generated for the audit; that satisfies the rule.
+
+Applied here: ISO 4217 commits no lockfile that carries dependencies (`Cargo.lock` and `package-lock.json` are
+gitignored, `wrappers/go/go.sum` is empty, Python pins live in `requirements-ci.txt`). The audits in `validate.yml`
+therefore run on what a fresh resolution produces: the Rust and JavaScript jobs generate the lockfile before auditing,
+and `pip-audit` reads `requirements-ci.txt`. The JavaScript wrapper has no dependencies, so its audit passes by
+construction. The audits are polled like every other workflow (invariant 6); they are not gate steps.
+
 ## Exit-code convention
 
 Every check in `tools/` exits with one of four codes, so a caller can tell "found a problem" from "could not look".
@@ -847,3 +865,5 @@ than one registry.
   from the ISO 3166 and ISO 10383 review threads.
 - 2026-10-19 — post-review addition: "Coordination notes" section (A14). Source: ISO 4217 v1.8.4, from the
   ISO 3166 and ISO 10383 review threads.
+- 2026-10-19 — post-review addition: operator-hygiene rule 9 ("Every lockfile is audited on every push").
+  Sourced from ISO 3166's v1.7.0–v1.7.1 review cycle (zmij / syn 3.0.6); ISO 4217's instance is v1.8.4.
