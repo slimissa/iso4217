@@ -248,12 +248,16 @@ jobs:
         include:
           - language: python
             test_cmd: pip install -r requirements-ci.txt && python3 -m pytest tests/test_wrappers.py -v
+            audit_cmd: pipx run --spec pip-audit==2.10.1 pip-audit -r requirements-ci.txt
           - language: javascript
             test_cmd: cd wrappers/javascript && npm test
+            audit_cmd: cd wrappers/javascript && npm install --package-lock-only --ignore-scripts && npm audit --audit-level=high
           - language: go
             test_cmd: cd wrappers/go && go test ./... -v
+            audit_cmd: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && export PATH="$(go env GOPATH)/bin:$PATH" && cd wrappers/go && govulncheck ./...
           - language: rust
             test_cmd: cd wrappers/rust && cargo test
+            audit_cmd: cd wrappers/rust && cargo generate-lockfile && cargo audit
 
     steps:
       - name: Checkout
@@ -275,7 +279,7 @@ jobs:
         if: matrix.language == 'go'
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.21'
+          go-version: '1.27'
 
       - name: Set up Rust
         if: matrix.language == 'rust'
@@ -283,3 +287,12 @@ jobs:
 
       - name: Run ${{ matrix.language }} wrapper tests
         run: ${{ matrix.test_cmd }}
+
+      - name: Install cargo-audit
+        if: matrix.language == 'rust'
+        uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: cargo-audit@0.22.2
+
+      - name: Audit ${{ matrix.language }} dependencies
+        run: ${{ matrix.audit_cmd }}

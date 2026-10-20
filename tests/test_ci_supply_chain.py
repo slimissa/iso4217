@@ -56,8 +56,20 @@ class TestInstallsArePinned:
         assert not bad, "unpinned pip installs:\n" + "\n".join(bad)
 
     def test_npm_is_not_installing_anything(self):
+        # v1.8.4 (H9a): `npm audit` needs a lockfile and package-lock.json is gitignored, so the audit job writes one with
+        # `npm install --package-lock-only --ignore-scripts`, which installs nothing. Any other `npm install` still fails.
         for name, number, line in _lines():
-            assert "npm install" not in line, f"{name}:{number}"
+            stripped = line.replace("npm install --package-lock-only --ignore-scripts", "")
+            assert "npm install" not in stripped, f"{name}:{number}"
+
+
+class TestAuditsRun:
+    """v1.8.4 (H9a): every wrapper ecosystem is audited in the validate-wrappers job."""
+
+    def test_the_four_audits_are_in_validate_yml(self):
+        text = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
+        for needle in ("cargo audit", "npm audit --audit-level=high", "pip-audit -r requirements-ci.txt", "govulncheck ./..."):
+            assert needle in text, needle
 
 
 class TestRequirementsFile:
