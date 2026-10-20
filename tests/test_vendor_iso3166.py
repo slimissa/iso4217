@@ -11,6 +11,7 @@ No test touches the network: the fetch is exercised with a stand-in for urlopen.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import subprocess
@@ -61,6 +62,8 @@ def _repo(tmp_path: Path, snapshot: bytes, meta: dict | None) -> Path:
     (tmp_path / "tools").mkdir()
     (tmp_path / "tools" / "iso3166_snapshot.json").write_bytes(snapshot)
     if meta is not None:
+        # --check verifies snapshot_sha256 first; a fixture meta gets the hash of the snapshot it sits beside.
+        meta = {**meta, "snapshot_sha256": meta.get("snapshot_sha256", v.snapshot_sha256(snapshot))}
         (tmp_path / "tools" / "iso3166_snapshot.meta.json").write_bytes(v.serialize_meta(meta))
     return tmp_path
 
@@ -168,7 +171,8 @@ def test_existing_meta_without_review_by_gets_the_default():
 def test_no_existing_meta_builds_the_defaults():
     meta = v.build_vendored(_fixture_v167_plus(), "9.9.9", None, "2026-02-02")[1]
     assert meta["meta"]["review_by"] is None and meta["notes"] == [] and meta["source"] == "iso3166"
-    assert list(meta) == ["$comment", "source", "source_version", "vendored_at", "vendored_from", "meta", "notes"]
+    assert list(meta) == ["$comment", "source", "source_version", "vendored_at", "vendored_from", "snapshot_sha256",
+                          "meta", "notes"]
 
 
 @pytest.mark.parametrize("mode", ["write", "check"])
@@ -305,3 +309,73 @@ def test_the_committed_meta_names_the_version_the_committed_snapshot_carries():
     assert meta["source_version"] == snap["meta"]["version"]
     assert meta["vendored_from"] == v.blob_url(meta["source_version"])
     assert v.detect_schema(snap) in v.SCHEMAS
+
+
+# ---------------------------------------------------------------------------
+# snapshot_sha256 (v1.8.5, F21)
+# ---------------------------------------------------------------------------
+
+def _vendored(tmp_path: Path):
+    data = _fixture_v167_plus()
+    root = _repo(tmp_path, b"{}", dict(META_WITH_REVIEW))
+    src = _source(tmp_path, data)
+    assert _run(root, "--version", "9.9.9", "--vendored-at", "2026-02-02", "--source", str(src)).returncode == 0
+    return root, src, data
+
+
+def test_write_records_the_sha256_of_the_snapshot_it_wrote(tmp_path):
+    root, _src, data = _vendored(tmp_path)
+    meta = json.loads((root / "tools" / "iso3166_snapshot.meta.json").read_text(encoding="utf-8"))
+    assert meta["snapshot_sha256"] == hashlib.sha256(data).hexdigest()
+    assert list(meta).index("snapshot_sha256") == list(meta).index("vendored_from") + 1
+
+
+def test_check_passes_and_reports_the_hash_when_nothing_changed(tmp_path):
+    root, src, _data = _vendored(tmp_path)
+    r = _run(root, "--check", "--source", str(src))
+    assert r.returncode == 0, r.stderr
+    assert "snapshot_sha256 matches" in r.stdout
+
+
+def test_a_mutated_snapshot_fails_the_hash_check_before_any_fetch(tmp_path, monkeypatch, capsys):
+    root, _src, data = _vendored(tmp_path)
+    (root / "tools" / "iso3166_snapshot.json").write_bytes(data.replace(b"AD", b"AE", 1))
+
+    def no_network(*a, **k):
+        raise AssertionError("the hash check must run before the tag is fetched")
+
+    monkeypatch.setattr(v, "fetch_source", no_network)
+    assert v.main(["--check"], root=root) == 1
+    err = capsys.readouterr().err
+    assert "snapshot_sha256" in err and "MISMATCH" in err
+
+
+def test_a_one_byte_mutation_of_the_committed_meta_hash_fails_the_check(tmp_path):
+    root, src, _data = _vendored(tmp_path)
+    meta_path = root / "tools" / "iso3166_snapshot.meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    meta["snapshot_sha256"] = ("0" if meta["snapshot_sha256"][0] != "0" else "1") + meta["snapshot_sha256"][1:]
+    meta_path.write_bytes(v.serialize_meta(meta))
+    r = _run(root, "--check", "--source", str(src))
+    assert r.returncode == 1 and "snapshot_sha256" in r.stderr
+
+
+@pytest.mark.parametrize("bad", [None, "", "abc", "Z" * 64, "A" * 64])
+def test_a_missing_or_malformed_hash_is_fatal_not_a_pass(tmp_path, bad):
+    root, src, _data = _vendored(tmp_path)
+    meta_path = root / "tools" / "iso3166_snapshot.meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    if bad is None:
+        del meta["snapshot_sha256"]
+    else:
+        meta["snapshot_sha256"] = bad
+    meta_path.write_bytes(v.serialize_meta(meta))
+    r = _run(root, "--check", "--source", str(src))
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "snapshot_sha256" in r.stderr
+
+
+def test_the_committed_snapshot_matches_its_recorded_sha256():
+    snap = (PROJECT_ROOT / "tools" / "iso3166_snapshot.json").read_bytes()
+    meta = json.loads((PROJECT_ROOT / "tools" / "iso3166_snapshot.meta.json").read_text(encoding="utf-8"))
+    assert meta["snapshot_sha256"] == hashlib.sha256(snap).hexdigest()

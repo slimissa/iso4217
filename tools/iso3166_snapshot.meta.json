@@ -4,6 +4,7 @@
   "source_version": "1.6.9",
   "vendored_at": "2026-10-17",
   "vendored_from": "https://github.com/slimissa/iso3166/blob/v1.6.9/iso3166.json",
+  "snapshot_sha256": "1ffe34a505bbe4bd8e6eeb49062f3d4390c83fb2d2b5938b4f8711e13578021f",
   "meta": {
     "review_by": "2027-10-15",
     "refresh_cadence": "rare"

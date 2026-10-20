@@ -23,12 +23,13 @@ Modes:
 The source is the ISO 3166 tag vX.Y.Z (tags are immutable), fetched from GitHub
 with three attempts. --source reads a local iso3166.json instead.
 
---check calls the same build_vendored() the write path calls. There is no
+--check first checks the stored snapshot_sha256 against the snapshot file, with no network, so a hand-edited
+snapshot fails before the tag is fetched. Then it calls the same build_vendored() the write path calls. There is no
 separate comparison logic: every branch the write path takes, including the one
 that preserves hand-set metadata, runs on every invocation. It compares
   1. tools/iso3166_snapshot.json against the snapshot bytes build_vendored() produces
   2. meta.source_version against the source's own meta.version
-and fails on either mismatch.
+and fails on either mismatch. The write path records snapshot_sha256, the SHA-256 of the snapshot bytes, in the meta file.
 
 One source schema is known today (ISO 3166 v1.6.7 and later). A second schema
 needs an entry in SCHEMAS and a fixture in tests/test_vendor_iso3166.py; a test
@@ -36,16 +37,18 @@ fails until both exist.
 
 Exit codes:
     0  wrote the snapshot, or --check matched
-    1  --check found a mismatch (snapshot bytes, or source_version)
+    1  --check found a mismatch (snapshot_sha256, snapshot bytes, or source_version)
     2  usage or fatal error (unreadable file, invalid JSON, unknown source schema,
-       no such tag, version mismatch on write)
+       no such tag, version mismatch on write, --check with no valid snapshot_sha256 in the meta file)
     3  could not run: the source could not be fetched after three attempts
 """
 from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -176,6 +179,11 @@ def merge_existing_meta(existing: dict[str, Any] | None) -> dict[str, Any]:
     }
 
 
+def snapshot_sha256(data: bytes) -> str:
+    """SHA-256 of the snapshot bytes, as recorded in the meta file."""
+    return hashlib.sha256(data).hexdigest()
+
+
 def build_vendored(
     source_bytes: bytes,
     version: str,
@@ -202,6 +210,7 @@ def build_vendored(
         "source_version": version,
         "vendored_at": vendored_at,
         "vendored_from": blob_url(version),
+        "snapshot_sha256": snapshot_sha256(snapshot_bytes),
         "meta": kept["meta"],
         "notes": kept["notes"],
     }
@@ -287,6 +296,17 @@ def _run_check(args: argparse.Namespace, root: Path) -> int:
         committed = snapshot_path.read_bytes()
     except OSError as exc:
         raise Fatal(f"cannot read {snapshot_path}: {exc}") from exc
+    recorded = existing_meta.get("snapshot_sha256")
+    if not isinstance(recorded, str) or not re.fullmatch(r"[0-9a-f]{64}", recorded):
+        raise Fatal(f"{META_REL} has no valid snapshot_sha256; re-vendor with: "
+                    f"python3 tools/vendor_iso3166.py --version {version} --vendored-at <date>")
+    actual = snapshot_sha256(committed)
+    if actual != recorded:
+        print(f"  MISMATCH: {SNAPSHOT_REL} has SHA-256 {actual}, but {META_REL} snapshot_sha256 is {recorded}",
+              file=sys.stderr)
+        print(f"  Re-vendor with: python3 tools/vendor_iso3166.py --version {version}", file=sys.stderr)
+        return EXIT_MISMATCH
+    print(f"  snapshot_sha256 matches ({actual[:12]}...)")
     source_bytes = _source_bytes(args, version)
     try:
         snapshot_bytes, _meta = build_vendored(source_bytes, version, existing_meta, existing_meta.get("vendored_at"))
