@@ -766,6 +766,7 @@ iso4217/
 │   ├── export_countries_parquet.py       # Countries Parquet generator (--check)
 │   ├── export_aggregated.py              # AGGREGATED-layer generator, 3 files (--check)
 │   ├── sync_wrappers.py                  # Wrapper copy sync (--check)
+│   ├── vendor_iso3166.py                 # ISO 3166 snapshot vendoring (--check)
 │   ├── check_version_consistency.py      # 11 sites, 2 axes
 │   ├── check_mojibake.py                 # UTF-8 / Latin-1 round-trip detector
 │   ├── check_country_codes.py            # ISO 3166 join check
