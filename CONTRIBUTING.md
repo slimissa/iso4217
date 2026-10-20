@@ -291,7 +291,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 The **registry data version** is in `iso4217.json` → `meta.version`. Each **wrapper's version** is independent and lives in its own package manifest (`wrappers/python/setup.py`, `wrappers/javascript/package.json`, `wrappers/rust/Cargo.toml`, `wrappers/go/go.mod`). A wrapper-only release does not require a registry bump and vice versa — the two versions track different things.
 
-As of v1.5.0: registry is `1.5.0`, Python package is `1.1.0`.
+As of v1.8.4: registry is `1.8.4`, Python package is `1.8.4`.
 
 ---
 
