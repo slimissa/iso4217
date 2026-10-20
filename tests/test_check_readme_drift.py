@@ -130,3 +130,18 @@ def test_git_unavailable_exits_3_not_a_traceback(tmp_path):
     r = subprocess.run([sys.executable, str(TOOL), "--quiet"], capture_output=True, text=True, env=env)
     assert r.returncode == 3, r.stderr
     assert "CANNOT RUN" in r.stderr and "Traceback" not in r.stderr
+
+
+def test_the_docstring_says_it_needs_a_git_work_tree_and_reads_the_index():
+    doc = TOOL.read_text(encoding="utf-8")[:3000]   # the module docstring is at the top
+    assert "Requires a git work tree" in doc and "git ls-files" in doc and "git add -A" in doc
+
+
+def test_outside_a_git_work_tree_exits_3_not_a_traceback(tmp_path):
+    root = tmp_path / "no-git"
+    root.mkdir()
+    (root / "README.md").write_text("# Title\n", encoding="utf-8")
+    env = {**os.environ, "README_CHECK_REPO": str(root), "GIT_CEILING_DIRECTORIES": str(tmp_path)}
+    r = subprocess.run([sys.executable, str(TOOL), "--quiet"], capture_output=True, text=True, env=env)
+    assert r.returncode == 3, r.stdout + r.stderr
+    assert "CANNOT RUN" in r.stderr and "Traceback" not in r.stderr

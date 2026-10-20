@@ -10,6 +10,11 @@ Checks:
   3. counts   — every count claim matches its source of truth
   4. adrs     — ADR numbers are unique and README references resolve
 
+Requires a git work tree. Tracked files come from `git ls-files`, which lists the index, not the disk: a new
+file that has not been `git add`ed does not exist for this check, and a deleted file that is still staged does. Run
+`git add -A` before this check. Outside a work tree, or with git missing, it prints CANNOT RUN and exits 3; it does
+not raise. README_CHECK_REPO points it at another work tree.
+
 Exit codes:
   0  no drift
   1  drift detected (each instance printed to stdout)
