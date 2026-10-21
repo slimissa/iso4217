@@ -731,6 +731,7 @@ print_plan() {
     echo "  wrappers/python/iso4217.json"
     echo "  wrappers/go/iso4217.json"
     echo "  wrappers/rust/iso4217.json"
+    echo "  wrappers/javascript/iso4217.json"
     echo
     echo "Preconditions:"
     echo "  clean tree"

@@ -29,7 +29,7 @@ on:
 
 jobs:
   # --- Job 1: Wrapper copy synchronization -------------------------------
-  # Regenerates wrappers/go/iso4217.json and wrappers/rust/iso4217.json
+  # Regenerates wrappers/go/iso4217.json, wrappers/rust/iso4217.json and wrappers/javascript/iso4217.json
   # from root iso4217.json and fails if the committed copies don't match.
   check-wrapper-sync:
     name: Check wrapper copies are in sync with root
@@ -49,8 +49,8 @@ jobs:
 
       - name: Fail if wrapper copies differ from root
         run: |
-          git diff --exit-code -- wrappers/go/iso4217.json wrappers/rust/iso4217.json || {
-            echo "::error::wrappers/go/iso4217.json and/or wrappers/rust/iso4217.json are out of sync with root iso4217.json."
+          git diff --exit-code -- wrappers/go/iso4217.json wrappers/rust/iso4217.json wrappers/javascript/iso4217.json || {
+            echo "::error::wrappers/go/iso4217.json, wrappers/rust/iso4217.json and/or wrappers/javascript/iso4217.json are out of sync with root iso4217.json."
             echo "::error::Run 'python3 tools/sync_wrappers.py' and commit the result."
             exit 1
           }

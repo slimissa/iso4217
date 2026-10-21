@@ -2,18 +2,20 @@
 """
 ISO 4217 Currency Registry — Wrapper Sync Tool.
 
-Three wrapper directories carry a local copy of iso4217.json:
+Four wrapper directories carry a local copy of iso4217.json:
 
   wrappers/python/iso4217.json   resolved at runtime by iso4217.py
   wrappers/go/iso4217.json       embedded at build time (go:embed)
   wrappers/rust/iso4217.json     embedded at build time (include_str!)
+  wrappers/javascript/iso4217.json  resolved at runtime by index.js; shipped in the npm package
+                                    (listed in package.json "files")
 
 None of them update automatically when the root file changes. This tool
-copies root into all three, and its --check mode fails the build when
+copies root into all four, and its --check mode fails the build when
 any copy has drifted.
 
 Usage:
-  python3 tools/sync_wrappers.py            copy root to all three
+  python3 tools/sync_wrappers.py            copy root to all four
   python3 tools/sync_wrappers.py --check    verify without writing
 
 Exit codes:
@@ -43,6 +45,7 @@ WRAPPER_COPIES = [
     PROJECT_ROOT / "wrappers" / "python" / "iso4217.json",
     PROJECT_ROOT / "wrappers" / "go" / "iso4217.json",
     PROJECT_ROOT / "wrappers" / "rust" / "iso4217.json",
+    PROJECT_ROOT / "wrappers" / "javascript" / "iso4217.json",
 ]
 
 
