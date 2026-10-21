@@ -1323,3 +1323,53 @@ class TestTerminalEscapes:
         assert iso4217_cli._safe("\U000e0001") == "\\U000e0001"      # a Cf tag character
         assert iso4217_cli._safe("\udc80") == "\\udc80"               # a lone surrogate (undecodable argv byte)
         assert iso4217_cli._safe("plain é") == "plain é"
+
+
+# ---------------------------------------------------------------------------
+# Decimal amounts (v1.9.0, F28)
+# ---------------------------------------------------------------------------
+
+class TestDecimalAmounts:
+    """`minor` and `format` used float(), which silently loses digits."""
+
+    def test_minor_keeps_every_digit(self, run_cli):
+        code, out, _ = run_cli(["minor", "99999999999999999999", "USD"])
+        assert code == 0 and out.strip() == "9999999999999999999900"
+
+    def test_minor_keeps_fractional_digits_a_float_cannot_hold(self, run_cli):
+        code, out, _ = run_cli(["minor", "123456789.123456789", "BTC"])
+        assert code == 0 and out.strip() == "12345678912345679"
+
+    @pytest.mark.parametrize("amount, expected", [("1.005", "101"), ("2.5", "3"), ("-2.5", "-3"), ("0.5", "1"), ("-0.5", "-1")])
+    def test_minor_rounds_half_away_from_zero_exactly(self, run_cli, amount, expected):
+        code, out, _ = run_cli(["minor", amount, "JPY" if amount != "1.005" else "USD"])
+        assert code == 0 and out.strip() == expected
+
+    def test_minor_accepts_scientific_notation_as_before(self, run_cli):
+        code, out, _ = run_cli(["minor", "1e2", "USD"])
+        assert code == 0 and out.strip() == "10000"
+
+    def test_format_keeps_every_digit(self, run_cli):
+        code, out, _ = run_cli(["format", "99999999999999999999.99", "USD"])
+        assert code == 0 and out.strip() == "$99,999,999,999,999,999,999.99"
+
+    @pytest.mark.parametrize("cmd", ["minor", "format"])
+    @pytest.mark.parametrize("amount", ["NaN", "nan", "sNaN", "Infinity", "+inf"])
+    def test_non_finite_amounts_exit_2(self, run_cli, cmd, amount):
+        code, _, err = run_cli([cmd, amount, "USD"])
+        assert code == 2 and "is not a finite number" in err
+
+    @pytest.mark.parametrize("cmd", ["minor", "format"])
+    def test_a_hostile_exponent_is_refused_not_computed(self, run_cli, cmd):
+        code, _, err = run_cli([cmd, "1e999999999", "USD"])
+        assert code == 2 and "too large" in err
+
+    def test_the_limit_is_exact(self, run_cli):
+        code, out, _ = run_cli(["minor", "9" * 100, "USD"])
+        assert code == 0 and out.strip() == "9" * 100 + "00"
+        code, _, err = run_cli(["minor", "9" * 101, "USD"])
+        assert code == 2 and "too large" in err
+
+    def test_not_a_number_keeps_its_message(self, run_cli):
+        code, _, err = run_cli(["minor", "twelve", "USD"])
+        assert code == 2 and err.strip() == "error: 'twelve' is not a number"

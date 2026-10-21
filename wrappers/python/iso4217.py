@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import math
+from decimal import ROUND_HALF_UP, Decimal, localcontext
 from pathlib import Path
 from typing import (
     Any,
@@ -434,7 +435,7 @@ class Currency:
 
     # -- Conversion ---------------------------------------------------------
 
-    def to_minor(self, major_amount: Union[int, float]) -> int:
+    def to_minor(self, major_amount: Union[int, float, Decimal]) -> int:
         """
         Convert a major currency amount to minor units.
 
@@ -442,13 +443,14 @@ class Currency:
         Rust (f64::round()), and JavaScript (Math.round for positives).
 
         Args:
-            major_amount: Amount in major units (e.g., 100.50 for $100.50).
+            major_amount: Amount in major units (e.g., 100.50 for $100.50). A Decimal is converted exactly
+                (no binary float is involved), rounding half away from zero.
 
         Returns:
             Integer amount in minor units (e.g., 10050 for 10050 cents).
 
         Raises:
-            ValueError: If major_amount is NaN or infinite.
+            ValueError: If major_amount is NaN or infinite (float or Decimal).
 
         Examples:
             >>> usd.to_minor(100.50)
@@ -460,6 +462,17 @@ class Currency:
             >>> btc.to_minor(0.00000001)
             1
         """
+        if isinstance(major_amount, Decimal):
+            # Exact (v1.9.0, F28): ROUND_HALF_UP is round-half-away-from-zero for Decimal, the rule used below.
+            if major_amount.is_nan():
+                raise ValueError("Cannot convert NaN to minor units")
+            if major_amount.is_infinite():
+                raise ValueError("Cannot convert infinity to minor units")
+            with localcontext() as ctx:
+                ctx.prec = len(major_amount.as_tuple().digits) + 10
+                scaled = major_amount.scaleb(self.minor_units)
+                return int(scaled.to_integral_value(rounding=ROUND_HALF_UP))
+
         if isinstance(major_amount, float):
             if math.isnan(major_amount):
                 raise ValueError("Cannot convert NaN to minor units")
@@ -495,12 +508,12 @@ class Currency:
 
     # -- Display ------------------------------------------------------------
 
-    def format(self, major_amount: Union[int, float]) -> str:
+    def format(self, major_amount: Union[int, float, Decimal]) -> str:
         """
         Format a major currency amount with the currency symbol.
 
         Args:
-            major_amount: Amount in major units.
+            major_amount: Amount in major units. A Decimal is formatted exactly.
 
         Returns:
             Formatted string like "$100.50" or "¥500".

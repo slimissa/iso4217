@@ -510,6 +510,50 @@ def test_the_real_registry_passes_the_strict_pass():
     assert CurrencyRegistry().currency("USD").minor_units == 2
 
 
+
+# ---------------------------------------------------------------------------
+# Decimal amounts (v1.9.0, F28)
+# ---------------------------------------------------------------------------
+
+def test_decimal_to_minor_is_exact_where_a_float_loses_digits():
+    from decimal import Decimal
+    usd = CurrencyRegistry().currency("USD")
+    assert usd.to_minor(Decimal("99999999999999999999")) == 9999999999999999999900
+    assert usd.to_minor(Decimal("123456789012345678.99")) == 12345678901234567899
+    assert usd.to_minor(99999999999999999999.0) != 9999999999999999999900      # the float path, unchanged
+
+
+def test_decimal_to_minor_rounds_half_away_from_zero():
+    from decimal import Decimal
+    reg = CurrencyRegistry()
+    jpy, usd = reg.currency("JPY"), reg.currency("USD")
+    assert [jpy.to_minor(Decimal(s)) for s in ("2.5", "-2.5", "0.5", "-0.5", "1.5", "-1.5")] == [3, -3, 1, -1, 2, -2]
+    assert usd.to_minor(Decimal("1.005")) == 101          # a tie a binary float cannot hold
+    assert usd.to_minor(1.005) == 100                      # the float path keeps its old behaviour
+
+
+def test_decimal_to_minor_refuses_nan_and_infinity():
+    from decimal import Decimal
+    usd = CurrencyRegistry().currency("USD")
+    for text in ("NaN", "sNaN", "Infinity", "-Infinity"):
+        with pytest.raises(ValueError):
+            usd.to_minor(Decimal(text))
+
+
+def test_decimal_and_float_agree_on_ordinary_amounts():
+    from decimal import Decimal
+    usd = CurrencyRegistry().currency("USD")
+    for text in ("0", "0.01", "100.50", "-100.50", "1234.56"):
+        assert usd.to_minor(Decimal(text)) == usd.to_minor(float(text))
+
+
+def test_decimal_format_is_exact():
+    from decimal import Decimal
+    reg = CurrencyRegistry()
+    assert reg.currency("USD").format(Decimal("99999999999999999999.99")) == "$99,999,999,999,999,999,999.99"
+    assert reg.currency("JPY").format(Decimal("500.9")) == "\u00a5500"
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(pytest.main([__file__, "-v"]))

@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from decimal import Decimal, InvalidOperation
 import io
 import json
 import os
@@ -633,15 +634,33 @@ def _cmd_list(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     return EXIT_OK
 
 
+# An amount is parsed as a Decimal, never a float: a float silently loses digits (v1.9.0, F28). The bound keeps a hostile
+# exponent such as 1e999999999 from making int() build a billion-digit integer.
+MAX_AMOUNT_INTEGER_DIGITS = 100
+
+
+def _parse_amount(text: str) -> Decimal:
+    """Parse a major-unit amount exactly. Raises ValueError with a reason that completes "'<amount>' is ..."."""
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        raise ValueError("not a number") from None
+    if not value.is_finite():
+        raise ValueError("not a finite number")
+    if value.adjusted() >= MAX_AMOUNT_INTEGER_DIGITS:
+        raise ValueError(f"too large (more than {MAX_AMOUNT_INTEGER_DIGITS} integer digits)")
+    return value
+
+
 def _cmd_minor(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     c = registry.currency(args.code)
     if c is None:
         _error(f"{args.code} not in registry")
         return EXIT_NOT_FOUND
     try:
-        amount = float(args.amount)
-    except ValueError:
-        _error(f"'{args.amount}' is not a number")
+        amount = _parse_amount(args.amount)
+    except ValueError as e:
+        _error(f"'{args.amount}' is {e}")
         return EXIT_USAGE
     try:
         result = c.to_minor(amount)
@@ -672,9 +691,9 @@ def _cmd_format(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
         _error(f"{args.code} not in registry")
         return EXIT_NOT_FOUND
     try:
-        amount = float(args.amount)
-    except ValueError:
-        _error(f"'{args.amount}' is not a number")
+        amount = _parse_amount(args.amount)
+    except ValueError as e:
+        _error(f"'{args.amount}' is {e}")
         return EXIT_USAGE
     print(c.format(amount))
     return EXIT_OK
