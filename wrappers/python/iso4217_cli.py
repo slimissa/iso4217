@@ -26,6 +26,9 @@ Output modes (mutually exclusive):
 Color is on when stdout is a TTY, off when piped. Override with
 ISO4217_COLOR=never|auto|always. Machine modes always disable color.
 
+Error messages that echo input escape control characters (\\x1b, not the raw byte), so an argument cannot drive the
+terminal.
+
 Exit codes (aligned with export_sql.py, export_csv.py, and the other tools):
     0  success
     1  not found, or validation failed
@@ -43,6 +46,7 @@ import io
 import json
 import os
 import sys
+import unicodedata
 from typing import Any, Callable, Iterable, Optional
 
 
@@ -160,6 +164,40 @@ class _Palette:
     def yellow(self, s: str) -> str: return self._wrap("33", s)
     def blue(self, s: str) -> str: return self._wrap("34", s)
     def magenta(self, s: str) -> str: return self._wrap("35", s)
+
+
+# ---------------------------------------------------------------------------
+# Untrusted text in messages (v1.9.0, F15)
+# ---------------------------------------------------------------------------
+# An argument, a code read from stdin or a path can carry a terminal escape (for example ESC ] 0 ; ... BEL, which sets
+# the window title). Every error message that may echo such input goes through _error(), which escapes control
+# characters before they reach stderr.
+
+_UNSAFE_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Zl", "Zp"})
+
+
+def _safe(text: object) -> str:
+    """Escape control, format, surrogate and line-separator characters as \\xNN, \\uNNNN or \\UNNNNNNNN."""
+    out = []
+    for ch in str(text):
+        if unicodedata.category(ch) in _UNSAFE_CATEGORIES:
+            cp = ord(ch)
+            out.append(f"\\x{cp:02x}" if cp <= 0xFF else f"\\u{cp:04x}" if cp <= 0xFFFF else f"\\U{cp:08x}")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _error(message: str) -> None:
+    """Print "error: <message>" to stderr with control characters escaped."""
+    print(f"error: {_safe(message)}", file=sys.stderr)
+
+
+class _SafeArgumentParser(argparse.ArgumentParser):
+    """argparse echoes unknown arguments and bad values in its own errors; escape those too."""
+
+    def error(self, message: str):  # type: ignore[override]
+        super().error(_safe(message))
 
 
 # ---------------------------------------------------------------------------
@@ -473,7 +511,7 @@ def _cmd_lookup(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     elif mode == "raw":
         assert field is not None  # guaranteed by _output_mode
         if field not in LOOKUP_FIELDS:
-            print(f"error: unknown field '{field}'", file=sys.stderr)
+            _error(f"unknown field '{field}'")
             return EXIT_USAGE
         for c in found:
             print(_cell_str(_field_value(c, field, registry)))
@@ -485,7 +523,7 @@ def _cmd_lookup(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
 
     if missing:
         for code in missing:
-            print(f"error: {code} not in registry", file=sys.stderr)
+            _error(f"{code} not in registry")
         return EXIT_NOT_FOUND
     return EXIT_OK
 
@@ -574,7 +612,7 @@ def _cmd_list(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     elif mode == "raw":
         assert field is not None
         if field not in LOOKUP_FIELDS:
-            print(f"error: unknown field '{field}'", file=sys.stderr)
+            _error(f"unknown field '{field}'")
             return EXIT_USAGE
         for c in rows:
             print(_cell_str(_field_value(c, field, registry)))
@@ -598,17 +636,17 @@ def _cmd_list(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
 def _cmd_minor(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     c = registry.currency(args.code)
     if c is None:
-        print(f"error: {args.code} not in registry", file=sys.stderr)
+        _error(f"{args.code} not in registry")
         return EXIT_NOT_FOUND
     try:
         amount = float(args.amount)
     except ValueError:
-        print(f"error: '{args.amount}' is not a number", file=sys.stderr)
+        _error(f"'{args.amount}' is not a number")
         return EXIT_USAGE
     try:
         result = c.to_minor(amount)
     except ValueError as e:
-        print(f"error: {e}", file=sys.stderr)
+        _error(f"{e}")
         return EXIT_USAGE
     print(result)
     return EXIT_OK
@@ -617,12 +655,12 @@ def _cmd_minor(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
 def _cmd_major(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     c = registry.currency(args.code)
     if c is None:
-        print(f"error: {args.code} not in registry", file=sys.stderr)
+        _error(f"{args.code} not in registry")
         return EXIT_NOT_FOUND
     try:
         minor = int(args.amount)
     except ValueError:
-        print(f"error: '{args.amount}' is not an integer", file=sys.stderr)
+        _error(f"'{args.amount}' is not an integer")
         return EXIT_USAGE
     print(repr(c.from_minor(minor)))
     return EXIT_OK
@@ -631,12 +669,12 @@ def _cmd_major(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
 def _cmd_format(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     c = registry.currency(args.code)
     if c is None:
-        print(f"error: {args.code} not in registry", file=sys.stderr)
+        _error(f"{args.code} not in registry")
         return EXIT_NOT_FOUND
     try:
         amount = float(args.amount)
     except ValueError:
-        print(f"error: '{args.amount}' is not a number", file=sys.stderr)
+        _error(f"'{args.amount}' is not a number")
         return EXIT_USAGE
     print(c.format(amount))
     return EXIT_OK
@@ -655,7 +693,7 @@ def _cmd_peg(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
 
     c = registry.currency(code)
     if c is None:
-        print(f"error: {code} not in registry", file=sys.stderr)
+        _error(f"{code} not in registry")
         return EXIT_NOT_FOUND
 
     peg_fields: tuple[str, ...] = (
@@ -680,7 +718,7 @@ def _cmd_peg(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     elif mode == "raw":
         assert field is not None
         if field not in peg_fields:
-            print(f"error: unknown field '{field}'", file=sys.stderr)
+            _error(f"unknown field '{field}'")
             return EXIT_USAGE
         print(_cell_str(_field_value(c, field, registry)))
     else:
@@ -716,7 +754,7 @@ def _cmd_info(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     elif mode == "raw":
         assert field is not None
         if field not in summary:
-            print(f"error: unknown field '{field}'", file=sys.stderr)
+            _error(f"unknown field '{field}'")
             return EXIT_USAGE
         print(_cell_str(summary[field]))
     elif mode in ("tsv", "csv"):
@@ -745,7 +783,7 @@ def _cmd_validate(args: argparse.Namespace, registry: CurrencyRegistry) -> int:
     missing = [code for code in codes if registry.currency(code) is None]
     if missing:
         for code in missing:
-            print(f"error: {code} not in registry", file=sys.stderr)
+            _error(f"{code} not in registry")
         return EXIT_NOT_FOUND
     return EXIT_OK
 
@@ -787,7 +825,7 @@ def _add_epilog(p: argparse.ArgumentParser, *, example: str, exit_codes: bool = 
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _SafeArgumentParser(
         prog="iso4217",
         description="Query the ISO 4217 Currency Registry.",
     )
@@ -1010,7 +1048,7 @@ def _run(argv: Optional[list[str]] = None) -> int:
         try:
             registry = _load_registry(getattr(args, "registry", None))
         except RegistryError as e:
-            print(f"error: {e}", file=sys.stderr)
+            _error(f"{e}")
             return EXIT_DATA
         print(registry.version)
         return EXIT_OK
@@ -1023,7 +1061,7 @@ def _run(argv: Optional[list[str]] = None) -> int:
     try:
         registry = _load_registry(getattr(args, "registry", None))
     except RegistryError as e:
-        print(f"error: {e}", file=sys.stderr)
+        _error(f"{e}")
         return EXIT_DATA
 
     handler = _HANDLERS[args.cmd]

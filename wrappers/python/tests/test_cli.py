@@ -1222,3 +1222,104 @@ class TestRegistryPathHardening:
                               capture_output=True, text=True, timeout=60)
         assert proc.returncode == 3, proc.stderr
         assert "Traceback" not in proc.stderr
+
+
+# ---------------------------------------------------------------------------
+# Terminal escapes in error messages (v1.9.0, F15)
+# ---------------------------------------------------------------------------
+
+_TITLE_ESCAPE = "\x1b]0;PWNED\x07"      # sets the terminal window title
+_PAYLOADS = [
+    _TITLE_ESCAPE,
+    "\x1b[31mRED\x1b[0m",               # SGR colour
+    "\x9b31m",                          # C1 control sequence introducer (8-bit CSI)
+    "A\x00B",                           # NUL
+    "A\rB",                             # carriage return: overwrites the line
+    "A\x08B",                           # backspace
+    "\u202eEVIL",                       # right-to-left override
+    "A\u2028B",                         # line separator
+]
+_RAW_BAD = ["\x1b", "\x07", "\x9b", "\x00", "\r", "\x08", "\u202e", "\u2028"]
+
+
+def _assert_inert(err: str) -> None:
+    for bad in _RAW_BAD:
+        assert bad not in err, f"raw {bad!r} reached stderr: {err!r}"
+
+
+class TestTerminalEscapes:
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_unknown_code_is_escaped(self, run_cli, payload):
+        code, out, err = run_cli(["lookup", payload])
+        assert code == 1 and out == ""
+        _assert_inert(err)
+        assert err.startswith("error: ") and err.rstrip().endswith("not in registry")
+
+    def test_the_title_escape_is_shown_as_text(self, run_cli):
+        _, _, err = run_cli(["lookup", _TITLE_ESCAPE])
+        assert err.strip() == "error: \\x1b]0;PWNED\\x07 not in registry"
+
+    @pytest.mark.parametrize("cmd", ["minor", "format"])
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_bad_amount_is_escaped(self, run_cli, cmd, payload):
+        code, _, err = run_cli([cmd, payload, "USD"])
+        assert code == 2
+        _assert_inert(err)
+        assert "is not a number" in err
+
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_bad_major_amount_is_escaped(self, run_cli, payload):
+        code, _, err = run_cli(["major", payload, "USD"])
+        assert code == 2
+        _assert_inert(err)
+
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_unknown_code_on_a_conversion_is_escaped(self, run_cli, payload):
+        code, _, err = run_cli(["minor", "1", payload])
+        assert code == 1
+        _assert_inert(err)
+
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_unknown_field_is_escaped(self, run_cli, payload):
+        code, _, err = run_cli(["lookup", "USD", "--raw", payload])
+        assert code == 2
+        _assert_inert(err)
+        assert "unknown field" in err
+
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_argparse_own_errors_are_escaped(self, run_cli, payload):
+        code, _, err = run_cli(["list", "--minor-units", payload])
+        assert code == 2
+        _assert_inert(err)
+        code, _, err = run_cli(["--no-such-flag" + payload])
+        assert code == 2
+        _assert_inert(err)
+
+    @pytest.mark.parametrize("payload", _PAYLOADS)
+    def test_registry_path_is_escaped(self, run_cli, payload):
+        code, _, err = run_cli(["--registry", payload, "lookup", "USD"])
+        assert code == 3
+        _assert_inert(err)
+
+    def test_codes_read_from_stdin_are_escaped(self, run_cli, monkeypatch):
+        monkeypatch.setattr(sys, "stdin", io.StringIO(_TITLE_ESCAPE + "\n"))
+        code, _, err = run_cli(["lookup", "-"])
+        assert code == 1
+        _assert_inert(err)
+
+    @pytest.mark.parametrize("sub", ["validate", "peg"])
+    def test_validate_and_peg_unknown_codes_are_escaped(self, run_cli, sub):
+        code, _, err = run_cli([sub, _TITLE_ESCAPE])
+        assert code == 1
+        _assert_inert(err)
+
+    def test_ordinary_text_is_not_altered(self, run_cli):
+        _, _, err = run_cli(["lookup", "C:\\temp\\é日本"])
+        assert err.strip() == "error: C:\\temp\\é日本 not in registry"
+
+    def test_safe_unit(self):
+        assert iso4217_cli._safe("a\x1bb") == "a\\x1bb"
+        assert iso4217_cli._safe("\u202e") == "\\u202e"
+        assert iso4217_cli._safe("\U000e0001") == "\\U000e0001"      # a Cf tag character
+        assert iso4217_cli._safe("\udc80") == "\\udc80"               # a lone surrogate (undecodable argv byte)
+        assert iso4217_cli._safe("plain é") == "plain é"
