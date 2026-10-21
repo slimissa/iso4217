@@ -2,6 +2,7 @@ package iso4217
 
 import (
 	"encoding/json"
+	"errors"
 	"math"
 	"os"
 	"reflect"
@@ -1492,4 +1493,81 @@ func TestCrossLanguageConsistency(t *testing.T) {
 			t.Errorf("USD.FromMinor(-1) = %v, expected -0.01", usd.FromMinor(-1))
 		}
 	})
+}
+
+// ---------------------------------------------------------------------------
+// Malformed registry data (v1.9.0, F13): the shared fixture, one error type
+// ---------------------------------------------------------------------------
+
+type malformedFixture struct {
+	Malformed []struct {
+		ID       string          `json:"id"`
+		Registry json.RawMessage `json:"registry"`
+		Path     string          `json:"path"`
+	} `json:"malformed"`
+	Valid []struct {
+		ID       string          `json:"id"`
+		Registry json.RawMessage `json:"registry"`
+	} `json:"valid"`
+}
+
+func loadMalformedFixture(t *testing.T) malformedFixture {
+	t.Helper()
+	raw, err := os.ReadFile("../../tests/cross_language_consistency.json")
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	var wrapper struct {
+		Tests malformedFixture `json:"malformed_registry_tests"`
+	}
+	if err := json.Unmarshal(raw, &wrapper); err != nil {
+		t.Fatalf("parse fixture: %v", err)
+	}
+	return wrapper.Tests
+}
+
+func TestMalformedRegistryIsRejectedWithTheErrorTypeAndThePath(t *testing.T) {
+	fx := loadMalformedFixture(t)
+	if len(fx.Malformed) < 30 {
+		t.Fatalf("fixture has only %d malformed cases", len(fx.Malformed))
+	}
+	for _, c := range fx.Malformed {
+		c := c
+		t.Run(c.ID, func(t *testing.T) {
+			_, err := loadRegistryFrom(c.Registry)
+			if err == nil {
+				t.Fatal("the registry was accepted")
+			}
+			if !errors.Is(err, ErrMalformedRegistry) {
+				t.Errorf("error does not wrap ErrMalformedRegistry: %v", err)
+			}
+			if !strings.HasPrefix(err.Error(), "malformed registry data: ") {
+				t.Errorf("message does not start with the shared prefix: %v", err)
+			}
+			if !strings.Contains(err.Error(), c.Path) {
+				t.Errorf("expected path %s in: %v", c.Path, err)
+			}
+		})
+	}
+}
+
+func TestValidFixtureRegistriesAreAccepted(t *testing.T) {
+	for _, c := range loadMalformedFixture(t).Valid {
+		if _, err := loadRegistryFrom(c.Registry); err != nil {
+			t.Errorf("%s: %v", c.ID, err)
+		}
+	}
+}
+
+func TestInvalidJSONIsAMalformedRegistryError(t *testing.T) {
+	_, err := loadRegistryFrom([]byte("{"))
+	if !errors.Is(err, ErrMalformedRegistry) || !strings.Contains(err.Error(), "invalid JSON") {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestTheEmbeddedRegistryPassesTheStrictPass(t *testing.T) {
+	if _, err := loadRegistry(); err != nil {
+		t.Fatalf("embedded registry rejected: %v", err)
+	}
 }

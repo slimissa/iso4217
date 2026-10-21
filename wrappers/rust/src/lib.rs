@@ -460,6 +460,181 @@ pub struct RegistrySummary {
 
 /// The main registry interface for looking up ISO 4217 currencies.
 ///
+// ---------------------------------------------------------------------------
+// Registry data validation (v1.9.0, F13)
+// ---------------------------------------------------------------------------
+// One strict pass over the parsed serde_json::Value, before any typed decoding. The same contract is implemented in
+// the Python, JavaScript and Go wrappers and tested against tests/cross_language_consistency.json
+// ("malformed_registry_tests"). The rules are in docs/WRAPPER_VALIDATION.md.
+//
+// Malformed data is reported as `Err(String)` whose text starts with `malformed registry data: ` followed by the
+// JSON path and the reason.
+
+const MAX_MINOR_UNITS: i64 = 36;
+
+const STRING_FIELDS: [&str; 14] = [
+    "numeric", "symbol", "entity", "central_bank", "pegged_to", "peg_type", "pegged_since", "note",
+    "withdrawn_date", "replaced_by", "type", "peg_mechanism", "classification", "source_url",
+];
+const NUMBER_FIELDS: [&str; 3] = ["peg_rate", "peg_band_pct", "conversion_rate"];
+const INTEGER_FIELDS: [&str; 1] = ["market_cap_rank"];
+const BOOLEAN_FIELDS: [&str; 2] = ["is_independent", "numeric_reused"];
+
+type JsonMap = serde_json::Map<String, serde_json::Value>;
+
+fn json_kind(v: &serde_json::Value) -> &'static str {
+    match v {
+        serde_json::Value::Null => "null",
+        serde_json::Value::Bool(_) => "boolean",
+        serde_json::Value::Number(_) => "number",
+        serde_json::Value::String(_) => "string",
+        serde_json::Value::Array(_) => "array",
+        serde_json::Value::Object(_) => "object",
+    }
+}
+
+fn malformed(path: &str, reason: &str) -> String {
+    format!("malformed registry data: {}: {}", path, reason)
+}
+
+fn check_kind(v: &serde_json::Value, kind: &str, path: &str) -> Result<(), String> {
+    let ok = match kind {
+        "string" => v.is_string(),
+        "number" => v.is_number(),
+        "integer" => v.is_i64() || v.is_u64(),
+        "boolean" => v.is_boolean(),
+        "array" => v.is_array(),
+        _ => v.is_object(),
+    };
+    if ok {
+        Ok(())
+    } else {
+        Err(malformed(path, &format!("expected {}, got {}", kind, json_kind(v))))
+    }
+}
+
+fn check_optional(obj: &JsonMap, key: &str, kind: &str, path: &str) -> Result<(), String> {
+    match obj.get(key) {
+        Some(v) if !v.is_null() => check_kind(v, kind, &format!("{}.{}", path, key)),
+        _ => Ok(()),
+    }
+}
+
+fn require<'a>(obj: &'a JsonMap, key: &str, kind: &str, path: &str) -> Result<&'a serde_json::Value, String> {
+    let full = format!("{}.{}", path, key);
+    let v = obj.get(key).ok_or_else(|| malformed(&full, "required field is missing"))?;
+    check_kind(v, kind, &full)?;
+    Ok(v)
+}
+
+fn validate_entry(entry: &serde_json::Value, path: &str) -> Result<(), String> {
+    check_kind(entry, "object", path)?;
+    let obj = entry.as_object().expect("checked above");
+    let code = require(obj, "code", "string", path)?;
+    require(obj, "name", "string", path)?;
+    let minor_units = require(obj, "minor_units", "integer", path)?;
+    if code.as_str() == Some("") {
+        return Err(malformed(&format!("{}.code", path), "must not be empty"));
+    }
+    match minor_units.as_i64() {
+        Some(n) if (0..=MAX_MINOR_UNITS).contains(&n) => {}
+        _ => {
+            return Err(malformed(
+                &format!("{}.minor_units", path),
+                &format!("expected an integer from 0 to {}, got {}", MAX_MINOR_UNITS, minor_units),
+            ))
+        }
+    }
+    for key in STRING_FIELDS {
+        check_optional(obj, key, "string", path)?;
+    }
+    for key in NUMBER_FIELDS {
+        check_optional(obj, key, "number", path)?;
+    }
+    for key in INTEGER_FIELDS {
+        check_optional(obj, key, "integer", path)?;
+    }
+    for key in BOOLEAN_FIELDS {
+        check_optional(obj, key, "boolean", path)?;
+    }
+    check_optional(obj, "countries", "array", path)?;
+    if let Some(countries) = obj.get("countries").and_then(|v| v.as_array()) {
+        for (i, country) in countries.iter().enumerate() {
+            let cpath = format!("{}.countries[{}]", path, i);
+            check_kind(country, "object", &cpath)?;
+            let cobj = country.as_object().expect("checked above");
+            require(cobj, "code", "string", &cpath)?;
+            check_optional(cobj, "name", "string", &cpath)?;
+            check_optional(cobj, "relationship", "string", &cpath)?;
+        }
+    }
+    check_optional(obj, "code_lifetime", "object", path)?;
+    if let Some(life) = obj.get("code_lifetime").and_then(|v| v.as_object()) {
+        let lpath = format!("{}.code_lifetime", path);
+        require(life, "to", "string", &lpath)?;
+        check_optional(life, "from", "string", &lpath)?;
+    }
+    Ok(())
+}
+
+/// The contract treats a null optional entry field as absent. serde would reject `null` for a field typed as a
+/// plain `Vec`, so nulls are dropped from the entries before typed decoding (the other wrappers treat them as absent
+/// by construction).
+fn drop_null_fields(root: &mut serde_json::Value) {
+    let lists: [(&str, &[&str]); 2] = [
+        ("currencies", &["active", "withdrawn"]),
+        ("non_iso", &["cryptocurrencies", "stablecoins", "commodities", "special_purpose"]),
+    ];
+    for (section, keys) in lists {
+        if let Some(group) = root.get_mut(section).and_then(|v| v.as_object_mut()) {
+            for key in keys {
+                if let Some(list) = group.get_mut(*key).and_then(|v| v.as_array_mut()) {
+                    for entry in list {
+                        if let Some(obj) = entry.as_object_mut() {
+                            obj.retain(|_, v| !v.is_null());
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Checks the parsed JSON against the contract in docs/WRAPPER_VALIDATION.md.
+fn validate_registry_data(root: &serde_json::Value) -> Result<(), String> {
+    check_kind(root, "object", "$")?;
+    let obj = root.as_object().expect("checked above");
+    for section in ["meta", "source", "currencies", "non_iso"] {
+        if let Some(v) = obj.get(section) {
+            check_kind(v, "object", &format!("$.{}", section))?;
+        }
+    }
+    let empty = JsonMap::new();
+    let meta = obj.get("meta").and_then(|v| v.as_object()).unwrap_or(&empty);
+    let source = obj.get("source").and_then(|v| v.as_object()).unwrap_or(&empty);
+    check_optional(meta, "version", "string", "$.meta")?;
+    check_optional(meta, "updated", "string", "$.meta")?;
+    check_optional(source, "last_amendment_applied", "integer", "$.source")?;
+    check_optional(source, "last_amendment_date", "string", "$.source")?;
+    let lists: [(&str, &[&str]); 2] = [
+        ("currencies", &["active", "withdrawn"]),
+        ("non_iso", &["cryptocurrencies", "stablecoins", "commodities", "special_purpose"]),
+    ];
+    for (section, keys) in lists {
+        let group = obj.get(section).and_then(|v| v.as_object()).unwrap_or(&empty);
+        for key in keys {
+            if let Some(list) = group.get(*key) {
+                let lpath = format!("$.{}.{}", section, key);
+                check_kind(list, "array", &lpath)?;
+                for (i, entry) in list.as_array().expect("checked above").iter().enumerate() {
+                    validate_entry(entry, &format!("{}[{}]", lpath, i))?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Loads the canonical iso4217.json data at compile time via `include_str!()`.
 /// Provides lookup methods for active, withdrawn, and non-ISO currencies.
 ///
@@ -495,11 +670,22 @@ impl CurrencyRegistry {
     ///
     /// # Errors
     ///
-    /// Returns `Err` if the embedded JSON cannot be parsed. This should never
-    /// happen with a valid registry file, but is surfaced for safety.
+    /// Returns `Err` if the embedded JSON is malformed: not valid JSON, or outside the
+    /// contract in docs/WRAPPER_VALIDATION.md. The text starts with
+    /// `malformed registry data: ` followed by the JSON path and the reason. This should
+    /// never happen with a valid registry file, but is surfaced for safety.
     pub fn load() -> Result<Self, String> {
-        let raw: RawRegistry = serde_json::from_str(REGISTRY_JSON)
-            .map_err(|e| format!("Failed to parse registry JSON: {}", e))?;
+        Self::load_from_str(REGISTRY_JSON)
+    }
+
+    /// Builds a registry from JSON text: generic parse, strict validation, typed decoding.
+    fn load_from_str(json: &str) -> Result<Self, String> {
+        let mut value: serde_json::Value = serde_json::from_str(json)
+            .map_err(|e| format!("malformed registry data: $: invalid JSON: {}", e))?;
+        validate_registry_data(&value)?;
+        drop_null_fields(&mut value);
+        let raw: RawRegistry = serde_json::from_value(value)
+            .map_err(|e| format!("malformed registry data: $: {}", e))?;
 
         let mut active = HashMap::new();
         let mut withdrawn = HashMap::new();
@@ -834,6 +1020,47 @@ mod tests {
 
     fn registry() -> CurrencyRegistry {
         CurrencyRegistry::load().expect("Failed to load registry")
+    }
+
+    #[test]
+    fn malformed_registry_fixture_is_rejected_with_the_prefix_and_the_path() {
+        let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
+            .expect("failed to read fixture");
+        let fixture: serde_json::Value = serde_json::from_str(&raw).expect("failed to parse fixture");
+        let tests = &fixture["malformed_registry_tests"];
+        let malformed = tests["malformed"].as_array().expect("malformed list");
+        assert!(malformed.len() >= 30, "fixture has only {} malformed cases", malformed.len());
+        for case in malformed {
+            let id = case["id"].as_str().unwrap();
+            let path = case["path"].as_str().unwrap();
+            let text = serde_json::to_string(&case["registry"]).unwrap();
+            match CurrencyRegistry::load_from_str(&text) {
+                Ok(_) => panic!("{}: the registry was accepted", id),
+                Err(msg) => {
+                    assert!(msg.starts_with("malformed registry data: "), "{}: {}", id, msg);
+                    assert!(msg.contains(path), "{}: expected path {} in: {}", id, path, msg);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn valid_fixture_registries_are_accepted() {
+        let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
+            .expect("failed to read fixture");
+        let fixture: serde_json::Value = serde_json::from_str(&raw).expect("failed to parse fixture");
+        for case in fixture["malformed_registry_tests"]["valid"].as_array().expect("valid list") {
+            let text = serde_json::to_string(&case["registry"]).unwrap();
+            if let Err(msg) = CurrencyRegistry::load_from_str(&text) {
+                panic!("{}: {}", case["id"], msg);
+            }
+        }
+    }
+
+    #[test]
+    fn invalid_json_is_a_malformed_registry_error() {
+        let err = CurrencyRegistry::load_from_str("{").unwrap_err();
+        assert!(err.starts_with("malformed registry data: $: invalid JSON"), "{}", err);
     }
 
     #[test]

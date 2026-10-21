@@ -462,5 +462,52 @@
         "minor_units_distribution"
       ]
     }
-  ]
+  ],
+  "malformed_registry_tests": {
+    "description": "Registries every wrapper must reject (malformed) or accept (valid). A malformed registry fails at load with the wrapper's documented error type and a message \"malformed registry data: <path>: <reason>\" naming the JSON path below. Contract: docs/WRAPPER_VALIDATION.md. JavaScript cannot tell 2.0 from 2, so no case relies on that.",
+    "max_minor_units": 36,
+    "valid": [
+      {"id": "empty_object", "registry": {}},
+      {"id": "minimal_entry", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2}]}}},
+      {"id": "minor_units_bounds", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 0}, {"code": "BBB", "name": "A", "minor_units": 36}]}}},
+      {"id": "optional_fields_null", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "pegged_to": null, "peg_rate": null, "peg_band_pct": null, "countries": null, "code_lifetime": null, "is_independent": null, "market_cap_rank": null}]}}},
+      {"id": "optional_fields_typed", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "pegged_to": "USD", "peg_rate": 1, "symbol": "$", "is_independent": false, "countries": [{"code": "US"}], "code_lifetime": {"from": null, "to": "2099-01"}}]}}},
+      {"id": "unknown_fields_ignored", "registry": {"extra": 1, "currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "introduced": "1999", "iso_status": "x"}]}}}
+    ],
+    "malformed": [
+      {"id": "root_array", "registry": [], "path": "$"},
+      {"id": "root_string", "registry": "x", "path": "$"},
+      {"id": "root_null", "registry": null, "path": "$"},
+      {"id": "currencies_array", "registry": {"currencies": []}, "path": "$.currencies"},
+      {"id": "currencies_null", "registry": {"currencies": null}, "path": "$.currencies"},
+      {"id": "meta_array", "registry": {"meta": []}, "path": "$.meta"},
+      {"id": "meta_version_number", "registry": {"meta": {"version": 1}}, "path": "$.meta.version"},
+      {"id": "source_amendment_string", "registry": {"source": {"last_amendment_applied": "3"}}, "path": "$.source.last_amendment_applied"},
+      {"id": "active_object", "registry": {"currencies": {"active": {}}}, "path": "$.currencies.active"},
+      {"id": "active_null", "registry": {"currencies": {"active": null}}, "path": "$.currencies.active"},
+      {"id": "non_iso_category_string", "registry": {"non_iso": {"stablecoins": "x"}}, "path": "$.non_iso.stablecoins"},
+      {"id": "entry_not_object", "registry": {"currencies": {"active": [1]}}, "path": "$.currencies.active[0]"},
+      {"id": "code_missing", "registry": {"currencies": {"active": [{"name": "A", "minor_units": 2}]}}, "path": "$.currencies.active[0].code"},
+      {"id": "code_empty", "registry": {"currencies": {"active": [{"code": "", "name": "A", "minor_units": 2}]}}, "path": "$.currencies.active[0].code"},
+      {"id": "code_number", "registry": {"currencies": {"active": [{"code": 5, "name": "A", "minor_units": 2}]}}, "path": "$.currencies.active[0].code"},
+      {"id": "name_missing", "registry": {"currencies": {"active": [{"code": "AAA", "minor_units": 2}]}}, "path": "$.currencies.active[0].name"},
+      {"id": "minor_units_missing", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A"}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "minor_units_string", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": "2"}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "minor_units_bool", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": true}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "minor_units_fraction", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2.5}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "minor_units_negative", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": -1}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "minor_units_above_max", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 37}]}}, "path": "$.currencies.active[0].minor_units"},
+      {"id": "withdrawn_second_entry", "registry": {"currencies": {"withdrawn": [{"code": "AAA", "name": "A", "minor_units": 2}, {"code": "BBB", "name": "A", "minor_units": "x"}]}}, "path": "$.currencies.withdrawn[1].minor_units"},
+      {"id": "non_iso_entry_null_minor_units", "registry": {"non_iso": {"cryptocurrencies": [{"code": "BTC", "name": "A", "minor_units": null}]}}, "path": "$.non_iso.cryptocurrencies[0].minor_units"},
+      {"id": "peg_rate_string", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "peg_rate": "1.0"}]}}, "path": "$.currencies.active[0].peg_rate"},
+      {"id": "is_independent_string", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "is_independent": "yes"}]}}, "path": "$.currencies.active[0].is_independent"},
+      {"id": "market_cap_rank_fraction", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "market_cap_rank": 1.5}]}}, "path": "$.currencies.active[0].market_cap_rank"},
+      {"id": "symbol_number", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "symbol": 5}]}}, "path": "$.currencies.active[0].symbol"},
+      {"id": "countries_object", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "countries": {}}]}}, "path": "$.currencies.active[0].countries"},
+      {"id": "country_not_object", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "countries": [1]}]}}, "path": "$.currencies.active[0].countries[0]"},
+      {"id": "country_code_missing", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "countries": [{"name": "x"}]}]}}, "path": "$.currencies.active[0].countries[0].code"},
+      {"id": "code_lifetime_array", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "code_lifetime": []}]}}, "path": "$.currencies.active[0].code_lifetime"},
+      {"id": "code_lifetime_to_missing", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "code_lifetime": {"from": null}}]}}, "path": "$.currencies.active[0].code_lifetime.to"}
+    ]
+  }
 }

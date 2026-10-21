@@ -18,7 +18,8 @@
 
 const path = require('path');
 const fs = require('fs');
-const { CurrencyRegistry } = require('./index.js');
+const os = require('os');
+const { CurrencyRegistry, RegistryDataError } = require('./index.js');
 
 function assert(condition, message) {
   if (!condition) {
@@ -459,6 +460,54 @@ test('cross-lang: fromMinor handles negative amounts', () => {
   const usd = registry.currency('USD');
   assert(usd.fromMinor(-10050) === -100.5, `expected -100.5, got ${usd.fromMinor(-10050)}`);
   assert(usd.fromMinor(-1) === -0.01, `expected -0.01, got ${usd.fromMinor(-1)}`);
+});
+
+// ---------------------------------------------------------------------------
+// Malformed registry data (v1.9.0, F13): the shared fixture, one error type
+// ---------------------------------------------------------------------------
+
+const MALFORMED_FIXTURE = JSON.parse(fs.readFileSync(VECTORS_PATH, 'utf-8')).malformed_registry_tests;
+const MALFORMED_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'iso4217-malformed-'));
+
+function registryFileFor(value) {
+  const p = path.join(MALFORMED_DIR, 'registry.json');
+  fs.writeFileSync(p, JSON.stringify(value));
+  return p;
+}
+
+for (const c of MALFORMED_FIXTURE.malformed) {
+  test(`malformed registry rejected: ${c.id}`, () => {
+    let error = null;
+    try {
+      new CurrencyRegistry(registryFileFor(c.registry));
+    } catch (e) {
+      error = e;
+    }
+    assert(error !== null, 'the registry was accepted');
+    assert(error instanceof RegistryDataError, `expected RegistryDataError, got ${error && error.name}: ${error && error.message}`);
+    assert(error.message.startsWith('malformed registry data: '), error.message);
+    assert(error.message.includes(c.path), `expected path ${c.path} in: ${error.message}`);
+  });
+}
+
+for (const c of MALFORMED_FIXTURE.valid) {
+  test(`valid fixture registry accepted: ${c.id}`, () => {
+    new CurrencyRegistry(registryFileFor(c.registry));
+  });
+}
+
+test('malformed registry: invalid JSON is a RegistryDataError too', () => {
+  const p = path.join(MALFORMED_DIR, 'broken.json');
+  fs.writeFileSync(p, '{');
+  let error = null;
+  try { new CurrencyRegistry(p); } catch (e) { error = e; }
+  assert(error instanceof RegistryDataError && error.message.includes('invalid JSON'), String(error));
+});
+
+test('malformed registry: a missing file stays a plain Error', () => {
+  let error = null;
+  try { new CurrencyRegistry(path.join(MALFORMED_DIR, 'absent.json')); } catch (e) { error = e; }
+  assert(error !== null && !(error instanceof RegistryDataError), String(error));
 });
 
 // ---------------------------------------------------------------------------

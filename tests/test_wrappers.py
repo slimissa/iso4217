@@ -11,12 +11,14 @@ Rust, and Go to ensure identical behavior across all wrappers.
 
 import json
 import sys
+
+import pytest
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "wrappers" / "python"))
 
-from iso4217 import CurrencyRegistry
+from iso4217 import CurrencyRegistry, RegistryDataError
 
 
 # ---------------------------------------------------------------------------
@@ -445,6 +447,68 @@ def test_from_minor_handles_negative_amounts():
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Malformed registry data (v1.9.0, F13): the shared fixture, one error type
+# ---------------------------------------------------------------------------
+
+def _malformed_cases():
+    return _load_vectors()["malformed_registry_tests"]
+
+
+def _write_registry(tmp_path, registry):
+    p = tmp_path / "registry.json"
+    p.write_text(json.dumps(registry), encoding="utf-8")
+    return p
+
+
+def test_every_malformed_registry_is_rejected_with_the_error_type_and_the_path(tmp_path):
+    cases = _malformed_cases()["malformed"]
+    assert len(cases) >= 30
+    for case in cases:
+        with pytest.raises(RegistryDataError) as exc:
+            CurrencyRegistry(_write_registry(tmp_path, case["registry"]))
+        msg = str(exc.value)
+        assert msg.startswith("malformed registry data: "), (case["id"], msg)
+        assert case["path"] in msg, (case["id"], case["path"], msg)
+
+
+def test_every_valid_fixture_registry_is_accepted(tmp_path):
+    for case in _malformed_cases()["valid"]:
+        CurrencyRegistry(_write_registry(tmp_path, case["registry"]))
+
+
+def test_the_error_type_is_a_value_error():
+    assert issubclass(RegistryDataError, ValueError)
+
+
+@pytest.mark.parametrize("text, reason", [
+    ("{", "invalid JSON"), ('{"a": NaN}', "non-standard JSON constant NaN"),
+    ("[" * 100000 + "]" * 100000, "nested too deeply"),
+])
+def test_unparsable_files_raise_the_same_error_type(tmp_path, text, reason):
+    p = tmp_path / "bad.json"
+    p.write_text(text, encoding="utf-8")
+    with pytest.raises(RegistryDataError, match=reason):
+        CurrencyRegistry(p)
+
+
+def test_invalid_utf8_raises_the_same_error_type(tmp_path):
+    p = tmp_path / "bad.json"
+    p.write_bytes(b'{"a": "\xff"}')
+    with pytest.raises(RegistryDataError, match="not valid UTF-8"):
+        CurrencyRegistry(p)
+
+
+def test_a_missing_file_is_still_file_not_found(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        CurrencyRegistry(tmp_path / "absent.json")
+
+
+def test_the_real_registry_passes_the_strict_pass():
+    assert CurrencyRegistry().currency("USD").minor_units == 2
+
 
 if __name__ == "__main__":
     import pytest

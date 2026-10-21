@@ -75,11 +75,141 @@ function resolveDataPath(explicitPath) {
  * @param {string|null} [explicitPath=null]
  * @returns {Object} Parsed registry data
  */
+// ---------------------------------------------------------------------------
+// Registry data validation (v1.9.0, F13)
+// ---------------------------------------------------------------------------
+// One strict pass over the parsed JSON, before any Currency is built. The same contract is implemented in the
+// Python, Go and Rust wrappers and tested against tests/cross_language_consistency.json
+// ("malformed_registry_tests"). The rules are in docs/WRAPPER_VALIDATION.md.
+
+const MAX_MINOR_UNITS = 36;
+
+/**
+ * Thrown by `new CurrencyRegistry()` when the registry data is malformed: not valid JSON, or outside the contract in
+ * docs/WRAPPER_VALIDATION.md. The message is "malformed registry data: <JSON path>: <reason>". A missing file is still
+ * a plain Error: that is I/O, not data.
+ */
+class RegistryDataError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'RegistryDataError';
+  }
+}
+
+const STRING_FIELDS = ['numeric', 'symbol', 'entity', 'central_bank', 'pegged_to', 'peg_type', 'pegged_since', 'note',
+  'withdrawn_date', 'replaced_by', 'type', 'peg_mechanism', 'classification', 'source_url'];
+const NUMBER_FIELDS = ['peg_rate', 'peg_band_pct', 'conversion_rate'];
+const INTEGER_FIELDS = ['market_cap_rank'];
+const BOOLEAN_FIELDS = ['is_independent', 'numeric_reused'];
+const ENTRY_LISTS = [
+  ['currencies', ['active', 'withdrawn']],
+  ['non_iso', ['cryptocurrencies', 'stablecoins', 'commodities', 'special_purpose']],
+];
+
+function isObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function jsonKind(v) {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  return typeof v === 'object' ? 'object' : typeof v;
+}
+
+function malformed(path, reason) {
+  throw new RegistryDataError(`malformed registry data: ${path}: ${reason}`);
+}
+
+const KIND_CHECKS = {
+  string: (v) => typeof v === 'string',
+  number: (v) => typeof v === 'number' && Number.isFinite(v),
+  integer: (v) => Number.isInteger(v),
+  boolean: (v) => typeof v === 'boolean',
+  array: (v) => Array.isArray(v),
+  object: isObject,
+};
+
+function checkKind(value, kind, path) {
+  if (!KIND_CHECKS[kind](value)) malformed(path, `expected ${kind}, got ${jsonKind(value)}`);
+}
+
+function has(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function checkOptional(obj, key, kind, path) {
+  if (has(obj, key) && obj[key] !== null) checkKind(obj[key], kind, `${path}.${key}`);
+}
+
+function validateEntry(entry, path) {
+  checkKind(entry, 'object', path);
+  for (const [key, kind] of [['code', 'string'], ['name', 'string'], ['minor_units', 'integer']]) {
+    if (!has(entry, key)) malformed(`${path}.${key}`, 'required field is missing');
+    checkKind(entry[key], kind, `${path}.${key}`);
+  }
+  if (entry.code === '') malformed(`${path}.code`, 'must not be empty');
+  if (entry.minor_units < 0 || entry.minor_units > MAX_MINOR_UNITS) {
+    malformed(`${path}.minor_units`, `expected an integer from 0 to ${MAX_MINOR_UNITS}, got ${entry.minor_units}`);
+  }
+  STRING_FIELDS.forEach((k) => checkOptional(entry, k, 'string', path));
+  NUMBER_FIELDS.forEach((k) => checkOptional(entry, k, 'number', path));
+  INTEGER_FIELDS.forEach((k) => checkOptional(entry, k, 'integer', path));
+  BOOLEAN_FIELDS.forEach((k) => checkOptional(entry, k, 'boolean', path));
+  checkOptional(entry, 'countries', 'array', path);
+  (entry.countries || []).forEach((country, i) => {
+    const cpath = `${path}.countries[${i}]`;
+    checkKind(country, 'object', cpath);
+    if (!has(country, 'code')) malformed(`${cpath}.code`, 'required field is missing');
+    checkKind(country.code, 'string', `${cpath}.code`);
+    checkOptional(country, 'name', 'string', cpath);
+    checkOptional(country, 'relationship', 'string', cpath);
+  });
+  checkOptional(entry, 'code_lifetime', 'object', path);
+  if (entry.code_lifetime) {
+    const lpath = `${path}.code_lifetime`;
+    if (!has(entry.code_lifetime, 'to')) malformed(`${lpath}.to`, 'required field is missing');
+    checkKind(entry.code_lifetime.to, 'string', `${lpath}.to`);
+    checkOptional(entry.code_lifetime, 'from', 'string', lpath);
+  }
+}
+
+/**
+ * Throws RegistryDataError unless `data` satisfies the contract in docs/WRAPPER_VALIDATION.md.
+ * @param {*} data
+ */
+function validateRegistryData(data) {
+  checkKind(data, 'object', '$');
+  for (const section of ['meta', 'source', 'currencies', 'non_iso']) {
+    if (has(data, section)) checkKind(data[section], 'object', `$.${section}`);
+  }
+  const meta = data.meta || {};
+  const source = data.source || {};
+  checkOptional(meta, 'version', 'string', '$.meta');
+  checkOptional(meta, 'updated', 'string', '$.meta');
+  checkOptional(source, 'last_amendment_applied', 'integer', '$.source');
+  checkOptional(source, 'last_amendment_date', 'string', '$.source');
+  for (const [section, keys] of ENTRY_LISTS) {
+    const group = data[section] || {};
+    for (const key of keys) {
+      if (!has(group, key)) continue;
+      checkKind(group[key], 'array', `$.${section}.${key}`);
+      group[key].forEach((entry, i) => validateEntry(entry, `$.${section}.${key}[${i}]`));
+    }
+  }
+}
+
 function loadRegistryData(explicitPath) {
   const fs = require('fs');
   const resolved = resolveDataPath(explicitPath);
   const raw = fs.readFileSync(resolved, 'utf-8');
-  return JSON.parse(raw);
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    throw new RegistryDataError(`malformed registry data: $: invalid JSON: ${e.message}`);
+  }
+  validateRegistryData(data);
+  return data;
 }
 
 // ---------------------------------------------------------------------------
@@ -453,7 +583,8 @@ class CurrencyRegistry {
    * Initialize the registry from a JSON file.
    *
    * @param {string|null} [dataPath=null] - Path to iso4217.json
-   * @throws {Error} If the registry file cannot be found or parsed
+   * @throws {Error} If the registry file cannot be found
+   * @throws {RegistryDataError} If the data is malformed (docs/WRAPPER_VALIDATION.md)
    */
   constructor(dataPath) {
     this._data = loadRegistryData(dataPath);
@@ -840,4 +971,5 @@ class CurrencyRegistry {
 module.exports = {
   Currency,
   CurrencyRegistry,
+  RegistryDataError,
 };

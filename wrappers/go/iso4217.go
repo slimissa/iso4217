@@ -39,6 +39,7 @@ package iso4217
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -381,12 +382,218 @@ var (
 	loadErr  error
 )
 
+// ---------------------------------------------------------------------------
+// Registry data validation (v1.9.0, F13)
+// ---------------------------------------------------------------------------
+// One strict pass over the generic parsed JSON, before any typed decoding. The same contract is implemented in the
+// Python, JavaScript and Rust wrappers and tested against tests/cross_language_consistency.json
+// ("malformed_registry_tests"). The rules are in docs/WRAPPER_VALIDATION.md.
+
+// ErrMalformedRegistry is wrapped by every error Load returns for malformed registry data. The message reads
+// "malformed registry data: <JSON path>: <reason>". Test for it with errors.Is.
+var ErrMalformedRegistry = errors.New("malformed registry data")
+
+const maxMinorUnits = 36
+
+var (
+	stringFields  = []string{"numeric", "symbol", "entity", "central_bank", "pegged_to", "peg_type", "pegged_since", "note", "withdrawn_date", "replaced_by", "type", "peg_mechanism", "classification", "source_url"}
+	numberFields  = []string{"peg_rate", "peg_band_pct", "conversion_rate"}
+	integerFields = []string{"market_cap_rank"}
+	booleanFields = []string{"is_independent", "numeric_reused"}
+	entryLists    = []struct {
+		section string
+		keys    []string
+	}{
+		{"currencies", []string{"active", "withdrawn"}},
+		{"non_iso", []string{"cryptocurrencies", "stablecoins", "commodities", "special_purpose"}},
+	}
+)
+
+func malformed(path, reason string) error {
+	return fmt.Errorf("%w: %s: %s", ErrMalformedRegistry, path, reason)
+}
+
+func jsonKind(v interface{}) string {
+	switch v.(type) {
+	case nil:
+		return "null"
+	case bool:
+		return "boolean"
+	case float64:
+		return "number"
+	case string:
+		return "string"
+	case []interface{}:
+		return "array"
+	}
+	return "object"
+}
+
+func kindOK(v interface{}, kind string) bool {
+	switch kind {
+	case "string":
+		_, ok := v.(string)
+		return ok
+	case "number":
+		_, ok := v.(float64)
+		return ok
+	case "integer":
+		f, ok := v.(float64)
+		return ok && f == math.Trunc(f)
+	case "boolean":
+		_, ok := v.(bool)
+		return ok
+	case "array":
+		_, ok := v.([]interface{})
+		return ok
+	}
+	_, ok := v.(map[string]interface{})
+	return ok
+}
+
+func checkKind(v interface{}, kind, path string) error {
+	if !kindOK(v, kind) {
+		return malformed(path, fmt.Sprintf("expected %s, got %s", kind, jsonKind(v)))
+	}
+	return nil
+}
+
+func checkOptional(obj map[string]interface{}, key, kind, path string) error {
+	if v, ok := obj[key]; ok && v != nil {
+		return checkKind(v, kind, path+"."+key)
+	}
+	return nil
+}
+
+func checkOptionalAll(obj map[string]interface{}, keys []string, kind, path string) error {
+	for _, k := range keys {
+		if err := checkOptional(obj, k, kind, path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateEntry(v interface{}, path string) error {
+	if err := checkKind(v, "object", path); err != nil {
+		return err
+	}
+	entry := v.(map[string]interface{})
+	for _, req := range [][2]string{{"code", "string"}, {"name", "string"}, {"minor_units", "integer"}} {
+		val, ok := entry[req[0]]
+		if !ok {
+			return malformed(path+"."+req[0], "required field is missing")
+		}
+		if err := checkKind(val, req[1], path+"."+req[0]); err != nil {
+			return err
+		}
+	}
+	if entry["code"].(string) == "" {
+		return malformed(path+".code", "must not be empty")
+	}
+	if mu := entry["minor_units"].(float64); mu < 0 || mu > maxMinorUnits {
+		return malformed(path+".minor_units", fmt.Sprintf("expected an integer from 0 to %d, got %v", maxMinorUnits, mu))
+	}
+	for _, group := range []struct {
+		keys []string
+		kind string
+	}{{stringFields, "string"}, {numberFields, "number"}, {integerFields, "integer"}, {booleanFields, "boolean"}} {
+		if err := checkOptionalAll(entry, group.keys, group.kind, path); err != nil {
+			return err
+		}
+	}
+	if err := checkOptional(entry, "countries", "array", path); err != nil {
+		return err
+	}
+	if countries, ok := entry["countries"].([]interface{}); ok {
+		for i, cv := range countries {
+			cpath := fmt.Sprintf("%s.countries[%d]", path, i)
+			if err := checkKind(cv, "object", cpath); err != nil {
+				return err
+			}
+			country := cv.(map[string]interface{})
+			code, ok := country["code"]
+			if !ok {
+				return malformed(cpath+".code", "required field is missing")
+			}
+			if err := checkKind(code, "string", cpath+".code"); err != nil {
+				return err
+			}
+			if err := checkOptionalAll(country, []string{"name", "relationship"}, "string", cpath); err != nil {
+				return err
+			}
+		}
+	}
+	if err := checkOptional(entry, "code_lifetime", "object", path); err != nil {
+		return err
+	}
+	if life, ok := entry["code_lifetime"].(map[string]interface{}); ok {
+		lpath := path + ".code_lifetime"
+		to, present := life["to"]
+		if !present {
+			return malformed(lpath+".to", "required field is missing")
+		}
+		if err := checkKind(to, "string", lpath+".to"); err != nil {
+			return err
+		}
+		if err := checkOptional(life, "from", "string", lpath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// validateRegistryData checks the generic parsed JSON against the contract in docs/WRAPPER_VALIDATION.md.
+func validateRegistryData(v interface{}) error {
+	if err := checkKind(v, "object", "$"); err != nil {
+		return err
+	}
+	root := v.(map[string]interface{})
+	for _, section := range []string{"meta", "source", "currencies", "non_iso"} {
+		if val, ok := root[section]; ok {
+			if err := checkKind(val, "object", "$."+section); err != nil {
+				return err
+			}
+		}
+	}
+	meta, _ := root["meta"].(map[string]interface{})
+	source, _ := root["source"].(map[string]interface{})
+	if err := checkOptionalAll(meta, []string{"version", "updated"}, "string", "$.meta"); err != nil {
+		return err
+	}
+	if err := checkOptional(source, "last_amendment_applied", "integer", "$.source"); err != nil {
+		return err
+	}
+	if err := checkOptional(source, "last_amendment_date", "string", "$.source"); err != nil {
+		return err
+	}
+	for _, list := range entryLists {
+		group, _ := root[list.section].(map[string]interface{})
+		for _, key := range list.keys {
+			val, ok := group[key]
+			if !ok {
+				continue
+			}
+			path := "$." + list.section + "." + key
+			if err := checkKind(val, "array", path); err != nil {
+				return err
+			}
+			for i, e := range val.([]interface{}) {
+				if err := validateEntry(e, fmt.Sprintf("%s[%d]", path, i)); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // Load returns the singleton CurrencyRegistry, loading it from the
 // embedded JSON data on first call. Subsequent calls return the cached
 // instance.
 //
 // The registry data is embedded in the binary at compile time — no file I/O,
-// no network calls.
+// no network calls. Malformed data returns an error wrapping ErrMalformedRegistry.
 func Load() (*CurrencyRegistry, error) {
 	loadOnce.Do(func() {
 		registry, loadErr = loadRegistry()
@@ -405,9 +612,21 @@ func MustLoad() *CurrencyRegistry {
 }
 
 func loadRegistry() (*CurrencyRegistry, error) {
+	return loadRegistryFrom(registryJSON)
+}
+
+// loadRegistryFrom builds a registry from JSON bytes: generic parse, strict validation, then typed decoding.
+func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
+	var generic interface{}
+	if err := json.Unmarshal(data, &generic); err != nil {
+		return nil, fmt.Errorf("%w: $: invalid JSON: %v", ErrMalformedRegistry, err)
+	}
+	if err := validateRegistryData(generic); err != nil {
+		return nil, err
+	}
 	var raw rawRegistry
-	if err := json.Unmarshal(registryJSON, &raw); err != nil {
-		return nil, fmt.Errorf("failed to parse registry JSON: %w", err)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("%w: $: %v", ErrMalformedRegistry, err)
 	}
 
 	r := &CurrencyRegistry{

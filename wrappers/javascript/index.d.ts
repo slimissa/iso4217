@@ -292,6 +292,14 @@ export interface RegistrySummary {
  *   console.log(c.code);
  * }
  */
+/**
+ * Thrown by `new CurrencyRegistry()` when the registry data is malformed: not valid JSON, or outside the contract in
+ * docs/WRAPPER_VALIDATION.md. The message is "malformed registry data: <JSON path>: <reason>".
+ */
+export declare class RegistryDataError extends Error {
+  constructor(message: string);
+}
+
 export declare class CurrencyRegistry {
   /**
    * Initialize the registry from a JSON file.

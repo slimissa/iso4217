@@ -57,7 +57,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
-from iso4217 import Currency, CurrencyRegistry  # noqa: E402
+from iso4217 import Currency, CurrencyRegistry, RegistryDataError  # noqa: E402
 
 
 __all__ = ["main"]
@@ -179,6 +179,8 @@ def _load_registry(path: Optional[str] = None) -> CurrencyRegistry:
         raise RegistryError(str(e)) from e
     except json.JSONDecodeError as e:
         raise RegistryError(f"invalid registry JSON: {e}") from e
+    except RegistryDataError as e:
+        raise RegistryError(str(e)) from e
 
 
 # ---------------------------------------------------------------------------

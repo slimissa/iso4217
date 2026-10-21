@@ -42,6 +42,134 @@ from typing import (
 
 
 # ---------------------------------------------------------------------------
+# Registry data validation (v1.9.0, F13)
+# ---------------------------------------------------------------------------
+# One strict pass over the parsed JSON, before any Currency is built. The same contract is implemented in the
+# JavaScript, Go and Rust wrappers and tested against tests/cross_language_consistency.json
+# ("malformed_registry_tests"). The rules are in docs/WRAPPER_VALIDATION.md.
+
+MAX_MINOR_UNITS = 36
+
+_STRING_FIELDS = ("numeric", "symbol", "entity", "central_bank", "pegged_to", "peg_type", "pegged_since", "note",
+                  "withdrawn_date", "replaced_by", "type", "peg_mechanism", "classification", "source_url")
+_NUMBER_FIELDS = ("peg_rate", "peg_band_pct", "conversion_rate")
+_INTEGER_FIELDS = ("market_cap_rank",)
+_BOOLEAN_FIELDS = ("is_independent", "numeric_reused")
+_ENTRY_LISTS = (
+    ("currencies", ("active", "withdrawn")),
+    ("non_iso", ("cryptocurrencies", "stablecoins", "commodities", "special_purpose")),
+)
+
+
+class RegistryDataError(ValueError):
+    """
+    The registry data is malformed.
+
+    Raised by CurrencyRegistry() for a file that is not valid JSON, is not valid UTF-8, or breaks the contract in
+    docs/WRAPPER_VALIDATION.md. The message is "malformed registry data: <JSON path>: <reason>". A missing file is
+    still FileNotFoundError: that is I/O, not data.
+    """
+
+
+def _json_kind(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float)):
+        return "number"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, list):
+        return "array"
+    return "object"
+
+
+def _fail(path: str, reason: str) -> None:
+    raise RegistryDataError(f"malformed registry data: {path}: {reason}")
+
+
+def _check_kind(value: Any, kind: str, path: str) -> None:
+    ok = {
+        "string": lambda v: isinstance(v, str),
+        "number": lambda v: isinstance(v, (int, float)) and not isinstance(v, bool),
+        "integer": lambda v: isinstance(v, int) and not isinstance(v, bool),
+        "boolean": lambda v: isinstance(v, bool),
+        "array": lambda v: isinstance(v, list),
+        "object": lambda v: isinstance(v, dict),
+    }[kind](value)
+    if not ok:
+        _fail(path, f"expected {kind}, got {_json_kind(value)}")
+
+
+def _check_optional(obj: Dict[str, Any], key: str, kind: str, path: str) -> None:
+    if obj.get(key) is not None:
+        _check_kind(obj[key], kind, f"{path}.{key}")
+
+
+def _validate_entry(entry: Any, path: str) -> None:
+    _check_kind(entry, "object", path)
+    for key, kind in (("code", "string"), ("name", "string"), ("minor_units", "integer")):
+        if key not in entry:
+            _fail(f"{path}.{key}", "required field is missing")
+        _check_kind(entry[key], kind, f"{path}.{key}")
+    if entry["code"] == "":
+        _fail(f"{path}.code", "must not be empty")
+    if not 0 <= entry["minor_units"] <= MAX_MINOR_UNITS:
+        _fail(f"{path}.minor_units", f"expected an integer from 0 to {MAX_MINOR_UNITS}, got {entry['minor_units']}")
+    for key in _STRING_FIELDS:
+        _check_optional(entry, key, "string", path)
+    for key in _NUMBER_FIELDS:
+        _check_optional(entry, key, "number", path)
+    for key in _INTEGER_FIELDS:
+        _check_optional(entry, key, "integer", path)
+    for key in _BOOLEAN_FIELDS:
+        _check_optional(entry, key, "boolean", path)
+    _check_optional(entry, "countries", "array", path)
+    for i, country in enumerate(entry.get("countries") or []):
+        cpath = f"{path}.countries[{i}]"
+        _check_kind(country, "object", cpath)
+        if "code" not in country:
+            _fail(f"{cpath}.code", "required field is missing")
+        _check_kind(country["code"], "string", f"{cpath}.code")
+        _check_optional(country, "name", "string", cpath)
+        _check_optional(country, "relationship", "string", cpath)
+    _check_optional(entry, "code_lifetime", "object", path)
+    life = entry.get("code_lifetime")
+    if life is not None:
+        lpath = f"{path}.code_lifetime"
+        if "to" not in life:
+            _fail(f"{lpath}.to", "required field is missing")
+        _check_kind(life["to"], "string", f"{lpath}.to")
+        _check_optional(life, "from", "string", lpath)
+
+
+def _validate_registry_data(data: Any) -> None:
+    """Raise RegistryDataError unless `data` satisfies the contract in docs/WRAPPER_VALIDATION.md."""
+    _check_kind(data, "object", "$")
+    for section in ("meta", "source", "currencies", "non_iso"):
+        if section in data:
+            _check_kind(data[section], "object", f"$.{section}")
+    meta, source = data.get("meta", {}), data.get("source", {})
+    _check_optional(meta, "version", "string", "$.meta")
+    _check_optional(meta, "updated", "string", "$.meta")
+    _check_optional(source, "last_amendment_applied", "integer", "$.source")
+    _check_optional(source, "last_amendment_date", "string", "$.source")
+    for section, keys in _ENTRY_LISTS:
+        group = data.get(section, {})
+        for key in keys:
+            if key not in group:
+                continue
+            _check_kind(group[key], "array", f"$.{section}.{key}")
+            for i, entry in enumerate(group[key]):
+                _validate_entry(entry, f"$.{section}.{key}[{i}]")
+
+
+def _reject_constant(name: str) -> None:
+    raise RegistryDataError(f"malformed registry data: $: non-standard JSON constant {name}")
+
+
+# ---------------------------------------------------------------------------
 # Currency
 # ---------------------------------------------------------------------------
 
@@ -437,6 +565,11 @@ class CurrencyRegistry:
             data_path: Path to iso4217.json. If None, looks for the file
                        relative to this module's location, then in the
                        current working directory.
+
+        Raises:
+            FileNotFoundError: If the registry file cannot be found.
+            RegistryDataError: If the data is malformed (not JSON, not UTF-8, or
+                               outside the contract in docs/WRAPPER_VALIDATION.md).
         """
         self._data = self._load_data(data_path)
         self._active: Dict[str, Currency] = {}
@@ -482,8 +615,17 @@ class CurrencyRegistry:
     def _load_data(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
         """Load and parse the registry JSON."""
         resolved = CurrencyRegistry._find_data_path(path)
-        with open(resolved, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(resolved, "r", encoding="utf-8") as f:
+                data = json.load(f, parse_constant=_reject_constant)
+        except UnicodeDecodeError as e:
+            raise RegistryDataError(f"malformed registry data: $: not valid UTF-8 ({e.reason})") from e
+        except json.JSONDecodeError as e:
+            raise RegistryDataError(f"malformed registry data: $: invalid JSON: {e}") from e
+        except RecursionError as e:
+            raise RegistryDataError("malformed registry data: $: nested too deeply") from e
+        _validate_registry_data(data)
+        return data
 
     def _build_indexes(self) -> None:
         """Build lookup indexes from the raw data."""
@@ -837,6 +979,7 @@ def all_active() -> List[Currency]:
 # ---------------------------------------------------------------------------
 
 __all__ = [
+    "RegistryDataError",
     "Currency",
     "CurrencyRegistry",
     "currency",
