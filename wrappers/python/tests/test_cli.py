@@ -1182,3 +1182,43 @@ class TestBrokenPipe:
         assert proc.returncode == 0
         assert proc.stderr == b""
         assert proc.stdout
+
+
+# ---------------------------------------------------------------------------
+# --registry hardening (v1.9.0, F14)
+# ---------------------------------------------------------------------------
+
+class TestRegistryPathHardening:
+    """A registry path that is a directory used to end in an IsADirectoryError traceback and exit 1."""
+
+    def test_a_directory_exits_3_with_a_message(self, run_cli, tmp_path):
+        code, out, err = run_cli(["--registry", str(tmp_path), "lookup", "USD"])
+        assert code == 3, err
+        assert "directory" in err and str(tmp_path) in err
+        assert out == ""
+
+    def test_a_directory_with_version_exits_3(self, run_cli, tmp_path):
+        code, _, err = run_cli(["--registry", str(tmp_path), "--version"])
+        assert code == 3 and "directory" in err
+
+    def test_a_path_through_a_file_exits_3(self, run_cli, tmp_path):
+        f = tmp_path / "file.txt"
+        f.write_text("x", encoding="utf-8")
+        code, _, err = run_cli(["--registry", str(f / "iso4217.json"), "lookup", "USD"])
+        assert code == 3 and err.startswith("error:")
+
+    def test_a_missing_file_is_still_exit_3(self, run_cli, tmp_path):
+        code, _, err = run_cli(["--registry", str(tmp_path / "absent.json"), "lookup", "USD"])
+        assert code == 3 and "not found" in err
+
+    def test_a_malformed_registry_is_exit_3_with_the_path(self, run_cli, tmp_path):
+        bad = tmp_path / "bad.json"
+        bad.write_text('{"currencies": []}', encoding="utf-8")
+        code, _, err = run_cli(["--registry", str(bad), "lookup", "USD"])
+        assert code == 3 and "malformed registry data: $.currencies" in err
+
+    def test_no_traceback_in_a_real_process(self, tmp_path):
+        proc = subprocess.run([sys.executable, str(_WRAPPER_DIR / "iso4217_cli.py"), "--registry", str(tmp_path), "info"],
+                              capture_output=True, text=True, timeout=60)
+        assert proc.returncode == 3, proc.stderr
+        assert "Traceback" not in proc.stderr

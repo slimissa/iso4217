@@ -30,7 +30,7 @@ Exit codes (aligned with export_sql.py, export_csv.py, and the other tools):
     0  success
     1  not found, or validation failed
     2  usage error (unknown flag, missing argument, bad combination)
-    3  data error (registry missing, invalid JSON)
+    3  data error (registry missing, unreadable or a directory, invalid JSON, invalid data)
 
 Read-only. No command writes to the registry or to any file. No network.
 """
@@ -181,6 +181,10 @@ def _load_registry(path: Optional[str] = None) -> CurrencyRegistry:
         raise RegistryError(f"invalid registry JSON: {e}") from e
     except RegistryDataError as e:
         raise RegistryError(str(e)) from e
+    except IsADirectoryError as e:
+        raise RegistryError(f"registry path is a directory, not a file: {path}") from e
+    except OSError as e:
+        raise RegistryError(f"cannot read registry {path or 'iso4217.json'}: {e.strerror or e}") from e
 
 
 # ---------------------------------------------------------------------------
