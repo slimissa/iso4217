@@ -1322,6 +1322,116 @@
       "contains": "test_outside_a_git_work_tree_exits_3_not_a_traceback"
     }
   ],
+  "1.9.0": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.0"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.0\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.0]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.0"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.0"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.0\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.0\""
+    },
+    {
+      "file": "tools/sync_wrappers.py",
+      "contains": "PROJECT_ROOT / \"wrappers\" / \"javascript\" / \"iso4217.json\""
+    },
+    {
+      "file": "tests/test_js_package.py",
+      "contains": "test_npm_pack_includes_the_registry_and_it_is_the_current_one"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "wrappers/javascript/iso4217.json"
+    },
+    {
+      "file": "docs/WRAPPER_VALIDATION.md",
+      "contains": "## The contract"
+    },
+    {
+      "file": "tests/cross_language_consistency.json",
+      "contains": "malformed_registry_tests"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "class RegistryDataError(ValueError)"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "MAX_MINOR_UNITS = 36"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "ROUND_HALF_UP"
+    },
+    {
+      "file": "wrappers/javascript/index.js",
+      "contains": "class RegistryDataError extends Error"
+    },
+    {
+      "file": "wrappers/javascript/index.d.ts",
+      "contains": "export declare class RegistryDataError extends Error"
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "contains": "var ErrMalformedRegistry"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "fn validate_registry_data"
+    },
+    {
+      "file": "wrappers/python/iso4217_cli.py",
+      "contains": "registry path is a directory"
+    },
+    {
+      "file": "wrappers/python/iso4217_cli.py",
+      "contains": "class _SafeArgumentParser"
+    },
+    {
+      "file": "wrappers/python/iso4217_cli.py",
+      "contains": "def _parse_amount"
+    },
+    {
+      "file": "wrappers/python/iso4217_cli.py",
+      "absent": "float(args.amount)"
+    },
+    {
+      "file": "wrappers/python/tests/test_cli.py",
+      "contains": "class TestTerminalEscapes"
+    },
+    {
+      "file": "wrappers/python/tests/test_cli.py",
+      "contains": "class TestDecimalAmounts"
+    },
+    {
+      "file": "wrappers/python/tests/test_cli.py",
+      "contains": "class TestRegistryPathHardening"
+    },
+    {
+      "file": "tests/test_wrappers.py",
+      "contains": "test_every_malformed_registry_is_rejected_with_the_error_type_and_the_path"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",
@@ -1362,6 +1472,10 @@
     {
       "file": "tools/validate.py",
       "absent": "JSONSCHEMA_NOT_INSTALLED"
+    },
+    {
+      "file": "wrappers/python/iso4217_cli.py",
+      "absent": "float(args.amount)"
     }
   ]
 }

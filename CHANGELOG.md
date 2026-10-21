@@ -6,6 +6,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.0] — Unreleased
+
+The wrappers and the CLI: the npm package carries its data, the four wrappers fail the same way on malformed data, and
+the CLI stops crashing, stops echoing terminal escapes, and stops losing digits. Audit findings F6, F13, F14, F15 and
+F28. No data change, no schema change. The Python wrapper's API gains a Decimal overload.
+
+### Fixed
+
+- **The npm package shipped without its data (F6).** `package.json` listed `iso4217.json` under `files`, but the file
+  was not in `wrappers/javascript/`, and `npm pack` omits a missing entry silently: the tarball held `index.js` and no
+  registry, and an installed package could not find its data unless the caller's working directory held one.
+  `tools/sync_wrappers.py` now keeps a fourth copy, `wrappers/javascript/iso4217.json`; a test packs the real package,
+  reads the tarball, installs it into an empty project and loads it.
+- **`iso4217 --registry <directory>` died with an `IsADirectoryError` traceback and exit 1 (F14).** It now exits 3 with
+  a message, like every other unusable registry; so do unreadable paths and paths through a file.
+- **The CLI echoed untrusted text into the terminal (F15).** `iso4217 lookup $'\x1b]0;PWNED\x07'` set the window title.
+  Every error message that echoes input, argparse's own included, now escapes control, format, surrogate and
+  line-separator characters (`\x1b`, `\u202e`); ordinary text, Windows paths and non-ASCII letters are untouched.
+- **`iso4217 minor` and `format` lost digits through `float()` (F28).** `minor 99999999999999999999 USD` now prints
+  `9999999999999999999900`. Amounts are parsed as `decimal.Decimal`; `NaN` and `Infinity` are still refused (exit 2);
+  amounts of more than 100 integer digits are refused instead of computed. **Output changes** for decimal ties a binary
+  float cannot hold: `minor 1.005 USD` is now `101` (it was `100`).
+
+### Changed
+
+- **One strict validation pass and one documented error type per wrapper (F13).** A malformed registry now fails at load,
+  with the same message shape in all four languages, `malformed registry data: <JSON path>: <reason>`: Python
+  `RegistryDataError` (a `ValueError`), JavaScript `RegistryDataError` (an `Error`), Go an error wrapping
+  `ErrMalformedRegistry`, Rust `Err(String)` starting with that text. The contract is `docs/WRAPPER_VALIDATION.md`;
+  `tests/cross_language_consistency.json` gains `malformed_registry_tests` (33 registries to reject with the path each
+  must name, 6 to accept), so `tools/check_cross_language.sh` exercises all four. **Behaviour change:** Python no longer
+  raises `json.JSONDecodeError` or `UnicodeDecodeError` for an unparsable file; both are `RegistryDataError` (still a
+  `ValueError`). The CLI maps it to exit 3.
+- `Currency.to_minor()` and `Currency.format()` in the Python wrapper accept a `Decimal` and convert it exactly (round
+  half away from zero). `int` and `float` behave as before.
+
+### Added
+
+- `docs/WRAPPER_VALIDATION.md`, `tests/test_js_package.py`, and tests for each item: the schema of the shared fixture in
+  all four wrapper suites, directory and escape cases in `wrappers/python/tests/test_cli.py`, Decimal cases in both the
+  wrapper and the CLI.
+- Claims for all of the above in `tools/release_claims.json`; `doc-facts` asserts the CLI no longer parses amounts with
+  `float()`.
+
+### Not in this release
+
+- `iso4217 major` still prints its result through `float` (`from_minor()` returns a float), so a very large minor amount
+  loses digits on output. Its input is already an exact `int`.
+- JavaScript cannot tell `2.0` from `2`, so it accepts an integral float for `minor_units`; Python, Go and Rust reject it.
+- The wrappers do not check for duplicate currency codes; the last one wins, as before.
+- The release gate runs `pytest tests/` only. `wrappers/python/tests/` (the CLI suite) runs in CI, not in the gate.
+- The `check-wrapper-sync` job's `git diff` list still omits `wrappers/python/iso4217.json` (`sync_wrappers.py --check`
+  covers it in CI and the gate). `docs/LAYERS.md` and `CONTRIBUTING.md` still describe two or three wrapper copies, not four.
+- `CONTRIBUTING.md` still says "As of v1.8.4". Nothing bumps that line.
+
+---
 ## [1.8.5] — 2026-10-20
 
 Input hardening: `tools/validate.py` stops passing when it could not run, stops crashing on hostile input, and rejects
