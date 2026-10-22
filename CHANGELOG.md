@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.0] — Unreleased
+## [1.9.0] — 2026-10-22
 
 The wrappers and the CLI: the npm package carries its data, the four wrappers fail the same way on malformed data, and
 the CLI stops crashing, stops echoing terminal escapes, and stops losing digits. Audit findings F6, F13, F14, F15 and
