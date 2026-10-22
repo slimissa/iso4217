@@ -141,7 +141,6 @@ def validate_against_schema(registry: Dict, schema: Dict) -> List[ValidationErro
 
     try:
         import jsonschema
-        from jsonschema import validate, ValidationError as SchemaError
 
         validator = jsonschema.Draft7Validator(schema)
         schema_errors = sorted(validator.iter_errors(registry), key=lambda e: e.path)

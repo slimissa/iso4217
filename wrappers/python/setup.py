@@ -113,7 +113,6 @@ setup(
             "pytest-cov>=4.0,<6",
             "mypy>=1.0,<2",
             "jsonschema>=4.0,<5",
-            "pyyaml>=6.0,<7",
         ],
     },
 

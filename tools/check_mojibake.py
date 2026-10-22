@@ -39,7 +39,9 @@ A file can opt out of scanning by placing the marker
 fixtures that deliberately contain corrupted bytes.
 
 Scanned extensions: md, txt, json, jsonl, py, sh, js, ts, rs, go, toml,
-yaml, yml, csv, tsv, sql, html, cfg, ini.
+yaml, yml, csv, tsv, sql, html, cfg, ini. Also scanned by name: .gitattributes,
+.gitignore, LICENSE, VERSION, MANIFEST.in, go.mod, go.sum. Not scanned: binary
+files (the .parquet outputs).
 
 Usage:
     python3 tools/check_mojibake.py
@@ -82,6 +84,11 @@ SCAN_SUFFIXES = {
     ".cfg", ".ini",
 }
 
+# Text files with no scanned suffix, matched by name. Binary files (the .parquet outputs) stay skipped.
+SCAN_NAMES = {
+    ".gitattributes", ".gitignore", "LICENSE", "VERSION", "MANIFEST.in", "go.mod", "go.sum",
+}
+
 SKIP_DIRS = {
     ".git", ".hg", ".svn",
     "node_modules", "target", "dist", "build",
@@ -111,7 +118,7 @@ def iter_files(root: Path) -> list[Path]:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
-        if path.suffix.lower() not in SCAN_SUFFIXES:
+        if path.suffix.lower() not in SCAN_SUFFIXES and path.name not in SCAN_NAMES:
             continue
         try:
             rel = path.relative_to(root)

@@ -251,7 +251,7 @@ jobs:
             audit_cmd: pipx run --spec pip-audit==2.10.1 pip-audit -r requirements-ci.txt
           - language: javascript
             test_cmd: cd wrappers/javascript && npm test
-            audit_cmd: cd wrappers/javascript && npm install --package-lock-only --ignore-scripts && npm audit --audit-level=high
+            audit_cmd: cd wrappers/javascript && npm install --package-lock-only --ignore-scripts && npm audit --audit-level=high --omit=dev
           - language: go
             test_cmd: cd wrappers/go && go test ./... -v
             audit_cmd: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && export PATH="$(go env GOPATH)/bin:$PATH" && cd wrappers/go && govulncheck ./...

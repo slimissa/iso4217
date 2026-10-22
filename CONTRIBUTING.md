@@ -127,7 +127,7 @@ pip install --upgrade pip
 # Install the wrapper editable, with its dev extras
 pip install -e "wrappers/python[dev]"
 
-# The dev extras include: pytest, pytest-cov, mypy, jsonschema, pyyaml
+# The dev extras include: pytest, pytest-cov, mypy, jsonschema
 # After this, the `iso4217` command is available on your PATH.
 
 # JavaScript wrapper
@@ -145,8 +145,6 @@ cd wrappers/go
 go build ./...
 cd ../..
 ```
-
-The `pyyaml` dependency is required to run the workflow verification snippets in this document. It is installed automatically by `pip install -e "wrappers/python[dev]"`; installing it manually is only necessary if you skip the `[dev]` extra.
 
 ---
 

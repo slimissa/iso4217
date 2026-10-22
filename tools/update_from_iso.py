@@ -32,14 +32,12 @@ Requirements:
 import json
 import sys
 import argparse
-import hashlib
 import subprocess
 from pathlib import Path
 from datetime import date, datetime, timezone
 from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import defaultdict
 
 # Optional imports — graceful degradation if not installed
 try:

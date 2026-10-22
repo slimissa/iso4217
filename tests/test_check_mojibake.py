@@ -134,3 +134,26 @@ def test_the_docstring_states_that_provenance():
     doc = " ".join(cm.__doc__.split())
     assert "Mathematical Operators" in doc and "General Punctuation" in doc
     assert "which no pattern covers" in doc
+
+
+# ---------------------------------------------------------------------------
+# Files with no scanned suffix (v1.9.0, F27)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name", sorted(cm.SCAN_NAMES))
+def test_text_files_without_a_scanned_suffix_are_scanned_by_name(tmp_path, name):
+    (tmp_path / name).write_bytes(b"clean")
+    assert tmp_path / name in cm.iter_files(tmp_path)
+    (tmp_path / name).write_bytes(b"before " + _corrupt("\u2014", "cp1252"))
+    assert cm.scan_file(tmp_path / name)
+
+
+def test_binary_outputs_stay_skipped(tmp_path):
+    (tmp_path / "x.parquet").write_bytes(b"\xef\xbf\xbd")
+    assert cm.iter_files(tmp_path) == []
+
+
+def test_every_real_text_file_without_a_scanned_suffix_is_covered():
+    found = {p.name for p in cm.iter_files(PROJECT_ROOT)}
+    for name in ("LICENSE", "VERSION", ".gitignore", ".gitattributes", "MANIFEST.in", "go.mod", "go.sum"):
+        assert name in found, name
