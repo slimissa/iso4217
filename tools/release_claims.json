@@ -1430,6 +1430,94 @@
     {
       "file": "tests/test_wrappers.py",
       "contains": "test_every_malformed_registry_is_rejected_with_the_error_type_and_the_path"
+    },
+    {
+      "file": "tools/update_from_iso.py",
+      "absent": "import hashlib"
+    },
+    {
+      "file": "tools/update_from_iso.py",
+      "absent": "defaultdict"
+    },
+    {
+      "file": "tools/validate.py",
+      "absent": "SchemaError"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "absent": "    overload,"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "absent": "pyyaml"
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "absent": "pyyaml"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"eslint\": \"10.12.0\""
+    },
+    {
+      "file": "wrappers/javascript/eslint.config.js",
+      "contains": "module.exports"
+    },
+    {
+      "file": "tools/check_mojibake.py",
+      "contains": "SCAN_NAMES"
+    },
+    {
+      "file": "tests/test_check_mojibake.py",
+      "contains": "test_text_files_without_a_scanned_suffix_are_scanned_by_name"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "cache: 'pip'"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "cache: 'npm'"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "cache: true"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "Swatinem/rust-cache@"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "npm audit --audit-level=high --omit=dev"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "absent": "needs: [validate-json, check-wrapper-sync"
+    },
+    {
+      "file": "tests/test_ci_topology.py",
+      "contains": "test_validate_wrappers_does_not_wait_for_validate_json"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "The duplicated code in `tools/` (e.g., `load_registry`, `_atomic_write_binary`) is accepted by design."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "`tools/iso3166_snapshot.json` re-vendored from ISO 3166 v1.8.0."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "Audit closure. All 30 findings from the v1.7.11 audit are either closed (F1–F28, F30) or explicitly accepted (F29)."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "F31 (upstream-drift detection)"
+    },
+    {
+      "file": "tools/iso3166_snapshot.meta.json",
+      "contains": "\"source_version\": \"1.8.0\""
     }
   ],
   "doc-facts": [

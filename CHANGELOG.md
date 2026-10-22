@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The wrappers and the CLI: the npm package carries its data, the four wrappers fail the same way on malformed data, and
 the CLI stops crashing, stops echoing terminal escapes, and stops losing digits. Audit findings F6, F13, F14, F15 and
-F28. No data change, no schema change. The Python wrapper's API gains a Decimal overload.
+F28, with F27 (cleanup) and F30 (CI topology) folded in and F29 recorded as accepted. No registry data change, no
+schema change; the vendored ISO 3166 snapshot is re-vendored (see Changed). The Python wrapper's API gains a Decimal
+overload.
 
 ### Fixed
 
@@ -42,6 +44,24 @@ F28. No data change, no schema change. The Python wrapper's API gains a Decimal 
 - `Currency.to_minor()` and `Currency.format()` in the Python wrapper accept a `Decimal` and convert it exactly (round
   half away from zero). `int` and `float` behave as before.
 
+- **Cleanup (F27).** Unused imports removed: `hashlib` and `defaultdict` in `tools/update_from_iso.py`, the unused
+  `jsonschema` import line in `tools/validate.py` (`SchemaError`, and `validate` with it), `overload` in the Python
+  wrapper. `pyyaml` leaves the Python dev extra (nothing imports it) and `CONTRIBUTING.md` stops saying it is needed.
+  `npm run lint` failed because `eslint` was not a dependency: it is now in `devDependencies`, exactly pinned, with an
+  `eslint.config.js` (ESLint 9 and later will not run without one). `tools/check_mojibake.py` scanned by suffix and so
+  skipped eight text files (`.gitattributes`, both `.gitignore`, `LICENSE`, `VERSION`, `MANIFEST.in`, `go.mod`,
+  `go.sum`); it now scans them by name. The five `.parquet` outputs are binary and stay skipped.
+- **CI topology (F30).** In `validate.yml`, `validate-wrappers` no longer waits for `validate-json`; both start once their
+  export and sync checks have passed. Dependency caches: pip (four jobs), npm and Go (their legs of the wrapper matrix)
+  and Rust through a SHA-pinned `Swatinem/rust-cache`, because `dtolnay/rust-toolchain` has no `cache` input. Each cache
+  names its dependency file (`cache-dependency-path`) because this repo has none of the default ones and setup-python and
+  setup-node fail the step without one. The JavaScript audit now runs `npm audit --omit=dev`: it audits what ships, as
+  before, instead of the linter's dependency tree. The Go leg of the matrix runs on a newer Go than `wrappers/go/go.mod`
+  declares (1.21), as it has since 1.8.5.
+- `tools/iso3166_snapshot.json` re-vendored from ISO 3166 v1.8.0. Closes six releases of drift (v1.7.0 through v1.8.0),
+  including the independent field correction in v1.7.3 and the note provenance fix in v1.7.4. `check_snapshot_freshness.py`
+  did not catch this because it checks `review_by`, not source-version drift; that gap becomes F31 in v1.9.1.
+
 ### Added
 
 - `docs/WRAPPER_VALIDATION.md`, `tests/test_js_package.py`, and tests for each item: the schema of the shared fixture in
@@ -49,6 +69,12 @@ F28. No data change, no schema change. The Python wrapper's API gains a Decimal 
   wrapper and the CLI.
 - Claims for all of the above in `tools/release_claims.json`; `doc-facts` asserts the CLI no longer parses amounts with
   `float()`.
+
+### Notes
+
+The duplicated code in `tools/` (e.g., `load_registry`, `_atomic_write_binary`) is accepted by design. Each tool is deliberately self-contained so it can be read, run, and reviewed alone.
+
+Audit closure. All 30 findings from the v1.7.11 audit are either closed (F1–F28, F30) or explicitly accepted (F29). F31 (upstream-drift detection) is a new finding surfaced during the v1.9.0 release cycle and is scheduled for v1.9.1.
 
 ### Not in this release
 
@@ -60,6 +86,10 @@ F28. No data change, no schema change. The Python wrapper's API gains a Decimal 
 - The `check-wrapper-sync` job's `git diff` list still omits `wrappers/python/iso4217.json` (`sync_wrappers.py --check`
   covers it in CI and the gate). `docs/LAYERS.md` and `CONTRIBUTING.md` still describe two or three wrapper copies, not four.
 - `CONTRIBUTING.md` still says "As of v1.8.4". Nothing bumps that line.
+- Other unused imports remain, outside the F27 list: `subprocess`, `Set` and `Tuple` in `tools/update_from_iso.py`,
+  `from email import errors` in `tools/validate.py`, and ones in `enrich_field.py`, `export_aggregated.py` and
+  `refresh_market_caps.py`. No check enforces it.
+- `npm run lint` is not run in CI, and the Go leg of the CI matrix does not test the minimum `go 1.21` the module declares.
 
 ---
 ## [1.8.5] — 2026-10-20
