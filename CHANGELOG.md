@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.1] — Unreleased
+
+### Notes
+
+- **Fifth-pass audit complete.** 11 new findings (P5-01 through P5-11) and 2 meta-additions (R10, AD) identified; the
+  report is `docs/audits/fifth-pass.md`. Queued for v1.9.1 through v1.9.5.
+
+---
 ## [1.9.0] — 2026-10-22
 
 The wrappers and the CLI: the npm package carries its data, the four wrappers fail the same way on malformed data, and
