@@ -1520,6 +1520,129 @@
       "contains": "\"source_version\": \"1.8.0\""
     }
   ],
+  "1.9.1": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.1"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.1\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.1]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.1"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.1"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.1\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.1\""
+    },
+    {
+      "file": "docs/audits/fifth-pass.md"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "### 10. A check that cannot fail is not a check"
+    },
+    {
+      "file": "tests/test_gate_mutations.py",
+      "contains": "test_every_gate_tool_is_covered_or_exempt_with_a_reason"
+    },
+    {
+      "file": "tests/test_gate_mutations.py",
+      "contains": "class TestCheckCountryCodes"
+    },
+    {
+      "file": "tests/test_gate_mutations.py",
+      "contains": "class TestSyncWrappersCheck"
+    },
+    {
+      "file": "tools/check_audit_table.py"
+    },
+    {
+      "file": "tests/test_check_audit_table.py"
+    },
+    {
+      "file": "tools/check_js_lint.sh"
+    },
+    {
+      "file": "tests/test_check_js_lint.py"
+    },
+    {
+      "file": "tests/test_ci_parity.py",
+      "contains": "test_every_pytest_command_in_a_workflow_passes_fail_on_skip"
+    },
+    {
+      "file": "wrappers/python/tests/conftest.py"
+    },
+    {
+      "file": "tools/vendor_iso3166.py",
+      "contains": "--check-upstream"
+    },
+    {
+      "file": "tests/test_vendor_upstream.py"
+    },
+    {
+      "file": "tools/check_release_claims.py",
+      "contains": "is not UTF-8 text"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_audit_table.py\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_js_lint.sh\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"pytest wrappers/python/tests/\""
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "python3 -m pytest tests/test_wrappers.py -v --fail-on-skip"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "python3 -m pytest wrappers/python/tests/test_cli.py -v --fail-on-skip"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "bash tools/check_js_lint.sh"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "absent": "npm audit --audit-level=high --omit=dev"
+    },
+    {
+      "file": ".github/workflows/version-and-hygiene.yml",
+      "contains": "python3 tools/check_audit_table.py"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "`check_audit_table.py`"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "absent": "The table is maintained by hand."
+    },
+    {
+      "file": "tools/iso3166_snapshot.meta.json",
+      "contains": "\"source_version\": \"1.8.0\""
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 ## [1.9.1] — Unreleased
 
+The gate learns to fail. The fifth-pass audit (`docs/audits/fifth-pass.md`) forced four gate tools to exit 0 and all
+1,421 tests stayed green. This release adds the tests that make every gate tool prove it can fail (P5-02), the rule that
+requires them (R10), a check that keeps `docs/AUDIT.md` true (AD), CI and gate parity (P5-05), the fix for the
+`check_release_claims.py --audit` crash (P5-08) and `vendor_iso3166.py --check-upstream` (F31). No registry data change;
+no schema change. The other audit findings are queued for later releases.
+
 ### Notes
 
 - **Fifth-pass audit complete.** 11 new findings (P5-01 through P5-11) and 2 meta-additions (R10, AD) identified; the
