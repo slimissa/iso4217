@@ -26,6 +26,10 @@ no schema change. The other audit findings are queued for later releases.
 - **Hygiene rule 10 (R10): a check that cannot fail is not a check.** `RELEASE_PATTERN.md` states it, cites P5-02, and
   names its enforcement (`tests/test_gate_mutations.py`). The numbering collides with ISO 3166's rules 10 to 19
   (P5-10); the rule is proposed to the siblings.
+- **`tools/check_audit_table.py` derives `docs/AUDIT.md` from the tree (AD).** It reads `tools/`, the workflows and
+  `run_gate()` and compares the `--check`, CI and Gate columns row by row; exit 0 match, 1 disagreement, 2 fatal. It is
+  a gate step (the gate is now 24 checks) and a CI job. The table was true when the fifth-pass audit re-derived it;
+  nothing kept it true.
 
 ### Notes
 

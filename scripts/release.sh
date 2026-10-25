@@ -458,6 +458,7 @@ run_gate() {
     run_gate_step "check_readme_drift.py"           python3 tools/check_readme_drift.py
     run_gate_step "check_provenance.py"             python3 tools/check_provenance.py
     run_gate_step "check_verification_doc.py"       python3 tools/check_verification_doc.py
+    run_gate_step "check_audit_table.py"            python3 tools/check_audit_table.py
     run_gate_step "enrich_field.py --field classification --check"  python3 tools/enrich_field.py --field classification --check
     run_gate_step "enrich_field.py --field code_lifetime --check"  python3 tools/enrich_field.py --field code_lifetime --check
     run_gate_step "enrich_field.py --field numeric_reused --check"  python3 tools/enrich_field.py --field numeric_reused --check
@@ -762,6 +763,7 @@ print_plan() {
     echo "  python3 tools/check_readme_drift.py"
     echo "  python3 tools/check_provenance.py"
     echo "  python3 tools/check_verification_doc.py"
+    echo "  python3 tools/check_audit_table.py"
     echo "  python3 tools/enrich_field.py --field classification --check"
     echo "  python3 tools/enrich_field.py --field code_lifetime --check"
     echo "  python3 tools/enrich_field.py --field numeric_reused --check"

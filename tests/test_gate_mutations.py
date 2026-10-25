@@ -144,6 +144,7 @@ GREEN = [
     ("export_aggregated.py", ("--check",)),
     ("validate.py", ()),
     ("check_mojibake.py", ()),
+    ("check_audit_table.py", ()),
 ]
 
 
@@ -420,6 +421,22 @@ class TestCheckReleaseClaims:
         assert code == 2
 
 
+class TestCheckAuditTable:
+    def test_a_row_that_disagrees_with_release_sh_exits_1(self, tree):
+        audit = tree / "docs" / "AUDIT.md"
+        text = audit.read_text(encoding="utf-8")
+        row = "| `validate.py` | \u2014 | validate.yml | yes |"
+        assert row in text, "the validate.py row changed; pick another row to break"
+        audit.write_text(text.replace(row, "| `validate.py` | \u2014 | validate.yml | \u2014 |"), encoding="utf-8")
+        code, out = run(tree, "check_audit_table.py")
+        assert code == 1 and "validate.py" in out
+
+    def test_a_missing_audit_file_exits_2(self, tree):
+        (tree / "docs" / "AUDIT.md").unlink()
+        code, _ = run(tree, "check_audit_table.py")
+        assert code == 2
+
+
 # ---------------------------------------------------------------------------
 # Rule 10 enforces itself: every gate tool has a case above or a written exemption.
 # ---------------------------------------------------------------------------
@@ -439,6 +456,7 @@ COVERED = {
     "validate.py",
     "check_mojibake.py",
     "check_release_claims.py",
+    "check_audit_table.py",
 }
 
 # Each exemption names the evidence. Adding a tool here instead of a case needs

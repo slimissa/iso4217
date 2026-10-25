@@ -10,8 +10,8 @@ How to read the columns:
 - **CI**: the workflow file(s) under `.github/workflows/` with a `run:` line that invokes the tool.
 - **Gate**: `run_gate()` in `scripts/release.sh` invokes the tool. "yes (N steps)" means N separate gate steps.
 
-The table is maintained by hand. No check compares it with the workflows or `release.sh`; it was derived from them
-when v1.8.4 was prepared. If a row and the tree disagree, the tree is right.
+The table is written by hand and checked by machine: `tools/check_audit_table.py` derives each column from the tree and
+fails the gate and CI when a row disagrees (v1.9.1). If a row and the tree disagree, the tree is right.
 
 ## Category A: committed-artifact producers
 
@@ -44,6 +44,7 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `check_readme_drift.py` | — | version-and-hygiene.yml | yes |
 | `check_provenance.py` | — | version-and-hygiene.yml | yes |
 | `check_verification_doc.py` | — | version-and-hygiene.yml | yes |
+| `check_audit_table.py` | — | version-and-hygiene.yml | yes |
 | `check_amendments.py` | — | monitor-amendments.yml | — |
 | `check_cross_language.sh` | — | — | yes |
 | `check_release_claims.py` | — | — | yes |
