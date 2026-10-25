@@ -30,6 +30,11 @@ no schema change. The other audit findings are queued for later releases.
   `run_gate()` and compares the `--check`, CI and Gate columns row by row; exit 0 match, 1 disagreement, 2 fatal. It is
   a gate step (the gate is now 24 checks) and a CI job. The table was true when the fifth-pass audit re-derived it;
   nothing kept it true.
+- **`vendor_iso3166.py --check-upstream` (F31).** Lists the ISO 3166 tags with `git ls-remote --tags`, takes the highest
+  stable `vX.Y.Z` and compares it with the vendored `source_version`: exit 0 current, 1 behind (or not an upstream tag),
+  2 no stable tags or bad flags, 3 the tags could not be read. It is not a gate step (it needs the network, and a new
+  upstream tag with no data change should not block a release). Against the vendored v1.8.0 it reports behind: ISO 3166
+  v1.8.1 exists and changes no data.
 
 ### Notes
 

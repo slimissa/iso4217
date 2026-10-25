@@ -19,6 +19,7 @@ serialize_meta() and nowhere else.
 Modes:
     python3 tools/vendor_iso3166.py --version 1.6.9 --vendored-at YYYY-MM-DD [--source PATH]
     python3 tools/vendor_iso3166.py --check [--source PATH]
+    python3 tools/vendor_iso3166.py --check-upstream [--upstream-url URL]
 
 The source is the ISO 3166 tag vX.Y.Z (tags are immutable), fetched from GitHub
 with three attempts. --source reads a local iso3166.json instead.
@@ -31,16 +32,24 @@ that preserves hand-set metadata, runs on every invocation. It compares
   2. meta.source_version against the source's own meta.version
 and fails on either mismatch. The write path records snapshot_sha256, the SHA-256 of the snapshot bytes, in the meta file.
 
+--check-upstream asks a different question: is the vendored release still the latest one? It runs
+`git ls-remote --tags` against the ISO 3166 repository (or --upstream-url), takes the highest stable vX.Y.Z tag, and
+compares it with source_version in the meta file. It reads no snapshot bytes and writes nothing. It is not a gate step:
+it needs the network, and a new upstream tag that changes no data would block a release with nothing to re-vendor.
+
 One source schema is known today (ISO 3166 v1.6.7 and later). A second schema
 needs an entry in SCHEMAS and a fixture in tests/test_vendor_iso3166.py; a test
 fails until both exist.
 
 Exit codes:
-    0  wrote the snapshot, or --check matched
-    1  --check found a mismatch (snapshot_sha256, snapshot bytes, or source_version)
+    0  wrote the snapshot, --check matched, or --check-upstream found the vendored release current
+    1  --check found a mismatch (snapshot_sha256, snapshot bytes, or source_version), or --check-upstream found the
+       vendored release behind the latest upstream tag (or not an upstream tag at all)
     2  usage or fatal error (unreadable file, invalid JSON, unknown source schema,
-       no such tag, version mismatch on write, --check with no valid snapshot_sha256 in the meta file)
-    3  could not run: the source could not be fetched after three attempts
+       no such tag, version mismatch on write, --check with no valid snapshot_sha256 in the meta file,
+       --check-upstream with no stable tags upstream or combined with another mode)
+    3  could not run: the source could not be fetched after three attempts, or the upstream tag list could not be
+       read after three attempts (or git is not installed)
 """
 from __future__ import annotations
 
@@ -49,6 +58,7 @@ import copy
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import time
 import urllib.error
@@ -60,6 +70,7 @@ from typing import Any, Callable
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SNAPSHOT_REL = "tools/iso3166_snapshot.json"
 META_REL = "tools/iso3166_snapshot.meta.json"
+UPSTREAM_URL = "https://github.com/slimissa/iso3166.git"
 
 EXIT_OK = 0
 EXIT_MISMATCH = 1
@@ -355,16 +366,78 @@ def _run_write(args: argparse.Namespace, root: Path) -> int:
     return EXIT_OK
 
 
+def _version_tuple(text: str) -> tuple[int, int, int] | None:
+    found = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", text)
+    return (int(found.group(1)), int(found.group(2)), int(found.group(3))) if found else None
+
+
+def list_upstream_tags(url: str, attempts: int = 3, timeout: float = 30.0) -> list[tuple[int, int, int]]:
+    """Stable vX.Y.Z tags at `url`, via `git ls-remote --tags`. Pre-release and non-version tags are ignored."""
+    last = "no output"
+    for attempt in range(attempts):
+        try:
+            done = subprocess.run(["git", "ls-remote", "--tags", url], capture_output=True, text=True, timeout=timeout)
+        except FileNotFoundError as exc:
+            raise CannotRun("git is not installed; --check-upstream needs it") from exc
+        except subprocess.TimeoutExpired:
+            last = f"timed out after {timeout:g}s"
+        else:
+            if done.returncode == 0:
+                tags = []
+                for line in done.stdout.splitlines():
+                    found = re.search(r"refs/tags/v(\d+)\.(\d+)\.(\d+)$", line)
+                    if found:
+                        tags.append((int(found.group(1)), int(found.group(2)), int(found.group(3))))
+                return sorted(set(tags))
+            last = (done.stderr.strip().splitlines() or ["git ls-remote failed"])[-1]
+        if attempt < attempts - 1:
+            _sleep(2 ** attempt)
+    raise CannotRun(f"could not list the tags at {url} after {attempts} attempts: {last}")
+
+
+def _run_check_upstream(args: argparse.Namespace, root: Path) -> int:
+    meta = _read_json(root / META_REL)
+    version = meta.get("source_version")
+    vendored = _version_tuple(version) if isinstance(version, str) else None
+    if vendored is None:
+        raise Fatal(f"{META_REL} has no source_version of the form X.Y.Z")
+    url = args.upstream_url or UPSTREAM_URL
+    tags = list_upstream_tags(url)
+    if not tags:
+        raise Fatal(f"no stable vX.Y.Z tags found at {url}")
+    latest = tags[-1]
+    latest_text = "v" + ".".join(str(n) for n in latest)
+    print(f"  vendored:        v{version}")
+    print(f"  upstream latest: {latest_text} ({url})")
+    if vendored not in tags:
+        print(f"  MISMATCH: v{version} is not a tag at {url}", file=sys.stderr)
+        return EXIT_MISMATCH
+    if vendored < latest:
+        print(f"  BEHIND: the vendored release v{version} is behind upstream {latest_text}", file=sys.stderr)
+        print(f"  Re-vendor with: python3 tools/vendor_iso3166.py --version {latest_text[1:]} --vendored-at <date>", file=sys.stderr)
+        return EXIT_MISMATCH
+    print(f"  current: v{version} is the latest upstream release")
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None, root: Path | None = None) -> int:
     ap = argparse.ArgumentParser(description="Vendor and verify the ISO 3166 snapshot.")
     ap.add_argument("--check", action="store_true", help="verify the committed snapshot against its source")
     ap.add_argument("--version", help="ISO 3166 release to vendor, for example 1.6.9 (write mode)")
     ap.add_argument("--vendored-at", help="date to record, YYYY-MM-DD (required in write mode; the tool never reads the clock)")
     ap.add_argument("--source", help="read iso3166.json from this path instead of fetching the tag")
+    ap.add_argument("--check-upstream", action="store_true", help="compare source_version with the latest ISO 3166 tag upstream (network)")
+    ap.add_argument("--upstream-url", help="git URL for --check-upstream (default: the ISO 3166 repository on GitHub)")
     ap.add_argument("--root", help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     base = Path(args.root) if args.root else (root or PROJECT_ROOT)
     try:
+        if args.check_upstream:
+            if args.check or args.version or args.vendored_at or args.source:
+                raise Fatal("--check-upstream does not combine with --check, --version, --vendored-at or --source")
+            return _run_check_upstream(args, base)
+        if args.upstream_url:
+            raise Fatal("--upstream-url is only meaningful with --check-upstream")
         if args.check:
             if args.version or args.vendored_at:
                 raise Fatal("--check reads the version from the meta file; --version and --vendored-at are write-mode flags")
