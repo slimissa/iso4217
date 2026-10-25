@@ -23,6 +23,9 @@ no schema change. The other audit findings are queued for later releases.
   modes, `validate`, `check_mojibake` and `check_release_claims`. A meta-test fails when a tool joins the gate
   without a case or a written exemption. Before this, forcing `check_country_codes`, `check_version_consistency`,
   `sync_wrappers --check` or `enrich_field --check` to exit 0 left all 1,421 tests green.
+- **Hygiene rule 10 (R10): a check that cannot fail is not a check.** `RELEASE_PATTERN.md` states it, cites P5-02, and
+  names its enforcement (`tests/test_gate_mutations.py`). The numbering collides with ISO 3166's rules 10 to 19
+  (P5-10); the rule is proposed to the siblings.
 
 ### Notes
 

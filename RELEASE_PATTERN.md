@@ -701,6 +701,28 @@ therefore run on what a fresh resolution produces: the Rust and JavaScript jobs 
 and `pip-audit` reads `requirements-ci.txt`. The JavaScript wrapper has no dependencies, so its audit passes by
 construction. The audits are polled like every other workflow (invariant 6); they are not gate steps.
 
+### 10. A check that cannot fail is not a check
+
+A check that cannot fail is not a check. Every check that runs in the gate or in CI must have at least one test that
+forces its failing state and asserts the resulting exit code.
+
+Why: the fifth-pass audit (finding P5-02) forced four gate tools to exit 0 and all 1,421 tests stayed green. The
+gate was reporting results from checks nothing had ever seen fail. Rules 7 and 8 make a check run; this rule makes a
+check able to go red.
+
+Enforced by `tests/test_gate_mutations.py`. Each case breaks one thing in a copy of the project and runs the real tool.
+`test_every_gate_tool_is_covered_or_exempt_with_a_reason` parses `run_gate()` in `scripts/release.sh` and fails when a
+tool joins the gate with neither a case nor a written exemption, so the rule does not depend on anyone remembering it.
+An exemption names evidence a reviewer can check: a test that fails when the tool is forced to exit 0.
+
+Scope: the meta-test sees gate steps that run `python3 tools/<name>` or `bash tools/<name>`. A CI-only check that is not a
+tool (a pytest suite, an audit) is outside it; `tests/test_ci_parity.py` covers the CI-versus-gate side.
+
+Numbering: ISO 3166's operator-hygiene section already uses 10 to 19 for other rules. This is ISO 4217's rule 10 until
+the registries renumber (audit finding P5-10).
+
+Sourced from ISO 4217 v1.9.1, fifth-pass audit finding P5-02 (`docs/audits/fifth-pass.md`).
+
 ## Exit-code convention
 
 Every check in `tools/` exits with one of four codes, so a caller can tell "found a problem" from "could not look".
@@ -867,3 +889,6 @@ than one registry.
   ISO 3166 and ISO 10383 review threads.
 - 2026-10-19 — post-review addition: operator-hygiene rule 9 ("Every lockfile is audited on every push").
   Sourced from ISO 3166's v1.7.0–v1.7.1 review cycle (zmij / syn 3.0.6); ISO 4217's instance is v1.8.4.
+- 2026-10-23 — post-review addition: operator-hygiene rule 10 ("A check that cannot fail is not a check").
+  Source: ISO 4217 v1.9.1, fifth-pass audit finding P5-02. Numbering collides with ISO 3166's rules 10 to 19
+  (finding P5-10); proposed to ISO 3166 and ISO 10383.
