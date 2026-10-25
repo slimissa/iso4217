@@ -158,3 +158,62 @@ def test_the_vendor_tool_never_calls_the_clock_or_a_random_source():
             if resolved in FORBIDDEN_CALLS or resolved.startswith("random."):
                 found.append((node.lineno, name))
     assert not found, found
+
+
+# -- non-text files and --audit (v1.9.1, P5-08) --------------------------------------------------
+
+def test_an_existence_claim_on_a_binary_file_passes_without_reading_it(tree):
+    (tree / "b.parquet").write_bytes(b"PAR1\x94\x00\xff")
+    ok, detail = crc.check_claim({"file": "b.parquet"})
+    assert ok and detail == "b.parquet exists"
+
+
+@pytest.mark.parametrize("key", ["contains", "absent"])
+def test_a_text_claim_on_a_binary_file_fails_cleanly(tree, key):
+    (tree / "b.parquet").write_bytes(b"PAR1\x94\x00\xff")
+    ok, detail = crc.check_claim({"file": "b.parquet", key: "x"})
+    assert ok is False and "not UTF-8 text" in detail
+
+
+def test_a_text_claim_on_a_directory_fails_cleanly(tree):
+    (tree / "d").mkdir()
+    ok, detail = crc.check_claim({"file": "d", "contains": "x"})
+    assert ok is False and "cannot be read" in detail
+
+
+def test_audit_passes_when_every_claim_holds(tree, capsys):
+    (tree / "b.parquet").write_bytes(b"PAR1\x94")
+    _manifest(tree, {"1.0.0": [{"file": "f.txt", "contains": "alpha"}, {"file": "b.parquet"}], "doc-facts": [{"file": "f.txt"}]})
+    assert crc.run_audit() == 0
+    assert "all claims pass" in capsys.readouterr().out
+
+
+def test_audit_reports_a_failing_claim_with_exit_1_and_keeps_going(tree, capsys):
+    (tree / "b.parquet").write_bytes(b"PAR1\x94")
+    _manifest(tree, {"1.0.0": [{"file": "f.txt", "contains": "gamma"}], "1.1.0": [{"file": "b.parquet", "contains": "x"}, {"file": "f.txt"}]})
+    assert crc.run_audit() == 1
+    out = capsys.readouterr().out
+    assert "1.0.0: 0/1 pass" in out and "1.1.0: 1/2 pass" in out
+
+
+def test_audit_of_an_empty_manifest_exits_2(tree, capsys):
+    _manifest(tree, {})
+    assert crc.run_audit() == 2
+
+
+def test_audit_through_main_returns_the_same_code(tree):
+    _manifest(tree, {"1.0.0": [{"file": "f.txt", "contains": "gamma"}]})
+    assert crc.main(["--audit"]) == 1
+
+
+def test_audit_over_the_real_manifest_finishes(capsys):
+    # The regression: the real manifest names .parquet files, and --audit used to die with UnicodeDecodeError.
+    # Superseded version claims fail by design, so the code may be 0 or 1; it must be a return, not a traceback.
+    assert crc.run_audit() in (0, 1)
+    assert "release claims" in capsys.readouterr().out
+
+
+def test_the_real_1_7_4_entry_checks_without_a_traceback():
+    claims = json.loads((PROJECT_ROOT / "tools" / "release_claims.json").read_text(encoding="utf-8"))["1.7.4"]
+    for claim in claims:
+        crc.check_claim(claim)

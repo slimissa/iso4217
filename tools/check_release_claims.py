@@ -83,7 +83,15 @@ def check_claim(claim: dict) -> tuple[bool, str]:
         # A claim cannot be verified against a missing file. An absent-only claim on a
         # missing file must not pass: renaming the file would silence every absence claim on it.
         return False, f"missing file: {claim['file']}"
-    text = path.read_text(encoding="utf-8")
+    if "contains" not in claim and "absent" not in claim:
+        # An existence claim never reads the file: Parquet and other binary artifacts are legitimate subjects.
+        return True, f"{claim['file']} exists"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return False, (f"{claim['file']} is not UTF-8 text; a contains/absent claim cannot be checked against it")
+    except OSError as exc:
+        return False, f"{claim['file']} cannot be read: {exc}"
     notes = []
     if "contains" in claim:
         needle = claim["contains"]

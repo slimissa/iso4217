@@ -14,6 +14,14 @@ requires them (R10), a check that keeps `docs/AUDIT.md` true (AD), CI and gate p
 `check_release_claims.py --audit` crash (P5-08) and `vendor_iso3166.py --check-upstream` (F31). No registry data change;
 no schema change. The other audit findings are queued for later releases.
 
+### Fixed
+
+- **`check_release_claims.py` crashed on Parquet files (P5-08).** `check_claim` read every claimed file as UTF-8 before
+  looking at the claim's shape, so the v1.7.4 existence claims on `.parquet` files raised `UnicodeDecodeError`, and so did
+  `--audit` (hygiene rule 6c's mechanism) and `check_release_claims.py 1.7.4`, exiting 1 like a finding. An existence
+  claim no longer reads the file; a `contains` or `absent` claim on a non-text file now fails with a message. `--audit`
+  has tests, including one over the real manifest.
+
 ### Added
 
 - **Every gate tool is now tested in its failing state (P5-02).** `tests/test_gate_mutations.py` breaks one thing in
