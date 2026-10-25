@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.1] — Unreleased
+## [1.9.1] — 2026-10-25
 
 The gate learns to fail. The fifth-pass audit (`docs/audits/fifth-pass.md`) forced four gate tools to exit 0 and all
 1,421 tests stayed green. This release adds the tests that make every gate tool prove it can fail (P5-02), the rule that

@@ -1,6 +1,6 @@
 -- ISO 4217 Currency Registry — SQL Export (ANSI SQL-92 (portable))
--- Source:      iso4217.json v1.9.0
--- Updated:     2026-10-22
+-- Source:      iso4217.json v1.9.1
+-- Updated:     2026-10-25
 -- Amendment:   180
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0
