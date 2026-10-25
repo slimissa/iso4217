@@ -14,6 +14,16 @@ requires them (R10), a check that keeps `docs/AUDIT.md` true (AD), CI and gate p
 `check_release_claims.py --audit` crash (P5-08) and `vendor_iso3166.py --check-upstream` (F31). No registry data change;
 no schema change. The other audit findings are queued for later releases.
 
+### Added
+
+- **Every gate tool is now tested in its failing state (P5-02).** `tests/test_gate_mutations.py` breaks one thing in
+  a copy of the project per case, runs the real tool, and asserts its exit code, for `check_country_codes`,
+  `check_version_consistency`, `sync_wrappers --check`, `enrich_field --check` (all four fields),
+  `check_snapshot_freshness`, `check_registry_freshness` (the 180/181-day boundary), the five exporters' `--check`
+  modes, `validate`, `check_mojibake` and `check_release_claims`. A meta-test fails when a tool joins the gate
+  without a case or a written exemption. Before this, forcing `check_country_codes`, `check_version_consistency`,
+  `sync_wrappers --check` or `enrich_field --check` to exit 0 left all 1,421 tests green.
+
 ### Notes
 
 - **Fifth-pass audit complete.** 11 new findings (P5-01 through P5-11) and 2 meta-additions (R10, AD) identified; the
