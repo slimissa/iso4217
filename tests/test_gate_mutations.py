@@ -36,6 +36,9 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RELEASE_SH = PROJECT_ROOT / "scripts" / "release.sh"
+# release.sh sets meta.updated to the release date, so the unbroken-copy baseline pins --today to the registry's own date
+# (age 0 whatever it is); a fixed date went stale the day a release was made two days after it.
+_REGISTRY_UPDATED = json.loads((PROJECT_ROOT / "iso4217.json").read_text(encoding="utf-8"))["meta"]["updated"]
 
 # The copy of the project every case breaks. It must never include a virtualenv, a build tree or anything else a
 # developer keeps inside the repository: the first version of this fixture copied `.venv` once per test and filled a disk.
@@ -136,7 +139,7 @@ GREEN = [
     ("enrich_field.py", ("--field", "numeric_reused", "--check")),
     ("enrich_field.py", ("--field", "source_url", "--check")),
     ("check_snapshot_freshness.py", ()),
-    ("check_registry_freshness.py", ("--today", "2026-10-23")),
+    ("check_registry_freshness.py", ("--today", _REGISTRY_UPDATED)),
     ("export_sql.py", ("--check",)),
     ("export_csv.py", ("--check",)),
     ("export_parquet.py", ("--check",)),
