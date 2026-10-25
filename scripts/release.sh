@@ -465,8 +465,10 @@ run_gate() {
     run_gate_step "enrich_field.py --field source_url --check"  python3 tools/enrich_field.py --field source_url --check
         
     run_gate_step "check_cross_language.sh"         bash tools/check_cross_language.sh
+    run_gate_step "check_js_lint.sh"                bash tools/check_js_lint.sh
 
     run_gate_step "pytest tests/"                   python3 -m pytest tests/ -q --fail-on-skip
+    run_gate_step "pytest wrappers/python/tests/"   python3 -m pytest wrappers/python/tests/ -q --fail-on-skip
 
     if [[ "$GATE_FAILED" -ne 0 ]]; then
         fail "gate failed; see output above"
@@ -769,7 +771,9 @@ print_plan() {
     echo "  python3 tools/enrich_field.py --field numeric_reused --check"
     echo "  python3 tools/enrich_field.py --field source_url --check"
     echo "  bash tools/check_cross_language.sh"
+    echo "  bash tools/check_js_lint.sh"
     echo "  python3 -m pytest tests/ -q --fail-on-skip"
+    echo "  python3 -m pytest wrappers/python/tests/ -q --fail-on-skip"
     echo
     echo "Post-gate:"
     echo "  git add -A && git commit -m 'Release $TAG'"

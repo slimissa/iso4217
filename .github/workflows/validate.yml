@@ -145,7 +145,7 @@ jobs:
         run: pip install -e "wrappers/python[dev]" --quiet
 
       - name: Run CLI test suite
-        run: python3 -m pytest wrappers/python/tests/test_cli.py -v
+        run: python3 -m pytest wrappers/python/tests/test_cli.py -v --fail-on-skip
 
       - name: Smoke test — JSON output round-trips
         run: |
@@ -255,11 +255,11 @@ jobs:
       matrix:
         include:
           - language: python
-            test_cmd: pip install -r requirements-ci.txt && python3 -m pytest tests/test_wrappers.py -v
+            test_cmd: pip install -r requirements-ci.txt && python3 -m pytest tests/test_wrappers.py -v --fail-on-skip
             audit_cmd: pipx run --spec pip-audit==2.10.1 pip-audit -r requirements-ci.txt
           - language: javascript
-            test_cmd: cd wrappers/javascript && npm test
-            audit_cmd: cd wrappers/javascript && npm install --package-lock-only --ignore-scripts && npm audit --audit-level=high --omit=dev
+            test_cmd: bash tools/check_js_lint.sh && cd wrappers/javascript && npm test
+            audit_cmd: cd wrappers/javascript && npm install --package-lock-only --ignore-scripts && npm audit --audit-level=high
           - language: go
             test_cmd: cd wrappers/go && go test ./... -v
             audit_cmd: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0 && export PATH="$(go env GOPATH)/bin:$PATH" && cd wrappers/go && govulncheck ./...

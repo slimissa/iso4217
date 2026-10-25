@@ -21,6 +21,18 @@ no schema change. The other audit findings are queued for later releases.
   `--audit` (hygiene rule 6c's mechanism) and `check_release_claims.py 1.7.4`, exiting 1 like a finding. An existence
   claim no longer reads the file; a `contains` or `absent` claim on a non-text file now fails with a message. `--audit`
   has tests, including one over the real manifest.
+- **CI and the release gate ran different checks (P5-05).** The 277-test CLI suite (`wrappers/python/tests/`) ran only in CI
+  and is now a gate step. `npm run lint` ran nowhere and now runs in CI and in the gate through `tools/check_js_lint.sh`.
+  The two Python pytest commands in `validate.yml` now pass `--fail-on-skip` (the CLI suite gets the flag through
+  `wrappers/python/tests/conftest.py`, which loads the repository's `tests/conftest.py`). `tests/test_ci_parity.py` fails
+  when a workflow pytest command lacks the flag, a workflow runs a tool the gate does not, or a workflow's pytest target
+  is not covered by a gate step. The gate is now 26 checks.
+
+### Changed
+
+- **The JavaScript dependency audit now includes dev dependencies.** CI installs and runs eslint, so `npm audit` no
+  longer passes `--omit=dev`. The release machine needs `npm` for the lint gate step; a missing `npm` is exit 3 and fails
+  the gate.
 
 ### Added
 

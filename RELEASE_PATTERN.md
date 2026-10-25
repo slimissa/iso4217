@@ -698,8 +698,8 @@ A lockfile that is not tracked is generated for the audit; that satisfies the ru
 Applied here: ISO 4217 commits no lockfile that carries dependencies (`Cargo.lock` and `package-lock.json` are
 gitignored, `wrappers/go/go.sum` is empty, Python pins live in `requirements-ci.txt`). The audits in `validate.yml`
 therefore run on what a fresh resolution produces: the Rust and JavaScript jobs generate the lockfile before auditing,
-and `pip-audit` reads `requirements-ci.txt`. The JavaScript wrapper has no dependencies, so its audit passes by
-construction. The audits are polled like every other workflow (invariant 6); they are not gate steps.
+and `pip-audit` reads `requirements-ci.txt`. The JavaScript wrapper has no runtime dependencies; since v1.9.1 its audit also covers the eslint dev dependency, because CI
+and the gate run it (`tools/check_js_lint.sh`). The audits are polled like every other workflow (invariant 6); they are not gate steps.
 
 ### 10. A check that cannot fail is not a check
 

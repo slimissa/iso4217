@@ -48,6 +48,7 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `check_amendments.py` | — | monitor-amendments.yml | — |
 | `check_cross_language.sh` | — | — | yes |
 | `check_release_claims.py` | — | — | yes |
+| `check_js_lint.sh` | — | validate.yml | yes |
 
 ## Category C: enrichment
 

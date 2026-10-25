@@ -468,6 +468,7 @@ EXEMPT = {
     "check_verification_doc.py": "forcing exit 0 fails a test in tests/ (v1.9.1 sweep)",
     "vendor_iso3166.py": "needs the network for --check; forcing exit 0 fails a test in tests/ (v1.9.1 sweep)",
     "check_cross_language.sh": "needs four toolchains; tests/test_check_cross_language.py covers its exit codes",
+    "check_js_lint.sh": "needs npm and the registry; tests/test_check_js_lint.py drives the real script with a stub npm for every exit code",
 }
 
 
