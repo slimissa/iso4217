@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.2] — Unreleased
+## [1.9.2] — 2026-10-26
 
 A consumer who downloads the wheel gets a valid registry. The third-pass audit (`docs/audits/third-pass.md`) found the Python wheel shipping a schema that rejected
 its own registry (P5-01), 25 countries where ISO 4217 and ISO 3166 name different currencies and nothing looked (P5-03),
