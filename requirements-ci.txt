@@ -8,7 +8,7 @@
 # produced by the stores-200 demo, and a query-engine change could move them.
 # The others are compatible ranges: a new major version is a decision, not an
 # accident.
-duckdb==1.5.6
+duckdb==2.0.0
 jsonschema>=4.26,<5
 pandas>=3.0.6,<4
 pyarrow==26.0.0
