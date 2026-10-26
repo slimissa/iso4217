@@ -20,6 +20,6 @@ pytest>=9.1.1,<10
 # them, the wheel tests fail on CI with "No module named 'setuptools'";
 # locally they can pass by accident if the venv has these as transitive
 # dependencies.
-setuptools>=68
-wheel>=0.42
-build>=1.0
+setuptools>=68,<90
+wheel>=0.42,<1
+build>=1.0,<2

@@ -78,8 +78,23 @@ class TestRequirementsFile:
         return [ln.strip() for ln in text.splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
 
     def test_the_expected_packages_are_listed(self):
+        """The exact package list, so a new dependency is a decision, not an accident.
+
+        build/setuptools/wheel are here because tests/test_wheel_contents.py
+        builds a real wheel with `pip wheel --no-build-isolation`; the build
+        backend must be installed in CI (v1.9.2, P5-01).
+        """
         names = sorted(re.split(r"[=<>~!]", req, maxsplit=1)[0] for req in self._requirements())
-        assert names == ["duckdb", "jsonschema", "pandas", "pyarrow", "pytest"]
+        assert names == [
+            "build",
+            "duckdb",
+            "jsonschema",
+            "pandas",
+            "pyarrow",
+            "pytest",
+            "setuptools",
+            "wheel",
+        ]
 
     def test_duckdb_is_pinned_exactly(self):
         assert any(re.fullmatch(r"duckdb==\d+(\.\d+)+", req) for req in self._requirements())
