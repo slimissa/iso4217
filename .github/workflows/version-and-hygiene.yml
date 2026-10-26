@@ -96,7 +96,7 @@ jobs:
         run: python3 tools/check_line_endings.py
 
   check-windows-line-endings:
-    name: Windows: line endings
+    name: "Windows: line endings"
     runs-on: windows-latest
     steps:
       - name: Turn on core.autocrlf before checkout
@@ -109,7 +109,7 @@ jobs:
         run: python tools/check_line_endings.py
 
   check-windows-snapshot-hash:
-    name: Windows: ISO 3166 snapshot hash
+    name: "Windows: ISO 3166 snapshot hash"
     runs-on: windows-latest
     steps:
       - name: Turn on core.autocrlf before checkout
@@ -122,7 +122,7 @@ jobs:
         run: python tools/vendor_iso3166.py --check
 
   check-windows-release-claims:
-    name: Windows: release claims
+    name: "Windows: release claims"
     runs-on: windows-latest
     steps:
       - name: Turn on core.autocrlf before checkout
