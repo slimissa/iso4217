@@ -13,3 +13,13 @@ jsonschema>=4.26,<5
 pandas>=3.0.6,<4
 pyarrow==26.0.0
 pytest>=9.1.1,<10
+
+# Build backend for tests/test_wheel_contents.py (v1.9.2, P5-01).
+# The test builds a real wheel with `pip wheel --no-build-isolation`, so
+# setuptools/wheel/build must be installed in the CI environment. Without
+# them, the wheel tests fail on CI with "No module named 'setuptools'";
+# locally they can pass by accident if the venv has these as transitive
+# dependencies.
+setuptools>=68
+wheel>=0.42
+build>=1.0
