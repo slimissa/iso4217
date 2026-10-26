@@ -73,6 +73,67 @@ jobs:
       - name: Verify country codes
         run: python3 tools/check_country_codes.py
 
+  check-country-currency:
+    name: Country-currency membership
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Verify country-currency membership
+        run: python3 tools/check_country_codes.py --membership
+
+  check-line-endings:
+    name: Line endings are LF
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Verify line endings
+        run: python3 tools/check_line_endings.py
+
+  check-windows-line-endings:
+    name: Windows: line endings
+    runs-on: windows-latest
+    steps:
+      - name: Turn on core.autocrlf before checkout
+        run: git config --global core.autocrlf true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Line endings survive a Windows checkout
+        run: python tools/check_line_endings.py
+
+  check-windows-snapshot-hash:
+    name: Windows: ISO 3166 snapshot hash
+    runs-on: windows-latest
+    steps:
+      - name: Turn on core.autocrlf before checkout
+        run: git config --global core.autocrlf true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Vendored snapshot hash matches
+        run: python tools/vendor_iso3166.py --check
+
+  check-windows-release-claims:
+    name: Windows: release claims
+    runs-on: windows-latest
+    steps:
+      - name: Turn on core.autocrlf before checkout
+        run: git config --global core.autocrlf true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Release claims hold
+        run: python tools/check_release_claims.py (Get-Content VERSION).Trim()
+
   check-readme-drift:
     name: README drift
     runs-on: ubuntu-latest

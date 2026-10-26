@@ -33,8 +33,10 @@ from setuptools import setup
 # ---------------------------------------------------------------------------
 # setuptools does not ship non-Python files in a wheel for a py_modules
 # distribution. MANIFEST.in affects the sdist, not the wheel. This override
-# copies iso4217.json and schema.json next to the modules after the normal
-# build_py step, so a pip install from a wheel resolves them at runtime.
+# copies iso4217.json next to the modules after the normal build_py step, so a
+# pip install from a wheel resolves it at runtime. The schema is deliberately
+# not shipped (docs/decisions/wheel-contents.md, ADR 0011): it is the contract
+# and lives at the tag; a bundled copy was v1.3.0 and rejected the registry.
 
 from pathlib import Path as _Path
 from setuptools.command.build_py import build_py as _build_py
@@ -43,7 +45,7 @@ from setuptools.command.build_py import build_py as _build_py
 class build_py(_build_py):
     """Copy data files next to the modules in the wheel's build/lib."""
 
-    DATA_FILES = ("iso4217.json", "schema.json")
+    DATA_FILES = ("iso4217.json",)
 
     def run(self):
         super().run()
@@ -117,8 +119,8 @@ setup(
     },
 
     # -- Data files --------------------------------------------------------
-    # The JSON and the schema ship next to the module. See the module
-    # docstring for why this is MANIFEST.in-driven, not package_data.
+    # The registry JSON ships next to the module; the schema does not (ADR 0011).
+    # See the module docstring for why this is build_py-driven, not package_data.
     include_package_data=True,
     zip_safe=False,  # the wrapper reads iso4217.json via Path(__file__); a zip
                      # import would break that resolution

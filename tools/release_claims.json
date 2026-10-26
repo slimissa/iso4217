@@ -1643,6 +1643,86 @@
       "contains": "\"source_version\": \"1.8.0\""
     }
   ],
+  "1.9.2": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.2"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.2\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.2]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.2"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.2"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.2\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.2\""
+    },
+    {
+      "file": "docs/decisions/country-currency-taxonomy.md"
+    },
+    {
+      "file": "docs/decisions/wheel-contents.md"
+    },
+    {
+      "file": "docs/decisions/line-ending-policy.md"
+    },
+    {
+      "file": "docs/COUNTRY_CURRENCY_ALLOWLIST.md"
+    },
+    {
+      "file": "tools/check_line_endings.py"
+    },
+    {
+      "file": "tests/test_wheel_contents.py"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "DATA_FILES = (\"iso4217.json\",)"
+    },
+    {
+      "file": "wrappers/python/MANIFEST.in",
+      "absent": "schema.json"
+    },
+    {
+      "file": ".gitattributes",
+      "contains": "* text=auto eol=lf"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_line_endings.py\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_country_codes.py --membership\""
+    },
+    {
+      "file": "tests/test_gate_mutations.py",
+      "contains": "class TestCheckLineEndings"
+    },
+    {
+      "file": "tests/test_gate_mutations.py",
+      "contains": "class TestCheckCountryCodesMembership"
+    },
+    {
+      "file": "README.md",
+      "contains": "Runs a 28-check gate"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",

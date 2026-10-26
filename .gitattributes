@@ -1,5 +1,19 @@
+# Line endings - ADR 0012. Every text file is LF, in the repository and in every working tree.
+# The default rule is the policy; the explicit rules below it keep the policy alive if someone deletes the default.
+# tools/check_line_endings.py fails on a CR byte in any text file and on a .gitattributes that drops these rules.
+* text=auto eol=lf
 
-# Flat-file exports — LF regardless of platform
+# Executable and data files: LF regardless of platform (a CRLF release.sh does not parse in bash; a CRLF snapshot
+# changes the SHA-256 that vendor_iso3166.py --check compares)
+*.sh   text eol=lf
+*.py   text eol=lf
+*.json text eol=lf
+*.sql  text eol=lf
+
+# Flat-file exports - LF regardless of platform. iso4217.excel.csv keeps its UTF-8 BOM and LF (ADR 0012).
 *.csv text eol=lf
 *.tsv text eol=lf
 VERSION text eol=lf
+
+# Binary
+*.parquet binary

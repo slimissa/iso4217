@@ -132,6 +132,7 @@ def edit_registry(tree: Path, mutate) -> None:
 
 GREEN = [
     ("check_country_codes.py", ()),
+    ("check_country_codes.py", ("--membership",)),
     ("check_version_consistency.py", ()),
     ("sync_wrappers.py", ("--check",)),
     ("enrich_field.py", ("--field", "classification", "--check")),
@@ -147,6 +148,7 @@ GREEN = [
     ("export_aggregated.py", ("--check",)),
     ("validate.py", ()),
     ("check_mojibake.py", ()),
+    ("check_line_endings.py", ()),
     ("check_audit_table.py", ()),
 ]
 
@@ -174,6 +176,168 @@ class TestCheckCountryCodes:
     def test_a_missing_snapshot_exits_2(self, tree):
         (tree / "tools" / "iso3166_snapshot.json").unlink()
         code, _ = run(tree, "check_country_codes.py")
+        assert code == 2
+
+
+# ---------------------------------------------------------------------------
+# check_country_codes.py --membership (v1.9.2, P5-03, ADR 0010):
+#   0 every disagreement allow-listed and every entry current, 1 unlisted / stale / invalid, 2 fatal
+# ---------------------------------------------------------------------------
+
+ALLOWLIST = Path("docs") / "COUNTRY_CURRENCY_ALLOWLIST.md"
+
+
+def _edit_allowlist(tree: Path, mutate) -> None:
+    import re as _re
+    path = tree / ALLOWLIST
+    text = path.read_text(encoding="utf-8")
+    found = _re.search(r"```json\n(.*?)\n```", text, _re.S)
+    data = json.loads(found.group(1))
+    mutate(data)
+    path.write_text(text[: found.start(1)] + json.dumps(data, ensure_ascii=False, indent=2) + text[found.end(1):], encoding="utf-8")
+
+
+def _country(data, code):
+    return next(c for c in data["currencies"]["active"] for k in c["countries"] if k["code"] == code and c["code"] == "EUR")
+
+
+class TestCheckCountryCodesMembership:
+    def test_germany_moved_to_usd_exits_1(self, tree):
+        # The audit's own repro: before v1.9.2 this exited 0.
+        def mutate(d):
+            eur = next(c for c in d["currencies"]["active"] if c["code"] == "EUR")
+            usd = next(c for c in d["currencies"]["active"] if c["code"] == "USD")
+            moved = next(k for k in eur["countries"] if k["code"] == "DE")
+            eur["countries"].remove(moved)
+            usd["countries"].append(moved)
+
+        edit_registry(tree, mutate)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "UNLISTED" in out and "DE" in out
+
+    def test_a_territory_dropped_from_the_registry_exits_1(self, tree):
+        # The fix-in-4217 decisions stay fixed: take American Samoa back out of USD.
+        def mutate(d):
+            usd = next(c for c in d["currencies"]["active"] if c["code"] == "USD")
+            usd["countries"] = [k for k in usd["countries"] if k["code"] != "AS"]
+
+        edit_registry(tree, mutate)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "AS" in out and "3166-only" in out
+
+    def test_a_new_fund_code_on_a_country_exits_1(self, tree):
+        def mutate(d):
+            usn = next(c for c in d["currencies"]["active"] if c["code"] == "USN")
+            usn["countries"].append({"code": "CA", "name": "Canada", "relationship": "issuing"})
+
+        edit_registry(tree, mutate)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "CA" in out and "USN" in out
+
+    def test_a_snapshot_currency_change_exits_1(self, tree):
+        path = tree / "tools" / "iso3166_snapshot.json"
+        snap = load(path)
+        next(c for c in snap["countries"]["active"] if c["alpha_2"] == "JP")["currency_codes"] = ["USD"]
+        save(path, snap)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "JP" in out
+
+    def test_a_stale_allowlist_entry_exits_1(self, tree):
+        def mutate(d):
+            d["entries"].append({"country": "DE", "currency": "EUR", "side": "4217-only", "category": "allow-list-with-reason",
+                                 "reason": "not a real disagreement", "source": "none"})
+
+        _edit_allowlist(tree, mutate)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "STALE" in out and "DE" in out
+
+    def test_an_entry_with_no_reason_exits_1(self, tree):
+        _edit_allowlist(tree, lambda d: d["entries"][0].update(reason=" "))
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "INVALID" in out and "reason" in out
+
+    def test_a_historical_entry_with_no_date_exits_1(self, tree):
+        def mutate(d):
+            next(e for e in d["entries"] if e["category"] == "out-of-scope-historical").pop("date")
+
+        _edit_allowlist(tree, mutate)
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "date" in out
+
+    def test_an_unknown_category_exits_1(self, tree):
+        _edit_allowlist(tree, lambda d: d["entries"][0].update(category="fix-in-4217"))
+        code, out = run(tree, "check_country_codes.py", "--membership")
+        assert code == 1 and "category" in out
+
+    def test_a_missing_allowlist_exits_2(self, tree):
+        (tree / ALLOWLIST).unlink()
+        code, _ = run(tree, "check_country_codes.py", "--membership")
+        assert code == 2
+
+    def test_an_allowlist_with_no_json_block_exits_2(self, tree):
+        (tree / ALLOWLIST).write_text("# empty\n", encoding="utf-8")
+        code, _ = run(tree, "check_country_codes.py", "--membership")
+        assert code == 2
+
+
+# ---------------------------------------------------------------------------
+# check_line_endings.py (v1.9.2, P5-06, ADR 0012): 0 ok, 1 CR byte or missing rule, 2 fatal
+# ---------------------------------------------------------------------------
+
+
+def _crlf(path: Path) -> None:
+    path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+
+
+class TestCheckLineEndings:
+    @pytest.mark.parametrize("rel", ["scripts/release.sh", "tools/validate.py", "iso4217.json", "iso4217.sql",
+                                     "README.md", ".github/workflows/validate.yml", "wrappers/go/go.mod"])
+    def test_a_crlf_file_exits_1(self, tree, rel):
+        _crlf(tree / rel)
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 1 and rel in out
+
+    def test_a_new_untracked_crlf_file_exits_1(self, tree):
+        (tree / "tools" / "new_tool.py").write_bytes(b"print('x')\r\n")
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 1 and "new_tool.py" in out
+
+    def test_a_single_stray_cr_exits_1(self, tree):
+        path = tree / "CONTRIBUTING.md"
+        path.write_bytes(path.read_bytes() + b"one stray\rcarriage return\n")
+        code, _ = run(tree, "check_line_endings.py")
+        assert code == 1
+
+    def test_a_cr_in_a_binary_file_is_not_a_finding(self, tree):
+        path = tree / "iso4217.parquet"
+        path.write_bytes(path.read_bytes() + b"\r\n\0\r\n")
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 0, out
+
+    def test_a_nul_and_cr_file_under_an_unlisted_extension_is_binary_not_text(self, tree):
+        # The v1.9.2 sweep's survivor: the .parquet case never reaches the NUL-byte branch (the extension list skips it
+        # first), so deleting that branch changed nothing. A .blob file is skipped by content alone.
+        (tree / "tools" / "fixture.blob").write_bytes(b"\x00\x01\r\n\x02")
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 0, out
+
+    def test_the_same_bytes_without_a_nul_are_text_and_exit_1(self, tree):
+        (tree / "tools" / "fixture.blob").write_bytes(b"\x01\r\n\x02")
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 1 and "fixture.blob" in out
+
+    @pytest.mark.parametrize("rule", ["* text=auto eol=lf", "*.sql  text eol=lf", "*.sh   text eol=lf", "*.parquet binary"])
+    def test_a_gitattributes_that_drops_a_rule_exits_1(self, tree, rule):
+        path = tree / ".gitattributes"
+        text = path.read_text(encoding="utf-8")
+        assert rule in text, f"{rule!r} is no longer in .gitattributes; update the case"
+        path.write_text(text.replace(rule + "\n", ""), encoding="utf-8")
+        code, out = run(tree, "check_line_endings.py")
+        assert code == 1 and ".gitattributes" in out
+
+    def test_a_missing_gitattributes_exits_2(self, tree):
+        (tree / ".gitattributes").unlink()
+        code, _ = run(tree, "check_line_endings.py")
         assert code == 2
 
 
@@ -424,6 +588,15 @@ class TestCheckReleaseClaims:
         assert code == 2
 
 
+class TestCheckReleaseClaimsBadVersion:
+    """The Windows job (v1.9.2) feeds this tool a value read from VERSION; an empty, malformed or unknown value must never exit 0."""
+
+    @pytest.mark.parametrize("args", [(), ("",), (" ",), ("x",), ("9.9.9",), ("--version", "1.9.1")], ids=repr)
+    def test_a_version_it_cannot_use_never_exits_0(self, tree, args):
+        code, _ = run(tree, "check_release_claims.py", *args)
+        assert code != 0
+
+
 class TestCheckAuditTable:
     def test_a_row_that_disagrees_with_release_sh_exits_1(self, tree):
         audit = tree / "docs" / "AUDIT.md"
@@ -458,6 +631,7 @@ COVERED = {
     "export_aggregated.py",
     "validate.py",
     "check_mojibake.py",
+    "check_line_endings.py",
     "check_release_claims.py",
     "check_audit_table.py",
 }

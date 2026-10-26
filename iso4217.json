@@ -130,6 +130,16 @@
             "code": "TL",
             "name": "Timor-Leste",
             "relationship": "adopting"
+          },
+          {
+            "code": "AS",
+            "name": "American Samoa",
+            "relationship": "territory"
+          },
+          {
+            "code": "UM",
+            "name": "United States Minor Outlying Islands",
+            "relationship": "territory"
           }
         ]
       },
@@ -321,6 +331,16 @@
             "code": "ME",
             "name": "Montenegro",
             "relationship": "adopting"
+          },
+          {
+            "code": "AX",
+            "name": "Åland Islands",
+            "relationship": "territory"
+          },
+          {
+            "code": "TF",
+            "name": "French Southern Territories",
+            "relationship": "territory"
           }
         ]
       },

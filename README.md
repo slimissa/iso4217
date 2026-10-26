@@ -607,7 +607,9 @@ The registry is validated through a multi-layer defense. Each check has one tool
 | **Ground truth** | Historical facts: eurozone rates, numeric codes, peg relationships | `tests/test_iso_codes.py` |
 | **Cross-language** | Identical behavior across all four wrappers | `tests/cross_language_consistency.json` |
 | **Country codes** | Every `countries[].code` resolves in the ISO 3166 snapshot | `tools/check_country_codes.py` |
+| **Country-currency membership** | Every disagreement between `countries[]` and ISO 3166's `currency_codes` is allow-listed with a reason ([ADR 0010](./docs/decisions/country-currency-taxonomy.md), [allow-list](./docs/COUNTRY_CURRENCY_ALLOWLIST.md)) | `tools/check_country_codes.py --membership` |
 | **Mojibake** | No UTF-8 / Latin-1 round-trip corruption in any text file | `tools/check_mojibake.py` |
+| **Line endings** | Every text file is LF; `.gitattributes` carries the policy ([ADR 0012](./docs/decisions/line-ending-policy.md)) | `tools/check_line_endings.py` |
 | **Registry freshness** | `meta.updated` within 180 days (one day of timezone skew tolerated) | `tools/check_registry_freshness.py` |
 | **Snapshot freshness** | Vendored snapshots within their `review_by` window | `tools/check_snapshot_freshness.py` |
 | **Provenance** | Every field of `iso4217.json` has a row in `docs/PROVENANCE.md` | `tools/check_provenance.py` |
@@ -637,7 +639,9 @@ python3 tools/sync_wrappers.py --check
 # Run the fast convention checks
 python3 tools/check_version_consistency.py
 python3 tools/check_mojibake.py
+python3 tools/check_line_endings.py
 python3 tools/check_country_codes.py
+python3 tools/check_country_codes.py --membership
 python3 tools/check_registry_freshness.py
 python3 tools/check_snapshot_freshness.py
 python3 tools/check_release_claims.py <version>
@@ -681,7 +685,7 @@ The script is deterministic and refuses to start unless the `gh` CLI is installe
 
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date (UTC), `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
-3. **Runs a 26-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, snapshot freshness, registry freshness, country codes, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, verification doc, the audit table, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
+3. **Runs a 28-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, line endings, snapshot freshness, registry freshness, country codes, country-currency membership, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, verification doc, the audit table, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
 4. **Commits and pushes** (it first checks that the gate left no untracked file and that every staged path is a plain modification, and prints the staged stat), then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
 5. **Tags** only when everything is green. The tag message is the first 15 lines of the changelog section, headings included; it is read back from the tag and compared before the tag is pushed.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.
@@ -734,8 +738,7 @@ iso4217/
 ├── CONTRIBUTING.md               # How to contribute
 ├── RELEASE_PATTERN.md            # The release convention shared across three registries
 ├── LICENSE                       # Apache 2.0
-├── windows-verify-manifest.txt   # Checksums used for the v1.5.1 Windows verification
-├── .gitattributes                # LF endings for flat exports
+├── .gitattributes                # LF endings for every text file (ADR 0012)
 ├── .gitignore
 │
 ├── iso4217.sql                   # CURATED — SQL, ANSI SQL-92 (portable)
@@ -769,7 +772,8 @@ iso4217/
 │   ├── vendor_iso3166.py                 # ISO 3166 snapshot vendoring (--check)
 │   ├── check_version_consistency.py      # 11 sites, 2 axes
 │   ├── check_mojibake.py                 # UTF-8 / Latin-1 round-trip detector
-│   ├── check_country_codes.py            # ISO 3166 join check
+│   ├── check_country_codes.py            # ISO 3166 join check; --membership compares currencies
+│   ├── check_line_endings.py             # LF-only policy (ADR 0012)
 │   ├── check_readme_drift.py             # README claims vs the tree
 │   ├── check_verification_doc.py         # Refuse to ship a placeholder doc
 │   ├── check_registry_freshness.py       # meta.updated within 180 days
@@ -812,6 +816,7 @@ iso4217/
 │   ├── PROVENANCE.md             # Per-field sourcing and known limits
 │   ├── LAYERS.md                 # RAW / CURATED / AGGREGATED model
 │   ├── JOINS.md                  # Cross-registry foreign-key graph (currency side)
+│   ├── COUNTRY_CURRENCY_ALLOWLIST.md # Reviewed 4217/3166 currency disagreements
 │   ├── v<version>-verification.md  # One per release since v1.5.0
 │   └── decisions/                # Architecture decision records
 │       ├── withdrawn-codes.md            # ADR 0001
@@ -823,6 +828,9 @@ iso4217/
 │       ├── aggregated-layer-0007.md      # ADR 0007
 │       ├── numeric-code-reuse.md         # ADR 0008
 │       ├── schema-version-consistency.md # ADR 0009
+│       ├── country-currency-taxonomy.md  # ADR 0010
+│       ├── wheel-contents.md             # ADR 0011
+│       ├── line-ending-policy.md         # ADR 0012
 │       └── v1.6.0-candidates.md          # Deferred decisions
 │
 └── .github/

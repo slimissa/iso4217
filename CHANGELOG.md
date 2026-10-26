@@ -6,9 +6,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.2] — Unreleased
+
+A consumer who downloads the wheel gets a valid registry. The third-pass audit (`docs/audits/third-pass.md`) found the Python wheel shipping a schema that rejected
+its own registry (P5-01), 25 countries where ISO 4217 and ISO 3166 name different currencies and nothing looked (P5-03),
+and a line-ending policy that covered three file types (P5-06). This release decides each one in an ADR first
+([0010](./docs/decisions/country-currency-taxonomy.md) is still Proposed: six rows await a read of the ISO 4217 page,
+[0011](./docs/decisions/wheel-contents.md), [0012](./docs/decisions/line-ending-policy.md)) and then closes it with a
+check that is proven able to fail. The registry gains four `countries[]` entries; the schema is unchanged.
+
+**For consumers.** The Python wheel now ships only the registry; the bundled schema, which rejected that registry, is
+gone, and the schema to validate against is the one at the release tag. Four territories (American Samoa, the United
+States Minor Outlying Islands, the Åland Islands and the French Southern Territories) now carry their currency in the
+registry. The 21 other countries where ISO 4217 and ISO 3166 differ are listed in `docs/COUNTRY_CURRENCY_ALLOWLIST.md`,
+each with a reason. Every text file in the repository is LF, and CI now checks a Windows checkout.
+
+### Fixed
+
+- **The wheel shipped a schema that rejected its own registry (P5-01).** `wrappers/python/schema.json` was the v1.3.0
+  schema and gave 314 errors against the v1.4.0 registry beside it. Nothing read it. The wheel and the sdist no longer
+  ship a schema (ADR 0011). `tests/test_wheel_contents.py` builds the real wheel, installs it in a clean virtualenv, and
+  validates the installed registry against the repository's schema; the same tests fail on the v1.9.1 packaging.
+- **Country-currency drift was undetected (P5-03).** `check_country_codes.py` asked whether a country code resolves and
+  never whether the currency agrees. Moving Germany to USD exited 0. `--membership` now compares both directions
+  against the vendored ISO 3166 snapshot and the reviewed allow-list. It also fails on a stale allow-list entry.
+- **Only `*.csv`, `*.tsv` and `VERSION` were pinned to LF (P5-06).** `.gitattributes` now carries `* text=auto eol=lf`
+  and explicit rules for `*.sh`, `*.py`, `*.json` and `*.sql` (ADR 0012). `tools/check_line_endings.py` fails on a CR
+  byte in any text file, including one not yet added to git.
+
+### Changed
+
+- **Four territories joined `countries[]` (P5-03, ADR 0010).** AS and UM on USD, AX and TF on EUR, each as `territory`.
+  ISO 3166 assigns those currencies; the registry was silent. The countries Parquet, `currencies_by_region.parquet` and
+  the four wrapper copies were regenerated.
+- **The gate is now 28 checks** (`check_country_codes.py --membership` and `check_line_endings.py`). CI has one job for
+  each, and three Windows jobs run `check_line_endings.py`, `vendor_iso3166.py --check` and `check_release_claims.py`
+  with `core.autocrlf=true` set before checkout.
+
+### Removed
+
+- `windows-verify-manifest.txt`: v1.5.1 hashes that nothing read and that no longer matched the files.
+
+### Added
+
+- `docs/COUNTRY_CURRENCY_ALLOWLIST.md` (25 entries) and ADRs 0010 to 0012.
+- Mutation cases for both new checks in `tests/test_gate_mutations.py` (rule 10), and a sweep of 16 mutants over the new
+  checks and the wheel test.
+
+---
 ## [1.9.1] — 2026-10-25
 
-The gate learns to fail. The fifth-pass audit (`docs/audits/fifth-pass.md`) forced four gate tools to exit 0 and all
+The gate learns to fail. The third-pass audit (`docs/audits/third-pass.md`) forced four gate tools to exit 0 and all
 1,421 tests stayed green. This release adds the tests that make every gate tool prove it can fail (P5-02), the rule that
 requires them (R10), a check that keeps `docs/AUDIT.md` true (AD), CI and gate parity (P5-05), the fix for the
 `check_release_claims.py --audit` crash (P5-08) and `vendor_iso3166.py --check-upstream` (F31). No registry data change;

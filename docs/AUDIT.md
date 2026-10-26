@@ -38,16 +38,17 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `validate.py` | — | validate.yml | yes |
 | `check_version_consistency.py` | — | version-and-hygiene.yml | yes |
 | `check_mojibake.py` | — | version-and-hygiene.yml | yes |
+| `check_line_endings.py` | — | version-and-hygiene.yml | yes |
 | `check_snapshot_freshness.py` | — | version-and-hygiene.yml | yes |
 | `check_registry_freshness.py` | — | version-and-hygiene.yml | yes |
-| `check_country_codes.py` | — | version-and-hygiene.yml | yes |
+| `check_country_codes.py` | — | version-and-hygiene.yml | yes (2 steps) |
 | `check_readme_drift.py` | — | version-and-hygiene.yml | yes |
 | `check_provenance.py` | — | version-and-hygiene.yml | yes |
 | `check_verification_doc.py` | — | version-and-hygiene.yml | yes |
 | `check_audit_table.py` | — | version-and-hygiene.yml | yes |
 | `check_amendments.py` | — | monitor-amendments.yml | — |
 | `check_cross_language.sh` | — | — | yes |
-| `check_release_claims.py` | — | — | yes |
+| `check_release_claims.py` | — | version-and-hygiene.yml | yes |
 | `check_js_lint.sh` | — | validate.yml | yes |
 
 ## Category C: enrichment

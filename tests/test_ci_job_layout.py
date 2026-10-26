@@ -38,7 +38,8 @@ def _jobs() -> dict[str, str]:
 
 
 def _tools(job_text: str) -> list[str]:
-    return re.findall(r"run:\s*python3 (tools/\w+\.py)", job_text)
+    # `python` as well as `python3`: the Windows jobs (v1.9.2, P5-06) run on a runner where setup-python provides `python`.
+    return re.findall(r"run:\s*python3? (tools/\w+\.py)", job_text)
 
 
 def _name(job_text: str) -> str:
