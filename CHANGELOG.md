@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.3] — Unreleased
+## [1.9.3] — 2026-10-27
 
 The four wrappers produce identical numbers for every input. The audit (`docs/audits/fifth-pass.md`) found the four wrappers
 diverging numerically (P5-04). Measuring them confirmed its table: the rounding mode was never the problem, since all four
