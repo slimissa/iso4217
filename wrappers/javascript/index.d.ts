@@ -181,6 +181,8 @@ export declare class Currency {
    * @param majorAmount - Amount in major units (e.g., 100.50 for $100.50)
    * @returns Integer amount in minor units (e.g., 10050 for cents)
    * @throws {Error} If majorAmount is NaN or infinite
+   * @throws {RangeError} If the rounded result does not fit in an int64 (|result| >= 2^63); the message says
+   *   "amount too large"
    *
    * @example
    * usd.toMinor(100.50);       // 10050
@@ -206,10 +208,13 @@ export declare class Currency {
   /**
    * Format a major currency amount with the currency symbol.
    *
-   * Uses en-US locale for thousands separators (financial convention).
+   * Rounds exactly as toMinor() does (half away from zero) and prints that rounded value, with comma thousands
+   * separators for fractional currencies (no Intl; independent of the runtime's locale). NaN is "$nan" and infinity
+   * is "$inf" / "$-inf".
    *
    * @param majorAmount - Amount in major units
    * @returns Formatted string like "$100.50" or "¥500"
+   * @throws {TypeError} If majorAmount is not a number
    *
    * @example
    * usd.format(100.50);        // "$100.50"

@@ -6,6 +6,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.3] — Unreleased
+
+The four wrappers produce identical numbers for every input. The audit (`docs/audits/fifth-pass.md`) found the four wrappers
+diverging numerically (P5-04). Measuring them confirmed its table: the rounding mode was never the problem, since all four
+already round half away from zero and the `100.005 -> 10001` fixture vector holds. The disagreements were in `format`,
+in overflow, in NaN and infinity, and in two rounding edges the audit did not list. This
+release writes the contract down first ([ADR 0013](./docs/decisions/wrapper-numeric-contract.md), Proposed until the
+owner commits it) and then makes every wrapper pass one shared fixture group.
+
+**For consumers.** The four wrappers now produce identical numbers for every input. `to_minor` now returns an error
+instead of a wrong number when the result doesn't fit in int64. Python and JavaScript previously returned correct big
+integers on 18-decimal tokens; they now raise, matching Go and Rust. A bignum API is planned. The `format` function now
+agrees with `to_minor` on tie-breaking, so an amount shows the same cents it converts to.
+
+### Fixed
+
+- **`format` disagreed with `to_minor` and with the other wrappers (P5-04).** `format(0.125, USD)` was `$0.12` in Python,
+  Go and Rust and `$0.13` in JavaScript while `to_minor` gave 13. `format` now rounds exactly as `to_minor` does and
+  prints that value, in every wrapper.
+- **Python truncated JPY (P5-04).** `format(2.9, JPY)` was `¥2`; it is `¥3`. JavaScript rounded `-2.5` to `-2` for JPY
+  (`Math.round`); every wrapper now gives `¥-3`.
+- **Go returned `INT64_MIN` for a large positive amount (P5-04).** `ToMinor(1e17)` on a 2-decimal currency returned
+  `-9223372036854775808` (amd64). Go and Rust now panic, with the message "amount too large", instead of returning a wrong
+  or saturated number, and both gain a variant that returns an error.
+- **Non-finite amounts formatted differently everywhere (P5-04).** NaN is `$nan` and infinities are `$inf` and `$-inf`
+  in all four wrappers. Go's `Format(+Inf)` was the malformed `$+,Inf`; JavaScript's was `$∞`.
+- **Python and JavaScript rounded with `floor(x + 0.5)` (P5-04).** It disagrees with Go and Rust at
+  `0.49999999999999994` and loses the half above 2^52 (`to_minor(4503599627370497.0, JPY)` returned `...498`). All four now
+  round exactly.
+- JavaScript `toMinor` no longer returns `-0`.
+
+### Added
+
+- `ToMinorChecked`, `ErrNonFinite` and `ErrOverflow` (Go); `try_to_minor` and `MinorError` (Rust). The existing `ToMinor` and
+  `to_minor` keep their signatures.
+- ADR 0013, the `numeric_contract` group in `tests/cross_language_consistency.json` (83 vectors, every expected value
+  computed by `tests/numeric_contract_oracle.py`), a contract test in each wrapper's own suite, and
+  `tests/test_wrapper_numeric_contract.py`. A sweep of 29 mutants, including the v1.9.2 behavior of each wrapper, is
+  killed by these tests.
+
+### Changed
+
+- `to_minor` raises `OverflowError` (Python) or `RangeError` (JavaScript) for a float or int whose rounded result does not fit in
+  int64. A Python `Decimal` is unaffected: it stays exact and unbounded.
+- `format` for 18-decimal assets prints the exact digits of the rounded double (`1.15` ETH is `Ξ1.149999999999999872`).
+- JavaScript `format` no longer uses `Intl` or `toLocaleString`, so it does not depend on the runtime's locale data.
+- Python `format(Decimal)` rounds half away from zero (it was half-even), matching `to_minor`.
+
+### Not changed
+
+- The rounding mode, `from_minor`, every existing fixture vector, and two behaviors that are consistent across wrappers
+  and under review: 0-decimal currencies print without thousands separators, and a negative amount that rounds to zero
+  prints `$-0.00` (JPY: `¥0`).
+
+---
 ## [1.9.2] — 2026-10-26
 
 A consumer who downloads the wheel gets a valid registry. The third-pass audit (`docs/audits/third-pass.md`) found the Python wheel shipping a schema that rejected

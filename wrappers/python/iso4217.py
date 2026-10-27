@@ -173,6 +173,63 @@ def _reject_constant(name: str) -> None:
 # Currency
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Numeric contract (ADR 0013, docs/decisions/wrapper-numeric-contract.md)
+# ---------------------------------------------------------------------------
+# One IEEE-double multiplication by an exact power of ten, then an exact round half away from zero; int64 bound on
+# the rounded value. The same algorithm runs in the Go, JavaScript and Rust wrappers.
+
+# 10^n is an exact double for n <= 22 (the registry maximum is 18); every wrapper takes it from the same exact table.
+_POW10_EXACT = tuple(float(10 ** _n) for _n in range(23))
+_INT64_LIMIT = 2 ** 63  # a rounded amount whose magnitude is at or above this does not fit in an int64
+
+
+def _round_half_away_from_zero(p: float) -> int:
+    """Round a finite double to an int, ties away from zero, exactly.
+
+    No ``floor(p + 0.5)``: in doubles ``0.49999999999999994 + 0.5`` is 1.0, and above 2**52 the addition loses the
+    half. ``p - trunc(p)`` is exact for doubles, so the comparison with 0.5 is exact.
+    """
+    t = math.trunc(p)
+    if abs(p - t) >= 0.5:
+        return t + (1 if p > 0 else -1)
+    return t
+
+
+def _non_finite(x: Any) -> Optional[str]:
+    """``'nan'``, ``'inf'`` or ``'-inf'`` for a non-finite int/float/Decimal, else None."""
+    if isinstance(x, Decimal):
+        if x.is_nan():
+            return "nan"
+        if x.is_infinite():
+            return "-inf" if x.is_signed() else "inf"
+        return None
+    if isinstance(x, float):
+        if math.isnan(x):
+            return "nan"
+        if math.isinf(x):
+            return "-inf" if x < 0 else "inf"
+    return None
+
+
+def _sign_bit(x: Any) -> bool:
+    """True for a negative amount and for -0.0 (a float's sign bit, a Decimal's sign)."""
+    if isinstance(x, Decimal):
+        return x.is_signed()
+    if isinstance(x, float):
+        return math.copysign(1.0, x) < 0
+    return x < 0
+
+
+def _as_amount(x: Any) -> Any:
+    """int, float and Decimal are used as they are; any other numeric type is converted with float(); str is refused."""
+    if isinstance(x, (str, bytes)):
+        raise TypeError(f"Cannot convert {x!r} to minor units: expected a number")
+    if isinstance(x, (int, float, Decimal)):
+        return x
+    return float(x)
+
+
 class Currency:
     """
     Represents a single currency from the ISO 4217 registry.
@@ -434,22 +491,46 @@ class Currency:
 
     # -- Conversion ---------------------------------------------------------
 
+    def _round_scaled(self, x: Any) -> Optional[int]:
+        """The amount scaled to minor units and rounded half away from zero, as an exact int.
+
+        ``x`` is finite. A Decimal and an int are exact; a float is one double multiplication followed by an exact
+        round. Returns None when the float product overflows a double (the amount is beyond any int64).
+        """
+        n = self.minor_units
+        if isinstance(x, Decimal):
+            with localcontext() as ctx:
+                ctx.prec = len(x.as_tuple().digits) + 10
+                return int(x.scaleb(n).to_integral_value(rounding=ROUND_HALF_UP))
+        if isinstance(x, int):
+            return int(x) * 10 ** n
+        p = x * _POW10_EXACT[n]
+        if math.isinf(p):
+            return None
+        return _round_half_away_from_zero(p)
+
     def to_minor(self, major_amount: Union[int, float, Decimal]) -> int:
         """
         Convert a major currency amount to minor units.
 
-        Uses round-half-away-from-zero semantics, matching Go (math.Round),
-        Rust (f64::round()), and JavaScript (Math.round for positives).
+        Rounds half away from zero (2.5 -> 3, -2.5 -> -3), identically in the Go, JavaScript and Rust wrappers
+        (ADR 0013). A float is multiplied by 10**minor_units as one IEEE double, then rounded exactly, so
+        ``to_minor(1.005)`` for USD is 100: 1.005 * 100 is 100.49999999999999. An int is exact; a Decimal is converted
+        exactly (no binary float is involved); any other numeric type is converted with ``float()``.
 
         Args:
-            major_amount: Amount in major units (e.g., 100.50 for $100.50). A Decimal is converted exactly
-                (no binary float is involved), rounding half away from zero.
+            major_amount: Amount in major units (e.g., 100.50 for $100.50).
 
         Returns:
             Integer amount in minor units (e.g., 10050 for 10050 cents).
 
         Raises:
             ValueError: If major_amount is NaN or infinite (float or Decimal).
+            OverflowError: If a float or int amount rounds to a result that does not fit in an int64
+                (``|result| >= 2**63``); the message says "amount too large". The four wrappers return the same numbers
+                or the same errors; Python and JavaScript used to return the larger value, which Go and Rust could
+                not. A Decimal is exempt: it is exact and unbounded (v1.9.0), and no other wrapper takes one.
+            TypeError: If major_amount is a str or bytes.
 
         Examples:
             >>> usd.to_minor(100.50)
@@ -461,30 +542,18 @@ class Currency:
             >>> btc.to_minor(0.00000001)
             1
         """
-        if isinstance(major_amount, Decimal):
-            # Exact (v1.9.0, F28): ROUND_HALF_UP is round-half-away-from-zero for Decimal, the rule used below.
-            if major_amount.is_nan():
-                raise ValueError("Cannot convert NaN to minor units")
-            if major_amount.is_infinite():
-                raise ValueError("Cannot convert infinity to minor units")
-            with localcontext() as ctx:
-                ctx.prec = len(major_amount.as_tuple().digits) + 10
-                scaled = major_amount.scaleb(self.minor_units)
-                return int(scaled.to_integral_value(rounding=ROUND_HALF_UP))
-
-        if isinstance(major_amount, float):
-            if math.isnan(major_amount):
-                raise ValueError("Cannot convert NaN to minor units")
-            if math.isinf(major_amount):
-                raise ValueError("Cannot convert infinity to minor units")
-
-        factor = 10 ** self.minor_units
-        # Round half away from zero: 2.5 -> 3, -2.5 -> -3
-        product = major_amount * factor
-        if product >= 0:
-            return math.floor(product + 0.5)
-        else:
-            return math.ceil(product - 0.5)
+        major_amount = _as_amount(major_amount)
+        kind = _non_finite(major_amount)
+        if kind == "nan":
+            raise ValueError("Cannot convert NaN to minor units")
+        if kind is not None:
+            raise ValueError("Cannot convert infinity to minor units")
+        r = self._round_scaled(major_amount)
+        if r is None or (not isinstance(major_amount, Decimal) and abs(r) >= _INT64_LIMIT):
+            raise OverflowError(
+                f"Cannot convert {major_amount!r} to minor units: amount too large for int64 minor units"
+            )
+        return r
 
     def from_minor(self, minor_amount: int) -> float:
         """
@@ -511,6 +580,12 @@ class Currency:
         """
         Format a major currency amount with the currency symbol.
 
+        The amount is rounded exactly as :meth:`to_minor` rounds it (half away from zero) and its digits are printed
+        from that rounded value, so ``format`` and ``to_minor`` cannot disagree (ADR 0013). It does not raise for a
+        number: NaN is ``nan``, infinity (or a float amount whose scaled value overflows a double) is ``inf`` or
+        ``-inf``, each after the symbol. Fractional currencies get comma thousands separators; 0-decimal currencies
+        print ungrouped.
+
         Args:
             major_amount: Amount in major units. A Decimal is formatted exactly.
 
@@ -522,10 +597,25 @@ class Currency:
             '$100.50'
             >>> jpy.format(500)
             '¥500'
+            >>> usd.format(float("nan"))
+            '$nan'
         """
-        if self.minor_units == 0:
-            return f"{self.symbol}{int(major_amount)}"
-        return f"{self.symbol}{major_amount:,.{self.minor_units}f}"
+        major_amount = _as_amount(major_amount)
+        kind = _non_finite(major_amount)
+        if kind is not None:
+            return f"{self.symbol}{kind}"
+        r = self._round_scaled(major_amount)
+        if r is None:  # a finite float whose scaled value overflows a double
+            return f"{self.symbol}{'-' if major_amount < 0 else ''}inf"
+        n = self.minor_units
+        # Sign comes from the sign bit of the amount when there are decimals, and from the rounded value when there
+        # are none: a negative amount that rounds to zero prints "$-0.00" but "¥0" (today's behavior in all four).
+        negative = (_sign_bit(major_amount) and (n > 0 or r != 0)) or (n == 0 and r < 0)
+        digits = str(abs(r))
+        if n > 0:
+            digits = digits.rjust(n + 1, "0")
+            digits = f"{int(digits[:-n]):,}.{digits[-n:]}"
+        return f"{self.symbol}{'-' if negative else ''}{digits}"
 
     # -- Magic methods ------------------------------------------------------
 

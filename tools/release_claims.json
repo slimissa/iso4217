@@ -1723,6 +1723,90 @@
       "contains": "Runs a 28-check gate"
     }
   ],
+  "1.9.3": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.3"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.3\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.3]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.3"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.3"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.3\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.3\""
+    },
+    {
+      "file": "docs/decisions/wrapper-numeric-contract.md"
+    },
+    {
+      "file": "tests/test_wrapper_numeric_contract.py"
+    },
+    {
+      "file": "tests/numeric_contract_oracle.py"
+    },
+    {
+      "file": "wrappers/go/numeric_contract_test.go"
+    },
+    {
+      "file": "wrappers/rust/tests/numeric_contract.rs"
+    },
+    {
+      "file": "wrappers/javascript/numeric_contract.test.js"
+    },
+    {
+      "file": "tests/cross_language_consistency.json",
+      "contains": "\"numeric_contract\""
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "contains": "func (c *Currency) ToMinorChecked"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "pub fn try_to_minor"
+    },
+    {
+      "file": "wrappers/javascript/index.js",
+      "contains": "const INT64_LIMIT"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "_INT64_LIMIT"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "absent": "math.floor(product + 0.5)"
+    },
+    {
+      "file": "wrappers/javascript/index.js",
+      "absent": "toLocaleString("
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "absent": "int64(math.Round(majorAmount * factor))"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "absent": "(major_amount * factor).round() as i64"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",

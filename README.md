@@ -807,7 +807,9 @@ iso4217/
 │   ├── test_check_snapshot_freshness.py
 │   ├── test_update_from_iso.py
 │   ├── test_refresh_market_caps.py
-│   └── test_wrappers.py
+│   ├── test_wrappers.py
+│   ├── test_wrapper_numeric_contract.py  # ADR 0013: the numeric contract, all four wrappers
+│   └── numeric_contract_oracle.py        # Reference implementation the fixture is checked against
 │
 ├── examples/
 │   └── stores-200/               # Companion demo: 200 stores, one registry, six queries
@@ -831,6 +833,7 @@ iso4217/
 │       ├── country-currency-taxonomy.md  # ADR 0010
 │       ├── wheel-contents.md             # ADR 0011
 │       ├── line-ending-policy.md         # ADR 0012
+│       ├── wrapper-numeric-contract.md   # ADR 0013
 │       └── v1.6.0-candidates.md          # Deferred decisions
 │
 └── .github/

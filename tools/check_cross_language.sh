@@ -182,7 +182,7 @@ echo
 # ---------------------------------------------------------------------------
 
 if command -v python3 >/dev/null 2>&1; then
-    run_suite "Python" python3 -m pytest tests/test_wrappers.py -q
+    run_suite "Python" python3 -m pytest tests/test_wrappers.py tests/test_wrapper_numeric_contract.py -q
 else
     report_not_run "Python" python "python3 not found"
 fi
@@ -192,7 +192,7 @@ fi
 # ---------------------------------------------------------------------------
 
 if command -v node >/dev/null 2>&1; then
-    run_suite "JavaScript" node wrappers/javascript/test.js
+    run_suite "JavaScript" bash -c 'cd wrappers/javascript && node test.js && node numeric_contract.test.js'
 else
     report_not_run "JavaScript" javascript "node not found"
 fi

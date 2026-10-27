@@ -247,6 +247,62 @@ func (c *Currency) AdoptingCountries() []Country {
 	return result
 }
 
+// Errors returned by ToMinorChecked (ADR 0013, docs/decisions/wrapper-numeric-contract.md).
+var (
+	// ErrNonFinite is returned for a NaN or infinite amount.
+	ErrNonFinite = errors.New("amount is not a finite number")
+	// ErrOverflow is returned when the amount, scaled to minor units and rounded, does not fit in an int64
+	// (|result| >= 2^63), or when scaling it overflows float64. The message says "amount too large".
+	ErrOverflow = errors.New("amount too large for int64 minor units")
+)
+
+// pow10Exact[n] is 10^n, exact as a float64 for n <= 22. Every wrapper takes 10^n from the same exact table, so the
+// one floating-point multiplication in the conversion is the same in all four languages.
+var pow10Exact = [...]float64{
+	1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11,
+	1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
+}
+
+// int64Limit is 2^63: a rounded amount whose magnitude is at or above it cannot be returned as int64.
+const int64Limit = 9223372036854775808.0
+
+// roundScaled returns x*10^n rounded half away from zero, as an integer-valued float64.
+//
+// The product is one IEEE-double multiplication; the round is exact (p-trunc(p) is exact for doubles), so there is no
+// floor(x+0.5) and no int64 conversion of an out-of-range float. It returns ErrNonFinite for NaN and infinite x and
+// ErrOverflow when the product itself overflows float64. It does not apply the int64 bound.
+func (c *Currency) roundScaled(x float64) (float64, error) {
+	if math.IsNaN(x) || math.IsInf(x, 0) {
+		return 0, ErrNonFinite
+	}
+	if c.MinorUnits < 0 || c.MinorUnits >= len(pow10Exact) {
+		return 0, fmt.Errorf("minor units %d is outside 0..%d", c.MinorUnits, len(pow10Exact)-1)
+	}
+	p := x * pow10Exact[c.MinorUnits]
+	if math.IsInf(p, 0) {
+		return 0, ErrOverflow
+	}
+	r := math.Trunc(p)
+	if math.Abs(p-r) >= 0.5 {
+		r += math.Copysign(1, p)
+	}
+	return r, nil
+}
+
+// ToMinorChecked converts a major currency amount to minor units, rounding half away from zero, and returns an error
+// instead of a wrong number: ErrNonFinite for NaN and infinity, ErrOverflow when the result does not fit in an int64.
+// Test with errors.Is.
+func (c *Currency) ToMinorChecked(majorAmount float64) (int64, error) {
+	r, err := c.roundScaled(majorAmount)
+	if err != nil {
+		return 0, fmt.Errorf("cannot convert %v to minor units: %w", majorAmount, err)
+	}
+	if math.Abs(r) >= int64Limit {
+		return 0, fmt.Errorf("cannot convert %v to minor units: %w", majorAmount, ErrOverflow)
+	}
+	return int64(r), nil
+}
+
 // ToMinor converts a major currency amount to minor units.
 //
 // Examples:
@@ -256,13 +312,14 @@ func (c *Currency) AdoptingCountries() []Country {
 //	kwd.ToMinor(1.500)        // 1500
 //	btc.ToMinor(0.000_000_01) // 1
 //
-// Panics if majorAmount is NaN or infinite.
+// Panics if majorAmount is NaN, infinite, or too large for an int64 amount of minor units (the panic value is a string
+// containing "amount too large"). Use ToMinorChecked to receive an error instead.
 func (c *Currency) ToMinor(majorAmount float64) int64 {
-	if math.IsNaN(majorAmount) || math.IsInf(majorAmount, 0) {
-		panic(fmt.Sprintf("Cannot convert %v to minor units", majorAmount))
+	m, err := c.ToMinorChecked(majorAmount)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot convert %v to minor units: %v", majorAmount, err))
 	}
-	factor := math.Pow(10, float64(c.MinorUnits))
-	return int64(math.Round(majorAmount * factor))
+	return m
 }
 
 // FromMinor converts minor units to a major currency amount.
@@ -278,51 +335,60 @@ func (c *Currency) FromMinor(minorAmount int64) float64 {
 
 // Format returns a major currency amount formatted with the currency symbol.
 //
+// The amount is rounded exactly as ToMinor rounds it (half away from zero) and its digits are printed from that
+// rounded value, so Format and ToMinor cannot disagree. It never panics: NaN is "nan", infinity (or an amount whose
+// scaled value overflows float64) is "inf" or "-inf" after the symbol. 2-decimal and other fractional currencies get
+// comma thousands separators; 0-decimal currencies print ungrouped (ADR 0013, D5, D6).
+//
 // Examples:
 //
 //	usd.Format(100.50)   // "$100.50"
 //	usd.Format(1000.00)  // "$1,000.00"
 //	jpy.Format(500.0)    // "¥500"
+//	usd.Format(math.NaN()) // "$nan"
 func (c *Currency) Format(majorAmount float64) string {
-	if c.MinorUnits == 0 {
-		return fmt.Sprintf("%s%d", c.Symbol, int64(math.Round(majorAmount)))
+	switch {
+	case math.IsNaN(majorAmount):
+		return c.Symbol + "nan"
+	case math.IsInf(majorAmount, 1):
+		return c.Symbol + "inf"
+	case math.IsInf(majorAmount, -1):
+		return c.Symbol + "-inf"
 	}
-	return c.Symbol + formatWithThousands(majorAmount, c.MinorUnits)
+	r, err := c.roundScaled(majorAmount)
+	if err != nil { // a finite amount whose scaled value overflows float64
+		if majorAmount < 0 {
+			return c.Symbol + "-inf"
+		}
+		return c.Symbol + "inf"
+	}
+	n := c.MinorUnits
+	// Sign comes from the sign bit of the amount when there are decimals, and from the rounded value when there are
+	// none: a negative amount that rounds to zero prints "$-0.00" but "¥0" (today's behavior in all four wrappers).
+	negative := (math.Signbit(majorAmount) && (n > 0 || r != 0)) || (n == 0 && r < 0)
+	digits := strconv.FormatFloat(math.Abs(r), 'f', 0, 64) // exact digits of an integer-valued float64
+	if n > 0 {
+		if len(digits) < n+1 {
+			digits = strings.Repeat("0", n+1-len(digits)) + digits
+		}
+		digits = groupThousands(digits[:len(digits)-n]) + "." + digits[len(digits)-n:]
+	}
+	if negative {
+		return c.Symbol + "-" + digits
+	}
+	return c.Symbol + digits
 }
 
-// formatWithThousands formats a float with the given number of decimal
-// places and comma thousands separators on the integer part, matching the
-// behavior of Python's f"{x:,.Nf}" and JS's Number.toLocaleString('en-US', ...).
-// Go's fmt package has no built-in thousands-grouping verb.
-func formatWithThousands(amount float64, decimals int) string {
-	raw := strconv.FormatFloat(amount, 'f', decimals, 64)
-
-	negative := strings.HasPrefix(raw, "-")
-	if negative {
-		raw = raw[1:]
-	}
-
-	intPart := raw
-	fracPart := ""
-	if dot := strings.IndexByte(raw, '.'); dot != -1 {
-		intPart = raw[:dot]
-		fracPart = raw[dot:]
-	}
-
-	var grouped strings.Builder
-	n := len(intPart)
-	for i, digit := range intPart {
-		if i > 0 && (n-i)%3 == 0 {
-			grouped.WriteByte(',')
+// groupThousands inserts a comma every three digits, counting from the right. Go's fmt has no grouping verb.
+func groupThousands(digits string) string {
+	var b strings.Builder
+	for i, d := range digits {
+		if i > 0 && (len(digits)-i)%3 == 0 {
+			b.WriteByte(',')
 		}
-		grouped.WriteRune(digit)
+		b.WriteRune(d)
 	}
-
-	result := grouped.String() + fracPart
-	if negative {
-		result = "-" + result
-	}
-	return result
+	return b.String()
 }
 
 // String returns a human-readable string representation.

@@ -217,19 +217,40 @@ function loadRegistryData(explicitPath) {
 // ---------------------------------------------------------------------------
 
 /**
- * Round to the nearest integer, ties away from zero (2.5 -> 3, -2.5 -> -3).
- *
- * This matches Go's math.Round and Rust's f64::round(), and deliberately
- * does NOT match JS's built-in Math.round(), which rounds half toward
- * +Infinity: Math.round(-2.5) === -2, not -3. Currency.toMinor() needs the
- * same rounding rule across all four language wrappers — see
- * tests/cross_language_consistency.json's ROUNDING vector.
- *
- * @param {number} x
- * @returns {number}
+ * 10^n, exact as a double for n <= 22. Every wrapper takes 10^n from the same exact table, so the one floating-point
+ * multiplication in the conversion is the same in all four languages (ADR 0013, D2).
  */
-function roundHalfAwayFromZero(x) {
-  return x >= 0 ? Math.floor(x + 0.5) : Math.ceil(x - 0.5);
+const POW10_EXACT = [
+  1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11,
+  1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
+];
+
+/** 2^63: a rounded amount whose magnitude is at or above it does not fit in an int64. */
+const INT64_LIMIT = 9223372036854775808;
+
+/**
+ * Round to the nearest integer, ties away from zero (2.5 -> 3, -2.5 -> -3), exactly.
+ *
+ * This matches Go's math.Round and Rust's f64::round(), and deliberately does NOT match JS's built-in Math.round(),
+ * which rounds half toward +Infinity (Math.round(-2.5) === -2). It also avoids Math.floor(x + 0.5): in doubles
+ * 0.49999999999999994 + 0.5 is 1, and above 2^52 the addition loses the half, so that form is wrong at the edges.
+ * p - Math.trunc(p) is exact for doubles, so the comparison with 0.5 is exact (ADR 0013, D2).
+ *
+ * @param {number} p - a finite double
+ * @returns {number} an integer-valued double (may be -0)
+ */
+function roundHalfAwayFromZero(p) {
+  const t = Math.trunc(p);
+  return Math.abs(p - t) >= 0.5 ? t + Math.sign(p) : t;
+}
+
+/**
+ * Insert a comma every three digits of a string of digits, counting from the right.
+ * @param {string} digits
+ * @returns {string}
+ */
+function groupThousands(digits) {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 /**
@@ -478,6 +499,8 @@ class Currency {
    * @param {number} majorAmount - Amount in major units (e.g., 100.50 for $100.50)
    * @returns {number} Integer amount in minor units (e.g., 10050 for cents)
    * @throws {Error} If majorAmount is NaN or infinite
+   * @throws {RangeError} If the rounded result does not fit in an int64 (|result| >= 2^63); the message says
+   *   "amount too large" (ADR 0013, D3)
    *
    * @example
    * usd.toMinor(100.50);   // 10050
@@ -490,8 +513,15 @@ class Currency {
       throw new Error(`Cannot convert ${majorAmount} to minor units`);
     }
 
-    const factor = Math.pow(10, this.minorUnits);
-    return roundHalfAwayFromZero(majorAmount * factor);
+    const p = majorAmount * POW10_EXACT[this.minorUnits];
+    if (!Number.isFinite(p)) {
+      throw new RangeError(`Cannot convert ${majorAmount} to minor units: amount too large for int64 minor units`);
+    }
+    const r = roundHalfAwayFromZero(p);
+    if (Math.abs(r) >= INT64_LIMIT) {
+      throw new RangeError(`Cannot convert ${majorAmount} to minor units: amount too large for int64 minor units`);
+    }
+    return r === 0 ? 0 : r; // never -0
   }
 
   /**
@@ -518,24 +548,46 @@ class Currency {
   /**
    * Format a major currency amount with the currency symbol.
    *
+   * The amount is rounded exactly as toMinor() rounds it (half away from zero) and its digits are printed from that
+   * rounded value, so format() and toMinor() cannot disagree. It does not use Intl: the result does not depend on the
+   * runtime's locale data. It never throws for a number: NaN is "nan", infinity (or an amount whose scaled value
+   * overflows) is "inf" or "-inf" after the symbol. Fractional currencies get comma thousands separators; 0-decimal
+   * currencies print ungrouped (ADR 0013, D5 and D6).
+   *
    * @param {number} majorAmount - Amount in major units
    * @returns {string} Formatted string like "$100.50" or "¥500"
+   * @throws {TypeError} If majorAmount is not a number
    *
    * @example
    * usd.format(100.50);   // "$100.50"
    * jpy.format(500);      // "¥500"
+   * usd.format(NaN);      // "$nan"
    */
   format(majorAmount) {
-    if (this.minorUnits === 0) {
-      return `${this.symbol}${Math.round(majorAmount)}`;
+    if (typeof majorAmount !== 'number') {
+      throw new TypeError(`Cannot format ${majorAmount}: expected a number`);
     }
-
-    const formatted = majorAmount.toLocaleString('en-US', {
-      minimumFractionDigits: this.minorUnits,
-      maximumFractionDigits: this.minorUnits,
-    });
-
-    return `${this.symbol}${formatted}`;
+    const symbol = this.symbol;
+    if (Number.isNaN(majorAmount)) {
+      return `${symbol}nan`;
+    }
+    const signBit = majorAmount < 0 || Object.is(majorAmount, -0);
+    const p = majorAmount * POW10_EXACT[this.minorUnits];
+    if (!Number.isFinite(p)) {
+      return `${symbol}${signBit ? '-' : ''}inf`; // infinity, or a finite amount whose scaled value overflowed
+    }
+    const n = this.minorUnits;
+    const r = roundHalfAwayFromZero(p);
+    // Sign comes from the sign bit of the amount when there are decimals, and from the rounded value when there are
+    // none: a negative amount that rounds to zero prints "$-0.00" but "\u00a50" (today's behavior in all four wrappers).
+    const negative = (signBit && (n > 0 || r !== 0)) || (n === 0 && r < 0);
+    let digits = BigInt(Math.abs(r)).toString(); // exact digits of an integer-valued double
+    if (n > 0) {
+      digits = digits.padStart(n + 1, '0');
+      const split = digits.length - n;
+      digits = `${groupThousands(digits.slice(0, split))}.${digits.slice(split)}`;
+    }
+    return `${symbol}${negative ? '-' : ''}${digits}`;
   }
 
   // -- Serialization ------------------------------------------------------

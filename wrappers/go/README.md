@@ -324,6 +324,7 @@ The tradeoff is binary size — the registry JSON is ~80KB uncompressed. With Go
 | `.IssuingCountries()` | `[]Country` | Sovereign issuing countries |
 | `.AdoptingCountries()` | `[]Country` | Countries that adopted this currency |
 | `.ToMinor(amount)` | `int64` | Major → minor units |
+| `.ToMinorChecked(amount)` | `(int64, error)` | Major → minor units; `ErrNonFinite` / `ErrOverflow` instead of a panic |
 | `.FromMinor(amount)` | `float64` | Minor → major units |
 | `.Format(amount)` | `string` | Formatted with symbol |
 | `.String()` | `string` | Human-readable representation |
@@ -390,6 +391,15 @@ This Go module follows Go conventions while maintaining the same behavior as the
 | Error handling | Exceptions | Exceptions | `Result<T, String>` / panics | `error` return / panics |
 
 ---
+
+## Numeric contract
+
+`ToMinor` and `Format` follow [ADR 0013](https://github.com/slimissa/iso4217/blob/main/docs/decisions/wrapper-numeric-contract.md) and return the same numbers in all four wrappers; every wrapper's tests read one shared fixture (`tests/cross_language_consistency.json`).
+
+- **Rounding:** half away from zero. `ToMinor(1.005)` for USD is 100, because 1.005 × 100 is `100.49999999999999` in a double.
+- **Overflow:** an amount whose rounded result does not fit in an int64 is an error, never a wrong number. `ToMinorChecked` returns `ErrOverflow` or `ErrNonFinite` (test with `errors.Is`); `ToMinor` panics with the same message. For an 18-decimal asset such as ETH the limit is about 9.22 units.
+- **`Format`** rounds exactly as `ToMinor` does and prints that value, so the two cannot disagree. NaN is `$nan`; infinities are `$inf` and `$-inf`.
+- **Zero decimals and zero sign:** 0-decimal currencies print without thousands separators (`¥1234567`), and a negative amount that rounds to zero prints `$-0.00` for a 2-decimal currency and `¥0` for JPY. Both are unchanged and under review.
 
 ## Development
 

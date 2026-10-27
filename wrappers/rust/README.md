@@ -309,6 +309,7 @@ The tradeoff is binary size — the registry JSON is ~80KB uncompressed. With `o
 | `.issuing_countries()` | `Vec<&Country>` | Sovereign issuing countries |
 | `.adopting_countries()` | `Vec<&Country>` | Countries that adopted this currency |
 | `.to_minor(amount)` | `i64` | Major → minor units |
+| `.try_to_minor(amount)` | `Result<i64, MinorError>` | Major → minor units; `MinorError::NonFinite` / `Overflow` instead of a panic |
 | `.from_minor(amount)` | `f64` | Minor → major units |
 | `.format(amount)` | `String` | Formatted with symbol |
 
@@ -351,6 +352,15 @@ This Rust crate follows Rust conventions while maintaining the same behavior as 
 | Error handling | Exceptions | Exceptions | `Result<T, String>` / panics |
 
 ---
+
+## Numeric contract
+
+`to_minor` and `format` follow [ADR 0013](https://github.com/slimissa/iso4217/blob/main/docs/decisions/wrapper-numeric-contract.md) and return the same numbers in all four wrappers; every wrapper's tests read one shared fixture (`tests/cross_language_consistency.json`).
+
+- **Rounding:** half away from zero. `to_minor(1.005)` for USD is 100, because 1.005 × 100 is `100.49999999999999` in a double.
+- **Overflow:** an amount whose rounded result does not fit in an int64 is an error, never a wrong number. `try_to_minor` returns `Err(MinorError::Overflow)` or `Err(MinorError::NonFinite)`; `to_minor` panics with the same message. For an 18-decimal asset such as ETH the limit is about 9.22 units.
+- **`format`** rounds exactly as `to_minor` does and prints that value, so the two cannot disagree. NaN is `$nan`; infinities are `$inf` and `$-inf`.
+- **Zero decimals and zero sign:** 0-decimal currencies print without thousands separators (`¥1234567`), and a negative amount that rounds to zero prints `$-0.00` for a 2-decimal currency and `¥0` for JPY. Both are unchanged and under review.
 
 ## Development
 

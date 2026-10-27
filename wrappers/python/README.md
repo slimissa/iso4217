@@ -295,6 +295,15 @@ If you install via pip, the JSON is bundled with the package and found automatic
 
 ---
 
+## Numeric contract
+
+`to_minor` and `format` follow [ADR 0013](https://github.com/slimissa/iso4217/blob/main/docs/decisions/wrapper-numeric-contract.md) and return the same numbers in all four wrappers; every wrapper's tests read one shared fixture (`tests/cross_language_consistency.json`).
+
+- **Rounding:** half away from zero. `to_minor(1.005)` for USD is 100, because 1.005 × 100 is `100.49999999999999` in a double.
+- **Overflow:** an amount whose rounded result does not fit in an int64 is an error, never a wrong number. `to_minor` raises `OverflowError` ("amount too large") for a float or int; NaN and infinity raise `ValueError`. A `Decimal` is exact and not bounded. For an 18-decimal asset such as ETH the limit is about 9.22 units.
+- **`format`** rounds exactly as `to_minor` does and prints that value, so the two cannot disagree. NaN is `$nan`; infinities are `$inf` and `$-inf`.
+- **Zero decimals and zero sign:** 0-decimal currencies print without thousands separators (`¥1234567`), and a negative amount that rounds to zero prints `$-0.00` for a 2-decimal currency and `¥0` for JPY. Both are unchanged and under review.
+
 ## Development
 
 ```bash

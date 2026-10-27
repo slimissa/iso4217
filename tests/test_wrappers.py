@@ -520,7 +520,9 @@ def test_decimal_to_minor_is_exact_where_a_float_loses_digits():
     usd = CurrencyRegistry().currency("USD")
     assert usd.to_minor(Decimal("99999999999999999999")) == 9999999999999999999900
     assert usd.to_minor(Decimal("123456789012345678.99")) == 12345678901234567899
-    assert usd.to_minor(99999999999999999999.0) != 9999999999999999999900      # the float path, unchanged
+    # The float path no longer returns a wrong number for an amount beyond int64; it raises (ADR 0013, D3).
+    with pytest.raises(OverflowError, match="amount too large"):
+        usd.to_minor(99999999999999999999.0)
 
 
 def test_decimal_to_minor_rounds_half_away_from_zero():
@@ -551,7 +553,8 @@ def test_decimal_format_is_exact():
     from decimal import Decimal
     reg = CurrencyRegistry()
     assert reg.currency("USD").format(Decimal("99999999999999999999.99")) == "$99,999,999,999,999,999,999.99"
-    assert reg.currency("JPY").format(Decimal("500.9")) == "\u00a5500"
+    # ADR 0013: format rounds half away from zero like to_minor. It used to truncate a 0-decimal amount (500.9 -> 500).
+    assert reg.currency("JPY").format(Decimal("500.9")) == "\u00a5501"
 
 
 if __name__ == "__main__":

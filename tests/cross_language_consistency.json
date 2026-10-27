@@ -509,5 +509,110 @@
       {"id": "code_lifetime_array", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "code_lifetime": []}]}}, "path": "$.currencies.active[0].code_lifetime"},
       {"id": "code_lifetime_to_missing", "registry": {"currencies": {"active": [{"code": "AAA", "name": "A", "minor_units": 2, "code_lifetime": {"from": null}}]}}, "path": "$.currencies.active[0].code_lifetime.to"}
     ]
+  },
+  "numeric_contract": {
+    "description": "Wrapper numeric contract (ADR 0013). Amounts are JSON numbers or the strings NaN, Infinity, -Infinity. An expected to_minor is an integer or {\"error\": \"non_finite\"|\"overflow\"}. Expected values are produced by tests/numeric_contract_oracle.py.",
+    "vector_count": 83,
+    "groups": [
+      {"id": "rounding", "description": "to_minor and format on exact and near ties; half away from zero (D1), format from the same r (D5)", "vectors": [
+        {"currency": "USD", "x": 0.005, "to_minor": 1, "format": "$0.01"},
+        {"currency": "USD", "x": 0.015, "to_minor": 2, "format": "$0.02"},
+        {"currency": "USD", "x": 0.025, "to_minor": 3, "format": "$0.03"},
+        {"currency": "USD", "x": 0.125, "to_minor": 13, "format": "$0.13"},
+        {"currency": "USD", "x": -0.005, "to_minor": -1, "format": "$-0.01"},
+        {"currency": "USD", "x": -0.125, "to_minor": -13, "format": "$-0.13"},
+        {"currency": "USD", "x": 1.005, "to_minor": 100, "format": "$1.00"},
+        {"currency": "USD", "x": 100.005, "to_minor": 10001, "format": "$100.01"},
+        {"currency": "USD", "x": -100.005, "to_minor": -10001, "format": "$-100.01"},
+        {"currency": "JPY", "x": 0.5, "to_minor": 1, "format": "\u00a51"},
+        {"currency": "JPY", "x": 1.5, "to_minor": 2, "format": "\u00a52"},
+        {"currency": "JPY", "x": 2.5, "to_minor": 3, "format": "\u00a53"},
+        {"currency": "JPY", "x": -0.5, "to_minor": -1, "format": "\u00a5-1"},
+        {"currency": "JPY", "x": -1.5, "to_minor": -2, "format": "\u00a5-2"},
+        {"currency": "JPY", "x": -2.5, "to_minor": -3, "format": "\u00a5-3"}
+      ]},
+      {"id": "rounding_edges", "description": "the floor(x + 0.5) cases: Python and JS gave a different answer from Go and Rust (D2)", "vectors": [
+        {"currency": "JPY", "x": 0.49999999999999994, "to_minor": 0, "format": "\u00a50"},
+        {"currency": "USD", "x": 0.004999999999999999, "to_minor": 0, "format": "$0.00"},
+        {"currency": "JPY", "x": 4503599627370497.0, "to_minor": 4503599627370497, "format": "\u00a54503599627370497"},
+        {"currency": "JPY", "x": 4503599627370499.0, "to_minor": 4503599627370499, "format": "\u00a54503599627370499"},
+        {"currency": "JPY", "x": -4503599627370497.0, "to_minor": -4503599627370497, "format": "\u00a5-4503599627370497"},
+        {"currency": "JPY", "x": 9007199254740991.0, "to_minor": 9007199254740991, "format": "\u00a59007199254740991"}
+      ]},
+      {"id": "overflow", "description": "to_minor errors when |r| >= 2^63 or the product is infinite; 18-decimal assets work below that (D3)", "vectors": [
+        {"currency": "USD", "x": 1e+17, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": -1e+17, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": 1e+18, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": 9.223372036854776e+18, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": -9.223372036854776e+18, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": 1e+300, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": 1e+307, "to_minor": {"error": "overflow"}},
+        {"currency": "USD", "x": -1e+307, "to_minor": {"error": "overflow"}},
+        {"currency": "JPY", "x": 9.223372036854775e+18, "to_minor": 9223372036854774784},
+        {"currency": "JPY", "x": -9.223372036854775e+18, "to_minor": -9223372036854774784},
+        {"currency": "JPY", "x": 9.223372036854776e+18, "to_minor": {"error": "overflow"}},
+        {"currency": "JPY", "x": -9.223372036854776e+18, "to_minor": {"error": "overflow"}},
+        {"currency": "ETH", "x": 1.0, "to_minor": 1000000000000000000},
+        {"currency": "ETH", "x": 9.0, "to_minor": 9000000000000000000},
+        {"currency": "ETH", "x": -9.0, "to_minor": -9000000000000000000},
+        {"currency": "ETH", "x": 9.3, "to_minor": {"error": "overflow"}},
+        {"currency": "ETH", "x": 10.0, "to_minor": {"error": "overflow"}},
+        {"currency": "ETH", "x": -10.0, "to_minor": {"error": "overflow"}}
+      ]},
+      {"id": "non_finite", "description": "NaN and +-Infinity; and finite amounts whose scaled product is infinite (D3, D5)", "vectors": [
+        {"currency": "USD", "x": "NaN", "to_minor": {"error": "non_finite"}, "format": "$nan"},
+        {"currency": "USD", "x": "Infinity", "to_minor": {"error": "non_finite"}, "format": "$inf"},
+        {"currency": "USD", "x": "-Infinity", "to_minor": {"error": "non_finite"}, "format": "$-inf"},
+        {"currency": "JPY", "x": "NaN", "to_minor": {"error": "non_finite"}, "format": "\u00a5nan"},
+        {"currency": "JPY", "x": "Infinity", "to_minor": {"error": "non_finite"}, "format": "\u00a5inf"},
+        {"currency": "JPY", "x": "-Infinity", "to_minor": {"error": "non_finite"}, "format": "\u00a5-inf"},
+        {"currency": "ETH", "x": "NaN", "to_minor": {"error": "non_finite"}, "format": "\u039enan"},
+        {"currency": "ETH", "x": "Infinity", "to_minor": {"error": "non_finite"}, "format": "\u039einf"},
+        {"currency": "ETH", "x": "-Infinity", "to_minor": {"error": "non_finite"}, "format": "\u039e-inf"},
+        {"currency": "USD", "x": 1e+307, "to_minor": {"error": "overflow"}, "format": "$inf"},
+        {"currency": "USD", "x": -1e+307, "to_minor": {"error": "overflow"}, "format": "$-inf"},
+        {"currency": "ETH", "x": 1e+300, "to_minor": {"error": "overflow"}, "format": "\u039einf"},
+        {"currency": "ETH", "x": -1e+300, "to_minor": {"error": "overflow"}, "format": "\u039e-inf"}
+      ]},
+      {"id": "jpy_ties", "description": "JPY has 0 minor units: format rounds half away from zero like to_minor (D1, D5)", "vectors": [
+        {"currency": "JPY", "x": -2.5, "to_minor": -3, "format": "\u00a5-3"},
+        {"currency": "JPY", "x": 2.5, "to_minor": 3, "format": "\u00a53"},
+        {"currency": "JPY", "x": -0.5, "to_minor": -1, "format": "\u00a5-1"},
+        {"currency": "JPY", "x": 0.5, "to_minor": 1, "format": "\u00a51"},
+        {"currency": "JPY", "x": -1.5, "to_minor": -2, "format": "\u00a5-2"},
+        {"currency": "JPY", "x": 1.5, "to_minor": 2, "format": "\u00a52"},
+        {"currency": "JPY", "x": 2.9, "to_minor": 3, "format": "\u00a53"},
+        {"currency": "JPY", "x": -2.9, "to_minor": -3, "format": "\u00a5-3"}
+      ]},
+      {"id": "format_agrees_with_to_minor", "description": "format and to_minor give the same rounded amount (D5); the property is also asserted for every vector with both", "vectors": [
+        {"currency": "USD", "x": 0.125, "to_minor": 13, "format": "$0.13"},
+        {"currency": "USD", "x": 0.015, "to_minor": 2, "format": "$0.02"},
+        {"currency": "USD", "x": 1.005, "to_minor": 100, "format": "$1.00"},
+        {"currency": "USD", "x": 2.675, "to_minor": 268, "format": "$2.68"},
+        {"currency": "USD", "x": 1.115, "to_minor": 112, "format": "$1.12"},
+        {"currency": "USD", "x": 1234567.895, "to_minor": 123456790, "format": "$1,234,567.90"}
+      ]},
+      {"id": "zero_sign", "description": "a negative amount that rounds to zero keeps today's sign rule (D6); to_minor never returns -0", "vectors": [
+        {"currency": "USD", "x": -1e-07, "to_minor": 0, "format": "$-0.00"},
+        {"currency": "USD", "x": -0.004, "to_minor": 0, "format": "$-0.00"},
+        {"currency": "USD", "x": -0.0, "to_minor": 0, "format": "$-0.00"},
+        {"currency": "USD", "x": 0.0, "to_minor": 0, "format": "$0.00"},
+        {"currency": "USD", "x": 0.004, "to_minor": 0, "format": "$0.00"},
+        {"currency": "JPY", "x": -0.4, "to_minor": 0, "format": "\u00a50"},
+        {"currency": "JPY", "x": -0.0, "to_minor": 0, "format": "\u00a50"},
+        {"currency": "JPY", "x": 0.0, "to_minor": 0, "format": "\u00a50"},
+        {"currency": "JPY", "x": 0.4, "to_minor": 0, "format": "\u00a50"}
+      ]},
+      {"id": "large_amounts", "description": "format prints the exact digits of r and never narrows to int64 (D5)", "vectors": [
+        {"currency": "ETH", "x": 1.0, "to_minor": 1000000000000000000, "format": "\u039e1.000000000000000000"},
+        {"currency": "ETH", "x": 10.0, "format": "\u039e10.000000000000000000"},
+        {"currency": "ETH", "x": 1.15, "to_minor": 1149999999999999872, "format": "\u039e1.149999999999999872"},
+        {"currency": "USD", "x": 1e+17, "format": "$100,000,000,000,000,000.00"},
+        {"currency": "USD", "x": 1e+20, "format": "$100,000,000,000,000,000,000.00"},
+        {"currency": "USD", "x": 1e+300, "format": "$1,000,000,000,000,000,076,297,030,790,848,949,253,473,468,551,506,568,117,016,017,342,062,113,802,881,257,944,841,421,889,646,917,840,766,397,475,771,385,487,613,722,103,878,447,999,382,918,156,113,505,198,307,501,676,498,564,889,816,265,363,680,954,146,073,142,351,510,583,734,589,868,908,251,556,590,636,177,158,632,052,826,223,905,092,841,834,398,586,171,030,837,356,738,498,992,045,704,981,575,106.56"},
+        {"currency": "JPY", "x": 4503599627370497.0, "format": "\u00a54503599627370497"},
+        {"currency": "USD", "x": 123456789.99, "to_minor": 12345678999, "format": "$123,456,789.99"}
+      ]}
+    ]
   }
 }

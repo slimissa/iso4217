@@ -263,6 +263,38 @@ pub struct CodeLifetime {
     pub to: String,
 }
 
+/// Why [`Currency::try_to_minor`] could not return a number (ADR 0013,
+/// `docs/decisions/wrapper-numeric-contract.md`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MinorError {
+    /// The amount is NaN or infinite.
+    NonFinite,
+    /// The amount, scaled to minor units and rounded, does not fit in an `i64` (`|result| >= 2^63`), or scaling it
+    /// overflowed `f64`. The message says "amount too large".
+    Overflow,
+}
+
+impl fmt::Display for MinorError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MinorError::NonFinite => write!(f, "amount is not a finite number"),
+            MinorError::Overflow => write!(f, "amount too large for i64 minor units"),
+        }
+    }
+}
+
+impl std::error::Error for MinorError {}
+
+/// `10^n`, exact as an `f64` for `n <= 22`. Every wrapper takes `10^n` from the same exact table, so the one
+/// floating-point multiplication in the conversion is the same in all four languages.
+const POW10_EXACT: [f64; 23] = [
+    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
+    1e21, 1e22,
+];
+
+/// `2^63`: a rounded amount whose magnitude is at or above it cannot be returned as an `i64`.
+const I64_LIMIT: f64 = 9_223_372_036_854_775_808.0;
+
 impl Currency {
     /// `true` if this currency is pegged to something.
     pub fn is_pegged(&self) -> bool {
@@ -285,6 +317,48 @@ impl Currency {
             .collect()
     }
 
+    /// `x * 10^n` rounded half away from zero, as an integer-valued `f64`.
+    ///
+    /// The product is one IEEE-double multiplication; the round is exact (`p - trunc(p)` is exact for doubles), so
+    /// there is no `floor(x + 0.5)` and no `as i64` cast of an out-of-range float. The int64 bound is not applied here.
+    fn round_scaled(&self, x: f64) -> Result<f64, MinorError> {
+        if !x.is_finite() {
+            return Err(MinorError::NonFinite);
+        }
+        let scale = POW10_EXACT.get(self.minor_units as usize).ok_or(MinorError::Overflow)?;
+        let p = x * scale;
+        if !p.is_finite() {
+            return Err(MinorError::Overflow);
+        }
+        let mut r = p.trunc();
+        if (p - r).abs() >= 0.5 {
+            r += p.signum();
+        }
+        Ok(r)
+    }
+
+    /// Convert a major currency amount to minor units, rounding half away from zero, and return an error instead of
+    /// a wrong number: [`MinorError::NonFinite`] for NaN and infinity, [`MinorError::Overflow`] when the result does
+    /// not fit in an `i64`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use iso4217::{CurrencyRegistry, MinorError};
+    /// # let registry = CurrencyRegistry::load().unwrap();
+    /// # let usd = registry.active("USD").unwrap();
+    /// assert_eq!(usd.try_to_minor(100.50), Ok(10050));
+    /// assert_eq!(usd.try_to_minor(1e17), Err(MinorError::Overflow));
+    /// assert_eq!(usd.try_to_minor(f64::NAN), Err(MinorError::NonFinite));
+    /// ```
+    pub fn try_to_minor(&self, major_amount: f64) -> Result<i64, MinorError> {
+        let r = self.round_scaled(major_amount)?;
+        if r.abs() >= I64_LIMIT {
+            return Err(MinorError::Overflow);
+        }
+        Ok(r as i64)
+    }
+
     /// Convert a major currency amount to minor units.
     ///
     /// # Examples
@@ -304,14 +378,14 @@ impl Currency {
     ///
     /// # Panics
     ///
-    /// Panics if `major_amount` is NaN or infinite.
+    /// Panics if `major_amount` is NaN, infinite, or too large for an `i64` amount of minor units (the message says
+    /// "amount too large"). Use [`Currency::try_to_minor`] to receive an error instead.
     pub fn to_minor(&self, major_amount: f64) -> i64 {
-        assert!(
-            major_amount.is_finite(),
-            "Cannot convert NaN or infinity to minor units"
-        );
-        let factor = 10_f64.powi(self.minor_units as i32);
-        (major_amount * factor).round() as i64
+        match self.try_to_minor(major_amount) {
+            Ok(minor) => minor,
+            Err(MinorError::NonFinite) => panic!("Cannot convert NaN or infinity to minor units"),
+            Err(e) => panic!("Cannot convert {} to minor units: {}", major_amount, e),
+        }
     }
 
     /// Convert minor units to a major currency amount.
@@ -333,6 +407,11 @@ impl Currency {
 
     /// Format a major currency amount with the currency symbol.
     ///
+    /// The amount is rounded exactly as [`Currency::to_minor`] rounds it (half away from zero) and its digits are
+    /// printed from that rounded value, so `format` and `to_minor` cannot disagree. It never panics: NaN is `nan`,
+    /// infinity (or an amount whose scaled value overflows `f64`) is `inf` or `-inf` after the symbol. Fractional
+    /// currencies get comma thousands separators; 0-decimal currencies print ungrouped (ADR 0013, D5 and D6).
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -343,47 +422,48 @@ impl Currency {
     /// assert_eq!(usd.format(100.50), "$100.50");
     /// assert_eq!(usd.format(1000.00), "$1,000.00");
     /// assert_eq!(jpy.format(500.0), "¥500");
+    /// assert_eq!(usd.format(f64::NAN), "$nan");
     /// ```
     pub fn format(&self, major_amount: f64) -> String {
-        if self.minor_units == 0 {
-            format!("{}{}", self.symbol, major_amount.round() as i64)
-        } else {
-            format!("{}{}", self.symbol, format_with_thousands(major_amount, self.minor_units as usize))
+        let infinity = |negative: bool| format!("{}{}inf", self.symbol, if negative { "-" } else { "" });
+        if major_amount.is_nan() {
+            return format!("{}nan", self.symbol);
         }
+        if major_amount.is_infinite() {
+            return infinity(major_amount < 0.0);
+        }
+        let r = match self.round_scaled(major_amount) {
+            Ok(r) => r,
+            // a finite amount whose scaled value overflows f64
+            Err(_) => return infinity(major_amount < 0.0),
+        };
+        let n = self.minor_units as usize;
+        // Sign comes from the sign bit of the amount when there are decimals, and from the rounded value when there
+        // are none: a negative amount that rounds to zero prints "$-0.00" but "¥0" (today's behavior in all four).
+        let negative = (major_amount.is_sign_negative() && (n > 0 || r != 0.0)) || (n == 0 && r < 0.0);
+        let mut digits = format!("{:.0}", r.abs()); // exact digits of an integer-valued f64
+        if n > 0 {
+            if digits.len() < n + 1 {
+                digits = format!("{}{}", "0".repeat(n + 1 - digits.len()), digits);
+            }
+            let split = digits.len() - n;
+            digits = format!("{}.{}", group_thousands(&digits[..split]), &digits[split..]);
+        }
+        format!("{}{}{}", self.symbol, if negative { "-" } else { "" }, digits)
     }
 }
 
-/// Formats a float with the given number of decimal places and comma
-/// thousands separators on the integer part, matching Python's
-/// `f"{x:,.Nf}"` and JS's `Number.toLocaleString('en-US', ...)`. Rust's
-/// standard formatting has no built-in thousands-grouping flag.
-fn format_with_thousands(amount: f64, decimals: usize) -> String {
-    let raw = format!("{:.prec$}", amount, prec = decimals);
-    let (negative, raw) = match raw.strip_prefix('-') {
-        Some(rest) => (true, rest),
-        None => (false, raw.as_str()),
-    };
-
-    let (int_part, frac_part) = match raw.split_once('.') {
-        Some((i, f)) => (i, format!(".{}", f)),
-        None => (raw, String::new()),
-    };
-
-    let mut grouped = String::new();
-    let digits: Vec<char> = int_part.chars().collect();
+/// Inserts a comma every three digits, counting from the right. Rust's standard formatting has no grouping flag.
+fn group_thousands(digits: &str) -> String {
     let n = digits.len();
-    for (i, digit) in digits.iter().enumerate() {
+    let mut grouped = String::with_capacity(n + n / 3);
+    for (i, digit) in digits.chars().enumerate() {
         if i > 0 && (n - i) % 3 == 0 {
             grouped.push(',');
         }
-        grouped.push(*digit);
+        grouped.push(digit);
     }
-
-    let mut result = grouped + &frac_part;
-    if negative {
-        result = format!("-{}", result);
-    }
-    result
+    grouped
 }
 
 impl fmt::Display for Currency {
