@@ -804,12 +804,20 @@ class TestVerificationDoc:
         assert "validate.yml" in doc and "version-and-hygiene.yml" in doc
         assert "check_mojibake.py" in doc and "pytest tests/" in doc, "the gate steps"
 
-    def test_a_doc_that_would_fail_the_checker_is_not_committed_and_the_exit_is_8(self, fx):
+    def test_a_todo_in_the_gate_evidence_does_not_fail_the_doc(self, fx):
+        # v1.9.4 fix: a TODO inside a fenced code block (the gate evidence) is data,
+        # not a placeholder. The doc is committed; the release exits 0. The prose-TODO
+        # case is tested in tests/test_release_hygiene.py (function extraction).
         r = fx.run(NEW, env={"RH_TODO_OUTPUT": "check_mojibake.py"})
-        assert r.returncode == E_DOC, r.out
-        assert fx.origin_tags() == [f"v{NEW}"], "the release itself is complete"
-        assert fx.origin_main() == fx.ogit("rev-parse", f"v{NEW}^{{commit}}"), "no doc commit on origin"
-        assert fx.head() == fx.origin_main(), "no doc commit locally either"
+        assert r.returncode == E_OK, r.out
+        assert fx.origin_tags() == [f"v{NEW}"], "the release is tagged"
+        doc = fx.read(f"docs/v{NEW}-verification.md")
+        assert "TODO: forced placeholder in the output of check_mojibake.py" in doc, "the gate evidence is present"
+        checker = subprocess.run(
+            [sys.executable, "tools/check_verification_doc.py"],
+            cwd=fx.work, capture_output=True, text=True, env=fx._env(),
+        )
+        assert checker.returncode == 0, f"the doc with a fenced TODO must pass the checker:\n{checker.stdout}\n{checker.stderr}"
 
     def test_a_doc_push_that_fails_is_exit_8(self, fx):
         # The tag push is allowed; the push of main after the tag is rejected. The hook rejects main only once the tag exists.

@@ -134,7 +134,7 @@ MUTANTS: list[Mutant] = [
     # -- the verification doc ------------------------------------------------------------------------------------------
     Mutant("M27-doc-is-a-stub", "the doc is written with TODO markers", "test_the_second_commit_is_one_complete_doc",
            note="the v1.9.3 script IS this mutant; its kill is the red-first result, judged against the refactored script"),
-    Mutant("M28-doc-written-without-being-checked", "an invalid doc is committed", "test_a_doc_that_would_fail_the_checker",
+    Mutant("M28-doc-written-without-being-checked", "an invalid doc is committed", "test_a_checker_failure_is_exit_8_and_the_doc_is_not_committed",
            note="refactored script only: the check_verification_doc.py call before the doc commit"),
     # -- dry run -------------------------------------------------------------------------------------------------------
     Mutant("M29-dry-run-falls-through", "--dry-run goes on to release", "test_a_dry_run_leaves_the_tree_clean_enough",
@@ -207,8 +207,12 @@ for _m in MUTANTS:
 def _inner(killers: str, env_extra: dict | None = None) -> subprocess.CompletedProcess:
     env = {k: v for k, v in os.environ.items() if k not in ("RH_RELEASE_SH", "RH_BUMP_PY")}
     env.update(env_extra or {})
+    # A killer may live in the harness file or in the function-extraction file
+    # (test_release_hygiene.py). Passing one file to pytest -k exits 5 (NO
+    # TESTS COLLECTED) when the killer lives in the other file. Pass both.
+    files = [H, "tests/test_release_hygiene.py"]
     return subprocess.run(
-        [sys.executable, "-m", "pytest", H, "-q", "-p", "no:cacheprovider", "-x", "-k", killers],
+        [sys.executable, "-m", "pytest", *files, "-q", "-p", "no:cacheprovider", "-x", "-k", killers],
         cwd=PROJECT_ROOT, capture_output=True, text=True, env=env, timeout=900,
     )
 
@@ -263,10 +267,19 @@ def test_every_mutant_is_killed(m: Mutant, tmp_path):
 def test_no_mutant_id_is_duplicated_and_every_killer_names_a_real_test():
     ids = [m.id for m in MUTANTS]
     assert len(ids) == len(set(ids))
-    names = set(re.findall(r"def (test_\w+)", (PROJECT_ROOT / H).read_text(encoding="utf-8")))
+    # A killer may live in the harness file OR in the function-extraction file
+    # (test_release_hygiene.py), because M28's defect is a within-function
+    # ordering that extraction tests: checker fails -> no commit -> exit 8.
+    sources = [
+        PROJECT_ROOT / "tests" / "test_release_harness.py",
+        PROJECT_ROOT / "tests" / "test_release_hygiene.py",
+    ]
+    names = set()
+    for src in sources:
+        names.update(re.findall(r"def (test_\w+)", src.read_text(encoding="utf-8")))
     for m in MUTANTS:
         for token in re.findall(r"test_\w+", m.killers):
-            assert any(n.startswith(token) for n in names), f"{m.id}: killer {token} matches no test in {H}"
+            assert any(n.startswith(token) for n in names), f"{m.id}: killer {token} matches no test in tests/"
 
 
 # ---------------------------------------------------------------------------

@@ -28,6 +28,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.test_export_aggregated import env
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TEXT = (PROJECT_ROOT / "scripts" / "release.sh").read_text(encoding="utf-8")
 BASH = shutil.which("bash")
@@ -47,6 +49,19 @@ ISOLATED = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null"}
 def _function(name: str) -> str:
     match = re.search(rf"^{name}\(\) \{{\n.*?^\}}\n", TEXT, re.S | re.M)
     assert match, f"{name}() not found in scripts/release.sh; the harness cannot test it"
+    return match.group(0)
+
+def _function_from_runtime(name: str) -> str:
+    """Extract `name()` from RH_RELEASE_SH (set by the mutation sweep) or from TEXT.
+
+    A mutation sweep points RH_RELEASE_SH at a mutated copy of release.sh. The
+    extraction tests must read *that* copy, or the mutant is never exercised
+    (M28 in v1.9.4 survived for exactly this reason: _function read TEXT).
+    """
+    source = os.environ.get("RH_RELEASE_SH")
+    text_src = Path(source).read_text(encoding="utf-8") if source else TEXT
+    match = re.search(rf"^{name}\(\) \{{\n.*?^\}}\n", text_src, re.S | re.M)
+    assert match, f"{name}() not found in {source or 'scripts/release.sh'}"
     return match.group(0)
 
 
@@ -216,3 +231,88 @@ class TestPlanMatchesGate:
 
     def test_the_plan_lists_every_gate_step_in_gate_order(self):
         assert _plan_commands() == _gate_commands()
+
+# tests/test_release_hygiene.py — append
+
+class TestVerificationDocFunction:
+    """v1.9.4: the check-then-commit ordering in write_verification_doc, tested by extraction.
+
+    The harness test for a *prose* TODO would need a test hook in production code
+    (to write a TODO into prose, which the release script never does); extraction
+    tests the function's own ordering — if check_verification_doc.py exits non-zero,
+    the doc is not committed and the exit is 8.
+    """
+
+    def _run(self, tmp_path: Path, *, checker_fails: bool) -> subprocess.CompletedProcess:
+        work = tmp_path / "work"
+        work.mkdir()
+        (work / "scripts").mkdir()
+        (work / "tools").mkdir()
+        (work / "docs").mkdir()
+        (work / "VERSION").write_text("1.9.4\n", encoding="utf-8")
+        # A stub `git` on PATH: the tested unit is the check-then-commit ordering,
+        # not git's behavior. The fixture has no repo, so a bare `git rev-parse`
+        # (which write_verification_doc runs before the checker) would exit 128 and
+        # abort the harness under `set -e`. The stub exits 0 for every subcommand;
+        # the failing-checker path never reaches `git add`/`commit`/`push`
+        # (fail_code exits first), so a no-op stub is sufficient for this test.
+        (work / "bin").mkdir()
+        git = work / "bin" / "git"
+        git.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        git.chmod(0o755)
+
+        if checker_fails:
+            (work / "checker-fails").write_text("x")
+
+        (work / "tools" / "check_verification_doc.py").write_text(
+            "#!/usr/bin/env python3\n"
+            "import sys\n"
+            "from pathlib import Path\n"
+            "if Path('checker-fails').exists():\n"
+            "    print('DIRTY: simulated prose TODO')\n"
+            "    sys.exit(1)\n"
+            "sys.exit(0)\n",
+            encoding="utf-8",
+        )
+        # Do NOT pre-write the doc. write_verification_doc must create it, so the
+        # checker runs on the freshly written file. If the doc pre-exists, the
+        # function early-returns ("already exists; leaving it alone") and the
+        # checker is never called, so the check-then-commit ordering would not
+        # be tested. The doc is left behind by the heredoc write on the failure
+        # path; the function exits 8 (fail_code) before git is touched.
+
+        # The function, extracted from scripts/release.sh by _function(name).
+        func = _function_from_runtime("write_verification_doc")
+
+        harness = work / "harness.sh"
+        harness.write_text(
+            "set -euo pipefail\n"
+            "EXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\n"
+            "DRY_RUN=false\nRECREATE_TAG=false\nTAG=v1.9.4\nTODAY=2026-10-28\n"
+            "GATE_PASSED=0\nGATE_STEPS=0\nGATE_LOG_FILE=''\nCI_RUN_LINES=''\n"
+            "info()  { printf '  %s\\n' \"$*\"; }\n"
+            "step()  { printf '\\n== %s ==\\n' \"$*\"; }\n"
+            "fail_code() { local code=\"$1\"; shift; printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$code\"; }\n"
+            "fail()  { fail_code \"$EXIT_PRECOND\" \"$@\"; }\n"
+            "mutated_hint() { echo 'restore it with: git checkout -- .'; }\n"
+            + func
+            + "\nwrite_verification_doc\necho REACHED_END\n"
+        )
+
+        env = {
+            **os.environ,
+            "GIT_CONFIG_GLOBAL": "/dev/null",
+            "GIT_CONFIG_SYSTEM": "/dev/null",
+            "PATH": f"{work / 'bin'}{os.pathsep}{os.environ['PATH']}",
+        }
+        return subprocess.run([BASH, str(harness)], cwd=work, capture_output=True, text=True, env=env, timeout=60)
+
+    def test_a_checker_failure_is_exit_8_and_the_doc_is_not_committed(self, tmp_path):
+        r = self._run(tmp_path, checker_fails=True)
+        assert r.returncode == 8, r.stdout + r.stderr
+        assert "not committed" in r.stderr
+        assert "REACHED_END" not in r.stdout
+        assert not (tmp_path / "work" / "docs" / "v1.9.4-verification.md").exists() or \
+               "TODO" not in (tmp_path / "work" / "docs" / "v1.9.4-verification.md").read_text(), \
+               "the doc must not be committed when the checker fails"
+

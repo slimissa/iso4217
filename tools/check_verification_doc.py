@@ -51,6 +51,39 @@ def _version_key(path: Path) -> tuple[int, ...]:
     return tuple(int(x) for x in m.group(1).split("."))
 
 
+# ---------------------------------------------------------------------------
+# Fenced code and inline code are *evidence*, not prose. A TODO inside them is a
+# quoted tool output or a claim's wording, not a placeholder. The v1.9.4 doc's
+# evidence section quotes `scripts/release.sh does not contain 'TODO'`, which the
+# pre-fix scanner reported as a marker. Mask it before scanning, and map a match
+# back to its original line number.
+# ---------------------------------------------------------------------------
+
+_FENCE_RE = re.compile(r"^(```|~~~)", re.MULTILINE)
+
+
+def _mask_code(text: str) -> str:
+    """Return `text` with fenced code blocks and inline `code` spans blanked out,
+    preserving line structure so line numbers in the result match the original."""
+    lines = text.splitlines(keepends=True)
+    out = []
+    in_fence = False
+    for line in lines:
+        if _FENCE_RE.match(line):
+            in_fence = not in_fence
+            out.append("\n" if line.endswith("\n") else "")
+            continue
+        if in_fence:
+            out.append("\n" if line.endswith("\n") else "")
+            continue
+        # Inline code spans: `...` on a single line. Two or more backticks are
+        # handled by the same blanking (we lose the backtick count, which is fine
+        # for a marker scan).
+        masked = re.sub(r"`[^`\n]+`", lambda m: " " * len(m.group(0)), line)
+        out.append(masked)
+    return "".join(out)
+
+
 def check_doc(path: Path) -> list[str]:
     if not path.is_file():
         return [f"{path}: not a file"]
@@ -65,9 +98,11 @@ def check_doc(path: Path) -> list[str]:
             f"at least {MIN_LINES}. This is probably the release script's stub."
         )
 
+    # Scan prose only: fenced code and inline code are evidence.
+    prose = _mask_code(text)
     for pattern, label in PLACEHOLDER_PATTERNS:
-        for m in pattern.finditer(text):
-            line_no = text[: m.start()].count("\n") + 1
+        for m in pattern.finditer(prose):
+            line_no = prose[: m.start()].count("\n") + 1
             snippet = lines[line_no - 1].strip()[:80]
             errors.append(f"{path}:{line_no}: {label}: {snippet}")
 
