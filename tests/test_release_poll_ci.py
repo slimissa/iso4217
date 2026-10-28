@@ -53,7 +53,9 @@ BASH = shutil.which("bash")
 HELPERS = (
     "info()  { printf '  %s\\n' \"$*\"; }\n"
     "step()  { printf '\\n== %s ==\\n' \"$*\"; }\n"
-    "fail()  { printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$EXIT_PRECOND\"; }\n"
+    "fail_code() { local code=\"$1\"; shift; printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$code\"; }\n"
+    "fail()  { fail_code \"$EXIT_PRECOND\" \"$@\"; }\n"
+    "mutated_hint() { echo 'restore it with: git checkout -- .'; }\n"
 )
 
 GH_STUB = """#!/bin/sh
@@ -114,7 +116,7 @@ def _run(tmp: Path, function: str, modes: dict, *, timeout=2, grace=1, interval=
     harness = tmp / "harness.sh"
     harness.write_text(
         "set -euo pipefail\n"
-        "EXIT_PRECOND=1\n"
+        "EXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\n"
         "POLLED_WORKFLOWS=(a.yml b.yml)\n"
         f"POLL_TIMEOUT={timeout}\nPOLL_GRACE={grace}\nPOLL_INTERVAL={interval}\n"
         + HELPERS
@@ -160,7 +162,7 @@ class TestPollCiFailsClosed:
         code, _, err, elapsed = _run(
             tmp_path, "poll_ci", {"a.yml": "success", "b.yml": "empty"}, grace=1, timeout=30
         )
-        assert code == 1
+        assert code == 6
         assert "b.yml" in err and "did not trigger it" in err
         assert elapsed < 10
 
@@ -174,7 +176,7 @@ class TestPollCiFailsClosed:
         code, _, err, elapsed = _run(
             tmp_path, "poll_ci", {"a.yml": "error", "b.yml": "success"}, grace=30, timeout=60
         )
-        assert code == 1
+        assert code == 6
         assert "a.yml" in err and "Bad credentials" in err
         assert elapsed < 3
 
@@ -182,30 +184,30 @@ class TestPollCiFailsClosed:
         code, _, err, elapsed = _run(
             tmp_path, "poll_ci", {"a.yml": "failure", "b.yml": "inprogress"}, grace=30, timeout=60
         )
-        assert code == 1
+        assert code == 6
         assert "a.yml" in err and "104" in err and "failure" in err
         assert elapsed < 3
 
     def test_a_cancelled_run_is_not_green(self, tmp_path):
         code, _, err, _ = _run(tmp_path, "poll_ci", {"a.yml": "cancelled", "b.yml": "success"})
-        assert code == 1 and "cancelled" in err
+        assert code == 6 and "cancelled" in err
 
     def test_any_failed_run_for_a_workflow_fails_even_if_a_newer_one_passed(self, tmp_path):
         code, _, err, _ = _run(tmp_path, "poll_ci", {"a.yml": "oldfail_newok", "b.yml": "success"})
-        assert code == 1 and "107" in err
+        assert code == 6 and "107" in err
 
     def test_timeout_fails_and_names_the_workflow_still_running(self, tmp_path):
         code, _, err, elapsed = _run(
             tmp_path, "poll_ci", {"a.yml": "inprogress", "b.yml": "success"}, timeout=2, grace=30
         )
-        assert code == 1
+        assert code == 6
         assert "timed out after 2s" in err and "a.yml" in err
         # $SECONDS counts whole seconds, so the wait may end up to 1 s early.
         assert 1.0 <= elapsed < 8
 
     def test_a_queued_run_is_not_green(self, tmp_path):
         code, _, err, _ = _run(tmp_path, "poll_ci", {"a.yml": "queued", "b.yml": "success"}, timeout=1)
-        assert code == 1 and "timed out" in err
+        assert code == 6 and "timed out" in err
 
 
 # ---------------------------------------------------------------------------
@@ -215,12 +217,12 @@ class TestPollCiFailsClosed:
 class TestCheckGhReady:
     def test_gh_not_installed_fails(self, tmp_path):
         code, _, err, _ = _run(tmp_path, "check_gh_ready", {}, with_gh=False)
-        assert code == 1
+        assert code == 3
         assert "gh CLI not found" in err
 
     def test_gh_that_cannot_list_runs_fails(self, tmp_path):
         code, _, err, _ = _run(tmp_path, "check_gh_ready", {"_probe": "error"})
-        assert code == 1
+        assert code == 3
         assert "gh cannot list workflow runs" in err
 
     def test_working_gh_passes(self, tmp_path):

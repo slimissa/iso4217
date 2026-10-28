@@ -7,15 +7,22 @@
 #   bash scripts/release.sh <version> --dry-run    # preview, no mutation
 #   bash scripts/release.sh <version> --force      # re-run on existing tag
 #
-# Exit codes:
+# Exit codes (each one is a different recovery; ADR 0014, D6):
 #   0  success (or successful dry-run)
-#   1  precondition failed (dirty tree, wrong branch, tag exists, gate failed)
+#   1  a precondition found a problem (nothing was mutated)
 #   2  usage error
+#   3  could not run: gh missing or unauthenticated, origin unreadable (nothing was mutated)
+#   4  a generator, a version bump or the gate failed (tree mutated, nothing committed)
+#   5  commit or push failed
+#   6  CI not green, no run for the pushed commit, or the poll timed out (commit is on origin, nothing tagged)
+#   7  tag creation, verification or push failed
+#   8  the verification doc failed (released and tagged; only the doc is missing)
 #
 # Preconditions (all must hold, checked before anything is mutated):
 #   - working tree is clean
 #   - current branch is main
-#   - tag v<version> does not already exist (unless --force)
+#   - tag v<version> exists neither on origin nor locally (--force recreates a tag that exists only locally;
+#     a tag on origin is never moved)
 #   - CHANGELOG.md contains a '## [<version>]' section
 #   - tools/check_version_consistency.py currently passes
 #
@@ -50,6 +57,30 @@ RUST_CARGO="wrappers/rust/Cargo.toml"
 EXIT_OK=0
 EXIT_PRECOND=1
 EXIT_USAGE=2
+EXIT_COULD_NOT=3
+EXIT_GATE=4
+EXIT_PUSH=5
+EXIT_CI=6
+EXIT_TAG=7
+EXIT_DOC=8
+
+# Temporary state, removed by cleanup() on every exit, normal or not.
+DRY_COPY=""
+GATE_LOG_FILE=""
+GATE_STEPS=0
+GATE_PASSED=0
+CI_RUN_LINES=""
+RECREATE_TAG=false
+
+cleanup() {
+    if [ -n "$DRY_COPY" ]; then
+        rm -rf "$DRY_COPY"
+    fi
+    if [ -n "$GATE_LOG_FILE" ]; then
+        rm -f "$GATE_LOG_FILE"
+    fi
+}
+trap cleanup EXIT
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -57,7 +88,17 @@ EXIT_USAGE=2
 
 info()  { printf '  %s\n' "$*"; }
 step()  { printf '\n== %s ==\n' "$*"; }
-fail()  { printf 'FAIL: %s\n' "$*" >&2; exit "$EXIT_PRECOND"; }
+fail_code() { local code="$1"; shift; printf 'FAIL: %s\n' "$*" >&2; exit "$code"; }
+fail()  { fail_code "$EXIT_PRECOND" "$@"; }
+
+# What the operator should do after a failure that happened once the tree was being changed.
+mutated_hint() {
+    if $DRY_RUN; then
+        echo "this is a dry run: your working tree was not touched"
+    else
+        echo "the working tree may be modified and nothing was committed; restore it with: git checkout -- ."
+    fi
+}
 
 usage() {
     cat <<'EOF'
@@ -67,8 +108,12 @@ Arguments:
   <version>    Target version, X.Y.Z format.
 
 Flags:
-  --dry-run    Print every site and gate without mutating anything.
-  --force      Allow releasing a version that is already tagged.
+  --dry-run    Run the preconditions, then bump, regenerate and run the gate
+               on a throwaway copy of the tree. Nothing is committed, pushed
+               or tagged, and your working tree is not touched.
+  --force      Recreate a tag that exists only locally (a release whose tag
+               push failed). A tag on origin is never moved; --force does not
+               change that.
   --poll-timeout N
                Seconds to wait for CI after the push (positive integer,
                default 300). A timeout fails the release; it never tags.
@@ -78,8 +123,14 @@ workflow runs. The release refuses to start without it.
 
 Exit codes:
   0  success (or successful dry-run)
-  1  precondition failed
+  1  precondition failed (nothing mutated)
   2  usage error
+  3  could not run: gh missing or unauthenticated, origin unreadable
+  4  generator, version bump or gate failed (tree modified, nothing committed)
+  5  commit or push failed
+  6  CI not green, no run, or poll timed out (commit is on origin; nothing tagged)
+  7  tag creation, verification or push failed
+  8  verification doc failed (released and tagged; only the doc is missing)
 EOF
 }
 
@@ -146,13 +197,13 @@ CURRENT_VERSION="$(cat "$VERSION_FILE" 2>/dev/null || echo "unknown")"
 
 check_head_at_origin() {
     if ! git fetch origin main --quiet 2>/dev/null; then
-        fail "cannot fetch origin/main; check network and remote access"
+        fail_code "$EXIT_COULD_NOT" "cannot fetch origin/main; check network and remote access"
     fi
     local local_head remote_head
     local_head="$(git rev-parse HEAD)"
     remote_head="$(git rev-parse origin/main 2>/dev/null || echo "")"
     if [ -z "$remote_head" ]; then
-        fail "cannot resolve origin/main after fetch"
+        fail_code "$EXIT_COULD_NOT" "cannot resolve origin/main after fetch"
     fi
     if [ "$local_head" != "$remote_head" ]; then
         fail "HEAD is not at origin/main (local: ${local_head:0:8}, origin/main: ${remote_head:0:8})"
@@ -196,9 +247,8 @@ POLL_GRACE=60
 POLL_INTERVAL=10
 
 # Ported from ISO 3166 v1.6.3, commit db74f96.
-# Shell-side only. Inline Python in bump_* functions is checked at
-# runtime by NameError; extending this check to cover it is deferred
-# until 4217 hits the failure mode.
+# Shell-side only. The version bumps live in scripts/bump_version.py (ADR 0014,
+# D8), which is Python and fails loudly on its own.
 check_no_orphan_variables() {
     local orphans
     orphans="$(grep -nE '\$\{[A-Z_]+\}|\$[A-Z_]{3,}' scripts/release.sh \
@@ -258,20 +308,33 @@ check_on_main() {
 # together, and it runs before anything is changed (also under --dry-run).
 check_gh_ready() {
     if ! command -v gh >/dev/null 2>&1; then
-        fail "gh CLI not found; release.sh needs it to verify CI before tagging (https://cli.github.com)"
+        fail_code "$EXIT_COULD_NOT" "gh CLI not found; release.sh needs it to verify CI before tagging (https://cli.github.com)"
     fi
     if ! gh run list --limit 1 --json databaseId >/dev/null 2>&1; then
-        fail "gh cannot list workflow runs; run 'gh auth login' and check access to this repository"
+        fail_code "$EXIT_COULD_NOT" "gh cannot list workflow runs; run 'gh auth login' and check access to this repository"
     fi
 }
 
+# Tag state is read from both places, origin first (ADR 0014, D3). A tag on origin is
+# published and is never moved. A tag that exists only locally was never published
+# (a release whose tag push failed); --force recreates it.
 check_tag_free() {
+    local remote_tags
+    if ! remote_tags="$(git ls-remote --tags origin "refs/tags/$TAG" 2>&1)"; then
+        fail_code "$EXIT_COULD_NOT" "cannot read tags on origin (git ls-remote failed): ${remote_tags:0:200}"
+    fi
+    if [ -n "$remote_tags" ]; then
+        fail "tag $TAG already exists on origin; a published tag is never moved, and --force does not change that"
+    fi
     if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
         if $FORCE; then
-            info "tag $TAG already exists (--force given, continuing)"
+            RECREATE_TAG=true
+            info "tag $TAG exists locally only (--force given): it will be recreated from the CHANGELOG"
         else
-            fail "tag $TAG already exists; use --force to override"
+            fail "tag $TAG already exists locally (not on origin); use --force to recreate it"
         fi
+    elif $FORCE; then
+        info "--force given, but tag $TAG does not exist anywhere: nothing to do"
     fi
 }
 
@@ -289,113 +352,42 @@ check_version_consistency() {
 }
 
 # ---------------------------------------------------------------------------
-# Version bump — each site edited in place, format preserved
+# Version bump: one call to scripts/bump_version.py per site (ADR 0014, D8)
 # ---------------------------------------------------------------------------
 
-bump_version_file() {
-    printf '%s\n' "$VERSION" > "$VERSION_FILE"
+BUMP_SCRIPT="scripts/bump_version.py"
+
+# bump_site <site> <from> <to>. The script is idempotent and fails loudly, so a
+# site that cannot be bumped stops the release here instead of staying old.
+bump_site() {
+    local site="$1" from="$2" to="$3"
+    if ! python3 "$BUMP_SCRIPT" --from "$from" --to "$to" "$site"; then
+        fail_code "$EXIT_GATE" "bump of site '$site' failed (see above); $(mutated_hint)"
+    fi
 }
 
-bump_changelog() {
-    python3 - "$VERSION" "$TODAY" <<'PYEOF'
-import re, sys
-from pathlib import Path
-version, today = sys.argv[1], sys.argv[2]
-p = Path("CHANGELOG.md")
-text = p.read_text(encoding="utf-8")
-pattern = re.compile(
-    r"^(## \[" + re.escape(version) + r"\]) — Unreleased$",
-    re.MULTILINE,
-)
-new_text, n = pattern.subn(r"\1 — " + today, text)
-if n > 0:
-    p.write_text(new_text, encoding="utf-8")
-PYEOF
-}
-
-bump_iso_json() {
-    python3 - "$VERSION" "$TODAY" <<'PYEOF'
-import re, sys
-from pathlib import Path
-version, today = sys.argv[1], sys.argv[2]
-p = Path("iso4217.json")
-text = p.read_text(encoding="utf-8")
-# meta.version — first occurrence
-text = re.sub(
-    r'("version":\s*)"[0-9]+\.[0-9]+\.[0-9]+"',
-    r'\1"' + version + '"',
-    text,
-    count=1,
-)
-# meta.updated — first occurrence
-text = re.sub(
-    r'("updated":\s*)"[0-9]{4}-[0-9]{2}-[0-9]{2}"',
-    r'\1"' + today + '"',
-    text,
-    count=1,
-)
-p.write_text(text, encoding="utf-8")
-PYEOF
-}
-
-bump_readme_badges() {
-    # Only the registry badge moves on a registry release; the schema
-    # badge tracks the schema axis, which is independent.
-    sed -i "s|badge/registry-[0-9]\+\.[0-9]\+\.[0-9]\+-orange|badge/registry-$VERSION-orange|" "$README"
-}
-
-bump_python_setup() {
-    sed -i "s/^VERSION = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/VERSION = \"$VERSION\"/" "$PY_SETUP"
-}
-
-bump_js_package() {
-    python3 - "$VERSION" <<'PYEOF'
-import json, sys
-from pathlib import Path
-version = sys.argv[1]
-p = Path("wrappers/javascript/package.json")
-data = json.loads(p.read_text(encoding="utf-8"))
-data["version"] = version
-p.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-PYEOF
-}
-
-bump_rust_cargo() {
-    python3 - "$VERSION" <<'PYEOF'
-import sys
-from pathlib import Path
-version = sys.argv[1]
-p = Path("wrappers/rust/Cargo.toml")
-lines = p.read_text(encoding="utf-8").splitlines()
-out = []
-in_pkg = False
-for line in lines:
-    s = line.strip()
-    if s.startswith("[") and s.endswith("]"):
-        in_pkg = (s == "[package]")
-    if in_pkg and s.startswith("version"):
-        line = 'version = "' + version + '"'
-    out.append(line)
-p.write_text("\n".join(out) + "\n", encoding="utf-8")
-PYEOF
-}
-
+# The clock is read once, at the top of this script (TODAY, UTC), and passed in.
 bump_all_sites() {
     step "Bumping version sites to $VERSION"
-    info "VERSION"
-    bump_version_file
-    info "CHANGELOG.md"
-    bump_changelog
-    info "iso4217.json (meta.version, meta.updated)"
-    bump_iso_json
-    info "README.md (registry badge)"
-    bump_readme_badges
-    info "wrappers/python/setup.py"
-    bump_python_setup
-    info "wrappers/javascript/package.json"
-    bump_js_package
-    info "wrappers/rust/Cargo.toml"
-    bump_rust_cargo
+    local heading_old="## [$VERSION] — Unreleased"
+    local heading_new="## [$VERSION] — $TODAY"
+    local dated
+    if [[ "$CURRENT_VERSION" == "$VERSION" ]]; then
+        # A re-run after the release commit exists: the heading already carries its date.
+        dated="$(grep -E "^## \[$VERSION\] — [0-9]{4}-[0-9]{2}-[0-9]{2}$" "$CHANGELOG" | head -1 || true)"
+        if [ -n "$dated" ]; then
+            heading_old="$dated"
+            heading_new="$dated"
+        fi
+    fi
+    bump_site version          "$CURRENT_VERSION" "$VERSION"
+    bump_site changelog        "$heading_old" "$heading_new"
+    bump_site iso_json_version "$CURRENT_VERSION" "$VERSION"
+    bump_site iso_json_updated DATE "$TODAY"
+    bump_site readme_badge     "$CURRENT_VERSION" "$VERSION"
+    bump_site setup_py         "$CURRENT_VERSION" "$VERSION"
+    bump_site package_json     "$CURRENT_VERSION" "$VERSION"
+    bump_site cargo_toml       "$CURRENT_VERSION" "$VERSION"
 }
 
 # ---------------------------------------------------------------------------
@@ -404,22 +396,22 @@ bump_all_sites() {
 
 regenerate_artifacts() {
     step "Regenerating artifacts"
-    python3 tools/export_sql.py       >/dev/null || fail "export_sql.py exited non-zero"
+    python3 tools/export_sql.py       >/dev/null || fail_code "$EXIT_GATE" "export_sql.py exited non-zero; $(mutated_hint)"
     info "✓ SQL exports (4 files)"
-    python3 tools/export_csv.py       >/dev/null || fail "export_csv.py exited non-zero"
+    python3 tools/export_csv.py       >/dev/null || fail_code "$EXIT_GATE" "export_csv.py exited non-zero; $(mutated_hint)"
     info "✓ CSV/TSV exports (4 files)"
-    python3 tools/export_parquet.py   >/dev/null || fail "export_parquet.py exited non-zero"
+    python3 tools/export_parquet.py   >/dev/null || fail_code "$EXIT_GATE" "export_parquet.py exited non-zero; $(mutated_hint)"
     info "✓ Parquet export (1 file)"
-    python3 tools/export_countries_parquet.py >/dev/null || fail "export_countries_parquet.py exited non-zero"
+    python3 tools/export_countries_parquet.py >/dev/null || fail_code "$EXIT_GATE" "export_countries_parquet.py exited non-zero; $(mutated_hint)"
     info "✓ Countries Parquet (1 file)"
-    python3 tools/export_aggregated.py        >/dev/null || fail "export_aggregated.py exited non-zero"
+    python3 tools/export_aggregated.py        >/dev/null || fail_code "$EXIT_GATE" "export_aggregated.py exited non-zero; $(mutated_hint)"
     info "✓ Aggregated exports (3 files)"
-    python3 tools/sync_wrappers.py    >/dev/null || fail "sync_wrappers.py exited non-zero"
+    python3 tools/sync_wrappers.py    >/dev/null || fail_code "$EXIT_GATE" "sync_wrappers.py exited non-zero; $(mutated_hint)"
     info "✓ Wrapper copies (3 files)"
 }
 
 # ---------------------------------------------------------------------------
-# Gate — every check must pass; the script stops at the first failure
+# Gate — every check runs and every failure is reported; the script stops after the last one
 # ---------------------------------------------------------------------------
 
 GATE_FAILED=0
@@ -427,19 +419,34 @@ GATE_FAILED=0
 run_gate_step() {
     local name="$1"
     shift
-    local output
-    if output=$("$@" 2>&1); then
+    local output rc=0 mark
+    output=$("$@" 2>&1) || rc=$?
+    GATE_STEPS=$((GATE_STEPS + 1))
+    if [ "$rc" -eq 0 ]; then
+        GATE_PASSED=$((GATE_PASSED + 1))
+        mark="✓"
         info "✓ $name"
     else
+        mark="✗"
         info "✗ $name"
         printf '%s\n' "$output" | tail -25
         GATE_FAILED=1
+    fi
+    # The record the verification doc is built from (D4): what each step printed, last 20 lines.
+    if [ -n "$GATE_LOG_FILE" ]; then
+        {
+            printf '### %s %s\n\n```\n' "$mark" "$name"
+            printf '%s\n' "$output" | tail -20
+            printf '```\n\n'
+        } >> "$GATE_LOG_FILE"
     fi
 }
 
 run_gate() {
     step "Running gate"
     GATE_FAILED=0
+    GATE_STEPS=0
+    GATE_PASSED=0
 
     run_gate_step "validate.py"                     python3 tools/validate.py
     run_gate_step "check_version_consistency.py"    python3 tools/check_version_consistency.py
@@ -473,7 +480,7 @@ run_gate() {
     run_gate_step "pytest wrappers/python/tests/"   python3 -m pytest wrappers/python/tests/ -q --fail-on-skip
 
     if [[ "$GATE_FAILED" -ne 0 ]]; then
-        fail "gate failed; see output above"
+        fail_code "$EXIT_GATE" "gate failed; see output above; $(mutated_hint)"
     fi
 }
 
@@ -491,17 +498,19 @@ commit_and_push() {
     local untracked staged_other
     untracked="$(git ls-files --others --exclude-standard)"
     if [ -n "$untracked" ]; then
-        fail "untracked file(s) would be added to the release commit:
-$untracked"
+        fail_code "$EXIT_GATE" "untracked file(s) would be added to the release commit:
+$untracked
+nothing was committed; $(mutated_hint), and remove the file(s) listed above"
     fi
 
-    git add -A
+    git add -A || fail_code "$EXIT_PUSH" "git add failed"
 
     staged_other="$(git diff --cached --name-status | awk '$1 != "M"')"
     if [ -n "$staged_other" ]; then
         git reset -q
-        fail "the release commit would add, delete, or rename files (only modifications are expected); unstaged:
-$staged_other"
+        fail_code "$EXIT_GATE" "the release commit would add, delete, or rename files (only modifications are expected); unstaged:
+$staged_other
+nothing was committed; $(mutated_hint)"
     fi
 
     # --no-pager: an interactive shell would open a pager and block here until 'q'.
@@ -510,11 +519,11 @@ $staged_other"
     if git diff --cached --quiet; then
         info "no changes to commit"
     else
-        git commit -m "Release $TAG"
+        git commit -m "Release $TAG" || fail_code "$EXIT_PUSH" "git commit failed; nothing was pushed"
         info "committed: Release $TAG"
     fi
 
-    git push origin main
+    git push origin main || fail_code "$EXIT_PUSH" "git push origin main failed; the release commit exists locally only and nothing was tagged"
     info "pushed to origin/main"
 }
 
@@ -540,6 +549,7 @@ poll_ci() {
     while true; do
         missing=""
         pending=""
+        CI_RUN_LINES=""
         for wf in "${POLLED_WORKFLOWS[@]}"; do
             if ! out="$(gh run list --workflow "$wf" --event push --limit 20 \
                 --json databaseId,headSha,status,conclusion \
@@ -547,7 +557,7 @@ poll_ci() {
                 2>"$errf")"; then
                 err="$(head -c 300 "$errf")"
                 rm -f "$errf"
-                fail "gh run list failed for $wf: ${err:-no error text}"
+                fail_code "$EXIT_CI" "gh run list failed for $wf: ${err:-no error text}"
             fi
             if [ -z "$out" ]; then
                 missing="$missing $wf"
@@ -560,8 +570,9 @@ poll_ci() {
                 fi
                 if [ "$conclusion" != "success" ]; then
                     rm -f "$errf"
-                    fail "workflow $wf (run $id) concluded '$conclusion' on ${sha:0:8}"
+                    fail_code "$EXIT_CI" "workflow $wf (run $id) concluded '$conclusion' on ${sha:0:8}"
                 fi
+                CI_RUN_LINES="${CI_RUN_LINES}${wf}|${id}|${conclusion}"$'\n'
             done <<< "$out"
         done
 
@@ -574,11 +585,11 @@ poll_ci() {
         elapsed=$((SECONDS - start))
         if [ -n "$missing" ] && [ "$elapsed" -ge "$POLL_GRACE" ]; then
             rm -f "$errf"
-            fail "no run for${missing} on ${sha:0:8} after ${POLL_GRACE}s: the push did not trigger it"
+            fail_code "$EXIT_CI" "no run for${missing} on ${sha:0:8} after ${POLL_GRACE}s: the push did not trigger it"
         fi
         if [ "$elapsed" -ge "$POLL_TIMEOUT" ]; then
             rm -f "$errf"
-            fail "CI poll timed out after ${POLL_TIMEOUT}s on ${sha:0:8}; still waiting on:${missing}${pending}"
+            fail_code "$EXIT_CI" "CI poll timed out after ${POLL_TIMEOUT}s on ${sha:0:8}; still waiting on:${missing}${pending}"
         fi
         sleep "$POLL_INTERVAL"
     done
@@ -612,9 +623,14 @@ tag_release() {
     printf '%s\n' "$message" > "$msgfile"
     if ! [ -s "$msgfile" ]; then
         rm -f "$msgfile"
-        fail "tag message file is empty; no tag created, nothing pushed"
+        fail_code "$EXIT_TAG" "tag message file is empty; no tag created, nothing pushed"
     fi
-    git tag -a "$TAG" --cleanup=verbatim -F "$msgfile"
+    # A tag that exists only locally was never published; --force recreates it (D3).
+    if $RECREATE_TAG && git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+        git tag -d "$TAG" >/dev/null || fail_code "$EXIT_TAG" "could not delete the local-only tag $TAG; delete it by hand and re-run with --force"
+        info "deleted the local-only tag $TAG (never published); recreating it"
+    fi
+    git tag -a "$TAG" --cleanup=verbatim -F "$msgfile" || fail_code "$EXIT_TAG" "git tag $TAG failed; nothing was pushed"
 
     # A12: tag-message verification. Comparison is content-equivalent after
     # trailing-newline normalization — $(...) strips trailing newlines on both
@@ -629,12 +645,12 @@ tag_release() {
     rm -f "$msgfile"
     if [[ "$verified" -ne 1 ]]; then
         if ! git tag -d "$TAG" >/dev/null; then
-            fail "git recorded a different tag message than the CHANGELOG text (or it could not be read back), and 'git tag -d $TAG' failed: local tag $TAG STILL EXISTS and nothing was pushed; run 'git tag -d $TAG' by hand before re-running"
+            fail_code "$EXIT_TAG" "git recorded a different tag message than the CHANGELOG text (or it could not be read back), and 'git tag -d $TAG' failed: local tag $TAG STILL EXISTS and nothing was pushed; run 'git tag -d $TAG' by hand before re-running"
         fi
-        fail "git recorded a different tag message than the CHANGELOG text (or it could not be read back); local tag $TAG deleted, nothing pushed"
+        fail_code "$EXIT_TAG" "git recorded a different tag message than the CHANGELOG text (or it could not be read back); local tag $TAG deleted, nothing pushed"
     fi
 
-    git push origin "$TAG"
+    git push origin "$TAG" || fail_code "$EXIT_TAG" "git push origin $TAG failed; the tag exists locally only (fix the cause, then re-run with --force)"
     info "tagged and pushed: $TAG"
 }
 
@@ -642,6 +658,9 @@ tag_release() {
 # Verification doc
 # ---------------------------------------------------------------------------
 
+# The doc is written after the tag because it names the tag commit and the CI runs, neither of
+# which can exist before the commit does (ADR 0014, D4). It is complete: every number in it comes
+# from the run just made. If it would fail tools/check_verification_doc.py it is not committed.
 write_verification_doc() {
     step "Writing verification doc"
 
@@ -652,51 +671,46 @@ write_verification_doc() {
         return
     fi
 
-    cat > "$doc" <<EOF
-# $TAG Post-Release Verification
+    local tag_commit wf id conclusion
+    tag_commit="$(git rev-parse "$TAG^{commit}")"
 
-**Date:** $TODAY
-**Tag:** $TAG
-**Tag commit:** $(git rev-parse HEAD)
+    {
+        printf '# %s Post-Release Verification\n\n' "$TAG"
+        printf '**Date:** %s\n' "$TODAY"
+        printf '**Tag:** %s\n' "$TAG"
+        printf '**Tag commit:** %s\n' "$tag_commit"
+        printf '**Written by:** scripts/release.sh, from the run it just made. It records what was run and what each step printed.\n\n'
+        printf '## Summary\n\n'
+        printf '| Check | Result |\n|-------|--------|\n'
+        printf '| Gate | %s of %s steps passed |\n' "$GATE_PASSED" "$GATE_STEPS"
+        while IFS='|' read -r wf id conclusion; do
+            [ -z "$wf" ] && continue
+            printf '| CI: %s | run %s, %s |\n' "$wf" "$id" "$conclusion"
+        done <<< "$CI_RUN_LINES"
+        printf '\n## CI\n\n'
+        printf 'These runs were read from GitHub for the tag commit before the tag was created.\n\n'
+        printf '| Workflow | Run id | Conclusion |\n|----------|--------|------------|\n'
+        while IFS='|' read -r wf id conclusion; do
+            [ -z "$wf" ] && continue
+            printf '| %s | %s | %s |\n' "$wf" "$id" "$conclusion"
+        done <<< "$CI_RUN_LINES"
+        printf '\n## Gate\n\n'
+        printf 'Every step of the release gate ran on the release tree. The last lines each step printed:\n\n'
+        if [ -n "$GATE_LOG_FILE" ]; then
+            cat "$GATE_LOG_FILE"
+        fi
+        printf '## Known limits\n\n'
+        printf 'This record was generated by the release script. CI on the commit that adds this document runs after the push and is not part of it.\n'
+    } > "$doc"
 
-## Summary
+    if ! python3 tools/check_verification_doc.py >&2; then
+        rm -f "$doc"
+        fail_code "$EXIT_DOC" "the generated $doc failed tools/check_verification_doc.py and was not committed; $TAG is tagged and pushed, only the doc is missing"
+    fi
 
-| # | Check | Result |
-|---|-------|--------|
-| 8.1 | CI | TODO |
-| 8.2 | Version consistency | TODO |
-| 8.3 | Export drift | TODO |
-| 8.4 | Validation | TODO |
-| 8.5 | Mojibake | TODO |
-
-## 8.1 — CI
-
-TODO: paste the CI run URL and result.
-
-## 8.2 — Version consistency
-
-TODO: paste the output of \`python3 tools/check_version_consistency.py\`.
-
-## 8.3 — Export drift
-
-TODO: paste the output of the three \`--check\` commands and \`sync_wrappers.py --check\`.
-
-## 8.4 — Validation
-
-TODO: paste the output of \`python3 tools/validate.py\`.
-
-## 8.5 — Mojibake
-
-TODO: paste the output of \`python3 tools/check_mojibake.py\`.
-
-## Known gaps
-
-TODO
-EOF
-
-    git add "$doc"
-    git commit -m "Add $TAG verification doc"
-    git push origin main
+    git add "$doc" || fail_code "$EXIT_DOC" "git add of $doc failed; $TAG is tagged and pushed"
+    git commit -q -m "Add $TAG verification doc" || fail_code "$EXIT_DOC" "git commit of $doc failed; $TAG is tagged and pushed"
+    git push origin main || fail_code "$EXIT_DOC" "git push of the verification doc failed; $TAG is tagged and pushed; the doc commit exists locally only"
     info "wrote and pushed $doc"
 }
 
@@ -787,10 +801,32 @@ print_plan() {
     echo "    timeout ${POLL_TIMEOUT}s (--poll-timeout); any other outcome fails, nothing is tagged"
     echo "  git tag -a $TAG -m '<first 15 lines of CHANGELOG section>'"
     echo "  git push origin $TAG"
-    echo "  write docs/$TAG-verification.md"
+    echo "  write docs/$TAG-verification.md (complete: tag commit, CI run ids, gate output; checked before it is committed)"
+    echo
+}
+
+# --dry-run: the plan, then bump, regenerate and the gate on a throwaway copy, so "would the gate
+# pass?" has an answer and the operator's tree is never touched (ADR 0014, D5). cleanup() removes
+# the copy on every exit.
+dry_run() {
+    local rc=0
+    print_plan
+    DRY_COPY="$(mktemp -d "${TMPDIR:-/tmp}/release-dryrun.XXXXXX")"
+    step "Dry run on a throwaway copy"
+    info "copying the tree to a temporary directory (removed on exit)"
+    cp -a "$REPO_ROOT/." "$DRY_COPY/" || fail_code "$EXIT_COULD_NOT" "could not copy the tree for the dry run"
+    (
+        cd "$DRY_COPY"
+        bump_all_sites
+        regenerate_artifacts
+        run_gate
+    ) || rc=$?
+    if [ "$rc" -ne 0 ]; then
+        exit "$rc"
+    fi
     echo
     echo "============================================================"
-    echo " DRY RUN — no changes will be made"
+    echo " DRY RUN: the gate passed on a throwaway copy; nothing was changed"
     echo "============================================================"
 }
 
@@ -837,9 +873,11 @@ check_no_orphan_variables
 info "✓ no orphaned variables in release.sh"
 
 if $DRY_RUN; then
-    print_plan
+    dry_run
     exit "$EXIT_OK"
 fi
+
+GATE_LOG_FILE="$(mktemp "${TMPDIR:-/tmp}/gatelog.XXXXXX")"
 
 bump_all_sites
 regenerate_artifacts

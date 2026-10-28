@@ -1807,6 +1807,84 @@
       "absent": "(major_amount * factor).round() as i64"
     }
   ],
+  "1.9.4": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.4"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.4\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.4]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.4"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.4"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.4\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.4\""
+    },
+    {
+      "file": "docs/decisions/release-harness.md"
+    },
+    {
+      "file": "tests/test_release_harness.py"
+    },
+    {
+      "file": "tests/test_release_harness_mutations.py"
+    },
+    {
+      "file": "scripts/bump_version.py"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "EXIT_GATE=4"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "EXIT_DOC=8"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "git ls-remote --tags origin"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "scripts/bump_version.py"
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "TODO"
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "python3 - \"$VERSION\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "sed -i"
+    },
+    {
+      "file": "scripts/release.sh",
+      "absent": "stops at the first failure"
+    },
+    {
+      "file": "tests/test_release_harness_mutations.py",
+      "contains": "M31-ls-remote-check-removed"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",

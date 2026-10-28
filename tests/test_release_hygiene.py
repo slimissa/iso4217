@@ -37,7 +37,9 @@ pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="bash, pty and P
 HELPERS = (
     "info()  { printf '  %s\\n' \"$*\"; }\n"
     "step()  { printf '\\n== %s ==\\n' \"$*\"; }\n"
-    "fail()  { printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$EXIT_PRECOND\"; }\n"
+    "fail_code() { local code=\"$1\"; shift; printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$code\"; }\n"
+    "fail()  { fail_code \"$EXIT_PRECOND\" \"$@\"; }\n"
+    "mutated_hint() { echo 'restore it with: git checkout -- .'; }\n"
 )
 ISOLATED = {"GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null"}
 
@@ -60,7 +62,7 @@ class TestRegenerateStopsOnAFailingGenerator:
     def _run(self, tmp_path: Path, failing: str):
         harness = tmp_path / "harness.sh"
         harness.write_text(
-            "set -euo pipefail\nEXIT_PRECOND=1\n" + HELPERS
+            "set -euo pipefail\nEXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\n" + HELPERS
             + 'python3() { echo "$1" >> calls.txt; if [ "$1" = "tools/' + failing + '.py" ]; then return 1; fi; return 0; }\n'
             + _function("regenerate_artifacts") + "\nregenerate_artifacts\necho REACHED_END\n"
         )
@@ -71,7 +73,7 @@ class TestRegenerateStopsOnAFailingGenerator:
     @pytest.mark.parametrize("failing", GENERATORS)
     def test_a_failing_generator_stops_the_release_and_is_named(self, tmp_path, failing):
         result, calls = self._run(tmp_path, failing)
-        assert result.returncode == 1
+        assert result.returncode == 4
         assert "REACHED_END" not in result.stdout
         assert failing + ".py" in result.stderr
         later = GENERATORS[GENERATORS.index(failing) + 1:]
@@ -89,7 +91,7 @@ class TestOrphanCheck:
         (tmp_path / "scripts" / "release.sh").write_text(script_body, encoding="utf-8")
         harness = tmp_path / "harness.sh"
         harness.write_text(
-            "set -euo pipefail\nEXIT_PRECOND=1\n" + HELPERS + _function("check_no_orphan_variables")
+            "set -euo pipefail\nEXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\n" + HELPERS + _function("check_no_orphan_variables")
             + "\ncheck_no_orphan_variables\n"
         )
         return subprocess.run([BASH, str(harness)], cwd=tmp_path, capture_output=True, text=True, timeout=60)
@@ -182,7 +184,7 @@ class TestPager:
         marker = tmp_path / "pager-ran"
         harness = tmp_path / "harness.sh"
         harness.write_text(
-            "set -euo pipefail\nEXIT_PRECOND=1\nTAG=v9.9.9\n" + HELPERS + _function("commit_and_push")
+            "set -euo pipefail\nEXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\nTAG=v9.9.9\n" + HELPERS + _function("commit_and_push")
             + "\ncommit_and_push\n"
         )
         code, out = _in_pty([BASH, str(harness)], work, self._env(marker))

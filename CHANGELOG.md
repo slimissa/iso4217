@@ -6,6 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.4] — Unreleased
+
+The release script is tested the same way the registry is. The audit (`docs/audits/fifth-pass.md`) found that `scripts/release.sh`,
+the biggest check in the system, had no test that ran it from start to finish or forced most of its failures (P5-07). This
+release writes the script's semantics down first ([ADR 0014](./docs/decisions/release-harness.md), Proposed until the owner
+commits it), then runs the real script against a fake remote and makes every path in it fail on purpose.
+
+**For consumers.** The release script is now tested the same way the registry is. Every precondition, every bump, every error
+path has a test that forces its failure. A release that would have shipped a broken commit now fails before the commit.
+
+### Fixed
+
+- **Six of the seven version bumps could do nothing and let the release finish (P5-07).** With a site's pattern gone, the
+  release exited 0 and shipped that site at the old version (the CHANGELOG miss was caught only later, by the gate). Each
+  bump now fails loudly, names the site, and reads its result back. One of them also rewrote the first `"version"` anywhere
+  in `iso4217.json` when `meta.version` was missing; it now addresses `meta.version` only.
+- **`--force` could not do what it said (P5-07).** It let an existing tag through and then failed at the end, and the tag
+  check never asked origin, so a tag that existed only there was not seen. The tag state is now read from origin first.
+  `--force` recreates a tag that exists only locally (a release whose tag push failed). A tag on origin is never moved.
+- **The release script pushed a verification document that its own check rejects (P5-07).** The stub had `TODO` markers and
+  failed CI until someone edited it. The script now writes a complete document (tag commit, CI run ids, the output of every
+  gate step), checks it before committing it, and does not commit it if it fails.
+- **`--dry-run` only printed a plan (P5-07).** It now bumps, regenerates and runs the whole gate on a throwaway copy of the
+  tree, so it says whether the gate would pass, and it never touches your working tree.
+
+### Added
+
+- ADR 0014, `tests/test_release_harness.py` (111 tests that run `release.sh` from `main()` against a bare git remote and
+  a stub `gh`), and `tests/test_release_harness_mutations.py` (31 mutants of the script, every one killed).
+- `scripts/bump_version.py`: one call per site, idempotent, fails loudly, never reads the clock.
+
+### Changed
+
+- Exit codes. 0 success, 1 a precondition found a problem, 2 usage, 3 could not run, 4 a generator, bump or the gate failed
+  (tree modified, nothing committed), 5 commit or push failed, 6 CI not green, 7 the tag failed, 8 the verification doc
+  failed. Each is a different recovery. The meanings of 0 to 3 are unchanged.
+- The four older `tests/test_release_*.py` files define the new helper and assert the new codes.
+
+### Not changed
+
+- The gate is still 28 steps; the new tests run inside the existing `pytest tests/` step.
+- `check_workflows_covered` still exempts workflows whose names start with `monitor`, `fetch`, `refresh`, `update` or
+  `schedule`.
+- A re-run on a later day still rewrites `meta.updated` to that day.
+
+---
 ## [1.9.3] — 2026-10-27
 
 The four wrappers produce identical numbers for every input. The audit (`docs/audits/fifth-pass.md`) found the four wrappers

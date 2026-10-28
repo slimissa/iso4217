@@ -38,7 +38,9 @@ pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="bash and POSIX 
 HELPERS = (
     "info()  { printf '  %s\\n' \"$*\"; }\n"
     "step()  { printf '\\n== %s ==\\n' \"$*\"; }\n"
-    "fail()  { printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$EXIT_PRECOND\"; }\n"
+    "fail_code() { local code=\"$1\"; shift; printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$code\"; }\n"
+    "fail()  { fail_code \"$EXIT_PRECOND\" \"$@\"; }\n"
+    "mutated_hint() { echo 'restore it with: git checkout -- .'; }\n"
 )
 
 
@@ -78,7 +80,7 @@ def repo(tmp_path: Path):
 def _run(work: Path):
     harness = work.parent / "harness.sh"
     harness.write_text(
-        "set -euo pipefail\nEXIT_PRECOND=1\nTAG=v9.9.9\n" + HELPERS + _function() + "\ncommit_and_push\n"
+        "set -euo pipefail\nEXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\nTAG=v9.9.9\n" + HELPERS + _function() + "\ncommit_and_push\n"
     )
     env = dict(os.environ, GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null")
     result = subprocess.run([BASH, str(harness)], cwd=work, capture_output=True, text=True, env=env, timeout=60)
@@ -129,7 +131,7 @@ class TestAborts:
         (work / "a.txt").write_text("one changed\n")
         (work / "stray.parquet").write_text("left by the gate\n")
         code, _, err = _run(work)
-        assert code == 1
+        assert code == 4
         assert "stray.parquet" in err and "untracked" in err
         self._assert_untouched(work, origin)
         assert (work / "stray.parquet").exists()
@@ -138,7 +140,7 @@ class TestAborts:
         work, origin = repo
         (work / "b.txt").unlink()
         code, _, err = _run(work)
-        assert code == 1
+        assert code == 4
         assert "b.txt" in err and "only modifications are expected" in err
         self._assert_untouched(work, origin)
         assert not (work / "b.txt").exists()                          # the working tree is left as found
@@ -148,14 +150,14 @@ class TestAborts:
         (work / "new.txt").write_text("x\n")
         _git(work, "add", "new.txt")
         code, _, err = _run(work)
-        assert code == 1 and "new.txt" in err
+        assert code == 4 and "new.txt" in err
         self._assert_untouched(work, origin)
 
     def test_a_rename_aborts(self, repo):
         work, origin = repo
         _git(work, "mv", "a.txt", "renamed.txt")
         code, _, err = _run(work)
-        assert code == 1 and "renamed.txt" in err
+        assert code == 4 and "renamed.txt" in err
         self._assert_untouched(work, origin)
 
     def test_a_modification_alongside_a_deletion_still_aborts_everything(self, repo):
@@ -163,7 +165,7 @@ class TestAborts:
         (work / "a.txt").write_text("one changed\n")
         (work / "b.txt").unlink()
         code, _, _ = _run(work)
-        assert code == 1
+        assert code == 4
         self._assert_untouched(work, origin)
 
 

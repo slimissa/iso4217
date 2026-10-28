@@ -35,7 +35,9 @@ pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="bash and POSIX 
 HELPERS = (
     "info()  { printf '  %s\\n' \"$*\"; }\n"
     "step()  { printf '\\n== %s ==\\n' \"$*\"; }\n"
-    "fail()  { printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$EXIT_PRECOND\"; }\n"
+    "fail_code() { local code=\"$1\"; shift; printf 'FAIL: %s\\n' \"$*\" >&2; exit \"$code\"; }\n"
+    "fail()  { fail_code \"$EXIT_PRECOND\" \"$@\"; }\n"
+    "mutated_hint() { echo 'restore it with: git checkout -- .'; }\n"
 )
 
 SECTION = """# Changelog
@@ -105,7 +107,7 @@ def _run(work: Path, changelog_text: str, *, tamper: bool | str = False):
         )
     harness = work.parent / "harness.sh"
     harness.write_text(
-        "set -euo pipefail\nEXIT_PRECOND=1\nVERSION=9.9.9\nTAG=v9.9.9\n"
+        "set -euo pipefail\nEXIT_PRECOND=1\nEXIT_COULD_NOT=3\nEXIT_GATE=4\nEXIT_PUSH=5\nEXIT_CI=6\nEXIT_TAG=7\nEXIT_DOC=8\nDRY_RUN=false\nRECREATE_TAG=false\nVERSION=9.9.9\nTAG=v9.9.9\n"
         f'CHANGELOG="{changelog}"\n' + HELPERS + wrapper + _function() + "\ntag_release\n"
     )
     env = dict(os.environ, GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null", TMPDIR=str(work.parent))
@@ -171,7 +173,7 @@ class TestReadBackMismatch:
     def test_a_recorded_message_that_differs_deletes_the_local_tag_and_does_not_push(self, repo):
         work, origin, git = repo
         code, _, err = _run(work, SECTION, tamper=True)
-        assert code == 1
+        assert code == 7
         assert "different tag message" in err and "nothing pushed" in err
         assert git("tag", "-l") == ""                                  # local tag removed
         remote = subprocess.run(["git", "--git-dir", str(origin), "tag", "-l"], capture_output=True, text=True).stdout
@@ -182,7 +184,7 @@ class TestDeleteFailure:
     def test_a_failing_tag_delete_aborts_and_says_the_tag_still_exists(self, repo):
         work, origin, git = repo
         code, _, err = _run(work, SECTION, tamper="delete_fails")
-        assert code == 1
+        assert code == 7
         assert "STILL EXISTS" in err and "nothing was pushed" in err
         assert git("tag", "-l").strip() == "v9.9.9"                   # the tag really is still there
         remote = subprocess.run(["git", "--git-dir", str(origin), "tag", "-l"], capture_output=True, text=True).stdout
