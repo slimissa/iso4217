@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.4] — Unreleased
+## [1.9.4] — 2026-10-28
 
 The release script is tested the same way the registry is. The audit (`docs/audits/fifth-pass.md`) found that `scripts/release.sh`,
 the biggest check in the system, had no test that ran it from start to finish or forced most of its failures (P5-07). This
