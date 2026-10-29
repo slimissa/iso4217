@@ -1,6 +1,6 @@
 # ADR 0014 - Release harness
 
-**Status:** Proposed. It becomes Accepted when `tests/test_release_harness.py` and `tests/test_release_harness_mutations.py` pass with every mutant killed, and the owner commits it.
+**Status:** Accepted. `tests/test_release_harness.py` (113 tests) and `tests/test_release_harness_mutations.py` (31 mutants, 31 killed, 0 survivors) pass; `docs/v1.9.4-verification.md` records the release.
 **Date:** 2026-10-28
 **Context:** v1.9.4 - closing P5-07. Spine sentence: "The release script is tested the same way the registry is."
 

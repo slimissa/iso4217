@@ -239,3 +239,24 @@ What this adds to the report:
   `vendor_iso3166.py` and `refresh_market_caps.py`. It has none in `sync_wrappers.py`.
 - Item D is still not fully closed. A per-tool, per-code table needs a real harness: run each tool in an environment
   that triggers each code, then assert.
+
+
+---
+
+## P5-07 — Closed at v1.9.4
+
+**Finding:** *Most of `release.sh` has no test* (P2). **Status: closed.**
+
+**Proof:**
+- `tests/test_release_harness.py` — 113 tests, run from `main()` against a bare
+  git remote and a stub `gh`.
+- `tests/test_release_harness_mutations.py` — 31 mutants, 31 killed, 0 survivors.
+- `tests/test_release_hygiene.py` — 16 tests (function extraction), including the
+  negative test that M28 requires.
+- `docs/v1.9.4-verification.md` — the release receipt (§8.1–§8.6).
+- ADR 0014 (`docs/decisions/release-harness.md`) — **Accepted**.
+
+**Action item 9** ("Add a fake-remote `release.sh` harness (P5-07). Larger
+effort.") is **done**.
+
+The remaining findings (P5-09, P5-10, P5-11, EC) are scheduled for v1.9.5.
