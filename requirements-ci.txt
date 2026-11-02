@@ -21,5 +21,5 @@ pytest>=9.1.1,<10
 # locally they can pass by accident if the venv has these as transitive
 # dependencies.
 setuptools>=68,<90
-wheel>=0.42,<1
+wheel>=0.48.0,<1
 build>=1.0,<2
