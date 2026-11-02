@@ -22,4 +22,4 @@ pytest>=9.1.1,<10
 # dependencies.
 setuptools>=68,<90
 wheel>=0.42,<1
-build>=1.0,<2
+build>=1.6.1,<2
