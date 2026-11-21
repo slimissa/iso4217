@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.5] — Unreleased
+## [1.9.5] — 2026-11-21
 
 The audit's documents are held to the same standard as its code. This release closes the third audit pass (v1.9.1 to v1.9.5): the
 wrappers' lookup contract (P5-09), one numbering for the release rules (P5-10 and EC), the verification-document checker (P5-11), the
