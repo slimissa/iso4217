@@ -282,7 +282,7 @@ class TestVerificationDocFunction:
         # path; the function exits 8 (fail_code) before git is touched.
 
         # The function, extracted from scripts/release.sh by _function(name).
-        func = _function_from_runtime("write_verification_doc")
+        func = _function_from_runtime("render_verification_doc") + "\n" + _function_from_runtime("write_verification_doc")
 
         harness = work / "harness.sh"
         harness.write_text(

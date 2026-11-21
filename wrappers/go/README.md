@@ -428,3 +428,7 @@ go test -race ./...
 ## License
 
 Apache 2.0 — same as the [ISO 4217 registry](https://github.com/slimissa/iso4217). Use it anywhere.
+
+## Lookup contract
+
+A code in more than one section resolves to the first of: active, withdrawn, non-ISO. Within one section a repeated code keeps its last entry, so a collection has one entry per code. A Go `string` cannot be nil or a non-string, so there is no invalid-input case here; the empty string is just a code that is not found (`nil`). Decided in [ADR 0015](../../docs/decisions/wrapper-lookup-contract.md); the shared vectors are the `lookup_contract` group of `tests/cross_language_consistency.json`, read by all four wrappers.

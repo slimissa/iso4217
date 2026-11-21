@@ -623,6 +623,21 @@ class Currency {
 // ---------------------------------------------------------------------------
 
 /**
+ * Upper-case a code argument. Anything that is not a string, null and undefined included, throws a TypeError (ADR 0015, D2).
+ * @param {*} value
+ * @param {string} [name]
+ * @returns {string}
+ * @private
+ */
+function requireCode(value, name = 'code') {
+  if (typeof value !== 'string') {
+    const got = value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
+    throw new TypeError(`${name} must be a string, got ${got}`);
+  }
+  return value.toUpperCase();
+}
+
+/**
  * The main registry interface for looking up ISO 4217 currencies.
  *
  * Loads the canonical iso4217.json file and provides lookup methods
@@ -667,14 +682,12 @@ class CurrencyRegistry {
     for (const c of (currencies.active || [])) {
       const currency = new Currency(c);
       this._active.set(c.code, currency);
-      this._all.set(c.code, currency);
     }
 
     // Withdrawn currencies
     for (const c of (currencies.withdrawn || [])) {
       const currency = new Currency(c);
       this._withdrawn.set(c.code, currency);
-      this._all.set(c.code, currency);
     }
 
     // Non-ISO currencies
@@ -683,7 +696,14 @@ class CurrencyRegistry {
       for (const c of (nonIso[category] || [])) {
         const currency = new Currency(c);
         this._nonIso.set(c.code, currency);
-        this._all.set(c.code, currency);
+      }
+    }
+
+    // currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
+    // (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
+    for (const section of [this._active, this._withdrawn, this._nonIso]) {
+      for (const [code, entry] of section) {
+        if (!this._all.has(code)) this._all.set(code, entry);
       }
     }
   }
@@ -714,13 +734,16 @@ class CurrencyRegistry {
 
   /**
    * Look up any currency by code (case-insensitive).
-   * Searches active, withdrawn, and non-ISO currencies.
+   * Searches active, withdrawn, and non-ISO currencies. A code in more than one section resolves to the first of:
+   * active, withdrawn, non-ISO. Within one section a repeated code keeps its last entry.
+   *
+   * @throws {TypeError} if `code` is not a string (null and undefined included)
    *
    * @param {string} code - Currency code (e.g., "USD", "usd", "Btc")
    * @returns {Currency|null}
    */
   currency(code) {
-    return this._all.get(code.toUpperCase()) || null;
+    return this._all.get(requireCode(code)) || null;
   }
 
   /**
@@ -730,7 +753,7 @@ class CurrencyRegistry {
    * @returns {Currency|null}
    */
   active(code) {
-    return this._active.get(code.toUpperCase()) || null;
+    return this._active.get(requireCode(code)) || null;
   }
 
   /**
@@ -740,7 +763,7 @@ class CurrencyRegistry {
    * @returns {Currency|null}
    */
   withdrawn(code) {
-    return this._withdrawn.get(code.toUpperCase()) || null;
+    return this._withdrawn.get(requireCode(code)) || null;
   }
 
   /**
@@ -750,7 +773,7 @@ class CurrencyRegistry {
    * @returns {Currency|null}
    */
   nonIso(code) {
-    return this._nonIso.get(code.toUpperCase()) || null;
+    return this._nonIso.get(requireCode(code)) || null;
   }
 
   // -- Collection accessors -----------------------------------------------
@@ -1002,7 +1025,7 @@ class CurrencyRegistry {
    * @returns {boolean}
    */
   has(code) {
-    return this._all.has(code.toUpperCase());
+    return this._all.has(requireCode(code));
   }
 
   // -- Display ------------------------------------------------------------

@@ -1,7 +1,7 @@
 """
 Gate mutation tests (v1.9.1, audit finding P5-02; RELEASE_PATTERN.md hygiene rule 10).
 
-A check that cannot fail is not a check. The fifth-pass audit forced each of
+A check that cannot fail is not a check. The third-pass audit forced each of
 these gate tools to exit 0 and the whole suite stayed green: nothing proved the
 gate could go red. This module is that proof. Every case here builds a copy of
 the project, breaks exactly one thing in the copy, runs the real tool as a
@@ -150,6 +150,8 @@ GREEN = [
     ("check_mojibake.py", ()),
     ("check_line_endings.py", ()),
     ("check_audit_table.py", ()),
+    ("check_doc_paths.py", ()),
+    ("check_rules_refs.py", ()),
 ]
 
 
@@ -613,6 +615,52 @@ class TestCheckAuditTable:
         assert code == 2
 
 
+class TestCheckDocPaths:
+    def test_a_document_citing_a_missing_docs_path_exits_1(self, tree):
+        readme = tree / "README.md"
+        readme.write_text(readme.read_text(encoding="utf-8") + "\nSee docs/audits/nothing-here.md for more.\n", encoding="utf-8")
+        code, out = run(tree, "check_doc_paths.py")
+        assert code == 1 and "docs/audits/nothing-here.md" in out
+
+    def test_history_may_cite_an_old_name_but_not_a_path_that_never_existed(self, tree):
+        changelog = tree / "CHANGELOG.md"
+        changelog.write_text(changelog.read_text(encoding="utf-8") + "\nSee docs/never-existed.md.\n", encoding="utf-8")
+        code, out = run(tree, "check_doc_paths.py")
+        assert code == 1 and "docs/never-existed.md" in out
+
+    def test_a_missing_root_exits_2(self, tree):
+        code, _ = run(tree, "check_doc_paths.py", str(tree / "nope"))
+        assert code == 2
+
+
+class TestCheckRulesRefs:
+    def test_a_renamed_rule_heading_exits_1_and_names_the_rule(self, tree):
+        pattern = tree / "RELEASE_PATTERN.md"
+        text = pattern.read_text(encoding="utf-8")
+        heading = "### 7. A check that cannot run must fail, not pass"
+        assert heading in text, "the H7 heading changed; pick another rule to break"
+        pattern.write_text(text.replace(heading, "### 7. A check that cannot run is skipped"), encoding="utf-8")
+        code, out = run(tree, "check_rules_refs.py")
+        assert code == 1 and "H7" in out
+
+    def test_a_qualified_citation_of_a_rule_that_does_not_exist_exits_1(self, tree):
+        readme = tree / "README.md"
+        readme.write_text(readme.read_text(encoding="utf-8") + "\nPer invariant 99 of the pattern.\n", encoding="utf-8")
+        code, out = run(tree, "check_rules_refs.py")
+        assert code == 1 and "invariant 99" in out
+
+    def test_a_new_bare_rule_citation_in_an_unlisted_file_exits_1(self, tree):
+        doc = tree / "docs" / "WRAPPER_VALIDATION.md"
+        doc.write_text(doc.read_text(encoding="utf-8") + "\nAs rule 7 says.\n", encoding="utf-8")
+        code, out = run(tree, "check_rules_refs.py")
+        assert code == 1 and "bare rule citation" in out
+
+    def test_a_missing_rules_file_exits_2(self, tree):
+        (tree / "docs" / "rules.md").unlink()
+        code, _ = run(tree, "check_rules_refs.py")
+        assert code == 2
+
+
 # ---------------------------------------------------------------------------
 # Rule 10 enforces itself: every gate tool has a case above or a written exemption.
 # ---------------------------------------------------------------------------
@@ -634,6 +682,8 @@ COVERED = {
     "check_line_endings.py",
     "check_release_claims.py",
     "check_audit_table.py",
+    "check_doc_paths.py",
+    "check_rules_refs.py",
 }
 
 # Each exemption names the evidence. Adding a tool here instead of a case needs

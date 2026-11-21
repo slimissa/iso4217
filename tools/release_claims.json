@@ -1885,6 +1885,132 @@
       "contains": "M31-ls-remote-check-removed"
     }
   ],
+  "1.9.5": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.5"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.5\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.5]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.5"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.5"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.5\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.5\""
+    },
+    {
+      "file": "docs/decisions/wrapper-lookup-contract.md"
+    },
+    {
+      "file": "docs/decisions/rules-numbering.md"
+    },
+    {
+      "file": "docs/decisions/verification-doc-history.md"
+    },
+    {
+      "file": "docs/rules.md",
+      "contains": "numbering authority"
+    },
+    {
+      "file": "docs/rules-legacy-bare.json"
+    },
+    {
+      "file": "docs/verification-grandfathered.json",
+      "contains": "docs/v1.5.4-verification.md"
+    },
+    {
+      "file": "docs/audits/third-pass.md",
+      "contains": "Closure (v1.9.5)"
+    },
+    {
+      "file": "tools/check_doc_paths.py"
+    },
+    {
+      "file": "tools/check_rules_refs.py"
+    },
+    {
+      "file": "tests/test_check_doc_paths.py"
+    },
+    {
+      "file": "tests/test_check_rules_refs.py"
+    },
+    {
+      "file": "tests/test_wrapper_lookup_contract.py"
+    },
+    {
+      "file": "tests/test_v195_mutations.py"
+    },
+    {
+      "file": "wrappers/javascript/lookup_contract.test.js"
+    },
+    {
+      "file": "wrappers/go/lookup_contract_test.go"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "mod lookup_contract"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "def _require_code"
+    },
+    {
+      "file": "wrappers/javascript/index.js",
+      "contains": "function requireCode"
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "contains": "if _, taken := r.all[code]; !taken {"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "all.entry(code.clone()).or_insert_with"
+    },
+    {
+      "file": "tests/cross_language_consistency.json",
+      "contains": "\"lookup_contract\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_doc_paths.py\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_rules_refs.py\""
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "tools/check_verification_doc.py --all"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "dry_run_doc()"
+    },
+    {
+      "file": "tools/check_verification_doc.py",
+      "contains": "unclosed code fence opened at line"
+    },
+    {
+      "file": "RELEASE_PATTERN.md",
+      "contains": "docs/rules.md"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",

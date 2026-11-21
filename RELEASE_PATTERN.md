@@ -2,6 +2,10 @@
 
 **Status:** Adopted — reviewed by ISO 3166 and Exchange Calendar.
 
+**Numbering:** [docs/rules.md](docs/rules.md) is the numbering authority: it gives every rule below an ID (`E1` to `E8`, `H1` to
+`H10`), says which heading it indexes, and shows how the other registries number the same rules. A citation that leaves this
+repository names it: `4217/H7`. It does not restate any rule.
+
 The `release.sh` script exists in four registries. Each was written
 independently, then reconciled through a series of exchange messages
 between the maintainers. They share eight invariants and diverge on
@@ -400,7 +404,7 @@ compared on content, as the rule says.
 
 ## Operator hygiene
 
-Four rules that emerged from specific failure modes across the
+The rules below emerged from specific failure modes across the
 four implementations.
 
 ### 1. No heredocs for multi-line scripts
@@ -525,7 +529,7 @@ Applies to:
 The rule: if an artifact reproduces text from a running program,
 that artifact is a copy, not a reference. Copies drift.
 
-### 6b. The commit is not the working tree
+### 6b. The commit is not the working tree
 
 `git diff --cached --stat` before every commit. The message is a
 claim about what the commit contains, not about what's on disk. If
@@ -706,7 +710,7 @@ and the gate run it (`tools/check_js_lint.sh`). The audits are polled like every
 A check that cannot fail is not a check. Every check that runs in the gate or in CI must have at least one test that
 forces its failing state and asserts the resulting exit code.
 
-Why: the fifth-pass audit (finding P5-02) forced four gate tools to exit 0 and all 1,421 tests stayed green. The
+Why: the third-pass audit (finding P5-02) forced four gate tools to exit 0 and all 1,421 tests stayed green. The
 gate was reporting results from checks nothing had ever seen fail. Rules 7 and 8 make a check run; this rule makes a
 check able to go red.
 
@@ -721,7 +725,7 @@ tool (a pytest suite, an audit) is outside it; `tests/test_ci_parity.py` covers 
 Numbering: ISO 3166's operator-hygiene section already uses 10 to 19 for other rules. This is ISO 4217's rule 10 until
 the registries renumber (audit finding P5-10).
 
-Sourced from ISO 4217 v1.9.1, fifth-pass audit finding P5-02 (`docs/audits/fifth-pass.md`).
+Sourced from ISO 4217 v1.9.1, third-pass audit finding P5-02 (`docs/audits/third-pass.md`).
 
 ## Exit-code convention
 
@@ -890,5 +894,8 @@ than one registry.
 - 2026-10-19 — post-review addition: operator-hygiene rule 9 ("Every lockfile is audited on every push").
   Sourced from ISO 3166's v1.7.0–v1.7.1 review cycle (zmij / syn 3.0.6); ISO 4217's instance is v1.8.4.
 - 2026-10-23 — post-review addition: operator-hygiene rule 10 ("A check that cannot fail is not a check").
-  Source: ISO 4217 v1.9.1, fifth-pass audit finding P5-02. Numbering collides with ISO 3166's rules 10 to 19
+  Source: ISO 4217 v1.9.1, third-pass audit finding P5-02. Numbering collides with ISO 3166's rules 10 to 19
   (finding P5-10); proposed to ISO 3166 and ISO 10383.
+- 2026-10-29 — reviewed by ISO 4217 (v1.9.5). Added the pointer to `docs/rules.md` (the numbering authority, ADR 0016); corrected
+  the hygiene section's stale count ("Four rules"; there are thirteen headings); restored the heading of hygiene rule 6b, which carried a
+  non-breaking space after the hashes and so did not render as a heading. Source: ISO 4217 v1.9.5, third-pass audit finding P5-10.

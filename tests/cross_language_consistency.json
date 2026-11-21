@@ -614,5 +614,256 @@
         {"currency": "USD", "x": 123456789.99, "to_minor": 12345678999, "format": "$123,456,789.99"}
       ]}
     ]
+  },
+  "lookup_contract": {
+    "description": "The lookup contract (ADR 0015): the documented order active, withdrawn, non-ISO decides which entry currency() returns (the earliest section wins); within one section the last entry for a code wins and the collection has one entry per code; Python and JavaScript raise TypeError for a code argument that is not a string. Go and Rust cannot be given one. Each wrapper builds the registries below through its own loader.",
+    "vector_count": 14,
+    "invalid_input_count": 25,
+    "precedence": [
+      {
+        "id": "active_beats_non_iso",
+        "registry": {
+          "currencies": {
+            "active": [
+              {
+                "code": "AAA",
+                "name": "active-A",
+                "minor_units": 2
+              }
+            ]
+          },
+          "non_iso": {
+            "cryptocurrencies": [
+              {
+                "code": "AAA",
+                "name": "nonISO-A",
+                "minor_units": 8
+              }
+            ]
+          }
+        },
+        "lookups": [
+          {
+            "method": "currency",
+            "code": "AAA",
+            "expected_name": "active-A"
+          },
+          {
+            "method": "currency",
+            "code": "aaa",
+            "expected_name": "active-A"
+          },
+          {
+            "method": "active",
+            "code": "AAA",
+            "expected_name": "active-A"
+          },
+          {
+            "method": "non_iso",
+            "code": "AAA",
+            "expected_name": "nonISO-A"
+          }
+        ]
+      },
+      {
+        "id": "active_beats_withdrawn",
+        "registry": {
+          "currencies": {
+            "active": [
+              {
+                "code": "BBB",
+                "name": "active-B",
+                "minor_units": 2
+              }
+            ],
+            "withdrawn": [
+              {
+                "code": "BBB",
+                "name": "withdrawn-B",
+                "minor_units": 2
+              }
+            ]
+          }
+        },
+        "lookups": [
+          {
+            "method": "currency",
+            "code": "BBB",
+            "expected_name": "active-B"
+          },
+          {
+            "method": "withdrawn",
+            "code": "BBB",
+            "expected_name": "withdrawn-B"
+          }
+        ]
+      },
+      {
+        "id": "withdrawn_beats_non_iso",
+        "registry": {
+          "currencies": {
+            "withdrawn": [
+              {
+                "code": "DDD",
+                "name": "withdrawn-D",
+                "minor_units": 2
+              }
+            ]
+          },
+          "non_iso": {
+            "stablecoins": [
+              {
+                "code": "DDD",
+                "name": "nonISO-D",
+                "minor_units": 6
+              }
+            ]
+          }
+        },
+        "lookups": [
+          {
+            "method": "currency",
+            "code": "DDD",
+            "expected_name": "withdrawn-D"
+          },
+          {
+            "method": "non_iso",
+            "code": "DDD",
+            "expected_name": "nonISO-D"
+          }
+        ]
+      },
+      {
+        "id": "all_three_sections",
+        "registry": {
+          "currencies": {
+            "active": [
+              {
+                "code": "EEE",
+                "name": "active-E",
+                "minor_units": 2
+              }
+            ],
+            "withdrawn": [
+              {
+                "code": "EEE",
+                "name": "withdrawn-E",
+                "minor_units": 2
+              }
+            ]
+          },
+          "non_iso": {
+            "commodities": [
+              {
+                "code": "EEE",
+                "name": "nonISO-E",
+                "minor_units": 4
+              }
+            ]
+          }
+        },
+        "lookups": [
+          {
+            "method": "currency",
+            "code": "EEE",
+            "expected_name": "active-E"
+          }
+        ]
+      }
+    ],
+    "duplicates": [
+      {
+        "id": "last_wins_within_a_section",
+        "registry": {
+          "currencies": {
+            "active": [
+              {
+                "code": "FFF",
+                "name": "first",
+                "minor_units": 2
+              },
+              {
+                "code": "FFF",
+                "name": "second",
+                "minor_units": 2
+              },
+              {
+                "code": "GGG",
+                "name": "g",
+                "minor_units": 2
+              }
+            ]
+          }
+        },
+        "expected_active_count": 2,
+        "lookups": [
+          {
+            "method": "currency",
+            "code": "FFF",
+            "expected_name": "second"
+          },
+          {
+            "method": "active",
+            "code": "FFF",
+            "expected_name": "second"
+          }
+        ]
+      },
+      {
+        "id": "last_category_wins_within_non_iso",
+        "registry": {
+          "non_iso": {
+            "cryptocurrencies": [
+              {
+                "code": "HHH",
+                "name": "crypto-H",
+                "minor_units": 8
+              }
+            ],
+            "stablecoins": [
+              {
+                "code": "HHH",
+                "name": "stable-H",
+                "minor_units": 6
+              }
+            ]
+          }
+        },
+        "lookups": [
+          {
+            "method": "non_iso",
+            "code": "HHH",
+            "expected_name": "stable-H"
+          },
+          {
+            "method": "currency",
+            "code": "HHH",
+            "expected_name": "stable-H"
+          }
+        ]
+      }
+    ],
+    "invalid_input": {
+      "applies_to": [
+        "python",
+        "javascript"
+      ],
+      "error": "TypeError",
+      "message_contains": "must be a string",
+      "methods": [
+        "currency",
+        "active",
+        "withdrawn",
+        "non_iso",
+        "contains"
+      ],
+      "values": [
+        null,
+        123,
+        true,
+        [],
+        {}
+      ]
+    }
   }
 }

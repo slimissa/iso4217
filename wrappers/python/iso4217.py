@@ -646,6 +646,13 @@ class Currency:
 # CurrencyRegistry
 # ---------------------------------------------------------------------------
 
+def _require_code(value: object, name: str = "code") -> str:
+    """Return `value` upper-cased. Anything that is not a str, None included, raises TypeError (ADR 0015, D2)."""
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a string, got {type(value).__name__}")
+    return value.upper()
+
+
 class CurrencyRegistry:
     """
     The main registry interface for looking up ISO 4217 currencies.
@@ -737,13 +744,11 @@ class CurrencyRegistry:
         for c in currencies.get("active", []):
             currency = Currency(c)
             self._active[c["code"]] = currency
-            self._all_codes[c["code"]] = currency
 
         # Withdrawn currencies
         for c in currencies.get("withdrawn", []):
             currency = Currency(c)
             self._withdrawn[c["code"]] = currency
-            self._all_codes[c["code"]] = currency
 
         # Non-ISO currencies
         non_iso = self._data.get("non_iso", {})
@@ -751,7 +756,12 @@ class CurrencyRegistry:
             for c in non_iso.get(category, []):
                 currency = Currency(c)
                 self._non_iso[c["code"]] = currency
-                self._all_codes[c["code"]] = currency
+
+        # currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
+        # (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
+        for section in (self._active, self._withdrawn, self._non_iso):
+            for code, entry in section.items():
+                self._all_codes.setdefault(code, entry)
 
     # -- Metadata -----------------------------------------------------------
 
@@ -781,15 +791,19 @@ class CurrencyRegistry:
         """
         Look up any currency by code (case-insensitive).
 
-        Searches active, withdrawn, and non-ISO currencies in that order.
+        Searches active, withdrawn, and non-ISO currencies in that order. A code in more than one section resolves to the
+        first of: active, withdrawn, non-ISO. Within one section a repeated code keeps its last entry.
 
         Args:
             code: Currency code (e.g., "USD", "usd", "Btc").
 
         Returns:
             Currency object or None if not found.
+
+        Raises:
+            TypeError: if `code` is not a string (None included).
         """
-        return self._all_codes.get(code.upper())
+        return self._all_codes.get(_require_code(code))
 
     def active(self, code: str) -> Optional[Currency]:
         """
@@ -801,7 +815,7 @@ class CurrencyRegistry:
         Returns:
             Currency object or None if not found or not active.
         """
-        return self._active.get(code.upper())
+        return self._active.get(_require_code(code))
 
     def withdrawn(self, code: str) -> Optional[Currency]:
         """
@@ -813,7 +827,7 @@ class CurrencyRegistry:
         Returns:
             Currency object or None if not found or not withdrawn.
         """
-        return self._withdrawn.get(code.upper())
+        return self._withdrawn.get(_require_code(code))
 
     def non_iso(self, code: str) -> Optional[Currency]:
         """
@@ -825,7 +839,7 @@ class CurrencyRegistry:
         Returns:
             Currency object or None if not found.
         """
-        return self._non_iso.get(code.upper())
+        return self._non_iso.get(_require_code(code))
 
     # -- Collection accessors -----------------------------------------------
 
@@ -962,7 +976,7 @@ class CurrencyRegistry:
 
     def __contains__(self, code: str) -> bool:
         """Check if a currency code exists in the registry (any category)."""
-        return code.upper() in self._all_codes
+        return _require_code(code) in self._all_codes
 
     # -- Statistics ---------------------------------------------------------
 

@@ -144,6 +144,16 @@ MUTANTS: list[Mutant] = [
     Mutant("M31-ls-remote-check-removed", "a tag only on origin is not seen",
            "test_check_tag_free_sees_a_tag_that_exists_only_on_origin",
            note="refactored script only: the git ls-remote read in check_tag_free"),
+    # -- v1.9.5 (ADR 0017, D7): what the first real release taught the dry-run ------------------------------------------
+    Mutant("M32-dry-run-skips-the-doc-stage", "the dry-run cannot predict exit 8",
+           "renders_the_verification_doc or rendered_doc_the_checker_would_reject",
+           note="v1.9.5: dry_run_doc"),
+    Mutant("M33-a-re-run-moves-the-release-date", "a later-day re-run rewrites meta.updated",
+           "ReRunOnALaterDay", note="v1.9.5: the re-run guard in bump_all_sites"),
+    Mutant("M34-a-fence-line-in-gate-output-is-not-neutralised", "quoted output can open a fence in the doc",
+           "fence_line_in_gate_output", note="v1.9.5: the sed in run_gate_step"),
+    Mutant("M35-the-gate-checks-only-the-latest-verification-doc", "the gate runs the checker without --all",
+           "rendered_doc_the_checker_would_reject", note="v1.9.5: the gate step's --all"),
 ]
 
 
@@ -161,6 +171,9 @@ G_READBACK = (BUMP, '        if reader(path.read_bytes().decode("utf-8")) != new
 G_ONLYFIELD = (BUMP, "        _check_only_that_value_changed(site, text, new_text)\n", "")
 
 SAME = "same"
+# The real stage's check, anchored by the render call before it: the dry-run's document stage has the same check line.
+REAL_DOC_CHECK = ('    render_verification_doc "$doc" "$(git rev-parse "$TAG^{commit}")"\n\n'
+                  '    if ! python3 tools/check_verification_doc.py >&2; then')
 REFACTORED = {
     "M01": SAME, "M02": SAME, "M03": SAME, "M04": SAME,
     "M05": SAME,   # the line is unique: tag_release's own test begins `if $RECREATE_TAG &&`
@@ -191,12 +204,18 @@ REFACTORED = {
     "M25": [(REL, '    git push origin main || fail_code "$EXIT_PUSH"', '    true || fail_code "$EXIT_PUSH"')],
     "M26": SAME,
     "M27": [(REL, "        printf '## Known limits\\n\\n'", "        printf 'TODO: fill in\\n'\n        printf '## Known limits\\n\\n'"),
-            (REL, "    if ! python3 tools/check_verification_doc.py >&2; then", "    if false; then")],
-    "M28": [(REL, "    if ! python3 tools/check_verification_doc.py >&2; then", "    if false; then")],
+            (REL, REAL_DOC_CHECK, REAL_DOC_CHECK.replace("if ! python3 tools/check_verification_doc.py >&2; then", "if false; then"))],
+    "M28": [(REL, REAL_DOC_CHECK, REAL_DOC_CHECK.replace("if ! python3 tools/check_verification_doc.py >&2; then", "if false; then"))],
     "M29": [(REL, '    dry_run\n    exit "$EXIT_OK"', "    dry_run")],
     "M30": [(REL, '        rm -rf "$DRY_COPY"', "        true")],
     "M31": [(REL, '    if ! remote_tags="$(git ls-remote --tags origin "refs/tags/$TAG" 2>&1)"; then',
              '    remote_tags=""\n    if false; then')],
+    "M32": [(REL, "        dry_run_doc\n    ) || rc=$?", "        true\n    ) || rc=$?")],
+    "M33": [(REL, '    if [[ "$CURRENT_VERSION" != "$VERSION" ]]; then\n        bump_site iso_json_updated',
+             '    if true; then\n        bump_site iso_json_updated')],
+    "M34": [(REL, " | sed -e 's/^```/    ```/' -e 's/^~~~/    ~~~/'", "")],
+    "M35": [(REL, 'run_gate_step "check_verification_doc.py --all" python3 tools/check_verification_doc.py --all',
+             'run_gate_step "check_verification_doc.py --all" python3 tools/check_verification_doc.py')],
 }
 for _m in MUTANTS:
     _bound = REFACTORED[_m.id[:3]]

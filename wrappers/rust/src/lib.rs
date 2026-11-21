@@ -778,8 +778,7 @@ impl CurrencyRegistry {
                 for c in active_list {
                     let code = c.code.clone();
                     let currency = Currency::from(c.clone());
-                    active.insert(code.clone(), currency.clone());
-                    all.insert(code, currency);
+                    active.insert(code, currency);
                 }
             }
 
@@ -788,8 +787,7 @@ impl CurrencyRegistry {
                 for c in withdrawn_list {
                     let code = c.code.clone();
                     let currency = Currency::from(c.clone());
-                    withdrawn.insert(code.clone(), currency.clone());
-                    all.insert(code, currency);
+                    withdrawn.insert(code, currency);
                 }
             }
         }
@@ -808,10 +806,17 @@ impl CurrencyRegistry {
                     for c in list {
                         let code = c.code.clone();
                         let currency = Currency::from(c.clone());
-                        non_iso.insert(code.clone(), currency.clone());
-                        all.insert(code, currency);
+                        non_iso.insert(code, currency);
                     }
                 }
+            }
+        }
+
+        // currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
+        // (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
+        for section in [&active, &withdrawn, &non_iso] {
+            for (code, currency) in section.iter() {
+                all.entry(code.clone()).or_insert_with(|| currency.clone());
             }
         }
 
@@ -877,7 +882,8 @@ impl CurrencyRegistry {
 
     /// Look up any currency by code (case-insensitive).
     ///
-    /// Searches active, withdrawn, and non-ISO currencies in that order.
+    /// Searches active, withdrawn, and non-ISO currencies in that order. A code in more than one section resolves to the
+    /// first of: active, withdrawn, non-ISO. Within one section a repeated code keeps its last entry.
     pub fn currency(&self, code: &str) -> Option<&Currency> {
         self.all.get(&code.to_uppercase())
     }
@@ -1768,5 +1774,82 @@ mod tests {
                     "by_classification({}) should NOT contain {}", arg, excluded);
             }
         }
+    }
+}
+
+// The wrapper lookup contract (ADR 0015, docs/decisions/wrapper-lookup-contract.md): every vector in the `lookup_contract` group
+// of tests/cross_language_consistency.json must hold in this wrapper. The same file is read by the Python, JavaScript and Go
+// suites. A `&str` cannot be null or a non-string, so the group's invalid_input vectors do not apply here; the test asserts the
+// group says so.
+#[cfg(test)]
+mod lookup_contract {
+    use super::*;
+
+    #[test]
+    fn lookup_contract() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../tests/cross_language_consistency.json"
+        );
+        let fixture: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        let lc = fixture
+            .get("lookup_contract")
+            .expect("tests/cross_language_consistency.json has no lookup_contract group");
+        let applies: Vec<&str> = lc["invalid_input"]["applies_to"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_str().unwrap())
+            .collect();
+        assert!(
+            !applies.contains(&"rust"),
+            "invalid_input cannot apply to Rust: a &str is never null or a non-string"
+        );
+
+        let mut vectors = 0;
+        for group in ["precedence", "duplicates"] {
+            for case in lc[group].as_array().unwrap() {
+                let id = case["id"].as_str().unwrap();
+                let registry = CurrencyRegistry::load_from_str(&case["registry"].to_string())
+                    .unwrap_or_else(|e| panic!("{}: registry did not load: {}", id, e));
+                for lk in case["lookups"].as_array().unwrap() {
+                    vectors += 1;
+                    let code = lk["code"].as_str().unwrap();
+                    let method = lk["method"].as_str().unwrap();
+                    let found = match method {
+                        "currency" => registry.currency(code),
+                        "active" => registry.active(code),
+                        "withdrawn" => registry.withdrawn(code),
+                        "non_iso" => registry.non_iso(code),
+                        other => panic!("{}: unknown method {}", id, other),
+                    };
+                    let expected = lk["expected_name"].as_str().unwrap();
+                    assert_eq!(
+                        found.map(|c| c.name.as_str()),
+                        Some(expected),
+                        "{}: {}({})",
+                        id,
+                        method,
+                        code
+                    );
+                }
+                if let Some(n) = case.get("expected_active_count") {
+                    vectors += 1;
+                    assert_eq!(
+                        registry.all_active().len() as u64,
+                        n.as_u64().unwrap(),
+                        "{}: all_active()",
+                        id
+                    );
+                }
+            }
+        }
+        assert_eq!(
+            vectors as u64,
+            lc["vector_count"].as_u64().unwrap(),
+            "the fixture's vector_count"
+        );
+        println!("LOOKUP_CONTRACT rust vectors={}", vectors);
     }
 }

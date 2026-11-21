@@ -1,0 +1,4 @@
+{
+  "docs/v1.5.0-verification.md": "79 lines, one short of the 80-line minimum; a real record of the v1.5.0 release, kept as it was.",
+  "docs/v1.5.4-verification.md": "A stub that shipped uncompleted (39 lines, TODO markers); the completeness check did not exist until v1.7.11. A historical record, not edited."
+}

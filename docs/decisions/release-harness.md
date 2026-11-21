@@ -304,7 +304,7 @@ The harness is built from this list. A line here without a test is a harness tha
 7. **`check_workflows_covered` exempts by name prefix** (`monitor`, `fetch`, `refresh`, `update`, `schedule`). The harness
    tests both sides; the exemption list is **unchanged** and is a v1.9.5 finding (a push-triggered `update-*.yml` would be
    silently unpolled).
-8. **The `docs/audits/fifth-pass.md` to `third-pass.md` rename is v1.9.5.** It is not done here and is named under
+8. **The `docs/audits/fifth-pass.md` to `third-pass.md` rename is v1.9.5.** It is not done here and is named under <!-- doc-path: example -->
    "Verification owed".
 
 Also consequent: the gate accumulates (D9), a failed gate leaves a mutated tree and says how to restore it (D10), the
@@ -342,3 +342,15 @@ Also consequent: the gate accumulates (D9), a failed gate leaves a mutated tree 
 - **For the v1.9.5 triage (new findings, not fixed here):** a re-run on a later day rewrites `meta.updated`; the
   `check_workflows_covered` name-prefix exemption; and the `fifth-pass.md` to `third-pass.md` rename.
 - The harness depends on `bash`, `git` and POSIX paths; it is skipped on Windows like the existing release tests.
+
+## Amendment 1 (v1.9.5): what the first real release taught D4 and D5
+
+Recorded by ADR 0017 (D7 a and b). Two things changed after v1.9.4 shipped.
+
+- **D4: the verification-doc checker skips fenced code and inline code spans** (commit `fcc04cf`). The first real release
+  exited 8: the generated doc quotes gate output, and the checker, which then had no notion of evidence, rejected a word in it.
+  The refusal was the guard working as designed (a doc its own checker rejects is not committed); the checker was wrong about
+  what is evidence. v1.9.5 makes the fence handling exact (an unterminated fence is an error) and states what it does not catch.
+- **D5: the dry-run now reaches the doc stage.** v1.9.4's dry-run bumped, regenerated and ran the gate, but never rendered
+  the document, so it could not predict exit 8. It now renders the document in the throwaway copy and runs the checker on it.
+  [Confirmed] this was a gap in D5 as accepted, not in the code.

@@ -6,6 +6,80 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.5] — Unreleased
+
+The audit's documents are held to the same standard as its code. This release closes the third audit pass (v1.9.1 to v1.9.5): the
+wrappers' lookup contract (P5-09), one numbering for the release rules (P5-10 and EC), the verification-document checker (P5-11), the
+audit's own file name, and the decisions v1.9.4 left open. Each is decided in an ADR first ([ADR 0015](./docs/decisions/wrapper-lookup-contract.md),
+[0016](./docs/decisions/rules-numbering.md), [0017](./docs/decisions/verification-doc-history.md); Proposed until the owner commits them),
+then tested, then mutated.
+
+**For consumers.** When a code appears in more than one section of a registry, `currency()` now returns the entry the documentation has always
+promised: active first, then withdrawn, then non-ISO. This changes nothing for the registry that ships (the validator already refuses such
+overlaps) and matters only for hand-edited registries. In Python and JavaScript, passing something that is not a string, `None` and `null`
+included, now raises a `TypeError` that says so, instead of an accidental `AttributeError`; Go and Rust cannot be given such a value and are
+unchanged. The release script's dry-run now also checks the verification document it would write, and a re-run on a later day no longer moves
+the release date.
+
+### Fixed
+
+- **`currency()` returned the last section that mentioned a code, not the first the documentation named (P5-09).** All four wrappers built
+  the any-code index in the documented order and let each later section overwrite the earlier one, so a non-ISO entry beat an active one.
+  Measured by running all four before the change. The index now keeps the earliest section; within one section the last entry for a code still
+  wins, and a collection has one entry per code, now written down and tested.
+- **`currency(None)` failed with an accident (P5-09).** Python raised `AttributeError`, JavaScript an unrelated `TypeError` from
+  `.toUpperCase`. Both now raise `TypeError("code must be a string, got ...")` from `currency`, `active`, `withdrawn`, `non_iso`/`nonIso` and
+  the membership test.
+- **`check_verification_doc.py --all` was unusable and its OK line named nothing (P5-11).** Eleven of its 24 findings on the v1.9.4 tree were the prose
+  word "placeholder" matched case-insensitively (the other 13: a 79-line record and a stub that shipped). `PLACEHOLDER` is now a marker only in upper case; the OK line names the document and its length (and,
+  with `--all`, what it set aside); the two genuine historical exceptions, `docs/v1.5.0-verification.md` (79 lines) and
+  `docs/v1.5.4-verification.md` (a stub that shipped), are listed with reasons in `docs/verification-grandfathered.json`, and a listed entry
+  that became clean or whose file is gone is an error. The gate and CI now run `--all`.
+- **An unterminated code fence hid the rest of a verification document (P5-11).** Fence tracking is now exact (character and length), and an
+  unterminated fence is an error.
+- **The audit document had two names.** `docs/audits/fifth-pass.md` is now `docs/audits/third-pass.md`; two CHANGELOG links already pointed
+  at the new name and had been dead. The `P5-` finding IDs keep their prefix (an identifier, cited on about 110 lines), and a paragraph at the
+  top of the document says so.
+- **The dry-run could not predict a failing verification document.** v1.9.4's first real release exited 8 because the generated document
+  quoted a gate line that the checker rejected. The dry-run now renders the document in its throwaway copy and runs the checker on it, and a
+  line in a gate step's output that starts a code fence can no longer open or close one in the document.
+- **A re-run on a later day moved the release date and made a second Release commit.** A re-run now keeps the date of the release commit.
+- **Hygiene rule 6b did not render as a heading** in `RELEASE_PATTERN.md`: its heading had a non-breaking space after the hashes. The new
+  rules checker found it.
+
+### Added
+
+- ADRs 0015, 0016 and 0017, and Amendment 1 to ADR 0014.
+- `docs/rules.md`, the numbering authority for the release rules (`E1` to `E8`, `H1` to `H10`), an adoption matrix for the four registries
+  labelled "not verified by tooling", and `tools/check_rules_refs.py`, which keeps this repository's side true. Cross-repository citations are
+  prefixed (`4217/H7`).
+- `tools/check_doc_paths.py`: every `docs/` path a document cites must exist. Gate steps 28 to 30.
+- `tests/test_wrapper_lookup_contract.py`, the `lookup_contract` group of `tests/cross_language_consistency.json` (14 vectors and 25
+  invalid-input cases), and the suites that read it in JavaScript (`lookup_contract.test.js`), Go (`lookup_contract_test.go`) and Rust (the
+  `lookup_contract` module).
+- 36 mutants: 32 in `tests/test_v195_mutations.py` and 4 more in `tests/test_release_harness_mutations.py` (35 there now). Every one is killed.
+  The suite is 2046 tests collected, from 1889 at v1.9.4.
+- The closing section of `docs/audits/third-pass.md`: every finding with the release that closed it and the test or tool that holds it, the
+  lessons, and the list of what the fourth audit takes up.
+
+### Changed
+
+- The gate is 30 steps (it was 28): `check_doc_paths.py` and `check_rules_refs.py` are new, and the verification-document step runs `--all`.
+- `RELEASE_PATTERN.md` points at `docs/rules.md`, no longer says "Four rules" above thirteen, and has a review-history entry.
+
+### Not changed
+
+- `check_workflows_covered` still exempts workflows by name prefix; exempting by trigger is on the fourth audit's list.
+- Rust's collection accessors still return hash-map order; `by_country(None)` and `pegged_to(None)` still raise `AttributeError` in Python.
+  Both are recorded as findings for the fourth audit. No registry data changed.
+
+### Corrections
+
+- The entries for 1.9.0, 1.9.3 and 1.9.4 and the 1.9.1, 1.9.3 and 1.9.4 verification documents call the audit file `docs/audits/fifth-pass.md`;
+  it is `docs/audits/third-pass.md`. Those documents carry a dated correction note; the sentences are unchanged.
+- The 1.9.3 and 1.9.4 verification documents say there are 21 non-ISO currencies; there are 22.
+
+---
 ## [1.9.4] — 2026-10-28
 
 The release script is tested the same way the registry is. The audit (`docs/audits/fifth-pass.md`) found that `scripts/release.sh`,

@@ -735,14 +735,12 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 		for _, c := range raw.Currencies.Active {
 			currency := newCurrency(c)
 			r.active[strings.ToUpper(currency.Code)] = currency
-			r.all[strings.ToUpper(currency.Code)] = currency
 		}
 
 		// Withdrawn currencies
 		for _, c := range raw.Currencies.Withdrawn {
 			currency := newCurrency(c)
 			r.withdrawn[strings.ToUpper(currency.Code)] = currency
-			r.all[strings.ToUpper(currency.Code)] = currency
 		}
 	}
 
@@ -752,7 +750,6 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 			for _, c := range currencies {
 				currency := newCurrency(c)
 				r.nonISO[strings.ToUpper(currency.Code)] = currency
-				r.all[strings.ToUpper(currency.Code)] = currency
 			}
 		}
 
@@ -760,6 +757,16 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 		addNonISO(raw.NonISO.Stablecoins)
 		addNonISO(raw.NonISO.Commodities)
 		addNonISO(raw.NonISO.SpecialPurpose)
+	}
+
+	// Currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
+	// (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
+	for _, section := range []map[string]*Currency{r.active, r.withdrawn, r.nonISO} {
+		for code, c := range section {
+			if _, taken := r.all[code]; !taken {
+				r.all[code] = c
+			}
+		}
 	}
 
 	return r, nil
@@ -851,7 +858,8 @@ func (r *CurrencyRegistry) AmendmentDate() string {
 // ---------------------------------------------------------------------------
 
 // Currency looks up any currency by code (case-insensitive).
-// Searches active, withdrawn, and non-ISO currencies.
+// Searches active, withdrawn, and non-ISO currencies. A code in more than one section resolves to the first of: active,
+// withdrawn, non-ISO. Within one section a repeated code keeps its last entry.
 func (r *CurrencyRegistry) Currency(code string) *Currency {
 	return r.all[strings.ToUpper(code)]
 }

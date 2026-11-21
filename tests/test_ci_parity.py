@@ -2,7 +2,7 @@
 CI and the release gate run the same checks (v1.9.1, audit finding P5-05; RELEASE_PATTERN.md section 5 and
 hygiene rule 7).
 
-The fifth-pass audit found a 277-test CLI suite that ran only in CI, an eslint script that ran nowhere, and two
+The third-pass audit found a 277-test CLI suite that ran only in CI, an eslint script that ran nowhere, and two
 CI pytest commands without `--fail-on-skip`. These tests read the workflows and release.sh and fail when
 that happens again:
 

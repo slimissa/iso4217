@@ -42,6 +42,7 @@ BASH = shutil.which("bash")
 pytestmark = pytest.mark.skipif(sys.platform == "win32" or not BASH, reason="bash and POSIX git paths")
 
 OLD, NEW = "1.0.0", "1.0.1"
+TAG = f"v{NEW}"
 E_OK, E_PRE, E_USAGE, E_COULD_NOT, E_GATE, E_PUSH, E_CI, E_TAG, E_DOC = 0, 1, 2, 3, 4, 5, 6, 7, 8
 
 EXPORTERS = ["export_sql", "export_csv", "export_parquet", "export_countries_parquet", "export_aggregated", "sync_wrappers"]
@@ -49,7 +50,7 @@ STUB_PY = [
     "validate", "export_sql", "export_csv", "export_parquet", "export_countries_parquet", "export_aggregated",
     "sync_wrappers", "check_release_claims", "check_mojibake", "check_line_endings", "check_snapshot_freshness",
     "check_registry_freshness", "check_country_codes", "vendor_iso3166", "check_readme_drift", "check_provenance",
-    "check_audit_table", "enrich_field",
+    "check_audit_table", "enrich_field", "check_doc_paths", "check_rules_refs",
 ]
 STUB_SH = ["check_cross_language", "check_js_lint"]
 SITE_FILES = ["VERSION", "CHANGELOG.md", "iso4217.json", "README.md", "wrappers/python/setup.py",
@@ -61,6 +62,8 @@ me = os.path.basename(__file__)
 if me in os.environ.get("RH_FAIL", "").split(","):
     print("forced failure of " + me)
     sys.exit(1)
+if os.environ.get("RH_FENCE_OUTPUT") == me:
+    print("```")
 if os.environ.get("RH_TODO_OUTPUT") == me:
     print("TODO: forced placeholder in the output of " + me)
 if me == "export_sql.py" and os.environ.get("RH_LEAVE_UNTRACKED"):
@@ -99,6 +102,12 @@ CONFTEST = (
     "def pytest_addoption(parser):\n"
     "    parser.addoption('--fail-on-skip', action='store_true', default=False)\n"
 )
+DATE_SHIM = '''\
+#!/bin/sh
+# A later day on demand: `date -u +...` answers RH_TODAY when it is set; everything else is the real date.
+if [ -n "$RH_TODAY" ] && [ "$1" = "-u" ]; then echo "$RH_TODAY"; exit 0; fi
+exec REAL_DATE "$@"
+'''
 HOOK_REJECT_TAGS = ('while read old new ref; do case "$ref" in refs/tags/*) '
                     'echo "tag rejected by the test hook" >&2; exit 1;; esac; done\n')
 HOOK_REJECT_MAIN = ('while read old new ref; do case "$ref" in refs/heads/main) '
@@ -244,6 +253,9 @@ def build_fixture(base: Path, no_gh_path: str, manifest: tuple = (OLD, NEW)) -> 
     gh = fx.bin / "gh"
     gh.write_text(GH_SRC)
     gh.chmod(0o755)
+    date = fx.bin / "date"
+    date.write_text(DATE_SHIM.replace("REAL_DATE", shutil.which("date") or "/bin/date"))
+    date.chmod(0o755)
 
     script = RELEASE_SH.read_text(encoding="utf-8")
     for old, new in (("POLL_GRACE=60", "POLL_GRACE=3"), ("POLL_INTERVAL=10", "POLL_INTERVAL=1")):
@@ -828,6 +840,17 @@ class TestVerificationDoc:
         assert r.returncode == E_DOC, r.out
         assert fx.origin_tags() == [f"v{NEW}"]
 
+    def test_a_fence_line_in_gate_output_cannot_break_the_generated_doc(self, fx):
+        # ADR 0017, D4: an unterminated fence is an error, so a gate step that prints a lone fence line must not be able to
+        # open one in the document it is quoted in.
+        r = fx.run(NEW, env={"RH_FENCE_OUTPUT": "check_mojibake.py"})
+        assert r.returncode == E_OK, r.out
+        doc = fx.read(f"docs/{TAG}-verification.md")
+        assert sum(1 for line in doc.splitlines() if line.startswith("```")) % 2 == 0
+        checker = subprocess.run([sys.executable, "tools/check_verification_doc.py", "--all"], cwd=fx.work, capture_output=True,
+                                 text=True, env=fx._env())
+        assert checker.returncode == 0, checker.stdout + checker.stderr
+
     def test_a_doc_that_already_exists_is_left_alone(self, fx):
         fx.write(f"docs/v{NEW}-verification.md", _verification_doc(NEW) + "Hand-written.\n")
         fx.commit_all("pre-authored doc")
@@ -847,10 +870,28 @@ class TestDryRun:
         before = fx.snapshot()
         r = fx.run(NEW, "--dry-run")
         assert r.returncode == E_OK, r.out
-        assert "Running gate" in r.out and "\u2713 pytest tests/" in r.out and "\u2713 check_verification_doc.py" in r.out, \
+        assert "Running gate" in r.out and "\u2713 pytest tests/" in r.out and "\u2713 check_verification_doc.py --all" in r.out, \
             "a dry-run that does not run the gate is a plan"
         assert fx.snapshot() == before, "the operator's tree, commits, tags and origin are exactly as they were"
         assert not any("--workflow" in c for c in fx.gh_calls()), "no CI poll"
+
+    def test_R_the_dry_run_renders_the_verification_doc_and_checks_it(self, fx):
+        r = fx.run(NEW, "--dry-run")
+        assert r.returncode == E_OK, r.out
+        assert "Rendering verification doc" in r.out
+        assert f"docs/{TAG}-verification.md" in r.out and "clean" in r.out.split("Rendering verification doc", 1)[1]
+        assert not (fx.work / f"docs/{TAG}-verification.md").exists(), "the rendered doc lives in the throwaway copy only"
+
+    def test_R_a_rendered_doc_the_checker_would_reject_is_exit_8_in_the_dry_run_too(self, fx):
+        # The fixture's checker accepts the gate's --all call and rejects the doc stage's call: the dry-run must reach it.
+        fx.write("tools/check_verification_doc.py",
+                 "import os, sys\nif '--all' in sys.argv or not os.environ.get('RH_DOC_REJECT'):\n    sys.exit(0)\n"
+                 "print('DIRTY: rejected on purpose')\nsys.exit(1)\n")
+        fx.commit_all("a checker that rejects the generated doc")
+        before = fx.snapshot()
+        r = fx.run(NEW, "--dry-run", env={"RH_DOC_REJECT": "1"})
+        assert r.returncode == E_DOC, r.out
+        assert fx.snapshot() == before and fx.tmp_entries() == []
 
     def test_a_dry_run_leaves_the_tree_clean_enough_for_the_real_release_to_follow(self, fx):
         assert fx.run(NEW, "--dry-run").returncode == E_OK
@@ -882,6 +923,29 @@ class TestDryRun:
     def test_a_dry_run_still_enforces_the_preconditions(self, fx):
         fx.write("stray.txt", "x")
         assert fx.run(NEW, "--dry-run").returncode == E_PRE
+
+
+# ---------------------------------------------------------------------------
+# A re-run on a later day (ADR 0017, D7 c)
+# ---------------------------------------------------------------------------
+
+class TestReRunOnALaterDay:
+    def test_R_a_re_run_the_next_day_keeps_the_release_date_and_makes_no_second_release_commit(self, fx):
+        fx.hook(HOOK_REJECT_TAGS)
+        first = fx.run(NEW, env={"RH_TODAY": "2026-10-01"})
+        assert first.returncode == E_TAG, first.out
+        fx.clear_hook()
+        second = fx.run(NEW, "--force", env={"RH_TODAY": "2026-10-02"})
+        assert second.returncode == E_OK, second.out
+        assert json.loads(fx.read("iso4217.json"))["meta"]["updated"] == "2026-10-01"
+        assert f"## [{NEW}] \u2014 2026-10-01" in fx.read("CHANGELOG.md")
+        subjects = fx.ogit("log", "--format=%s").split("\n")
+        assert subjects.count(f"Release {TAG}") == 1, subjects
+
+    def test_C_a_first_run_uses_the_day_the_clock_gives(self, fx):
+        r = fx.run(NEW, env={"RH_TODAY": "2026-10-03"})
+        assert r.returncode == E_OK, r.out
+        assert json.loads(fx.read("iso4217.json"))["meta"]["updated"] == "2026-10-03"
 
 
 # ---------------------------------------------------------------------------

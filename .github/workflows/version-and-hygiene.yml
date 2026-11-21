@@ -153,8 +153,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
-      - name: Check verification docs for placeholders
-        run: python3 tools/check_verification_doc.py
+      - name: Check every verification doc for placeholders (grandfathered records named in docs/verification-grandfathered.json)
+        run: python3 tools/check_verification_doc.py --all
 
   check-registry-freshness:
     name: Registry freshness
@@ -280,3 +280,25 @@ jobs:
           python-version: "3.12"
       - name: Check docs/AUDIT.md against the workflows and release.sh
         run: python3 tools/check_audit_table.py
+
+  check-doc-paths:
+    name: Cited docs paths exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Check every docs/ path a document cites exists
+        run: python3 tools/check_doc_paths.py
+
+  check-rules-refs:
+    name: Release-rule numbering is consistent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Check docs/rules.md against RELEASE_PATTERN.md and the citations
+        run: python3 tools/check_rules_refs.py

@@ -46,6 +46,8 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `check_provenance.py` | — | version-and-hygiene.yml | yes |
 | `check_verification_doc.py` | — | version-and-hygiene.yml | yes |
 | `check_audit_table.py` | — | version-and-hygiene.yml | yes |
+| `check_doc_paths.py` | — | version-and-hygiene.yml | yes |
+| `check_rules_refs.py` | — | version-and-hygiene.yml | yes |
 | `check_amendments.py` | — | monitor-amendments.yml | — |
 | `check_cross_language.sh` | — | — | yes |
 | `check_release_claims.py` | — | version-and-hygiene.yml | yes |

@@ -675,7 +675,7 @@ CI rejects any pull request where a derived file is stale. The release gate (bel
 Releases are cut by [`scripts/release.sh`](./scripts/release.sh):
 
 ```bash
-bash scripts/release.sh <version> --dry-run   # preview every site and gate
+bash scripts/release.sh <version> --dry-run   # run the gate and render the verification doc on a throwaway copy
 bash scripts/release.sh <version>             # release
 bash scripts/release.sh <version> --force     # re-run on an existing tag
 bash scripts/release.sh <version> --poll-timeout 900   # wait up to 900 s for CI (default 300)
@@ -685,7 +685,7 @@ The script is deterministic and refuses to start unless the `gh` CLI is installe
 
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date (UTC), `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
-3. **Runs a 28-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, line endings, snapshot freshness, registry freshness, country codes, country-currency membership, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, verification doc, the audit table, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
+3. **Runs a 30-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, line endings, snapshot freshness, registry freshness, country codes, country-currency membership, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, every verification doc (`--all`), the audit table, the cited `docs/` paths, the release-rule numbering, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
 4. **Commits and pushes** (it first checks that the gate left no untracked file and that every staged path is a plain modification, and prints the staged stat), then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
 5. **Tags** only when everything is green. The tag message is the first 15 lines of the changelog section, headings included; it is read back from the tag and compared before the tag is pushed.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.
@@ -937,7 +937,7 @@ Read its footer: every Parquet file here carries `iso4217.version` and `iso4217.
 So a consumer can download one file without running anything, and so any drift between the JSON and a derived file fails CI instead of reaching users.
 
 **How are releases tested before they ship?**
-`bash scripts/release.sh <version> --dry-run` prints every site, artifact, and gate check without changing anything.
+`bash scripts/release.sh <version> --dry-run` bumps, regenerates, runs the whole gate and renders the verification document on a throwaway copy of the tree, so it says whether the gate would pass; it never touches your working tree.
 
 ---
 

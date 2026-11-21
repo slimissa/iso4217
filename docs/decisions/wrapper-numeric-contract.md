@@ -6,7 +6,7 @@
 
 ## Context
 
-The brief for v1.9.3 listed the rounding mode as one of five disagreements. The audit's own finding (`docs/audits/fifth-pass.md`,
+The brief for v1.9.3 listed the rounding mode as one of five disagreements. The audit's own finding (`docs/audits/third-pass.md`,
 P5-04) says something narrower: `to_minor` rounds ties identically in all four wrappers and `format` does not. Measured on
 the v1.9.2 tree (Python 3.12, Node 22, Go 1.27 linux/amd64, Rust 1.99), the audit is right and the brief's framing is not:
 **the rounding mode is not changing**:

@@ -6,7 +6,7 @@ Derive the truth of the tables in docs/AUDIT.md from the tree and compare.
 
 docs/AUDIT.md says, for every tool in tools/: whether it declares a `--check`
 option, which workflow files invoke it, and how many `run_gate()` steps in
-scripts/release.sh invoke it. v1.8.4 wrote that table by hand and the fifth-pass
+scripts/release.sh invoke it. v1.8.4 wrote that table by hand and the third-pass
 audit (v1.9.0) re-derived it with a short script and found it true, with nothing
 keeping it true. This tool is that script, wired into the gate and CI
 (RELEASE_PATTERN.md rule 8 says the table is the mechanism; this makes it

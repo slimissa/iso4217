@@ -1,4 +1,14 @@
-# Fifth-pass audit: ISO 4217 registry v1.9.0
+# Third-pass audit: ISO 4217 registry v1.9.0
+
+> **Editorial note (v1.9.5).** This document, formerly `docs/audits/fifth-pass.md`, was delivered calling itself the fifth <!-- doc-path: example -->
+> pass. That was a naming fault: this repository counts the audit that runs from v1.9.1 to v1.9.5 as its **third pass**, and the
+> file was renamed in v1.9.5 (ADR 0017, D6). The finding IDs keep their `P5-` prefix: they are identifiers, cited on about 110
+> lines in 23 files including verification records that are not rewritten, so renaming them would break every one of those
+> citations. Read "P5" as a label, not a count.
+>
+> The report below is otherwise as delivered. It refers three times to "pass 3" as an *earlier* audit: [Guess] the first
+> mention (to_minor rounding made consistent) is the v1.1.0 fixes and the other two are the v1.7.11 audit (F1 to F30), but the
+> report does not say, and this note does not claim to know. Reconciling it is on the fourth audit's input list.
 
 Date: 2026-10-23. Scope: the project archive `iso4217-main.zip` at v1.9.0 (the archive carried no `.git`, so HEAD
 479f623 and the tag at fc3c5b5 were not verified). Method: read-only. The gate checks, `pytest --fail-on-skip`, the
@@ -94,7 +104,7 @@ Severity uses the same P0-P3 scale as the earlier audits. The P5-nn prefix avoid
 - `format(nan)` returns "$nan" while `to_minor(nan)` raises.
 - Fixture: it has 16 formatting vectors, all exactly representable, with no negatives, no ties and no large values.
   Error messages for the malformed-registry fixture matched between Python and JS in the probe.
-- Why missed: pass 3 made `to_minor` rounding consistent and assumed `format` followed.
+- Why missed: the earlier audit the report called "pass 3" made `to_minor` rounding consistent and assumed `format` followed.
 - Prevention: add tie, negative, overflow and `format`-versus-`to_minor` vectors to the fixture. Decide and document
   overflow behaviour.
 
@@ -105,7 +115,7 @@ Severity uses the same P0-P3 scale as the earlier audits. The P5-nn prefix avoid
 - The two CI pytest lines for the Python wrapper (`validate-wrappers` and `check-cli`) lack `--fail-on-skip`, which
   is hygiene rule 7's own flag.
 - `check-wrapper-sync` diffs three of the four copies. The fourth is covered by `sync_wrappers --check` elsewhere.
-- Why missed: pass 3 audited the gate's completeness against the lists in the docs, not against the workflow files.
+- Why missed: the earlier audit the report called "pass 3" audited the gate's completeness against the lists in the docs, not against the workflow files.
 - Prevention: a test that parses `validate.yml` and `version-and-hygiene.yml` and asserts every `run:` command is in
   the gate or on a named exception list.
 
@@ -128,7 +138,7 @@ Severity uses the same P0-P3 scale as the earlier audits. The P5-nn prefix avoid
   accumulates and then fails; a failed gate leaves a mutated tree with no rollback; `release.sh` pushes a stub
   verification doc that its own CI check will reject until it is filled; `check_workflows_covered` exempts names
   starting with monitor, fetch, refresh, update or schedule.
-- Why missed: pass 3 verified the behaviours of the bugs it found, not the coverage of the whole script.
+- Why missed: the earlier audit the report called "pass 3" verified the behaviours of the bugs it found, not the coverage of the whole script.
 - Prevention: a fake-remote harness that runs `release.sh` end to end with a stub `gh`.
 
 **P5-08 [P2] `check_release_claims.py --audit` crashes** [Confirmed]
@@ -185,7 +195,7 @@ Severity uses the same P0-P3 scale as the earlier audits. The P5-nn prefix avoid
 10. Add a `check_audit_table.py` that derives the AUDIT.md table; align sibling rule numbers (P5-10); fix the
     docstring and the verification-doc OK line (P5-09, P5-11).
 
-## Meta: what the fifth pass learned about the method
+## Meta: what this pass learned about the method
 
 - The earlier passes checked each fix with a mutation, but nobody mutated the checks that predate the audits. P5-02
   is the hole: the audit method inherited "the gate guards the release" as an unexamined premise.
@@ -194,9 +204,9 @@ Severity uses the same P0-P3 scale as the earlier audits. The P5-nn prefix avoid
 - Fixtures were treated as the contract. P5-04 is what the fixture does not contain.
 - Docs and tables were verified once by hand (AUDIT.md was true, and still has no checker).
 
-## Should a sixth pass happen?
+## Should a further pass happen?
 
-Not a fifth-style pass again. One narrow pass after these patches land, looking for what this one could not reach:
+Not a pass of this kind again. One narrow pass after these patches land, looking for what this one could not reach:
 the Windows and PyPI paths, the ISO 3166 side of the seam, a CI-toolchain diff (Go 1.27 and stable Rust, against Go
 1.22 and Rust 1.75), and a live SIX amendment check.
 
@@ -260,3 +270,85 @@ What this adds to the report:
 effort.") is **done**.
 
 The remaining findings (P5-09, P5-10, P5-11, EC) are scheduled for v1.9.5.
+
+## Closure (v1.9.5)
+
+This pass closes at v1.9.5. What follows records what closed each finding and what holds it today. It starts no new work; the last
+section is a list for the fourth audit and nothing on it was begun.
+
+### The findings
+
+| Finding | Subject | Closed at | Held by |
+|---|---|---|---|
+| P5-01 | The wheel shipped a schema that rejected its own registry | v1.9.2 | `tests/test_wheel_contents.py` |
+| P5-02 | The gate's tools were never shown able to fail | v1.9.1 | `tests/test_gate_mutations.py` |
+| P5-03 | Country-currency drift went undetected | v1.9.2 | `check_country_codes.py --membership`, ADR 0010 |
+| P5-04 | The four wrappers disagreed on rounding and formatting | v1.9.3 | `tests/test_wrapper_numeric_contract.py`, ADR 0013 |
+| P5-05 | CI and the release gate ran different checks | v1.9.1 | `tests/test_ci_parity.py` |
+| P5-06 | The line-ending policy covered three file types | v1.9.2 | `tools/check_line_endings.py`, `.gitattributes` |
+| P5-07 | Most of `release.sh` had no test | v1.9.4 | `tests/test_release_harness.py`, `tests/test_release_harness_mutations.py`, ADR 0014 |
+| P5-08 | `check_release_claims.py --audit` crashed on Parquet files | v1.9.1 | `tests/test_check_release_claims.py` |
+| P5-09 | The wrappers' lookup contradicted its own documentation | v1.9.5 | `tests/test_wrapper_lookup_contract.py` and the four wrappers' own suites, ADR 0015 |
+| P5-10 | Rule numbers collide across registries | v1.9.5, this repository's side | `tools/check_rules_refs.py`, `docs/rules.md`, ADR 0016; the sibling columns are unverified by tooling |
+| P5-11 | `check_verification_doc.py` had a weak OK line and an unusable `--all` | v1.9.5 | `tests/test_check_verification_doc.py`, `docs/verification-grandfathered.json`, ADR 0017 |
+| R10 | Hygiene rule 10: a check that cannot fail is not a check | v1.9.1 | the self-enforcing coverage test in `tests/test_gate_mutations.py` |
+| AD | `docs/AUDIT.md` was written by hand and checked by nothing | v1.9.1 | `tools/check_audit_table.py` |
+| F31 | A stale vendored ISO 3166 snapshot could not be noticed | v1.9.1 | `vendor_iso3166.py --check-upstream`, `tests/test_vendor_upstream.py` |
+| EC | "Docs and pattern alignment" with Exchange Calendar | v1.9.5, as part of P5-10 | the Exchange Calendar column of `docs/rules.md`, labelled unverified |
+
+EC is never defined in this document or anywhere else in the repository; it appears only in lists of the open findings. [Guess] It is
+the Exchange Calendar alignment of P5-10, and ADR 0016 treats it so. If the owner meant something else this row is the one to correct.
+
+### What held up
+
+- **ADR first.** ADRs 0013 to 0017 were each written before the code they govern, and each was amended by what the tests found, not
+  the other way round (ADR 0014 twice, ADR 0017 for the fence handling and the grandfather list).
+- **The gate refuses to tag on red, and the release script that enforces it is tested.** 118 tests run the real script against a bare
+  git remote, and 35 mutants of it are killed.
+- **Mutation sweeps found defects in the tests themselves.** In v1.9.4 three (a `gh` stub that reported a run for any commit; a fixture
+  value too weak to observe; two overlapping guards). In v1.9.5 the first run killed all 36 new mutants (32 in `tests/test_v195_mutations.py`,
+  4 in the release harness's file); that is a statement about those mutants, not a proof that nothing is missing.
+- **A tool that indexes a document finds the document's defects.** `check_rules_refs.py` requires every rule heading to have a row; it
+  found that the heading of hygiene rule 6b carried a non-breaking space after the hashes and so did not render as a heading.
+  `check_doc_paths.py` found the two dead links in the CHANGELOG that had stood for two releases.
+
+### What this pass learned about the method
+
+- **Run what processes real output on the real tree (the v1.9.5 brief's rule D).** v1.9.4's first real release exited 8: the generated
+  verification document quoted the gate's output, and that output contained the line the 1.9.4 manifest's own claim printed. The harness used
+  stubs and could not have seen it; the dry-run did not reach the document stage. Both are fixed (ADR 0017, D7).
+- **The harness can be wrong too (rule E).** A fixture is a claim about the repository; when a fixture needed the repository's history
+  (a list of grandfathered documents, a list of frozen citations) the list moved into a data file in the root being checked, so no other
+  root inherits it.
+- **A number in a document comes from a command (rule F).** "Non-ISO: 21" was written in the v1.9.3 verification document and carried
+  forward to v1.9.4; the registry has 22. The v1.9.4 document's test counts disagreed with each other. Corrections are appended to those
+  documents, dated; the originals are untouched.
+
+### The fourth audit's input list
+
+A list, not work. Nothing here was started.
+
+1. The Windows and PyPI paths.
+2. The ISO 3166 seam.
+3. The CI-toolchain difference: this release was built with Go 1.27.3, Rust 1.99.1 and Node 22 installed from conda-forge in a sandbox;
+   the versions CI uses were not compared.
+4. Live SIX data.
+5. The rules matrix: read the Exchange Calendar and ISO 10383 pattern files (the former's `docs` directory was blocked to automated access
+   on 2026-10-29), replace every "unknown" cell, verify the matrix by tooling, and decide the difference in gate semantics (ISO 3166 and
+   ISO 10383 describe a fail-fast gate; this repository's accumulates every failure).
+6. Deferred from v1.9.5: `check_workflows_covered` exempts workflows by name prefix (`monitor`, `fetch`, `refresh`, `update`, `schedule`), so a
+   push-triggered `update-*.yml` would be silently unpolled. Exempting by trigger needs a YAML read the script cannot do without a helper and
+   its own tests.
+7. New findings from this release, not fixed:
+   - Rust's collection accessors (`all_active()` and siblings) return hash-map order; Python, JavaScript and Go return file order.
+   - `by_country(None)` and `pegged_to(None)` raise `AttributeError` in Python [Confirmed by running] and an incidental `TypeError` in
+     JavaScript [by reading]: the same accident P5-09 fixed for the five currency-code lookups.
+   - Go and Rust sources are not formatted by `gofmt` and `rustfmt` (`gofmt -l` lists two files; `rustfmt` reports 45 differences on the
+     v1.9.4 tree) and no gate step checks formatting.
+   - This document still says "pass 3" three times for an earlier audit without saying which; the editorial note at the top records a guess.
+   - Any manifest claim whose output line contains a word the verification-document checker bans can still make a generated document fail it
+     when the word is outside a code fence; the fence handling removes the known case, not the class.
+8. For the owner to measure on the real tree: the size and time of the dry-run's throwaway copy, and whether the real tree's gate output
+   passes the checker in the dry-run's document stage.
+9. Not verified in this release: CI, the commit hashes and tags (the archive carries no history), and the clean-venv count on the
+   maintainer's machine.
