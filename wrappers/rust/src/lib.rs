@@ -2024,3 +2024,59 @@ mod collection_order {
         assert_eq!(r.all_currencies()[1].name, "g", "the earliest section wins");
     }
 }
+
+// Collection order across the four wrappers (v1.9.6, ADR 0015): every list in the `collection_order` group of
+// tests/cross_language_consistency.json must be returned by this wrapper in exactly that order. The same group is read by the
+// Python, JavaScript and Go suites, so the four outputs are identical.
+#[cfg(test)]
+mod collection_order_fixture {
+    use super::*;
+
+    #[test]
+    fn collection_order() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../tests/cross_language_consistency.json"
+        );
+        let fixture: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        let co = fixture
+            .get("collection_order")
+            .expect("tests/cross_language_consistency.json has no collection_order group");
+        let mut cases = vec![("shipped".to_string(), co["shipped"].clone())];
+        for case in co["synthetic"].as_array().expect("collection_order has no synthetic cases") {
+            cases.push((case["id"].as_str().unwrap().to_string(), case.clone()));
+        }
+
+        let codes = |list: Vec<&Currency>| -> Vec<String> { list.iter().map(|c| c.code.clone()).collect() };
+        let want = |v: &serde_json::Value| -> Vec<String> {
+            v.as_array().unwrap().iter().map(|c| c.as_str().unwrap().to_string()).collect()
+        };
+        let mut vectors = 0;
+        for (id, case) in cases {
+            let registry = if case["registry"].as_str() == Some("shipped") {
+                CurrencyRegistry::load().unwrap()
+            } else {
+                CurrencyRegistry::load_from_str(&case["registry"].to_string())
+                    .unwrap_or_else(|e| panic!("{}: registry did not load: {}", id, e))
+            };
+            for (method, expected) in case["collections"].as_object().unwrap() {
+                vectors += 1;
+                let got = match method.as_str() {
+                    "all_active" => codes(registry.all_active()),
+                    "all_withdrawn" => codes(registry.all_withdrawn()),
+                    "all_non_iso" => codes(registry.all_non_iso()),
+                    "all_currencies" => codes(registry.all_currencies()),
+                    other => panic!("{}: unknown collection {}", id, other),
+                };
+                assert_eq!(got, want(expected), "{}: {}", id, method);
+            }
+            for (anchor, expected) in case["pegged_to"].as_object().unwrap() {
+                vectors += 1;
+                assert_eq!(codes(registry.pegged_to(anchor)), want(expected), "{}: pegged_to({})", id, anchor);
+            }
+        }
+        assert_eq!(vectors as u64, co["vector_count"].as_u64().unwrap(), "the fixture's vector_count");
+        println!("COLLECTION_ORDER rust vectors={}", vectors);
+    }
+}
