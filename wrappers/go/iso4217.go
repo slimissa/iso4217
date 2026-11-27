@@ -440,6 +440,21 @@ type CurrencyRegistry struct {
 	withdrawn      map[string]*Currency
 	nonISO         map[string]*Currency
 	all            map[string]*Currency
+	// File order beside each map (lookup stays O(1) in the map; collections walk the order). Each code is listed once, at
+	// the position of its first entry; the map holds the entry that wins (ADR 0015, D3), the same as Python's dict.
+	activeOrder    []string
+	withdrawnOrder []string
+	nonISOOrder    []string
+	allOrder       []string
+}
+
+// insertInOrder stores c under code, recording the code in order the first time it is seen. A repeated code keeps its
+// first position and takes the later entry (ADR 0015, D3).
+func insertInOrder(m map[string]*Currency, order *[]string, code string, c *Currency) {
+	if _, seen := m[code]; !seen {
+		*order = append(*order, code)
+	}
+	m[code] = c
 }
 
 var (
@@ -734,13 +749,13 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 	if raw.Currencies != nil {
 		for _, c := range raw.Currencies.Active {
 			currency := newCurrency(c)
-			r.active[strings.ToUpper(currency.Code)] = currency
+			insertInOrder(r.active, &r.activeOrder, strings.ToUpper(currency.Code), currency)
 		}
 
 		// Withdrawn currencies
 		for _, c := range raw.Currencies.Withdrawn {
 			currency := newCurrency(c)
-			r.withdrawn[strings.ToUpper(currency.Code)] = currency
+			insertInOrder(r.withdrawn, &r.withdrawnOrder, strings.ToUpper(currency.Code), currency)
 		}
 	}
 
@@ -749,7 +764,7 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 		addNonISO := func(currencies []rawCurrency) {
 			for _, c := range currencies {
 				currency := newCurrency(c)
-				r.nonISO[strings.ToUpper(currency.Code)] = currency
+				insertInOrder(r.nonISO, &r.nonISOOrder, strings.ToUpper(currency.Code), currency)
 			}
 		}
 
@@ -761,10 +776,17 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 
 	// Currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
 	// (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
-	for _, section := range []map[string]*Currency{r.active, r.withdrawn, r.nonISO} {
-		for code, c := range section {
+	// The sections are walked in file order, so AllCurrencies() lists them in that order too.
+	sections := []struct {
+		m     map[string]*Currency
+		order []string
+	}{{r.active, r.activeOrder}, {r.withdrawn, r.withdrawnOrder}, {r.nonISO, r.nonISOOrder}}
+	for _, section := range sections {
+		for _, code := range section.order {
+			c := section.m[code]
 			if _, taken := r.all[code]; !taken {
 				r.all[code] = c
+				r.allOrder = append(r.allOrder, code)
 			}
 		}
 	}
@@ -883,40 +905,37 @@ func (r *CurrencyRegistry) NonISO(code string) *Currency {
 // Collection accessors
 // ---------------------------------------------------------------------------
 
-// AllActive returns all active ISO 4217 currencies.
+// Every collection is in file order: the order of the entries in iso4217.json, section by section, one entry per code
+// (ADR 0015). The same order as the Python, JavaScript and Rust wrappers. A Go map has no order, so each walks its order
+// slice and reads the map.
+
+func inOrder(m map[string]*Currency, order []string) []*Currency {
+	result := make([]*Currency, 0, len(order))
+	for _, code := range order {
+		result = append(result, m[code])
+	}
+	return result
+}
+
+// AllActive returns all active ISO 4217 currencies, in file order.
 func (r *CurrencyRegistry) AllActive() []*Currency {
-	result := make([]*Currency, 0, len(r.active))
-	for _, c := range r.active {
-		result = append(result, c)
-	}
-	return result
+	return inOrder(r.active, r.activeOrder)
 }
 
-// AllWithdrawn returns all withdrawn ISO 4217 currencies.
+// AllWithdrawn returns all withdrawn ISO 4217 currencies, in file order.
 func (r *CurrencyRegistry) AllWithdrawn() []*Currency {
-	result := make([]*Currency, 0, len(r.withdrawn))
-	for _, c := range r.withdrawn {
-		result = append(result, c)
-	}
-	return result
+	return inOrder(r.withdrawn, r.withdrawnOrder)
 }
 
-// AllNonISO returns all non-ISO currencies.
+// AllNonISO returns all non-ISO currencies, in file order (cryptocurrencies, stablecoins, commodities, special purpose).
 func (r *CurrencyRegistry) AllNonISO() []*Currency {
-	result := make([]*Currency, 0, len(r.nonISO))
-	for _, c := range r.nonISO {
-		result = append(result, c)
-	}
-	return result
+	return inOrder(r.nonISO, r.nonISOOrder)
 }
 
-// AllCurrencies returns all currencies across all categories.
+// AllCurrencies returns all currencies across all categories: active, then withdrawn, then non-ISO, each in file order,
+// one entry per code (a code in more than one section appears once, where its earliest section lists it).
 func (r *CurrencyRegistry) AllCurrencies() []*Currency {
-	result := make([]*Currency, 0, len(r.all))
-	for _, c := range r.all {
-		result = append(result, c)
-	}
-	return result
+	return inOrder(r.all, r.allOrder)
 }
 
 // ---------------------------------------------------------------------------
@@ -933,7 +952,7 @@ func (r *CurrencyRegistry) AllCurrencies() []*Currency {
 func (r *CurrencyRegistry) PeggedTo(anchorCode string) []*Currency {
 	anchor := strings.ToUpper(anchorCode)
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		if c.PegType != nil && *c.PegType == "single" &&
 			c.PeggedTo != nil && strings.ToUpper(*c.PeggedTo) == anchor {
 			result = append(result, c)
@@ -945,7 +964,7 @@ func (r *CurrencyRegistry) PeggedTo(anchorCode string) []*Currency {
 // Independent returns all active currencies that are independently floating.
 func (r *CurrencyRegistry) Independent() []*Currency {
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		if c.IsIndependent {
 			result = append(result, c)
 		}
@@ -957,7 +976,7 @@ func (r *CurrencyRegistry) Independent() []*Currency {
 // of minor units.
 func (r *CurrencyRegistry) WithMinorUnits(n int) []*Currency {
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		if c.MinorUnits == n {
 			result = append(result, c)
 		}
@@ -969,7 +988,7 @@ func (r *CurrencyRegistry) WithMinorUnits(n int) []*Currency {
 func (r *CurrencyRegistry) IssuedBy(countryCode string) []*Currency {
 	code := strings.ToUpper(countryCode)
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		for _, country := range c.Countries {
 			if country.Code == code && country.Relationship == "issuing" {
 				result = append(result, c)
@@ -984,7 +1003,7 @@ func (r *CurrencyRegistry) IssuedBy(countryCode string) []*Currency {
 func (r *CurrencyRegistry) UsedIn(countryCode string) []*Currency {
 	code := strings.ToUpper(countryCode)
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		for _, country := range c.Countries {
 			if country.Code == code {
 				result = append(result, c)
@@ -1002,7 +1021,7 @@ func (r *CurrencyRegistry) UsedIn(countryCode string) []*Currency {
 // v1.6.0 and no entry carries a classification field.
 func (r *CurrencyRegistry) ByClassification(cls string) []*Currency {
 	var result []*Currency
-	for _, c := range r.active {
+	for _, c := range r.AllActive() {
 		if c.Classification != nil && *c.Classification == cls {
 			result = append(result, c)
 		}

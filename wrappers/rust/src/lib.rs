@@ -740,6 +740,21 @@ pub struct CurrencyRegistry {
     withdrawn: HashMap<String, Currency>,
     non_iso: HashMap<String, Currency>,
     all: HashMap<String, Currency>,
+    // File order beside each map (lookup stays O(1) in the map; collections walk the order). Each code is listed once, at
+    // the position of its first entry; the map holds the entry that wins (ADR 0015, D3), the same as Python's dict.
+    active_order: Vec<String>,
+    withdrawn_order: Vec<String>,
+    non_iso_order: Vec<String>,
+    all_order: Vec<String>,
+}
+
+/// Inserts `currency` under `code`, recording the code in `order` the first time it is seen. A repeated code keeps its
+/// first position and takes the later entry (ADR 0015, D3).
+fn insert_in_order(map: &mut HashMap<String, Currency>, order: &mut Vec<String>, code: String, currency: Currency) {
+    if !map.contains_key(&code) {
+        order.push(code.clone());
+    }
+    map.insert(code, currency);
 }
 
 impl CurrencyRegistry {
@@ -771,6 +786,10 @@ impl CurrencyRegistry {
         let mut withdrawn = HashMap::new();
         let mut non_iso = HashMap::new();
         let mut all = HashMap::new();
+        let mut active_order = Vec::new();
+        let mut withdrawn_order = Vec::new();
+        let mut non_iso_order = Vec::new();
+        let mut all_order = Vec::new();
 
         // Active currencies
         if let Some(ref currencies) = raw.currencies {
@@ -778,7 +797,7 @@ impl CurrencyRegistry {
                 for c in active_list {
                     let code = c.code.clone();
                     let currency = Currency::from(c.clone());
-                    active.insert(code, currency);
+                    insert_in_order(&mut active, &mut active_order, code, currency);
                 }
             }
 
@@ -787,7 +806,7 @@ impl CurrencyRegistry {
                 for c in withdrawn_list {
                     let code = c.code.clone();
                     let currency = Currency::from(c.clone());
-                    withdrawn.insert(code, currency);
+                    insert_in_order(&mut withdrawn, &mut withdrawn_order, code, currency);
                 }
             }
         }
@@ -806,7 +825,7 @@ impl CurrencyRegistry {
                     for c in list {
                         let code = c.code.clone();
                         let currency = Currency::from(c.clone());
-                        non_iso.insert(code, currency);
+                        insert_in_order(&mut non_iso, &mut non_iso_order, code, currency);
                     }
                 }
             }
@@ -814,8 +833,13 @@ impl CurrencyRegistry {
 
         // currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
         // (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
-        for section in [&active, &withdrawn, &non_iso] {
-            for (code, currency) in section.iter() {
+        // The sections are walked in file order, so all_currencies() lists them in that order too.
+        for (section, order) in [(&active, &active_order), (&withdrawn, &withdrawn_order), (&non_iso, &non_iso_order)] {
+            for code in order.iter() {
+                let currency = &section[code];
+                if !all.contains_key(code) {
+                    all_order.push(code.clone());
+                }
                 all.entry(code.clone()).or_insert_with(|| currency.clone());
             }
         }
@@ -853,6 +877,10 @@ impl CurrencyRegistry {
             withdrawn,
             non_iso,
             all,
+            active_order,
+            withdrawn_order,
+            non_iso_order,
+            all_order,
         })
     }
 
@@ -904,25 +932,34 @@ impl CurrencyRegistry {
     }
 
     // -- Collection accessors -----------------------------------------------
+    //
+    // Every collection is in file order: the order of the entries in iso4217.json, section by section, one entry per code
+    // (ADR 0015). The same order as the Python, JavaScript and Go wrappers.
 
-    /// Return all active ISO 4217 currencies.
+    /// The active currencies in file order. Every filter below starts from this order.
+    fn active_in_order(&self) -> impl Iterator<Item = &Currency> + '_ {
+        self.active_order.iter().map(move |code| &self.active[code])
+    }
+
+    /// Return all active ISO 4217 currencies, in file order.
     pub fn all_active(&self) -> Vec<&Currency> {
-        self.active.values().collect()
+        self.active_in_order().collect()
     }
 
-    /// Return all withdrawn ISO 4217 currencies.
+    /// Return all withdrawn ISO 4217 currencies, in file order.
     pub fn all_withdrawn(&self) -> Vec<&Currency> {
-        self.withdrawn.values().collect()
+        self.withdrawn_order.iter().map(|code| &self.withdrawn[code]).collect()
     }
 
-    /// Return all non-ISO currencies.
+    /// Return all non-ISO currencies, in file order (cryptocurrencies, stablecoins, commodities, special purpose).
     pub fn all_non_iso(&self) -> Vec<&Currency> {
-        self.non_iso.values().collect()
+        self.non_iso_order.iter().map(|code| &self.non_iso[code]).collect()
     }
 
-    /// Return all currencies across all categories.
+    /// Return all currencies across all categories: active, then withdrawn, then non-ISO, each in file order, one entry per
+    /// code (a code in more than one section appears once, where its earliest section lists it).
     pub fn all_currencies(&self) -> Vec<&Currency> {
-        self.all.values().collect()
+        self.all_order.iter().map(|code| &self.all[code]).collect()
     }
 
     // -- Filtering ----------------------------------------------------------
@@ -946,8 +983,7 @@ impl CurrencyRegistry {
     /// ```
     pub fn pegged_to(&self, anchor_code: &str) -> Vec<&Currency> {
         let anchor = anchor_code.to_uppercase();
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| {
                 c.peg_type.as_deref() == Some("single")
                     && c.pegged_to
@@ -960,8 +996,7 @@ impl CurrencyRegistry {
 
     /// Return all active currencies that are independently floating.
     pub fn independent(&self) -> Vec<&Currency> {
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| c.is_independent)
             .collect()
     }
@@ -975,8 +1010,7 @@ impl CurrencyRegistry {
     /// // Returns BHD, JOD, KWD, LYD, OMR, TND, IQD
     /// ```
     pub fn with_minor_units(&self, n: u8) -> Vec<&Currency> {
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| c.minor_units == n)
             .collect()
     }
@@ -984,8 +1018,7 @@ impl CurrencyRegistry {
     /// Find all active currencies where a country is the issuer.
     pub fn issued_by(&self, country_code: &str) -> Vec<&Currency> {
         let code = country_code.to_uppercase();
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| {
                 c.countries
                     .iter()
@@ -997,8 +1030,7 @@ impl CurrencyRegistry {
     /// Find all active currencies used in a country (any relationship).
     pub fn used_in(&self, country_code: &str) -> Vec<&Currency> {
         let code = country_code.to_uppercase();
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| c.countries.iter().any(|country| country.code == code))
             .collect()
     }
@@ -1015,8 +1047,7 @@ impl CurrencyRegistry {
     /// assert!(!funds.is_empty());
     /// ```
     pub fn by_classification(&self, cls: &str) -> Vec<&Currency> {
-        self.active
-            .values()
+        self.active_in_order()
             .filter(|c| c.classification.as_deref() == Some(cls))
             .collect()
     }
@@ -1077,9 +1108,9 @@ impl CurrencyRegistry {
 
     // -- Iteration ----------------------------------------------------------
 
-    /// Iterate over all active currencies.
-    pub fn iter(&self) -> impl Iterator<Item = &Currency> {
-        self.active.values()
+    /// Iterate over all active currencies, in file order.
+    pub fn iter(&self) -> impl Iterator<Item = &Currency> + '_ {
+        self.active_in_order()
     }
 }
 
@@ -1851,5 +1882,145 @@ mod lookup_contract {
             "the fixture's vector_count"
         );
         println!("LOOKUP_CONTRACT rust vectors={}", vectors);
+    }
+}
+
+// Collection order (v1.9.6): every collection is in file order, the order of the entries in iso4217.json, section by section,
+// one entry per code (ADR 0015). The expected orders are read from the embedded JSON itself, not from the wrapper.
+#[cfg(test)]
+mod collection_order {
+    use super::*;
+
+    fn json() -> serde_json::Value {
+        serde_json::from_str(REGISTRY_JSON).unwrap()
+    }
+
+    fn codes(list: &serde_json::Value) -> Vec<String> {
+        list.as_array()
+            .map(|a| a.iter().map(|c| c["code"].as_str().unwrap().to_string()).collect())
+            .unwrap_or_default()
+    }
+
+    /// One entry per code, at the position of its first entry.
+    fn first_seen(all: Vec<String>) -> Vec<String> {
+        let mut out: Vec<String> = Vec::new();
+        for code in all {
+            if !out.contains(&code) {
+                out.push(code);
+            }
+        }
+        out
+    }
+
+    fn expected_active() -> Vec<String> {
+        first_seen(codes(&json()["currencies"]["active"]))
+    }
+
+    fn expected_withdrawn() -> Vec<String> {
+        first_seen(codes(&json()["currencies"]["withdrawn"]))
+    }
+
+    fn expected_non_iso() -> Vec<String> {
+        let j = json();
+        let mut all = Vec::new();
+        for cat in ["cryptocurrencies", "stablecoins", "commodities", "special_purpose"] {
+            all.extend(codes(&j["non_iso"][cat]));
+        }
+        first_seen(all)
+    }
+
+    fn expected_all() -> Vec<String> {
+        let mut all = expected_active();
+        all.extend(expected_withdrawn());
+        all.extend(expected_non_iso());
+        first_seen(all)
+    }
+
+    fn expected_pegged_to(anchor: &str) -> Vec<String> {
+        let j = json();
+        let mut out = Vec::new();
+        for c in j["currencies"]["active"].as_array().unwrap() {
+            if c["peg_type"].as_str() == Some("single") && c["pegged_to"].as_str().map(|p| p.to_uppercase()) == Some(anchor.to_string()) {
+                out.push(c["code"].as_str().unwrap().to_string());
+            }
+        }
+        first_seen(out)
+    }
+
+    fn got(list: Vec<&Currency>) -> Vec<String> {
+        list.iter().map(|c| c.code.clone()).collect()
+    }
+
+    fn assert_first_last_and_all(name: &str, got: Vec<String>, want: Vec<String>) {
+        assert!(!want.is_empty(), "{}: the JSON gives an empty expectation", name);
+        assert_eq!(got.first(), want.first(), "{}: first code", name);
+        assert_eq!(got.last(), want.last(), "{}: last code", name);
+        assert_eq!(got, want, "{}: full order", name);
+    }
+
+    #[test]
+    fn all_active_is_in_file_order() {
+        assert_first_last_and_all("all_active", got(CurrencyRegistry::load().unwrap().all_active()), expected_active());
+    }
+
+    #[test]
+    fn all_withdrawn_is_in_file_order() {
+        assert_first_last_and_all("all_withdrawn", got(CurrencyRegistry::load().unwrap().all_withdrawn()), expected_withdrawn());
+    }
+
+    #[test]
+    fn all_non_iso_is_in_file_order() {
+        assert_first_last_and_all("all_non_iso", got(CurrencyRegistry::load().unwrap().all_non_iso()), expected_non_iso());
+    }
+
+    #[test]
+    fn all_currencies_is_active_then_withdrawn_then_non_iso_in_file_order() {
+        assert_first_last_and_all("all_currencies", got(CurrencyRegistry::load().unwrap().all_currencies()), expected_all());
+    }
+
+    #[test]
+    fn pegged_to_is_in_file_order() {
+        let r = CurrencyRegistry::load().unwrap();
+        for anchor in ["USD", "EUR", "XAF"] {
+            let want = expected_pegged_to(anchor);
+            if want.is_empty() {
+                assert!(r.pegged_to(anchor).is_empty(), "pegged_to({})", anchor);
+                continue;
+            }
+            assert_first_last_and_all(&format!("pegged_to({})", anchor), got(r.pegged_to(anchor)), want);
+        }
+    }
+
+    #[test]
+    fn every_filter_and_iter_keep_file_order() {
+        let r = CurrencyRegistry::load().unwrap();
+        let active = expected_active();
+        let subsequence = |name: &str, list: Vec<&Currency>| {
+            let positions: Vec<usize> = list.iter().map(|c| active.iter().position(|a| *a == c.code).unwrap()).collect();
+            assert!(!positions.is_empty(), "{}: empty", name);
+            assert!(positions.windows(2).all(|w| w[0] < w[1]), "{}: not in file order: {:?}", name, got(list));
+        };
+        subsequence("independent", r.independent());
+        subsequence("with_minor_units(2)", r.with_minor_units(2));
+        subsequence("issued_by(FR)", r.issued_by("FR"));
+        subsequence("used_in(FR)", r.used_in("FR"));
+        subsequence("by_classification(circulating)", r.by_classification("circulating"));
+        assert_eq!(r.iter().map(|c| c.code.clone()).collect::<Vec<_>>(), active, "iter()");
+    }
+
+    #[test]
+    fn a_repeated_code_keeps_its_first_position_and_its_last_entry() {
+        let r = CurrencyRegistry::load_from_str(
+            r#"{"currencies": {"active": [
+                {"code": "FFF", "name": "first", "minor_units": 2},
+                {"code": "GGG", "name": "g", "minor_units": 2},
+                {"code": "FFF", "name": "second", "minor_units": 2}],
+              "withdrawn": [{"code": "GGG", "name": "w", "minor_units": 2}, {"code": "WWW", "name": "w2", "minor_units": 2}]}}"#,
+        )
+        .unwrap();
+        assert_eq!(got(r.all_active()), vec!["FFF", "GGG"]);
+        assert_eq!(r.all_active()[0].name, "second");
+        assert_eq!(got(r.all_currencies()), vec!["FFF", "GGG", "WWW"]);
+        assert_eq!(r.all_currencies()[1].name, "g", "the earliest section wins");
     }
 }
