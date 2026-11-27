@@ -210,14 +210,18 @@ check_head_at_origin() {
     fi
 }
 
+# A workflow is polled if and only if a push runs it: the trigger decides, never the file name (v1.9.6, the third audit
+# pass's open item 6). scripts/workflow_triggers.py reads each workflow's on: key and fails closed on anything it cannot
+# read for certain.
 check_workflows_covered() {
     local declared=("$@")
-    local actual
-    actual="$(find .github/workflows -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' \) \
-        -exec basename {} \; 2>/dev/null \
-        | grep -v -E '^(monitor|fetch|refresh|update|schedule)' || true)"
-    if [ -z "$actual" ]; then
-        return
+    local actual rc=0
+    actual="$(python3 scripts/workflow_triggers.py --polled .github/workflows 2>&1)" || rc=$?
+    if [ "$rc" -eq 2 ]; then
+        fail "cannot tell which workflows a push runs:
+$actual"
+    elif [ "$rc" -ne 0 ]; then
+        fail_code "$EXIT_COULD_NOT" "scripts/workflow_triggers.py did not run (exit $rc): ${actual:0:300}"
     fi
     while read -r wf; do
         [ -z "$wf" ] && continue
@@ -232,6 +236,12 @@ check_workflows_covered() {
             fail "workflow $wf is not in the poll list (add it to POLLED_WORKFLOWS)"
         fi
     done <<< "$actual"
+    # The other direction: a polled workflow with no push trigger never gets a run for the release commit.
+    for d in "${declared[@]}"; do
+        if ! printf '%s\n' "$actual" | grep -qxF -- "$d"; then
+            fail "workflow $d is in POLLED_WORKFLOWS but no push runs it (remove it, or give it a push trigger)"
+        fi
+    done
 }
 
 POLLED_WORKFLOWS=(
@@ -770,7 +780,7 @@ print_plan() {
     echo "  clean tree"
     echo "  HEAD at origin/main"
     echo "  on main branch"
-    echo "  all per-push workflows in poll list"
+    echo "  poll list = the workflows with a push trigger (scripts/workflow_triggers.py)"
     echo "  gh installed and able to list workflow runs"
     echo "  tag free"
     echo "  CHANGELOG section present"

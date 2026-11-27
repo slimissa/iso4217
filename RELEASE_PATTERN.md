@@ -120,11 +120,16 @@ workflowName`, then iterates each run and asserts both `completed`
 and `success` before returning. The failure message names which
 workflow failed and its run ID.
 
-The workflow-coverage check (`check_workflows_covered`) enumerates
-`.github/workflows/*.yml`, filters schedule-driven workflows by name
-prefix, and fails if any remaining workflow is not in the declared
-poll list. This catches a new per-push workflow added without being
-added to `POLLED_WORKFLOWS`.
+The workflow-coverage check (`check_workflows_covered`) reads the
+`on:` key of every `.github/workflows/*.yml` with
+`scripts/workflow_triggers.py` and requires the declared poll list to be
+exactly the workflows with a `push` trigger: a push-triggered workflow
+missing from `POLLED_WORKFLOWS` fails, and so does a polled workflow no
+push runs (it would never get a run for the release commit). The
+trigger decides, never the file name (v1.9.6; until v1.9.5 names
+starting with `monitor`, `fetch`, `refresh`, `update` or `schedule`
+were exempt whatever their triggers). A workflow whose triggers the
+helper cannot read for certain stops the release.
 
 ### 7. Tag only on green
 

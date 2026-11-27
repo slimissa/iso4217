@@ -37,6 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # The mutation sweep (test_release_harness_mutations.py) points these at a mutated copy; nothing else sets them.
 RELEASE_SH = Path(os.environ.get("RH_RELEASE_SH") or PROJECT_ROOT / "scripts" / "release.sh")
 BUMP_PY = Path(os.environ.get("RH_BUMP_PY") or PROJECT_ROOT / "scripts" / "bump_version.py")
+TRIGGERS_PY = PROJECT_ROOT / "scripts" / "workflow_triggers.py"   # real: check_workflows_covered reads triggers with it (v1.9.6)
 BASH = shutil.which("bash")
 
 pytestmark = pytest.mark.skipif(sys.platform == "win32" or not BASH, reason="bash and POSIX git paths")
@@ -264,6 +265,8 @@ def build_fixture(base: Path, no_gh_path: str, manifest: tuple = (OLD, NEW)) -> 
     _mk(fx.work / "scripts" / "release.sh").write_text(script, encoding="utf-8")
     if BUMP_PY.exists():
         shutil.copy(BUMP_PY, fx.work / "scripts" / "bump_version.py")
+    if TRIGGERS_PY.exists():
+        shutil.copy(TRIGGERS_PY, fx.work / "scripts" / "workflow_triggers.py")
     for real in ("check_version_consistency.py", "check_verification_doc.py"):
         shutil.copy(PROJECT_ROOT / "tools" / real, _mk(fx.work / "tools" / real))
     for name in STUB_PY:
@@ -403,14 +406,48 @@ class TestPreconditions:
         assert "extra.yml is not in the poll list" in r.out
         _assert_untouched_by_a_failed_precondition(fx, before)
 
+    # v1.9.6 (the third audit pass, open item 6): the trigger decides, never the name. Until v1.9.5 the five prefixes below
+    # were exempt whatever their triggers (ADR 0014, consequence 7), so a push-triggered update-docs.yml went unpolled.
     @pytest.mark.parametrize("name", ["monitor-amendments", "fetch-x", "refresh-y", "update-docs", "schedule-z"])
-    def test_check_workflows_covered_exempts_the_five_prefixes_unchanged(self, fx, name):
-        # ADR 0014, consequence 7: the exemption list is unchanged here and is a v1.9.5 finding.
+    def test_check_workflows_covered_refuses_a_push_workflow_whatever_its_name(self, fx, name):
         fx.write(f".github/workflows/{name}.yml", "name: e\non: push\n")
-        fx.commit_all("add an exempt workflow")
+        fx.commit_all("add a push workflow with a formerly exempt name")
+        before = fx.snapshot()
+        r = fx.run(NEW, "--dry-run")
+        assert r.returncode == E_PRE, r.out
+        assert f"{name}.yml is not in the poll list" in r.out
+        _assert_untouched_by_a_failed_precondition(fx, before)
+
+    @pytest.mark.parametrize("on", [
+        "on:\n  schedule:\n    - cron: '0 8 * * 1'\n",
+        "on: workflow_dispatch\n",
+        "on: [workflow_dispatch, schedule]\n",
+    ])
+    @pytest.mark.parametrize("name", ["monitor-amendments", "nightly"])
+    def test_check_workflows_covered_exempts_a_workflow_no_push_runs(self, fx, name, on):
+        fx.write(f".github/workflows/{name}.yml", "name: e\n" + on)
+        fx.commit_all("add a workflow no push runs")
         r = fx.run(NEW, "--dry-run")
         assert r.returncode == E_OK, r.out
         assert "all per-push workflows are in the poll list" in r.out
+
+    def test_check_workflows_covered_refuses_a_polled_workflow_no_push_runs(self, fx):
+        fx.write(".github/workflows/version-and-hygiene.yml", "name: x\non: workflow_dispatch\n")
+        fx.commit_all("the polled workflow lost its push trigger")
+        before = fx.snapshot()
+        r = fx.run(NEW, "--dry-run")
+        assert r.returncode == E_PRE, r.out
+        assert "version-and-hygiene.yml is in POLLED_WORKFLOWS but no push runs it" in r.out
+        _assert_untouched_by_a_failed_precondition(fx, before)
+
+    def test_check_workflows_covered_refuses_a_workflow_it_cannot_read(self, fx):
+        fx.write(".github/workflows/odd.yml", "name: e\non: *anchors\n")
+        fx.commit_all("a workflow whose triggers cannot be read for certain")
+        before = fx.snapshot()
+        r = fx.run(NEW, "--dry-run")
+        assert r.returncode == E_PRE, r.out
+        assert "cannot tell which workflows a push runs" in r.out and "odd.yml" in r.out
+        _assert_untouched_by_a_failed_precondition(fx, before)
 
     def test_check_gh_ready_gh_missing_is_could_not_run(self, fx):
         before = fx.snapshot()
