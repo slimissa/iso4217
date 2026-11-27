@@ -616,9 +616,9 @@
     ]
   },
   "lookup_contract": {
-    "description": "The lookup contract (ADR 0015): the documented order active, withdrawn, non-ISO decides which entry currency() returns (the earliest section wins); within one section the last entry for a code wins and the collection has one entry per code; Python and JavaScript raise TypeError for a code argument that is not a string. Go and Rust cannot be given one. Each wrapper builds the registries below through its own loader.",
+    "description": "The lookup contract (ADR 0015): the documented order active, withdrawn, non-ISO decides which entry currency() returns (the earliest section wins); within one section the last entry for a code wins and the collection has one entry per code; Python and JavaScript raise TypeError for a code argument that is not a string. Go and Rust cannot be given one. v1.9.6 adds the lookups that take a country or anchor code (pegged_to, issued_by, used_in); invalid_input_count is the size of the group (methods times values), and method_applies_to, when it names a method, narrows applies_to for that method to the wrappers that guard it. Each wrapper builds the registries below through its own loader.",
     "vector_count": 14,
-    "invalid_input_count": 25,
+    "invalid_input_count": 40,
     "precedence": [
       {
         "id": "active_beats_non_iso",
@@ -855,8 +855,22 @@
         "active",
         "withdrawn",
         "non_iso",
-        "contains"
+        "contains",
+        "pegged_to",
+        "issued_by",
+        "used_in"
       ],
+      "method_applies_to": {
+        "pegged_to": [
+          "python"
+        ],
+        "issued_by": [
+          "python"
+        ],
+        "used_in": [
+          "python"
+        ]
+      },
       "values": [
         null,
         123,

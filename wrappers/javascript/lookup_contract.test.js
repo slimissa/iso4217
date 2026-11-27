@@ -56,7 +56,15 @@ for (const group of [lc.precedence, lc.duplicates]) {
 
 const registry = build(lc.precedence[0].registry);
 const inv = lc.invalid_input;
-for (const method of inv.methods) {
+// A method named in method_applies_to applies only to the wrappers listed there (v1.9.6).
+const scope = inv.method_applies_to || {};
+const applies = (method) => (scope[method] || inv.applies_to).includes('javascript');
+const mine = inv.methods.filter(applies);
+for (const method of mine) {
+  if (typeof registry[METHODS[method]] !== 'function') {
+    failures.push(`invalid_input names ${method}, which this suite does not map to a CurrencyRegistry method`);
+    continue;
+  }
   for (const value of inv.values.concat([undefined])) {
     const isExtra = value === undefined;
     if (!isExtra) invalid += 1;
@@ -75,7 +83,8 @@ for (const method of inv.methods) {
 
 for (const [label, ok] of [
   ['vector_count', vectors === lc.vector_count],
-  ['invalid_input_count', invalid === lc.invalid_input_count],
+  ['invalid_input_count', lc.invalid_input_count === inv.methods.length * inv.values.length],
+  ['invalid_input pairs that apply here', invalid === mine.length * inv.values.length],
 ]) {
   if (!ok) failures.push(`the fixture's declared ${label} does not match what this suite ran`);
 }

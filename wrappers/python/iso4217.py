@@ -881,9 +881,12 @@ class CurrencyRegistry:
 
         Examples:
             >>> registry.pegged_to("USD")
-            [Currency(code='AED', ...), Currency(code='SAR', ...), ...]
+            [Currency(code='HKD', ...), Currency(code='AED', ...), ...]
+
+        Raises:
+            TypeError: if `anchor_code` is not a string (None included).
         """
-        anchor = anchor_code.upper()
+        anchor = _require_code(anchor_code)
         return [
             c for c in self._active.values()
             if c.peg_type == "single"
@@ -917,8 +920,11 @@ class CurrencyRegistry:
 
         Returns:
             List of Currency objects issued by that country.
+
+        Raises:
+            TypeError: if `country_code` is not a string (None included).
         """
-        code = country_code.upper()
+        code = _require_code(country_code)
         return [
             c for c in self._active.values()
             if any(
@@ -936,8 +942,11 @@ class CurrencyRegistry:
 
         Returns:
             List of Currency objects used in that country.
+
+        Raises:
+            TypeError: if `country_code` is not a string (None included).
         """
-        code = country_code.upper()
+        code = _require_code(country_code)
         return [
             c for c in self._active.values()
             if any(country.get("code") == code for country in c.countries)
@@ -1081,7 +1090,7 @@ def active(code: str) -> Optional[Currency]:
 
 
 def pegged_to(anchor: str) -> List[Currency]:
-    """Convenience function to find currencies pegged to an anchor."""
+    """Convenience function to find currencies pegged to an anchor. A non-string anchor raises TypeError."""
     return _get_registry().pegged_to(anchor)
 
 

@@ -30,6 +30,18 @@ LC = json.loads(FIXTURE.read_text(encoding="utf-8")).get("lookup_contract", {})
 CASES = [("precedence", c) for c in LC.get("precedence", [])] + [("duplicates", c) for c in LC.get("duplicates", [])]
 IDS = [f"{kind}:{c['id']}" for kind, c in CASES]
 INVALID = LC.get("invalid_input", {})
+# v1.9.6: the lookups that take a country or anchor code joined the group. A method named in method_applies_to applies only to
+# the wrappers listed there; any other method applies to every wrapper in applies_to.
+NEW_IN_V196 = ("pegged_to", "issued_by", "used_in")
+
+
+def methods_for(lang: str) -> list[str]:
+    scope = INVALID.get("method_applies_to", {})
+    return [m for m in INVALID.get("methods", []) if lang in scope.get(m, INVALID.get("applies_to", []))]
+
+
+def invalid_count_for(lang: str) -> int:
+    return len(methods_for(lang)) * len(INVALID.get("values", []))
 SENTENCE = "A code in more than one section resolves to the first of: active, withdrawn, non-ISO."
 
 
@@ -52,6 +64,15 @@ class TestTheFixture:
     def test_C_the_invalid_input_group_names_the_two_languages_that_can_receive_one(self):
         assert INVALID["applies_to"] == ["python", "javascript"] and INVALID["error"] == "TypeError"
 
+    def test_R_the_country_and_anchor_lookups_are_in_the_group(self):
+        assert set(NEW_IN_V196) <= set(INVALID["methods"])
+        assert set(NEW_IN_V196) <= set(methods_for("python")), "the Python wrapper guards all three (v1.9.6)"
+
+    def test_R_method_applies_to_only_narrows_and_only_names_listed_methods(self):
+        for method, langs in INVALID.get("method_applies_to", {}).items():
+            assert method in INVALID["methods"], method
+            assert langs and set(langs) <= set(INVALID["applies_to"]), method
+
 
 class TestPythonWrapper:
     @pytest.mark.parametrize("kind,case", CASES, ids=IDS)
@@ -63,7 +84,7 @@ class TestPythonWrapper:
         if "expected_active_count" in case:
             assert len(registry.all_active()) == case["expected_active_count"]
 
-    @pytest.mark.parametrize("method", INVALID.get("methods", []))
+    @pytest.mark.parametrize("method", methods_for("python"))
     @pytest.mark.parametrize("value", INVALID.get("values", []), ids=lambda v: repr(v))
     def test_R_a_non_string_code_raises_type_error_with_a_message(self, tmp_path, method, value):
         registry = build(tmp_path, CASES[0][1])
@@ -82,6 +103,24 @@ class TestPythonWrapper:
         with pytest.raises(TypeError):
             iso4217.currency(None)
 
+    @pytest.mark.parametrize("value", INVALID.get("values", []), ids=lambda v: repr(v))
+    def test_R_the_module_level_pegged_to_raises_type_error_with_a_message(self, value):
+        with pytest.raises(TypeError) as err:
+            iso4217.pegged_to(value)
+        assert INVALID["message_contains"] in str(err.value) and str(err.value).startswith("code must be a string, got ")
+
+    @pytest.mark.parametrize("method", NEW_IN_V196)
+    def test_R_the_message_is_the_one_the_currency_lookups_use(self, tmp_path, method):
+        registry = build(tmp_path, CASES[0][1])
+        with pytest.raises(TypeError, match=r"^code must be a string, got NoneType$"):
+            getattr(registry, method)(None)
+
+    def test_C_a_string_country_or_anchor_still_works_in_any_case(self):
+        registry = iso4217.CurrencyRegistry()
+        assert [c.code for c in registry.pegged_to("usd")] == [c.code for c in registry.pegged_to("USD")] != []
+        assert [c.code for c in registry.used_in("fr")] == [c.code for c in registry.used_in("FR")] != []
+        assert registry.issued_by("") == [] and registry.used_in("ZZ") == []
+
     def test_C_the_shipped_registry_resolves_every_code_to_the_section_that_is_not_shadowed(self):
         registry = iso4217.CurrencyRegistry()
         for c in registry.all_active():
@@ -95,7 +134,7 @@ class TestJavaScriptWrapper:
         done = subprocess.run([node, "lookup_contract.test.js"], cwd=PROJECT_ROOT / "wrappers" / "javascript",
                               capture_output=True, text=True, timeout=300)
         assert done.returncode == 0, done.stdout[-2500:] + done.stderr[-1500:]
-        assert f'LOOKUP_CONTRACT javascript vectors={LC["vector_count"]} invalid={LC["invalid_input_count"]}' in done.stdout
+        assert f'LOOKUP_CONTRACT javascript vectors={LC["vector_count"]} invalid={invalid_count_for("javascript")}' in done.stdout
 
 
 class TestNativeSuitesCoverTheContract:
