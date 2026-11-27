@@ -860,17 +860,6 @@
         "issued_by",
         "used_in"
       ],
-      "method_applies_to": {
-        "pegged_to": [
-          "python"
-        ],
-        "issued_by": [
-          "python"
-        ],
-        "used_in": [
-          "python"
-        ]
-      },
       "values": [
         null,
         123,

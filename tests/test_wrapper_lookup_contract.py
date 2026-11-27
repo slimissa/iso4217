@@ -67,6 +67,7 @@ class TestTheFixture:
     def test_R_the_country_and_anchor_lookups_are_in_the_group(self):
         assert set(NEW_IN_V196) <= set(INVALID["methods"])
         assert set(NEW_IN_V196) <= set(methods_for("python")), "the Python wrapper guards all three (v1.9.6)"
+        assert set(NEW_IN_V196) <= set(methods_for("javascript")), "the JavaScript wrapper guards all three (v1.9.6)"
 
     def test_R_method_applies_to_only_narrows_and_only_names_listed_methods(self):
         for method, langs in INVALID.get("method_applies_to", {}).items():

@@ -21,7 +21,10 @@ if (!lc) {
   process.exit(1);
 }
 
-const METHODS = { currency: 'currency', active: 'active', withdrawn: 'withdrawn', non_iso: 'nonIso', contains: 'has' };
+const METHODS = {
+  currency: 'currency', active: 'active', withdrawn: 'withdrawn', non_iso: 'nonIso', contains: 'has',
+  pegged_to: 'peggedTo', issued_by: 'issuedBy', used_in: 'usedIn',
+};
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'iso4217-lookup-'));
 process.on('exit', () => fs.rmSync(dir, { recursive: true, force: true }));
 const failures = [];

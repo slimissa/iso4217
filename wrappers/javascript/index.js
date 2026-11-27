@@ -828,10 +828,12 @@ class CurrencyRegistry {
    *
    * @example
    * registry.peggedTo("USD");
-   * // [Currency { code: 'AED', ... }, Currency { code: 'SAR', ... }, ...]
+   * // [Currency { code: 'HKD', ... }, Currency { code: 'AED', ... }, ...]
+   *
+   * @throws {TypeError} If anchorCode is not a string (null and undefined included)
    */
   peggedTo(anchorCode) {
-    const anchor = anchorCode.toUpperCase();
+    const anchor = requireCode(anchorCode);
     const result = [];
 
     for (const c of this._active.values()) {
@@ -882,9 +884,10 @@ class CurrencyRegistry {
    *
    * @param {string} countryCode - ISO 3166-1 alpha-2 country code
    * @returns {Currency[]}
+   * @throws {TypeError} If countryCode is not a string (null and undefined included)
    */
   issuedBy(countryCode) {
-    const code = countryCode.toUpperCase();
+    const code = requireCode(countryCode);
     const result = [];
 
     for (const c of this._active.values()) {
@@ -903,9 +906,10 @@ class CurrencyRegistry {
    *
    * @param {string} countryCode - ISO 3166-1 alpha-2 country code
    * @returns {Currency[]}
+   * @throws {TypeError} If countryCode is not a string (null and undefined included)
    */
   usedIn(countryCode) {
-    const code = countryCode.toUpperCase();
+    const code = requireCode(countryCode);
     const result = [];
 
     for (const c of this._active.values()) {
