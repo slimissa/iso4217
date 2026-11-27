@@ -650,6 +650,10 @@ python3 tools/check_release_claims.py <version>
 # All four toolchains are required (python3, node, go, cargo); a suite that cannot
 # run fails the check. Excuse one on purpose with --allow-skip go (repeatable).
 bash tools/check_cross_language.sh
+
+# Go and Rust sources must be formatted (gofmt, rustfmt); fix with
+# gofmt -w wrappers/go and (cd wrappers/rust && cargo fmt).
+bash tools/check_formatting.sh
 ```
 
 For where each field comes from, how often it is refreshed, and what the amendment monitor does and does not check, see [`docs/PROVENANCE.md`](./docs/PROVENANCE.md).
@@ -685,7 +689,7 @@ The script is deterministic and refuses to start unless the `gh` CLI is installe
 
 1. **Bumps eight version sites:** `VERSION`, the changelog heading and date (UTC), `iso4217.json` `meta.version` and `meta.updated`, the README registry badge, and the Python, JavaScript, and Rust package manifests.
 2. **Regenerates sixteen files:** 4 SQL, 4 CSV/TSV, `iso4217.parquet`, `iso4217.countries.parquet`, the 3 aggregated files, and the 3 wrapper copies of the JSON — in layer order.
-3. **Runs a 30-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, line endings, snapshot freshness, registry freshness, country codes, country-currency membership, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, every verification doc (`--all`), the audit table, the cited `docs/` paths, the release-rule numbering, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
+3. **Runs a 31-check gate:** `validate.py`, version consistency, the five export `--check` modes, wrapper sync, release claims, mojibake, line endings, snapshot freshness, registry freshness, country codes, country-currency membership, the vendored ISO 3166 snapshot, README drift, PROVENANCE fields, every verification doc (`--all`), the audit table, the cited `docs/` paths, the release-rule numbering, `enrich_field.py --check` for each of its four fields, the cross-language suite, the JavaScript lint, the Go and Rust formatting check (`gofmt -l`, `cargo fmt --check`), and `pytest` on `tests/` and `wrappers/python/tests/` with `--fail-on-skip` (a skipped test fails the gate).
 4. **Commits and pushes** (it first checks that the gate left no untracked file and that every staged path is a plain modification, and prints the staged stat), then **polls every workflow** until each has a run for the release commit and every run has completed successfully. A missing run after 60 seconds, a failed run, a `gh` error, or the `--poll-timeout` expiring all stop the release before the tag.
 5. **Tags** only when everything is green. The tag message is the first 15 lines of the changelog section, headings included; it is read back from the tag and compared before the tag is pushed.
 6. **Writes a verification document**, `docs/v<version>-verification.md`, with the captured output of every check.
@@ -782,6 +786,7 @@ iso4217/
 │   ├── check_release_claims.py           # Manifest verification at release time
 │   ├── check_amendments.py               # Weekly ISO amendment monitor
 │   ├── check_cross_language.sh           # Four wrappers, one fixture
+│   ├── check_formatting.sh               # gofmt and rustfmt, report only
 │   ├── enrich_field.py                   # Field enrichment
 │   ├── parse_source.py                   # Source table classifier
 │   ├── update_from_iso.py                # Fetch, diff, and apply pipeline
@@ -890,6 +895,7 @@ Quick correction workflow:
    python3 tools/check_mojibake.py
    python3 tools/check_country_codes.py
    bash tools/check_cross_language.sh   # needs go and cargo too, or: --allow-skip go --allow-skip rust
+   bash tools/check_formatting.sh       # gofmt and rustfmt; a Go or Rust change must be formatted
    ```
 
 5. Run the full suite — `python3 -m pytest tests/ wrappers/python/tests/ -q` — all tests must pass.

@@ -52,7 +52,7 @@ STUB_PY = [
     "check_registry_freshness", "check_country_codes", "vendor_iso3166", "check_readme_drift", "check_provenance",
     "check_audit_table", "enrich_field", "check_doc_paths", "check_rules_refs",
 ]
-STUB_SH = ["check_cross_language", "check_js_lint"]
+STUB_SH = ["check_cross_language", "check_js_lint", "check_formatting"]
 SITE_FILES = ["VERSION", "CHANGELOG.md", "iso4217.json", "README.md", "wrappers/python/setup.py",
               "wrappers/javascript/package.json", "wrappers/rust/Cargo.toml"]
 

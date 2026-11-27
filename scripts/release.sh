@@ -482,6 +482,7 @@ run_gate() {
         
     run_gate_step "check_cross_language.sh"         bash tools/check_cross_language.sh
     run_gate_step "check_js_lint.sh"                bash tools/check_js_lint.sh
+    run_gate_step "check_formatting.sh"             bash tools/check_formatting.sh
 
     run_gate_step "pytest tests/"                   python3 -m pytest tests/ -q --fail-on-skip
     run_gate_step "pytest wrappers/python/tests/"   python3 -m pytest wrappers/python/tests/ -q --fail-on-skip
@@ -805,6 +806,7 @@ print_plan() {
     echo "  python3 tools/enrich_field.py --field source_url --check"
     echo "  bash tools/check_cross_language.sh"
     echo "  bash tools/check_js_lint.sh"
+    echo "  bash tools/check_formatting.sh"
     echo "  python3 -m pytest tests/ -q --fail-on-skip"
     echo "  python3 -m pytest wrappers/python/tests/ -q --fail-on-skip"
     echo

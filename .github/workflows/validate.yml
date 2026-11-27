@@ -298,6 +298,8 @@ jobs:
       - name: Set up Rust
         if: matrix.language == 'rust'
         uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          components: rustfmt
 
       - name: Cache cargo registry and build output
         if: matrix.language == 'rust'
@@ -307,6 +309,11 @@ jobs:
 
       - name: Run ${{ matrix.language }} wrapper tests
         run: ${{ matrix.test_cmd }}
+
+      # v1.9.6: `gofmt -l` must print nothing and `cargo fmt --check` must exit 0 (the release gate runs the same script).
+      - name: Check ${{ matrix.language }} formatting
+        if: matrix.language == 'go' || matrix.language == 'rust'
+        run: bash tools/check_formatting.sh ${{ matrix.language }}
 
       - name: Install cargo-audit
         if: matrix.language == 'rust'

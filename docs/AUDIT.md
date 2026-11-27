@@ -52,6 +52,7 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `check_cross_language.sh` | — | — | yes |
 | `check_release_claims.py` | — | version-and-hygiene.yml | yes |
 | `check_js_lint.sh` | — | validate.yml | yes |
+| `check_formatting.sh` | — | validate.yml | yes |
 
 ## Category C: enrichment
 
