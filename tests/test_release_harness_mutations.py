@@ -151,7 +151,8 @@ MUTANTS: list[Mutant] = [
     Mutant("M33-a-re-run-moves-the-release-date", "a later-day re-run rewrites meta.updated",
            "ReRunOnALaterDay", note="v1.9.5: the re-run guard in bump_all_sites"),
     Mutant("M34-a-fence-line-in-gate-output-is-not-neutralised", "quoted output can open a fence in the doc",
-           "fence_line_in_gate_output", note="v1.9.5: the sed in run_gate_step"),
+           "fence_line_in_gate_output or banned_word_in_a_claim_output_line",
+           note="v1.9.5: the sed in run_gate_step; v1.9.6: the checker's --quote, put back as a plain fence"),
     Mutant("M35-the-gate-checks-only-the-latest-verification-doc", "the gate runs the checker without --all",
            "rendered_doc_the_checker_would_reject", note="v1.9.5: the gate step's --all"),
 ]
@@ -213,7 +214,8 @@ REFACTORED = {
     "M32": [(REL, "        dry_run_doc\n    ) || rc=$?", "        true\n    ) || rc=$?")],
     "M33": [(REL, '    if [[ "$CURRENT_VERSION" != "$VERSION" ]]; then\n        bump_site iso_json_updated',
              '    if true; then\n        bump_site iso_json_updated')],
-    "M34": [(REL, " | sed -e 's/^```/    ```/' -e 's/^~~~/    ~~~/'", "")],
+    "M34": [(REL, " | tail -20 | python3 tools/check_verification_doc.py --quote",
+             " | tail -20 | { printf '```\\n'; cat; printf '```\\n'; }")],
     "M35": [(REL, 'run_gate_step "check_verification_doc.py --all" python3 tools/check_verification_doc.py --all',
              'run_gate_step "check_verification_doc.py --all" python3 tools/check_verification_doc.py')],
 }

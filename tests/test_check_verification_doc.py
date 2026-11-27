@@ -227,3 +227,110 @@ class TestTheRealTree:
         entries = json.loads((PROJECT_ROOT / GRANDFATHER_FILE).read_text(encoding="utf-8"))
         assert set(entries) == {"docs/v1.5.0-verification.md", "docs/v1.5.4-verification.md"}
         assert all(len(reason) > 20 for reason in entries.values())
+
+
+# ---------------------------------------------------------------------------
+# v1.9.6 (the third audit pass, open item 7): quoted gate output cannot leave its fence. The class, not the case: every
+# banned word, through a claim output line, behind every way a line of output could close a fence in the checker's reading.
+# ---------------------------------------------------------------------------
+
+sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+import check_verification_doc as cvd  # noqa: E402
+
+# One sample per banned pattern. The table must name every label in PLACEHOLDER_PATTERNS, so a word added to the list without
+# a sample here fails test_every_banned_word_has_a_sample.
+BANNED_SAMPLES = {
+    "TODO marker": "TODO",
+    "FIXME marker": "FIXME",
+    "PLACEHOLDER marker": "PLACEHOLDER",
+    "<the real line>": "<the real line>",
+    "<the proof line>": "<the proof line>",
+    "<paste ...>": "<paste output here>",
+    "<insert ...>": "<insert value>",
+    "<replace ...>": "<replace me>",
+    "<version>": "<version>",
+    "<X.Y.Z>": "<X.Y.Z>",
+    "<target>": "<target>",
+}
+
+# What a line of gate output could do to close the block in the checker's reading (str.splitlines plus CommonMark fences).
+ESCAPES = {
+    "none": "",
+    "fence": "```",
+    "indented_fence": "   ```",
+    "long_fence": "``````",
+    "tilde_fence": "~~~",
+    "fence_after_form_feed": "out\x0c```",
+    "fence_after_cr": "out\r```",
+    "fence_after_line_separator": "out ```",
+    "fence_after_next_line": "out\x85```",
+    "fence_after_file_separator": "out\x1c```",
+    "fence_in_mid_line": "a ```` b",
+}
+
+
+def _claim_line(sample: str) -> str:
+    # The shape of a line check_release_claims.py prints for a claim about a file's content.
+    return f"  ✓ scripts/release.sh does not contain '{sample}'"
+
+
+def _doc_with_quoted(output: str) -> str:
+    return ("# v9.9.9 Post-Release Verification\n\n" + _filler() + "\n\n## Gate\n\n### ✓ check_release_claims.py\n\n"
+            + cvd.quote_block(output) + "\n## Known limits\n\nNone.\n")
+
+
+class TestQuotedGateOutputCannotLeaveItsFence:
+    def test_every_banned_word_has_a_sample_and_each_sample_is_banned(self):
+        assert set(BANNED_SAMPLES) == {label for _p, label in cvd.PLACEHOLDER_PATTERNS}
+        for pattern, label in cvd.PLACEHOLDER_PATTERNS:
+            assert pattern.search(BANNED_SAMPLES[label]), label
+
+    @pytest.mark.parametrize("label", list(BANNED_SAMPLES))
+    def test_R_the_banned_word_in_prose_still_fails(self, tmp_path, label):
+        _write(tmp_path, _complete("v9.9.9", _claim_line(BANNED_SAMPLES[label]) + "\n"))
+        assert _run(tmp_path).returncode == 1
+
+    @pytest.mark.parametrize("escape", list(ESCAPES))
+    @pytest.mark.parametrize("label", list(BANNED_SAMPLES))
+    def test_R_every_banned_word_in_a_claim_output_line_stays_evidence(self, tmp_path, label, escape):
+        output = "\n".join(filter(None, [ESCAPES[escape], _claim_line(BANNED_SAMPLES[label]), ESCAPES[escape]]))
+        _write(tmp_path, _doc_with_quoted(output))
+        r = _run(tmp_path)
+        assert r.returncode == 0, f"{label} behind {escape!r}:\n{r.stdout}"
+
+    def test_R_all_of_them_at_once_in_one_block(self, tmp_path):
+        output = "\n".join(e + "\n" + _claim_line(s) for e in ESCAPES.values() for s in BANNED_SAMPLES.values())
+        _write(tmp_path, _doc_with_quoted(output))
+        assert _run(tmp_path).returncode == 0
+
+    @pytest.mark.parametrize("text", ["", "x", "```", "a ```` b\n```", "`" * 9, "~~~\n```\n````"])
+    def test_the_fence_is_longer_than_any_backtick_run_and_at_least_three(self, text):
+        block = cvd.quote_block(text)
+        opener = block.splitlines()[0]
+        longest = max([len(r) for r in __import__("re").findall(r"`+", text)] + [0])
+        assert set(opener) == {"`"} and len(opener) == max(3, longest + 1)
+        assert block.endswith("\n" + opener + "\n")
+
+    def test_the_content_lines_are_the_lines_the_checker_reads(self):
+        text = "a\x0cb\r\nc d"
+        assert cvd.quote_block(text).splitlines()[1:-1] == text.splitlines() == ["a", "b", "c", "d"]
+
+    def test_the_block_holds_no_line_break_but_newline(self):
+        # The generated document is LF-only (ADR 0012, tools/check_line_endings.py): a stray \r, \f or \u2028 quoted from gate
+        # output would fail the next release's gate. Every character str.splitlines breaks on, other than \n, is gone.
+        breaks = "\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029"
+        block = cvd.quote_block("".join(f"line{i}{c}" for i, c in enumerate(breaks)) + "end\r\n")
+        assert not any(c in block for c in breaks), repr(block)
+        assert block.splitlines()[1:-1] == [f"line{i}" for i in range(len(breaks))] + ["end"]
+
+    def test_the_command_line_quote_round_trips_stdin(self):
+        text = "  ```\nTODO evidence\n✓ ok\n"
+        r = subprocess.run([sys.executable, str(TOOL), "--quote"], input=text.encode("utf-8"), capture_output=True, timeout=30)
+        assert r.returncode == 0, r.stderr
+        assert r.stdout.decode("utf-8") == cvd.quote_block(text)
+
+    def test_the_release_script_quotes_with_the_checker(self):
+        text = (PROJECT_ROOT / "scripts" / "release.sh").read_text(encoding="utf-8")
+        body = text.split("run_gate_step() {", 1)[1].split("\n}\n", 1)[0]
+        assert "| tail -20 | python3 tools/check_verification_doc.py --quote" in body
+        assert "```" not in body, "the script must not write a fence of its own around gate output"

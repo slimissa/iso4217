@@ -67,6 +67,10 @@ if os.environ.get("RH_FENCE_OUTPUT") == me:
     print("```")
 if os.environ.get("RH_TODO_OUTPUT") == me:
     print("TODO: forced placeholder in the output of " + me)
+if os.environ.get("RH_OUTPUT_FILE") and os.environ.get("RH_OUTPUT_OF") == me:
+    sys.stdout.flush()
+    sys.stdout.buffer.write(open(os.environ["RH_OUTPUT_FILE"], "rb").read())
+    sys.stdout.flush()
 if me == "export_sql.py" and os.environ.get("RH_LEAVE_UNTRACKED"):
     open("stray.txt", "w").write("left behind by a generator\\n")
 print("ok " + me + " " + " ".join(sys.argv[1:]))
@@ -883,9 +887,44 @@ class TestVerificationDoc:
         r = fx.run(NEW, env={"RH_FENCE_OUTPUT": "check_mojibake.py"})
         assert r.returncode == E_OK, r.out
         doc = fx.read(f"docs/{TAG}-verification.md")
-        assert sum(1 for line in doc.splitlines() if line.startswith("```")) % 2 == 0
+        # v1.9.6: the fence is longer than the output's own, so counting fence-like lines no longer says anything; the
+        # checker's own reading does: no fence left open, and the stub's lone fence line is inside a block.
+        sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+        import check_verification_doc as cvd
+        prose, unclosed = cvd._mask_code(doc)
+        assert unclosed is None
+        assert "ok check_mojibake.py" in doc and "ok check_mojibake.py" not in prose
         checker = subprocess.run([sys.executable, "tools/check_verification_doc.py", "--all"], cwd=fx.work, capture_output=True,
                                  text=True, env=fx._env())
+        assert checker.returncode == 0, checker.stdout + checker.stderr
+
+    def test_every_banned_word_in_a_claim_output_line_cannot_fail_the_generated_doc(self, fx):
+        # v1.9.6 (the third audit pass, open item 7): the class, not the case. check_release_claims.py prints every word the
+        # checker bans, each behind a line that would have closed the v1.9.5 fence, and the real release still writes,
+        # checks and pushes its document.
+        sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+        import check_verification_doc as cvd
+        samples = {"TODO marker": "TODO", "FIXME marker": "FIXME", "PLACEHOLDER marker": "PLACEHOLDER",
+                   "<the real line>": "<the real line>", "<the proof line>": "<the proof line>",
+                   "<paste ...>": "<paste here>", "<insert ...>": "<insert it>", "<replace ...>": "<replace it>",
+                   "<version>": "<version>", "<X.Y.Z>": "<X.Y.Z>", "<target>": "<target>"}
+        assert set(samples) == {label for _p, label in cvd.PLACEHOLDER_PATTERNS}, "a banned word with no sample here"
+        closers = ["  ```", "x\x0c```", "````", "~~~"]
+        lines = [closers[i % len(closers)] + "\n" + f"  \u2713 scripts/release.sh does not contain '{s}'"
+                 for i, s in enumerate(samples.values())]
+        out = fx.base / "claims-output.txt"
+        out.write_bytes(("\n".join(lines[:4]) + "\n").encode("utf-8"))   # tail -20 keeps all of the first four pairs
+        r1 = fx.run(NEW, "--dry-run", env={"RH_OUTPUT_FILE": str(out), "RH_OUTPUT_OF": "check_release_claims.py"})
+        assert r1.returncode == E_OK, r1.out
+        out.write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
+        r = fx.run(NEW, env={"RH_OUTPUT_FILE": str(out), "RH_OUTPUT_OF": "check_release_claims.py"})
+        assert r.returncode == E_OK, r.out
+        doc = fx.read(f"docs/{TAG}-verification.md")
+        for s in list(samples.values())[-7:]:     # the last 20 lines of output: the last seven claim lines and their closers
+            assert f"does not contain '{s}'" in doc, s
+        assert not re.search("[\r\x0b\x0c\x1c-\x1e\x85\u2028\u2029]", doc), "the document is LF-only (ADR 0012)"
+        checker = subprocess.run([sys.executable, "tools/check_verification_doc.py", "--all"], cwd=fx.work,
+                                 capture_output=True, text=True, env=fx._env())
         assert checker.returncode == 0, checker.stdout + checker.stderr
 
     def test_a_doc_that_already_exists_is_left_alone(self, fx):

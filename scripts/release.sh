@@ -446,13 +446,14 @@ run_gate_step() {
         printf '%s\n' "$output" | tail -25
         GATE_FAILED=1
     fi
-    # The record the verification doc is built from (D4): what each step printed, last 20 lines.
+    # The record the verification doc is built from (D4): what each step printed, last 20 lines. The checker writes the
+    # fence itself (--quote), longer than any run of backticks in the output and over the lines it will later read, so no
+    # output can close it and a banned word in the output is always evidence, never prose (v1.9.6).
     if [ -n "$GATE_LOG_FILE" ]; then
         {
-            printf '### %s %s\n\n```\n' "$mark" "$name"
-            # A line that starts a code fence is indented four spaces, so quoted output cannot open or close a fence.
-            printf '%s\n' "$output" | tail -20 | sed -e 's/^```/    ```/' -e 's/^~~~/    ~~~/'
-            printf '```\n\n'
+            printf '### %s %s\n\n' "$mark" "$name"
+            printf '%s\n' "$output" | tail -20 | python3 tools/check_verification_doc.py --quote
+            printf '\n'
         } >> "$GATE_LOG_FILE"
     fi
 }

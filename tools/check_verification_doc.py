@@ -20,8 +20,20 @@ v1.9.5 (audit finding P5-11, ADR 0017):
   - Fenced code is tracked exactly (marker character and length; a tilde line does not close a backtick fence) and an
     unterminated fence is an error, so a fence cannot hide the rest of a document.
 
+v1.9.6 (the third audit pass, open item 7): `--quote` is how scripts/release.sh puts a gate step's output into the generated
+document. It reads text on stdin and writes it as a fenced block that the text itself cannot close: the lines are the lines
+this checker sees (str.splitlines, which also breaks on \r, \f, \x1c-\x1e, \x85, \u2028 and \u2029), and the fence is one
+backtick longer than the longest run of backticks anywhere in the text (at least three). A banned word in quoted gate output is
+therefore always evidence, never prose, whatever else the output prints. Before v1.9.6 the script only indented lines that
+began with a fence in column 0, so a fence line with one to three leading spaces, or behind a \f, closed the block early.
+
+Usage:
+  python3 tools/check_verification_doc.py [ROOT]          # the latest docs/v*-verification.md
+  python3 tools/check_verification_doc.py --all [ROOT]    # every one, honouring the grandfather list
+  ... | python3 tools/check_verification_doc.py --quote   # stdin as a fenced block its content cannot close
+
 Exit codes (the convention in RELEASE_PATTERN.md):
-  0  every doc checked is clean
+  0  every doc checked is clean (--quote: the block was written)
   1  at least one doc contains a placeholder, or a grandfather entry is stale
   2  usage error, or nothing to check: no docs/ directory or no docs/v*-verification.md
      (probably the wrong directory), or a malformed docs/verification-grandfathered.json
@@ -99,6 +111,23 @@ def _mask_code(text: str) -> tuple[str, int | None]:
     return "".join(out), (fence[2] if fence else None)
 
 
+def quote_block(text: str) -> str:
+    """`text` as a fenced code block that no line of `text` can close or escape, by this module's own reading.
+
+    The content lines are exactly the lines `check_doc` will see (str.splitlines), rejoined with "\n", so no character that
+    Python treats as a line break can start a hidden line. The fence is backticks, one longer than the longest run of
+    backticks in the text and at least three: a closing fence must be a line made only of at least that many backticks
+    (CommonMark, and `_mask_code`), and no line of the text holds that many."""
+    lines = text.splitlines()
+    longest = max((len(run) for run in re.findall(r"`+", text)), default=0)
+    fence = "`" * max(3, longest + 1)
+    block = fence + "\n" + "".join(line + "\n" for line in lines) + fence + "\n"
+    masked, unclosed = _mask_code(block)
+    if unclosed is not None or masked.strip():
+        raise AssertionError("quote_block produced a block its own content can escape")  # unreachable by construction
+    return block
+
+
 def check_doc(path: Path) -> list[str]:
     if not path.is_file():
         return [f"{path}: not a file"]
@@ -152,7 +181,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="check every docs/v*-verification.md (default: only the latest); honours " + GRANDFATHER_FILE,
     )
+    p.add_argument(
+        "--quote",
+        action="store_true",
+        help="read text on stdin and write it as a fenced block that the text cannot close (used by scripts/release.sh)",
+    )
     args = p.parse_args(argv)
+
+    if args.quote:
+        if args.all:
+            p.error("--quote takes no other option")
+        data = sys.stdin.buffer.read().decode("utf-8", errors="replace")
+        sys.stdout.buffer.write(quote_block(data).encode("utf-8"))
+        sys.stdout.flush()
+        return EXIT_OK
 
     root = Path(args.root).resolve()
     docs_dir = root / "docs"
