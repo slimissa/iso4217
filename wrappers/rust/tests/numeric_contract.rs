@@ -20,7 +20,11 @@ fn decode_x(v: &Value) -> f64 {
 
 /// The minor-unit magnitude a formatted amount shows: symbol, sign, commas and the point removed.
 fn digits(s: &str) -> String {
-    s.chars().filter(|c| c.is_ascii_digit()).collect::<String>().trim_start_matches('0').to_string()
+    s.chars()
+        .filter(|c| c.is_ascii_digit())
+        .collect::<String>()
+        .trim_start_matches('0')
+        .to_string()
 }
 
 #[test]
@@ -28,7 +32,8 @@ fn numeric_contract() {
     // Silence the expected panics of the panicking variants, then restore the harness hook so a real failure is printed.
     let harness_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(|_| {}));
-    let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json").expect("read fixture");
+    let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
+        .expect("read fixture");
     let fixture: Value = serde_json::from_str(&raw).expect("parse fixture");
     let nc = &fixture["numeric_contract"];
     let reg = CurrencyRegistry::load().expect("load registry");
@@ -39,7 +44,10 @@ fn numeric_contract() {
         let gid = g["id"].as_str().unwrap();
         for v in g["vectors"].as_array().expect("vectors") {
             let code = v["currency"].as_str().unwrap();
-            let c = reg.currency(code).or_else(|| reg.non_iso(code)).unwrap_or_else(|| panic!("{code} not found"));
+            let c = reg
+                .currency(code)
+                .or_else(|| reg.non_iso(code))
+                .unwrap_or_else(|| panic!("{code} not found"));
             let x = decode_x(&v["x"]);
             let label = format!("{gid}: {code} {}", v["x"]);
             let mut want_minor: Option<i64> = None;
@@ -47,9 +55,15 @@ fn numeric_contract() {
                 let exp = &v["to_minor"];
                 let checked = c.try_to_minor(x);
                 if let Some(kind) = exp.get("error").and_then(|e| e.as_str()) {
-                    let want = if kind == "non_finite" { MinorError::NonFinite } else { MinorError::Overflow };
+                    let want = if kind == "non_finite" {
+                        MinorError::NonFinite
+                    } else {
+                        MinorError::Overflow
+                    };
                     if checked != Err(want) {
-                        failures.push(format!("{label}: try_to_minor = {checked:?}, want Err({want:?})"));
+                        failures.push(format!(
+                            "{label}: try_to_minor = {checked:?}, want Err({want:?})"
+                        ));
                     }
                     if kind == "overflow" {
                         let msg = MinorError::Overflow.to_string();
@@ -64,11 +78,15 @@ fn numeric_contract() {
                     let want = exp.as_i64().expect("expected integer");
                     want_minor = Some(want);
                     if checked != Ok(want) {
-                        failures.push(format!("{label}: try_to_minor = {checked:?}, want Ok({want})"));
+                        failures.push(format!(
+                            "{label}: try_to_minor = {checked:?}, want Ok({want})"
+                        ));
                     }
                     match catch_unwind(AssertUnwindSafe(|| c.to_minor(x))) {
                         Ok(got) if got == want => {}
-                        other => failures.push(format!("{label}: to_minor = {other:?}, want {want}")),
+                        other => {
+                            failures.push(format!("{label}: to_minor = {other:?}, want {want}"))
+                        }
                     }
                 }
             }
@@ -79,7 +97,9 @@ fn numeric_contract() {
                 }
                 if let Some(m) = want_minor {
                     if digits(&got) != m.unsigned_abs().to_string().trim_start_matches('0') {
-                        failures.push(format!("{label}: format {got:?} disagrees with to_minor {m}"));
+                        failures.push(format!(
+                            "{label}: format {got:?} disagrees with to_minor {m}"
+                        ));
                     }
                 }
             }
@@ -87,7 +107,16 @@ fn numeric_contract() {
         }
     }
     std::panic::set_hook(harness_hook);
-    assert!(failures.is_empty(), "{} contract failure(s):\n{}", failures.len(), failures.join("\n"));
-    assert_eq!(count as u64, nc["vector_count"].as_u64().unwrap(), "vector count");
+    assert!(
+        failures.is_empty(),
+        "{} contract failure(s):\n{}",
+        failures.len(),
+        failures.join("\n")
+    );
+    assert_eq!(
+        count as u64,
+        nc["vector_count"].as_u64().unwrap(),
+        "vector count"
+    );
     println!("NUMERIC_CONTRACT rust vectors={count}");
 }

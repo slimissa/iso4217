@@ -71,7 +71,6 @@ struct RawSource {
     last_amendment_date: Option<String>,
 }
 
-
 #[derive(Debug, Deserialize)]
 struct RawCurrencies {
     active: Option<Vec<RawCurrency>>,
@@ -131,7 +130,6 @@ struct RawNonIso {
     commodities: Option<Vec<RawCurrency>>,
     special_purpose: Option<Vec<RawCurrency>>,
 }
-
 
 #[derive(Debug, Deserialize, Clone)]
 struct RawCountry {
@@ -288,8 +286,8 @@ impl std::error::Error for MinorError {}
 /// `10^n`, exact as an `f64` for `n <= 22`. Every wrapper takes `10^n` from the same exact table, so the one
 /// floating-point multiplication in the conversion is the same in all four languages.
 const POW10_EXACT: [f64; 23] = [
-    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20,
-    1e21, 1e22,
+    1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16,
+    1e17, 1e18, 1e19, 1e20, 1e21, 1e22,
 ];
 
 /// `2^63`: a rounded amount whose magnitude is at or above it cannot be returned as an `i64`.
@@ -325,7 +323,9 @@ impl Currency {
         if !x.is_finite() {
             return Err(MinorError::NonFinite);
         }
-        let scale = POW10_EXACT.get(self.minor_units as usize).ok_or(MinorError::Overflow)?;
+        let scale = POW10_EXACT
+            .get(self.minor_units as usize)
+            .ok_or(MinorError::Overflow)?;
         let p = x * scale;
         if !p.is_finite() {
             return Err(MinorError::Overflow);
@@ -425,7 +425,8 @@ impl Currency {
     /// assert_eq!(usd.format(f64::NAN), "$nan");
     /// ```
     pub fn format(&self, major_amount: f64) -> String {
-        let infinity = |negative: bool| format!("{}{}inf", self.symbol, if negative { "-" } else { "" });
+        let infinity =
+            |negative: bool| format!("{}{}inf", self.symbol, if negative { "-" } else { "" });
         if major_amount.is_nan() {
             return format!("{}nan", self.symbol);
         }
@@ -440,7 +441,8 @@ impl Currency {
         let n = self.minor_units as usize;
         // Sign comes from the sign bit of the amount when there are decimals, and from the rounded value when there
         // are none: a negative amount that rounds to zero prints "$-0.00" but "¥0" (today's behavior in all four).
-        let negative = (major_amount.is_sign_negative() && (n > 0 || r != 0.0)) || (n == 0 && r < 0.0);
+        let negative =
+            (major_amount.is_sign_negative() && (n > 0 || r != 0.0)) || (n == 0 && r < 0.0);
         let mut digits = format!("{:.0}", r.abs()); // exact digits of an integer-valued f64
         if n > 0 {
             if digits.len() < n + 1 {
@@ -449,7 +451,12 @@ impl Currency {
             let split = digits.len() - n;
             digits = format!("{}.{}", group_thousands(&digits[..split]), &digits[split..]);
         }
-        format!("{}{}{}", self.symbol, if negative { "-" } else { "" }, digits)
+        format!(
+            "{}{}{}",
+            self.symbol,
+            if negative { "-" } else { "" },
+            digits
+        )
     }
 }
 
@@ -500,7 +507,7 @@ impl From<RawCurrency> for Currency {
             currency_type: raw.currency_type,
             market_cap_rank: raw.market_cap_rank,
             peg_mechanism: raw.peg_mechanism,
-                        classification: raw.classification,
+            classification: raw.classification,
             numeric_reused: raw.numeric_reused,
             source_url: raw.source_url,
             code_lifetime: raw.code_lifetime.map(|l| CodeLifetime {
@@ -553,8 +560,20 @@ pub struct RegistrySummary {
 const MAX_MINOR_UNITS: i64 = 36;
 
 const STRING_FIELDS: [&str; 14] = [
-    "numeric", "symbol", "entity", "central_bank", "pegged_to", "peg_type", "pegged_since", "note",
-    "withdrawn_date", "replaced_by", "type", "peg_mechanism", "classification", "source_url",
+    "numeric",
+    "symbol",
+    "entity",
+    "central_bank",
+    "pegged_to",
+    "peg_type",
+    "pegged_since",
+    "note",
+    "withdrawn_date",
+    "replaced_by",
+    "type",
+    "peg_mechanism",
+    "classification",
+    "source_url",
 ];
 const NUMBER_FIELDS: [&str; 3] = ["peg_rate", "peg_band_pct", "conversion_rate"];
 const INTEGER_FIELDS: [&str; 1] = ["market_cap_rank"];
@@ -589,7 +608,10 @@ fn check_kind(v: &serde_json::Value, kind: &str, path: &str) -> Result<(), Strin
     if ok {
         Ok(())
     } else {
-        Err(malformed(path, &format!("expected {}, got {}", kind, json_kind(v))))
+        Err(malformed(
+            path,
+            &format!("expected {}, got {}", kind, json_kind(v)),
+        ))
     }
 }
 
@@ -600,9 +622,16 @@ fn check_optional(obj: &JsonMap, key: &str, kind: &str, path: &str) -> Result<()
     }
 }
 
-fn require<'a>(obj: &'a JsonMap, key: &str, kind: &str, path: &str) -> Result<&'a serde_json::Value, String> {
+fn require<'a>(
+    obj: &'a JsonMap,
+    key: &str,
+    kind: &str,
+    path: &str,
+) -> Result<&'a serde_json::Value, String> {
     let full = format!("{}.{}", path, key);
-    let v = obj.get(key).ok_or_else(|| malformed(&full, "required field is missing"))?;
+    let v = obj
+        .get(key)
+        .ok_or_else(|| malformed(&full, "required field is missing"))?;
     check_kind(v, kind, &full)?;
     Ok(v)
 }
@@ -621,7 +650,10 @@ fn validate_entry(entry: &serde_json::Value, path: &str) -> Result<(), String> {
         _ => {
             return Err(malformed(
                 &format!("{}.minor_units", path),
-                &format!("expected an integer from 0 to {}, got {}", MAX_MINOR_UNITS, minor_units),
+                &format!(
+                    "expected an integer from 0 to {}, got {}",
+                    MAX_MINOR_UNITS, minor_units
+                ),
             ))
         }
     }
@@ -663,7 +695,15 @@ fn validate_entry(entry: &serde_json::Value, path: &str) -> Result<(), String> {
 fn drop_null_fields(root: &mut serde_json::Value) {
     let lists: [(&str, &[&str]); 2] = [
         ("currencies", &["active", "withdrawn"]),
-        ("non_iso", &["cryptocurrencies", "stablecoins", "commodities", "special_purpose"]),
+        (
+            "non_iso",
+            &[
+                "cryptocurrencies",
+                "stablecoins",
+                "commodities",
+                "special_purpose",
+            ],
+        ),
     ];
     for (section, keys) in lists {
         if let Some(group) = root.get_mut(section).and_then(|v| v.as_object_mut()) {
@@ -690,18 +730,35 @@ fn validate_registry_data(root: &serde_json::Value) -> Result<(), String> {
         }
     }
     let empty = JsonMap::new();
-    let meta = obj.get("meta").and_then(|v| v.as_object()).unwrap_or(&empty);
-    let source = obj.get("source").and_then(|v| v.as_object()).unwrap_or(&empty);
+    let meta = obj
+        .get("meta")
+        .and_then(|v| v.as_object())
+        .unwrap_or(&empty);
+    let source = obj
+        .get("source")
+        .and_then(|v| v.as_object())
+        .unwrap_or(&empty);
     check_optional(meta, "version", "string", "$.meta")?;
     check_optional(meta, "updated", "string", "$.meta")?;
     check_optional(source, "last_amendment_applied", "integer", "$.source")?;
     check_optional(source, "last_amendment_date", "string", "$.source")?;
     let lists: [(&str, &[&str]); 2] = [
         ("currencies", &["active", "withdrawn"]),
-        ("non_iso", &["cryptocurrencies", "stablecoins", "commodities", "special_purpose"]),
+        (
+            "non_iso",
+            &[
+                "cryptocurrencies",
+                "stablecoins",
+                "commodities",
+                "special_purpose",
+            ],
+        ),
     ];
     for (section, keys) in lists {
-        let group = obj.get(section).and_then(|v| v.as_object()).unwrap_or(&empty);
+        let group = obj
+            .get(section)
+            .and_then(|v| v.as_object())
+            .unwrap_or(&empty);
         for key in keys {
             if let Some(list) = group.get(*key) {
                 let lpath = format!("$.{}.{}", section, key);
@@ -750,7 +807,12 @@ pub struct CurrencyRegistry {
 
 /// Inserts `currency` under `code`, recording the code in `order` the first time it is seen. A repeated code keeps its
 /// first position and takes the later entry (ADR 0015, D3).
-fn insert_in_order(map: &mut HashMap<String, Currency>, order: &mut Vec<String>, code: String, currency: Currency) {
+fn insert_in_order(
+    map: &mut HashMap<String, Currency>,
+    order: &mut Vec<String>,
+    code: String,
+    currency: Currency,
+) {
     if !map.contains_key(&code) {
         order.push(code.clone());
     }
@@ -834,7 +896,11 @@ impl CurrencyRegistry {
         // currency() resolves in the documented order, active then withdrawn then non-ISO, and the earliest section wins
         // (ADR 0015, D1). Within a section the last entry for a code wins and the collection has one entry per code (D3).
         // The sections are walked in file order, so all_currencies() lists them in that order too.
-        for (section, order) in [(&active, &active_order), (&withdrawn, &withdrawn_order), (&non_iso, &non_iso_order)] {
+        for (section, order) in [
+            (&active, &active_order),
+            (&withdrawn, &withdrawn_order),
+            (&non_iso, &non_iso_order),
+        ] {
             for code in order.iter() {
                 let currency = &section[code];
                 if !all.contains_key(code) {
@@ -948,12 +1014,18 @@ impl CurrencyRegistry {
 
     /// Return all withdrawn ISO 4217 currencies, in file order.
     pub fn all_withdrawn(&self) -> Vec<&Currency> {
-        self.withdrawn_order.iter().map(|code| &self.withdrawn[code]).collect()
+        self.withdrawn_order
+            .iter()
+            .map(|code| &self.withdrawn[code])
+            .collect()
     }
 
     /// Return all non-ISO currencies, in file order (cryptocurrencies, stablecoins, commodities, special purpose).
     pub fn all_non_iso(&self) -> Vec<&Currency> {
-        self.non_iso_order.iter().map(|code| &self.non_iso[code]).collect()
+        self.non_iso_order
+            .iter()
+            .map(|code| &self.non_iso[code])
+            .collect()
     }
 
     /// Return all currencies across all categories: active, then withdrawn, then non-ISO, each in file order, one entry per
@@ -1143,10 +1215,15 @@ mod tests {
     fn malformed_registry_fixture_is_rejected_with_the_prefix_and_the_path() {
         let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
             .expect("failed to read fixture");
-        let fixture: serde_json::Value = serde_json::from_str(&raw).expect("failed to parse fixture");
+        let fixture: serde_json::Value =
+            serde_json::from_str(&raw).expect("failed to parse fixture");
         let tests = &fixture["malformed_registry_tests"];
         let malformed = tests["malformed"].as_array().expect("malformed list");
-        assert!(malformed.len() >= 30, "fixture has only {} malformed cases", malformed.len());
+        assert!(
+            malformed.len() >= 30,
+            "fixture has only {} malformed cases",
+            malformed.len()
+        );
         for case in malformed {
             let id = case["id"].as_str().unwrap();
             let path = case["path"].as_str().unwrap();
@@ -1154,8 +1231,19 @@ mod tests {
             match CurrencyRegistry::load_from_str(&text) {
                 Ok(_) => panic!("{}: the registry was accepted", id),
                 Err(msg) => {
-                    assert!(msg.starts_with("malformed registry data: "), "{}: {}", id, msg);
-                    assert!(msg.contains(path), "{}: expected path {} in: {}", id, path, msg);
+                    assert!(
+                        msg.starts_with("malformed registry data: "),
+                        "{}: {}",
+                        id,
+                        msg
+                    );
+                    assert!(
+                        msg.contains(path),
+                        "{}: expected path {} in: {}",
+                        id,
+                        path,
+                        msg
+                    );
                 }
             }
         }
@@ -1165,8 +1253,12 @@ mod tests {
     fn valid_fixture_registries_are_accepted() {
         let raw = std::fs::read_to_string("../../tests/cross_language_consistency.json")
             .expect("failed to read fixture");
-        let fixture: serde_json::Value = serde_json::from_str(&raw).expect("failed to parse fixture");
-        for case in fixture["malformed_registry_tests"]["valid"].as_array().expect("valid list") {
+        let fixture: serde_json::Value =
+            serde_json::from_str(&raw).expect("failed to parse fixture");
+        for case in fixture["malformed_registry_tests"]["valid"]
+            .as_array()
+            .expect("valid list")
+        {
             let text = serde_json::to_string(&case["registry"]).unwrap();
             if let Err(msg) = CurrencyRegistry::load_from_str(&text) {
                 panic!("{}: {}", case["id"], msg);
@@ -1177,7 +1269,11 @@ mod tests {
     #[test]
     fn invalid_json_is_a_malformed_registry_error() {
         let err = CurrencyRegistry::load_from_str("{").unwrap_err();
-        assert!(err.starts_with("malformed registry data: $: invalid JSON"), "{}", err);
+        assert!(
+            err.starts_with("malformed registry data: $: invalid JSON"),
+            "{}",
+            err
+        );
     }
 
     #[test]
@@ -1557,10 +1653,16 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found in registry", v.code));
             for conv in &v.conversions {
                 let result = c.to_minor(conv.major);
-                assert_eq!(result, conv.minor, "{}.to_minor({}) = {}, expected {}", v.code, conv.major, result, conv.minor);
+                assert_eq!(
+                    result, conv.minor,
+                    "{}.to_minor({}) = {}, expected {}",
+                    v.code, conv.major, result, conv.minor
+                );
             }
         }
     }
@@ -1570,7 +1672,9 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found in registry", v.code));
             for conv in &v.conversions {
                 // "lossy" entries are rounding-boundary values not exactly
                 // representable in integer minor units (e.g. USD 100.005
@@ -1580,7 +1684,11 @@ mod tests {
                     continue;
                 }
                 let back = c.from_minor(conv.minor);
-                assert_eq!(back, conv.major, "{} round-trip failed: {} -> {} -> {}", v.code, conv.major, conv.minor, back);
+                assert_eq!(
+                    back, conv.major,
+                    "{} round-trip failed: {} -> {} -> {}",
+                    v.code, conv.major, conv.minor, back
+                );
             }
         }
     }
@@ -1590,9 +1698,16 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found", v.code));
             assert_eq!(c.to_minor(0.0), 0, "{}.to_minor(0.0) should be 0", v.code);
-            assert_eq!(c.from_minor(0), 0.0, "{}.from_minor(0) should be 0.0", v.code);
+            assert_eq!(
+                c.from_minor(0),
+                0.0,
+                "{}.from_minor(0) should be 0.0",
+                v.code
+            );
         }
     }
 
@@ -1601,7 +1716,9 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found in registry", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found in registry", v.code));
             for fmt_vec in &v.formatting {
                 let result = c.format(fmt_vec.major);
                 assert_eq!(
@@ -1618,8 +1735,14 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
-            assert_eq!(c.minor_units, v.minor_units, "{}.minor_units = {}, expected {}", v.code, c.minor_units, v.minor_units);
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found", v.code));
+            assert_eq!(
+                c.minor_units, v.minor_units,
+                "{}.minor_units = {}, expected {}",
+                v.code, c.minor_units, v.minor_units
+            );
         }
     }
 
@@ -1628,25 +1751,53 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found", v.code));
 
             if let Some(expected) = v.is_independent {
-                assert_eq!(c.is_independent, expected, "{}.is_independent = {}, expected {}", v.code, c.is_independent, expected);
+                assert_eq!(
+                    c.is_independent, expected,
+                    "{}.is_independent = {}, expected {}",
+                    v.code, c.is_independent, expected
+                );
             }
             if let Some(expected) = v.is_pegged {
-                assert_eq!(c.is_pegged(), expected, "{}.is_pegged() = {}, expected {}", v.code, c.is_pegged(), expected);
+                assert_eq!(
+                    c.is_pegged(),
+                    expected,
+                    "{}.is_pegged() = {}, expected {}",
+                    v.code,
+                    c.is_pegged(),
+                    expected
+                );
             }
             if let Some(expected) = &v.pegged_to {
-                assert_eq!(c.pegged_to.as_deref(), Some(expected.as_str()), "{}.pegged_to mismatch", v.code);
+                assert_eq!(
+                    c.pegged_to.as_deref(),
+                    Some(expected.as_str()),
+                    "{}.pegged_to mismatch",
+                    v.code
+                );
             }
             if let Some(expected) = &v.peg_type {
-                assert_eq!(c.peg_type.as_deref(), Some(expected.as_str()), "{}.peg_type mismatch", v.code);
+                assert_eq!(
+                    c.peg_type.as_deref(),
+                    Some(expected.as_str()),
+                    "{}.peg_type mismatch",
+                    v.code
+                );
             }
             if let Some(expected) = v.peg_rate {
                 assert_eq!(c.peg_rate, Some(expected), "{}.peg_rate mismatch", v.code);
             }
             if let Some(expected) = v.peg_band_pct {
-                assert_eq!(c.peg_band_pct, Some(expected), "{}.peg_band_pct mismatch", v.code);
+                assert_eq!(
+                    c.peg_band_pct,
+                    Some(expected),
+                    "{}.peg_band_pct mismatch",
+                    v.code
+                );
             }
         }
     }
@@ -1659,12 +1810,24 @@ mod tests {
             if !v.withdrawn {
                 continue;
             }
-            let c = reg.currency(&v.code).unwrap_or_else(|| panic!("{} not found", v.code));
+            let c = reg
+                .currency(&v.code)
+                .unwrap_or_else(|| panic!("{} not found", v.code));
             if let Some(expected) = &v.replaced_by {
-                assert_eq!(c.replaced_by.as_deref(), Some(expected.as_str()), "{}.replaced_by mismatch", v.code);
+                assert_eq!(
+                    c.replaced_by.as_deref(),
+                    Some(expected.as_str()),
+                    "{}.replaced_by mismatch",
+                    v.code
+                );
             }
             if let Some(expected) = v.conversion_rate {
-                assert_eq!(c.conversion_rate, Some(expected), "{}.conversion_rate mismatch", v.code);
+                assert_eq!(
+                    c.conversion_rate,
+                    Some(expected),
+                    "{}.conversion_rate mismatch",
+                    v.code
+                );
             }
         }
     }
@@ -1677,14 +1840,24 @@ mod tests {
             if t.expected_null {
                 for code in &t.lookups {
                     let result = clc_lookup(&reg, &t.method, code);
-                    assert!(result.is_none(), "{}('{}') should return None", t.method, code);
+                    assert!(
+                        result.is_none(),
+                        "{}('{}') should return None",
+                        t.method,
+                        code
+                    );
                 }
             } else {
                 let expected_code = t.expected_code.as_deref().expect("expected_code missing");
                 for code in &t.lookups {
                     let result = clc_lookup(&reg, &t.method, code);
-                    let result = result.unwrap_or_else(|| panic!("{}('{}') returned None", t.method, code));
-                    assert_eq!(result.code, expected_code, "{}('{}').code mismatch", t.method, code);
+                    let result =
+                        result.unwrap_or_else(|| panic!("{}('{}') returned None", t.method, code));
+                    assert_eq!(
+                        result.code, expected_code,
+                        "{}('{}').code mismatch",
+                        t.method, code
+                    );
                 }
             }
         }
@@ -1696,13 +1869,24 @@ mod tests {
         let vectors = load_consistency_vectors();
         for t in &vectors.filter_tests {
             let results = clc_filter(&reg, t);
-            let result_codes: std::collections::HashSet<&str> = results.iter().map(|c| c.code.as_str()).collect();
+            let result_codes: std::collections::HashSet<&str> =
+                results.iter().map(|c| c.code.as_str()).collect();
 
             for expected in &t.expected_contains {
-                assert!(result_codes.contains(expected.as_str()), "{}() should contain {}", t.method, expected);
+                assert!(
+                    result_codes.contains(expected.as_str()),
+                    "{}() should contain {}",
+                    t.method,
+                    expected
+                );
             }
             for excluded in &t.expected_not_contains {
-                assert!(!result_codes.contains(excluded.as_str()), "{}() should NOT contain {}", t.method, excluded);
+                assert!(
+                    !result_codes.contains(excluded.as_str()),
+                    "{}() should NOT contain {}",
+                    t.method,
+                    excluded
+                );
             }
         }
     }
@@ -1712,7 +1896,11 @@ mod tests {
         let vectors = load_consistency_vectors();
         for t in &vectors.summary_tests {
             for key in &t.expected_keys {
-                assert!(clc_summary_has_key(key), "RegistrySummary missing field '{}'", key);
+                assert!(
+                    clc_summary_has_key(key),
+                    "RegistrySummary missing field '{}'",
+                    key
+                );
             }
         }
     }
@@ -1722,7 +1910,11 @@ mod tests {
         let reg = registry();
         let vectors = load_consistency_vectors();
         for v in &vectors.test_vectors {
-            assert!(reg.currency(&v.code).is_some(), "{} from test vectors not found in registry", v.code);
+            assert!(
+                reg.currency(&v.code).is_some(),
+                "{} from test vectors not found in registry",
+                v.code
+            );
         }
     }
 
@@ -1769,12 +1961,14 @@ mod tests {
         for block in &v.classification_tests {
             if let Some(expected) = &block.expected {
                 for (code, expected_cls) in expected {
-                    let c = reg.currency(code)
+                    let c = reg
+                        .currency(code)
                         .unwrap_or_else(|| panic!("{} not found", code));
                     assert_eq!(
                         c.classification.as_deref(),
                         Some(expected_cls.as_str()),
-                        "{} classification mismatch", code
+                        "{} classification mismatch",
+                        code
                     );
                 }
             }
@@ -1797,12 +1991,20 @@ mod tests {
             let codes: std::collections::HashSet<&str> =
                 results.iter().map(|c| c.code.as_str()).collect();
             for expected in &block.expected_contains {
-                assert!(codes.contains(expected.as_str()),
-                    "by_classification({}) should contain {}", arg, expected);
+                assert!(
+                    codes.contains(expected.as_str()),
+                    "by_classification({}) should contain {}",
+                    arg,
+                    expected
+                );
             }
             for excluded in &block.expected_not_contains {
-                assert!(!codes.contains(excluded.as_str()),
-                    "by_classification({}) should NOT contain {}", arg, excluded);
+                assert!(
+                    !codes.contains(excluded.as_str()),
+                    "by_classification({}) should NOT contain {}",
+                    arg,
+                    excluded
+                );
             }
         }
     }
@@ -1897,7 +2099,11 @@ mod collection_order {
 
     fn codes(list: &serde_json::Value) -> Vec<String> {
         list.as_array()
-            .map(|a| a.iter().map(|c| c["code"].as_str().unwrap().to_string()).collect())
+            .map(|a| {
+                a.iter()
+                    .map(|c| c["code"].as_str().unwrap().to_string())
+                    .collect()
+            })
             .unwrap_or_default()
     }
 
@@ -1923,7 +2129,12 @@ mod collection_order {
     fn expected_non_iso() -> Vec<String> {
         let j = json();
         let mut all = Vec::new();
-        for cat in ["cryptocurrencies", "stablecoins", "commodities", "special_purpose"] {
+        for cat in [
+            "cryptocurrencies",
+            "stablecoins",
+            "commodities",
+            "special_purpose",
+        ] {
             all.extend(codes(&j["non_iso"][cat]));
         }
         first_seen(all)
@@ -1940,7 +2151,9 @@ mod collection_order {
         let j = json();
         let mut out = Vec::new();
         for c in j["currencies"]["active"].as_array().unwrap() {
-            if c["peg_type"].as_str() == Some("single") && c["pegged_to"].as_str().map(|p| p.to_uppercase()) == Some(anchor.to_string()) {
+            if c["peg_type"].as_str() == Some("single")
+                && c["pegged_to"].as_str().map(|p| p.to_uppercase()) == Some(anchor.to_string())
+            {
                 out.push(c["code"].as_str().unwrap().to_string());
             }
         }
@@ -1952,7 +2165,11 @@ mod collection_order {
     }
 
     fn assert_first_last_and_all(name: &str, got: Vec<String>, want: Vec<String>) {
-        assert!(!want.is_empty(), "{}: the JSON gives an empty expectation", name);
+        assert!(
+            !want.is_empty(),
+            "{}: the JSON gives an empty expectation",
+            name
+        );
         assert_eq!(got.first(), want.first(), "{}: first code", name);
         assert_eq!(got.last(), want.last(), "{}: last code", name);
         assert_eq!(got, want, "{}: full order", name);
@@ -1960,22 +2177,38 @@ mod collection_order {
 
     #[test]
     fn all_active_is_in_file_order() {
-        assert_first_last_and_all("all_active", got(CurrencyRegistry::load().unwrap().all_active()), expected_active());
+        assert_first_last_and_all(
+            "all_active",
+            got(CurrencyRegistry::load().unwrap().all_active()),
+            expected_active(),
+        );
     }
 
     #[test]
     fn all_withdrawn_is_in_file_order() {
-        assert_first_last_and_all("all_withdrawn", got(CurrencyRegistry::load().unwrap().all_withdrawn()), expected_withdrawn());
+        assert_first_last_and_all(
+            "all_withdrawn",
+            got(CurrencyRegistry::load().unwrap().all_withdrawn()),
+            expected_withdrawn(),
+        );
     }
 
     #[test]
     fn all_non_iso_is_in_file_order() {
-        assert_first_last_and_all("all_non_iso", got(CurrencyRegistry::load().unwrap().all_non_iso()), expected_non_iso());
+        assert_first_last_and_all(
+            "all_non_iso",
+            got(CurrencyRegistry::load().unwrap().all_non_iso()),
+            expected_non_iso(),
+        );
     }
 
     #[test]
     fn all_currencies_is_active_then_withdrawn_then_non_iso_in_file_order() {
-        assert_first_last_and_all("all_currencies", got(CurrencyRegistry::load().unwrap().all_currencies()), expected_all());
+        assert_first_last_and_all(
+            "all_currencies",
+            got(CurrencyRegistry::load().unwrap().all_currencies()),
+            expected_all(),
+        );
     }
 
     #[test]
@@ -1987,7 +2220,11 @@ mod collection_order {
                 assert!(r.pegged_to(anchor).is_empty(), "pegged_to({})", anchor);
                 continue;
             }
-            assert_first_last_and_all(&format!("pegged_to({})", anchor), got(r.pegged_to(anchor)), want);
+            assert_first_last_and_all(
+                &format!("pegged_to({})", anchor),
+                got(r.pegged_to(anchor)),
+                want,
+            );
         }
     }
 
@@ -1996,16 +2233,31 @@ mod collection_order {
         let r = CurrencyRegistry::load().unwrap();
         let active = expected_active();
         let subsequence = |name: &str, list: Vec<&Currency>| {
-            let positions: Vec<usize> = list.iter().map(|c| active.iter().position(|a| *a == c.code).unwrap()).collect();
+            let positions: Vec<usize> = list
+                .iter()
+                .map(|c| active.iter().position(|a| *a == c.code).unwrap())
+                .collect();
             assert!(!positions.is_empty(), "{}: empty", name);
-            assert!(positions.windows(2).all(|w| w[0] < w[1]), "{}: not in file order: {:?}", name, got(list));
+            assert!(
+                positions.windows(2).all(|w| w[0] < w[1]),
+                "{}: not in file order: {:?}",
+                name,
+                got(list)
+            );
         };
         subsequence("independent", r.independent());
         subsequence("with_minor_units(2)", r.with_minor_units(2));
         subsequence("issued_by(FR)", r.issued_by("FR"));
         subsequence("used_in(FR)", r.used_in("FR"));
-        subsequence("by_classification(circulating)", r.by_classification("circulating"));
-        assert_eq!(r.iter().map(|c| c.code.clone()).collect::<Vec<_>>(), active, "iter()");
+        subsequence(
+            "by_classification(circulating)",
+            r.by_classification("circulating"),
+        );
+        assert_eq!(
+            r.iter().map(|c| c.code.clone()).collect::<Vec<_>>(),
+            active,
+            "iter()"
+        );
     }
 
     #[test]
@@ -2044,13 +2296,21 @@ mod collection_order_fixture {
             .get("collection_order")
             .expect("tests/cross_language_consistency.json has no collection_order group");
         let mut cases = vec![("shipped".to_string(), co["shipped"].clone())];
-        for case in co["synthetic"].as_array().expect("collection_order has no synthetic cases") {
+        for case in co["synthetic"]
+            .as_array()
+            .expect("collection_order has no synthetic cases")
+        {
             cases.push((case["id"].as_str().unwrap().to_string(), case.clone()));
         }
 
-        let codes = |list: Vec<&Currency>| -> Vec<String> { list.iter().map(|c| c.code.clone()).collect() };
+        let codes =
+            |list: Vec<&Currency>| -> Vec<String> { list.iter().map(|c| c.code.clone()).collect() };
         let want = |v: &serde_json::Value| -> Vec<String> {
-            v.as_array().unwrap().iter().map(|c| c.as_str().unwrap().to_string()).collect()
+            v.as_array()
+                .unwrap()
+                .iter()
+                .map(|c| c.as_str().unwrap().to_string())
+                .collect()
         };
         let mut vectors = 0;
         for (id, case) in cases {
@@ -2073,10 +2333,20 @@ mod collection_order_fixture {
             }
             for (anchor, expected) in case["pegged_to"].as_object().unwrap() {
                 vectors += 1;
-                assert_eq!(codes(registry.pegged_to(anchor)), want(expected), "{}: pegged_to({})", id, anchor);
+                assert_eq!(
+                    codes(registry.pegged_to(anchor)),
+                    want(expected),
+                    "{}: pegged_to({})",
+                    id,
+                    anchor
+                );
             }
         }
-        assert_eq!(vectors as u64, co["vector_count"].as_u64().unwrap(), "the fixture's vector_count");
+        assert_eq!(
+            vectors as u64,
+            co["vector_count"].as_u64().unwrap(),
+            "the fixture's vector_count"
+        );
         println!("COLLECTION_ORDER rust vectors={}", vectors);
     }
 }
