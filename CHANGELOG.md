@@ -6,6 +6,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.9.6] — Unreleased
+
+One registry, one answer, in every language. This release closes the two items the third audit pass left open (items 6 and 7 of the fourth
+audit's input list in `docs/audits/third-pass.md`): the four wrappers now list every collection in the same order, the lookups that take a
+country or anchor code fail by name on a non-string, Go and Rust are formatted and kept formatted by the gate, a workflow is polled because
+a push runs it and never escapes because of its name, and quoted gate output can no longer break the verification document. No registry
+data changed; no schema change.
+
+**For consumers.** Every collection is now in file order in all four languages: the order of the entries in `iso4217.json`, section by
+section, one entry per code. Rust used to return hash-map order and Go a different random order on every call; both now match Python and
+JavaScript. In Python and JavaScript, `issued_by`/`issuedBy`, `used_in`/`usedIn` and `pegged_to`/`peggedTo` now raise the same
+`TypeError("code must be a string, got ...")` as the currency lookups for `None`, `null`, `undefined` or any other non-string, instead of an
+accidental `AttributeError` or an unrelated `TypeError`.
+
+### Fixed
+
+- **Rust and Go returned collections in hash order.** `all_active`, `all_withdrawn`, `all_non_iso`, `all_currencies`, `pegged_to`,
+  `independent`, `with_minor_units`, `issued_by`, `used_in`, `by_classification` (and Rust's `iter()`) walked a hash map. The audit named
+  Rust; Go's maps are iterated in a random order, so its lists changed from call to call. Both keep their maps for lookup and walk an order
+  index beside them. No lookup result changed.
+- **Three lookups failed by accident on a non-string (Python and JavaScript).** The country lookups (the audit called them `by_country`; they
+  are `issued_by` and `used_in`) and `pegged_to`, Python's module-level function included, now use the P5-09 helper.
+- **Go and Rust sources were not formatted** (`gofmt -l` listed two files, `rustfmt` 45 differences on v1.9.4). Both are formatted; the
+  formatting commits change formatting only, with the same test counts before and after.
+- **A push-triggered workflow could escape CI polling by its name.** `check_workflows_covered` exempted any workflow whose name started with
+  `monitor`, `fetch`, `refresh`, `update` or `schedule`. A workflow is now polled if and only if a push runs it: the trigger decides, read by
+  `scripts/workflow_triggers.py`, which fails closed on what it cannot read. A polled workflow that no push runs is also refused.
+- **Gate output could break the generated verification document.** A fence line indented by one to three spaces, or one after a form feed or
+  ` `, closed the quoted block, and any banned word after it failed the checker. `check_verification_doc.py --quote` now writes the
+  block, with a fence longer than any run of backticks in the output, over the lines the checker itself reads.
+
+### Added
+
+- The `collection_order` group of `tests/cross_language_consistency.json` (14 lists: four collections and five `pegged_to` anchors for the
+  shipped registry, five for a synthetic one with repeated codes), read by `tests/test_wrapper_collection_order.py`,
+  `collection_order.test.js`, `collection_order_test.go` and Rust's `collection_order_fixture` module. On v1.9.5 it fails in Go and Rust.
+- `tools/check_formatting.sh` (gate step 31, and a step of CI's Go and Rust legs, which now install `rustfmt`), with
+  `tests/test_check_formatting.py`.
+- `scripts/workflow_triggers.py` (standard library only; `on: push`, flow and block forms, quoted keys, the YAML 1.1 `on` → `True` trap)
+  with `tests/test_workflow_triggers.py`.
+- 35 mutants in `tests/test_v196_mutations.py`, at least one for each fix; every one is killed. The suite is 2329 tests, from 2046 at v1.9.5.
+
+### Changed
+
+- The gate is 31 steps (it was 30).
+- The `lookup_contract` invalid-input set covers eight methods (40 cases, from 25).
+- `docs/audits/third-pass.md`: the "pass 3" note is settled (all three mentions mean the v1.7.11 audit, with the evidence), and input-list
+  items 6 and 7 are marked closed with the patches that closed them.
+- The harness test that pinned the five name prefixes as exempt now pins them as refused for a push-triggered workflow.
+
+### Not changed
+
+- Fourth-audit input-list items 1 to 5, 8 and 9. CUC. The Proposed ADRs (0014 taxonomy, 0015, 0016, 0017, the numeric contract).
+
 ## [1.9.5] — 2026-11-21
 
 The audit's documents are held to the same standard as its code. This release closes the third audit pass (v1.9.1 to v1.9.5): the
