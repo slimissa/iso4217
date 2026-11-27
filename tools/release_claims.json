@@ -2011,6 +2011,182 @@
       "contains": "docs/rules.md"
     }
   ],
+  "1.9.6": [
+    {
+      "file": "VERSION",
+      "contains": "1.9.6"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"version\": \"1.9.6\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "contains": "## [1.9.6]"
+    },
+    {
+      "file": "README.md",
+      "contains": "registry-1.9.6"
+    },
+    {
+      "file": "wrappers/python/setup.py",
+      "contains": "1.9.6"
+    },
+    {
+      "file": "wrappers/javascript/package.json",
+      "contains": "\"version\": \"1.9.6\""
+    },
+    {
+      "file": "wrappers/rust/Cargo.toml",
+      "contains": "version = \"1.9.6\""
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "active_order: Vec<String>",
+      "absent": "self.active.values().collect()"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "mod collection_order {"
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "contains": "func inOrder(",
+      "absent": "for _, c := range r.all {"
+    },
+    {
+      "file": "wrappers/go/file_order_test.go",
+      "contains": "TestCollectionsAreInFileOrder"
+    },
+    {
+      "file": "tests/cross_language_consistency.json",
+      "contains": "\"collection_order\": {"
+    },
+    {
+      "file": "tests/test_wrapper_collection_order.py"
+    },
+    {
+      "file": "wrappers/javascript/collection_order.test.js",
+      "contains": "COLLECTION_ORDER javascript vectors="
+    },
+    {
+      "file": "wrappers/go/collection_order_test.go",
+      "contains": "COLLECTION_ORDER go vectors="
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "contains": "mod collection_order_fixture"
+    },
+    {
+      "file": "tools/check_cross_language.sh",
+      "contains": "tests/test_wrapper_collection_order.py"
+    },
+    {
+      "file": "tools/check_cross_language.sh",
+      "contains": "node collection_order.test.js"
+    },
+    {
+      "file": "wrappers/python/iso4217.py",
+      "contains": "anchor = _require_code(anchor_code)",
+      "absent": "country_code.upper()"
+    },
+    {
+      "file": "tests/test_wrapper_lookup_contract.py",
+      "contains": "NEW_IN_V196 = (\"pegged_to\", \"issued_by\", \"used_in\")"
+    },
+    {
+      "file": "wrappers/javascript/index.js",
+      "contains": "const anchor = requireCode(anchorCode);",
+      "absent": "countryCode.toUpperCase()"
+    },
+    {
+      "file": "wrappers/javascript/lookup_contract.test.js",
+      "contains": "pegged_to: 'peggedTo', issued_by: 'issuedBy', used_in: 'usedIn'"
+    },
+    {
+      "file": "tests/cross_language_consistency.json",
+      "contains": "\"invalid_input_count\": 40",
+      "absent": "method_applies_to\": {"
+    },
+    {
+      "file": "wrappers/go/iso4217.go",
+      "absent": "    \tisIndependent = *raw.IsIndependent"
+    },
+    {
+      "file": "wrappers/rust/src/lib.rs",
+      "absent": "fn require<'a>(obj: &'a JsonMap, key: &str, kind: &str, path: &str) -> Result<&'a serde_json::Value, String> {"
+    },
+    {
+      "file": "tools/check_formatting.sh",
+      "contains": "cargo fmt --check"
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "run_gate_step \"check_formatting.sh\""
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "components: rustfmt"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "contains": "bash tools/check_formatting.sh ${{ matrix.language }}"
+    },
+    {
+      "file": "README.md",
+      "contains": "Runs a 31-check gate"
+    },
+    {
+      "file": "docs/AUDIT.md",
+      "contains": "| `check_formatting.sh` |"
+    },
+    {
+      "file": "tests/test_check_formatting.py"
+    },
+    {
+      "file": "scripts/workflow_triggers.py",
+      "contains": "def triggers("
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "scripts/workflow_triggers.py --polled",
+      "absent": "monitor|fetch|refresh|update|schedule"
+    },
+    {
+      "file": "tests/test_workflow_triggers.py",
+      "contains": "test_the_yaml_1_1_on_true_trap"
+    },
+    {
+      "file": "tools/check_verification_doc.py",
+      "contains": "def quote_block("
+    },
+    {
+      "file": "scripts/release.sh",
+      "contains": "check_verification_doc.py --quote",
+      "absent": "sed -e 's/^```/"
+    },
+    {
+      "file": "tests/test_check_verification_doc.py",
+      "contains": "class TestQuotedGateOutputCannotLeaveItsFence"
+    },
+    {
+      "file": "docs/audits/third-pass.md",
+      "contains": "Settled at v1.9.6",
+      "absent": "this note does not claim to know"
+    },
+    {
+      "file": "docs/audits/third-pass.md",
+      "contains": "6. **Closed at v1.9.6 (patch 08).**"
+    },
+    {
+      "file": "docs/audits/third-pass.md",
+      "contains": "7. **Closed at v1.9.6 (patches 01 to 07, 09 and 10).**"
+    },
+    {
+      "file": "tests/test_v196_mutations.py",
+      "contains": "W35-one-banned-word-is-left-unfenced"
+    }
+  ],
   "doc-facts": [
     {
       "file": "tools/vendor_iso3166.py",
