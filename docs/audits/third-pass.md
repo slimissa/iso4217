@@ -6,9 +6,25 @@
 > lines in 23 files including verification records that are not rewritten, so renaming them would break every one of those
 > citations. Read "P5" as a label, not a count.
 >
-> The report below is otherwise as delivered. It refers three times to "pass 3" as an *earlier* audit: [Guess] the first
-> mention (to_minor rounding made consistent) is the v1.1.0 fixes and the other two are the v1.7.11 audit (F1 to F30), but the
-> report does not say, and this note does not claim to know. Reconciling it is on the fourth audit's input list.
+> The report below is otherwise as delivered. It refers three times to "pass 3" as an *earlier* audit, in its own numbering,
+> which this repository does not use. **Settled at v1.9.6: all three mean the v1.7.11 audit (F1 to F30, closed at v1.9.0).**
+> [Likely] The report never names it; the evidence is that each "why missed" sentence describes what one of that audit's
+> fixes did, as the CHANGELOG records it:
+>
+> - P5-04 ("made `to_minor` rounding consistent and assumed `format` followed"): F28, closed at v1.9.0. The 1.9.0 entry says
+>   `to_minor()` and `format()` both accept a `Decimal` and round it half away from zero. [Confirmed by running the v1.9.0
+>   tree, fc3c5b5] `to_minor(Decimal("0.125"))` was 13 and `format(Decimal("0.125"))` was `$0.12`: only `to_minor` did, which
+>   is P5-04's own second bullet. The v1.1.0 change this note used to guess (af37d41, "standardize rounding to
+>   half-away-from-zero across all four languages") also fits the words, but it was never called an audit, and one name for
+>   two audits in one report is the less likely reading.
+> - P5-05 ("audited the gate's completeness against the lists in the docs"): F5, closed at v1.8.3, made the generator list in
+>   CONTRIBUTING.md equal to the release script's and added a test that keeps the two lists equal; no workflow file was read.
+> - P5-07 ("verified the behaviours of the bugs it found, not the coverage of the whole script"): the functions P5-07 lists as
+>   tested (`poll_ci`, the tag path, `commit_and_push`) are those F1 (v1.7.12) and F3, F17, F19 and F25 (v1.7.14) fixed.
+>
+> Checked and not found: no CHANGELOG entry, commit message, verification record or decision record numbers the audits
+> before this one, so "pass 3" itself is matched to nothing in the history; the match is by content. ADR 0017 (D6) already
+> treats "the earlier audit" as the v1.7.11 audit.
 
 Date: 2026-10-23. Scope: the project archive `iso4217-main.zip` at v1.9.0 (the archive carried no `.git`, so HEAD
 479f623 and the tag at fc3c5b5 were not verified). Method: read-only. The gate checks, `pytest --fail-on-skip`, the
@@ -336,18 +352,26 @@ A list, not work. Nothing here was started.
 5. The rules matrix: read the Exchange Calendar and ISO 10383 pattern files (the former's `docs` directory was blocked to automated access
    on 2026-10-29), replace every "unknown" cell, verify the matrix by tooling, and decide the difference in gate semantics (ISO 3166 and
    ISO 10383 describe a fail-fast gate; this repository's accumulates every failure).
-6. Deferred from v1.9.5: `check_workflows_covered` exempts workflows by name prefix (`monitor`, `fetch`, `refresh`, `update`, `schedule`), so a
+6. **Closed at v1.9.6 (patch 08).** Deferred from v1.9.5: `check_workflows_covered` exempts workflows by name prefix (`monitor`, `fetch`, `refresh`, `update`, `schedule`), so a
    push-triggered `update-*.yml` would be silently unpolled. Exempting by trigger needs a YAML read the script cannot do without a helper and
    its own tests.
-7. New findings from this release, not fixed:
+7. **Closed at v1.9.6 (patches 01 to 07, 09 and 10).** New findings from this release, not fixed:
    - Rust's collection accessors (`all_active()` and siblings) return hash-map order; Python, JavaScript and Go return file order.
+     *Closed by patches 01 and 02.* Go did not return file order either: its accessors ranged over Go maps, whose order is random on
+     every call [Confirmed by running v1.9.5]. Both now return file order beside O(1) maps, and the `collection_order` group of
+     `tests/cross_language_consistency.json` holds all four to the same lists.
    - `by_country(None)` and `pegged_to(None)` raise `AttributeError` in Python [Confirmed by running] and an incidental `TypeError` in
      JavaScript [by reading]: the same accident P5-09 fixed for the five currency-code lookups.
+     *Closed by patches 03 and 04.* No `by_country` exists; the country lookups are `issued_by` and `used_in` (`issuedBy`, `usedIn`). All
+     three, and Python's module-level `pegged_to`, raise P5-09's `TypeError` and are in the `lookup_contract` invalid-input set.
    - Go and Rust sources are not formatted by `gofmt` and `rustfmt` (`gofmt -l` lists two files; `rustfmt` reports 45 differences on the
      v1.9.4 tree) and no gate step checks formatting.
+     *Closed by patches 05, 06 and 07:* both formatted, and `tools/check_formatting.sh` is a gate step and a step of CI's Go and Rust legs.
    - This document still says "pass 3" three times for an earlier audit without saying which; the editorial note at the top records a guess.
+     *Closed by patch 10:* the note now names the v1.7.11 audit and gives the evidence.
    - Any manifest claim whose output line contains a word the verification-document checker bans can still make a generated document fail it
      when the word is outside a code fence; the fence handling removes the known case, not the class.
+     *Closed by patch 09:* `check_verification_doc.py --quote` writes every quoted gate output in a fence its content cannot close.
 8. For the owner to measure on the real tree: the size and time of the dry-run's throwaway copy, and whether the real tree's gate output
    passes the checker in the dry-run's document stage.
 9. Not verified in this release: CI, the commit hashes and tags (the archive carries no history), and the clean-venv count on the
