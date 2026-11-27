@@ -55,10 +55,10 @@ var registryJSON []byte
 // ---------------------------------------------------------------------------
 
 type rawRegistry struct {
-	Meta      *rawMeta      `json:"meta"`
-	Source    *rawSource    `json:"source"`
+	Meta       *rawMeta       `json:"meta"`
+	Source     *rawSource     `json:"source"`
 	Currencies *rawCurrencies `json:"currencies"`
-	NonISO    *rawNonISO    `json:"non_iso"`
+	NonISO     *rawNonISO     `json:"non_iso"`
 }
 
 type rawMeta struct {
@@ -84,21 +84,21 @@ type rawNonISO struct {
 }
 
 type rawCurrency struct {
-	Code        string       `json:"code"`
-	Numeric     string       `json:"numeric"`
-	Name        string       `json:"name"`
-	MinorUnits  int          `json:"minor_units"`
-	Symbol      string       `json:"symbol"`
-	Entity      string       `json:"entity"`
-	CentralBank string       `json:"central_bank"`
-	PeggedTo    *string      `json:"pegged_to"`
-	PegType     *string      `json:"peg_type"`
-	PeggedSince *string      `json:"pegged_since"`
-	PegRate     *float64     `json:"peg_rate"`
-	PegBandPct  *float64     `json:"peg_band_pct"`
-	IsIndependent *bool      `json:"is_independent"`
-	Note        *string      `json:"note"`
-	Countries   []rawCountry `json:"countries"`
+	Code          string       `json:"code"`
+	Numeric       string       `json:"numeric"`
+	Name          string       `json:"name"`
+	MinorUnits    int          `json:"minor_units"`
+	Symbol        string       `json:"symbol"`
+	Entity        string       `json:"entity"`
+	CentralBank   string       `json:"central_bank"`
+	PeggedTo      *string      `json:"pegged_to"`
+	PegType       *string      `json:"peg_type"`
+	PeggedSince   *string      `json:"pegged_since"`
+	PegRate       *float64     `json:"peg_rate"`
+	PegBandPct    *float64     `json:"peg_band_pct"`
+	IsIndependent *bool        `json:"is_independent"`
+	Note          *string      `json:"note"`
+	Countries     []rawCountry `json:"countries"`
 	// Withdrawn fields
 	WithdrawnDate  *string  `json:"withdrawn_date"`
 	ReplacedBy     *string  `json:"replaced_by"`
@@ -432,14 +432,14 @@ type RegistrySummary struct {
 // Loads the canonical iso4217.json data at compile time via go:embed.
 // Provides lookup methods for active, withdrawn, and non-ISO currencies.
 type CurrencyRegistry struct {
-	version        string
-	updated        string
-	amendment      int
-	amendmentDate  string
-	active         map[string]*Currency
-	withdrawn      map[string]*Currency
-	nonISO         map[string]*Currency
-	all            map[string]*Currency
+	version       string
+	updated       string
+	amendment     int
+	amendmentDate string
+	active        map[string]*Currency
+	withdrawn     map[string]*Currency
+	nonISO        map[string]*Currency
+	all           map[string]*Currency
 	// File order beside each map (lookup stays O(1) in the map; collections walk the order). Each code is listed once, at
 	// the position of its first entry; the map holds the entry that wins (ADR 0015, D3), the same as Python's dict.
 	activeOrder    []string
@@ -797,7 +797,7 @@ func loadRegistryFrom(data []byte) (*CurrencyRegistry, error) {
 func newCurrency(raw rawCurrency) *Currency {
 	isIndependent := false
 	if raw.IsIndependent != nil {
-    	isIndependent = *raw.IsIndependent
+		isIndependent = *raw.IsIndependent
 	}
 
 	return &Currency{

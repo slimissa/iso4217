@@ -1028,6 +1028,7 @@ func BenchmarkSummary(b *testing.B) {
 		r.Summary()
 	}
 }
+
 // ---------------------------------------------------------------------------
 // Cross-language consistency (issue #4)
 //
@@ -1050,20 +1051,20 @@ type clcFormatting struct {
 }
 
 type clcTestVector struct {
-	Code           string           `json:"code"`
-	Description    string           `json:"description"`
-	MinorUnits     int              `json:"minor_units"`
-	IsIndependent  *bool            `json:"is_independent"`
-	IsPegged       *bool            `json:"is_pegged"`
-	PeggedTo       *string          `json:"pegged_to"`
-	PegType        *string          `json:"peg_type"`
-	PegRate        *float64         `json:"peg_rate"`
-	PegBandPct     *float64         `json:"peg_band_pct"`
-	Withdrawn      bool             `json:"withdrawn"`
-	ReplacedBy     *string          `json:"replaced_by"`
-	ConversionRate *float64         `json:"conversion_rate"`
-	Conversions    []clcConversion  `json:"conversions"`
-	Formatting     []clcFormatting  `json:"formatting"`
+	Code           string          `json:"code"`
+	Description    string          `json:"description"`
+	MinorUnits     int             `json:"minor_units"`
+	IsIndependent  *bool           `json:"is_independent"`
+	IsPegged       *bool           `json:"is_pegged"`
+	PeggedTo       *string         `json:"pegged_to"`
+	PegType        *string         `json:"peg_type"`
+	PegRate        *float64        `json:"peg_rate"`
+	PegBandPct     *float64        `json:"peg_band_pct"`
+	Withdrawn      bool            `json:"withdrawn"`
+	ReplacedBy     *string         `json:"replaced_by"`
+	ConversionRate *float64        `json:"conversion_rate"`
+	Conversions    []clcConversion `json:"conversions"`
+	Formatting     []clcFormatting `json:"formatting"`
 }
 
 type clcLookupTest struct {
@@ -1089,11 +1090,11 @@ type clcSummaryTest struct {
 }
 
 type crossLanguageConsistency struct {
-	Description  string          `json:"description"`
-	Version      string          `json:"version"`
-	TestVectors  []clcTestVector `json:"test_vectors"`
-	LookupTests  []clcLookupTest `json:"lookup_tests"`
-	FilterTests  []clcFilterTest `json:"filter_tests"`
+	Description  string           `json:"description"`
+	Version      string           `json:"version"`
+	TestVectors  []clcTestVector  `json:"test_vectors"`
+	LookupTests  []clcLookupTest  `json:"lookup_tests"`
+	FilterTests  []clcFilterTest  `json:"filter_tests"`
 	SummaryTests []clcSummaryTest `json:"summary_tests"`
 }
 
