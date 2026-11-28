@@ -169,9 +169,9 @@ Every derived artifact must be regenerated in the same commit. CI rejects PRs wh
    `sync_wrappers.py` copies the root `iso4217.json` into `wrappers/go/iso4217.json` and `wrappers/rust/iso4217.json`, which are compiled into those wrappers at build time (`go:embed`, `include_str!`) and do **not** update on their own. Skipping this step leaves Go and Rust silently running against stale data. CI will fail the build if these copies aren't in sync with root, but running it locally first saves you a failed PR.
 4. Run the full test suite:
    ```bash
-   python3 -m pytest tests/ wrappers/python/tests/ -q
+   python3 -m pytest tests/ wrappers/python/tests/ -q --fail-on-skip
    ```
-   Expect **768 tests passing** as of v1.5.0. The count changes when tests are added or removed — a PR that changes the count should update the number referenced in this document and in `CHANGELOG.md`.
+   Every test must pass and none may be skipped (a skipped test verified nothing). The suite's size is not written here: pytest prints it, and a number in a document goes stale with the next test (this one said 768 from v1.5.0 to v1.9.6).
 5. Confirm the CLI resolves against the updated registry:
    ```bash
    pytest wrappers/python/tests/test_cli.py -q
@@ -299,7 +299,7 @@ When reviewing PRs, maintainers will check, in order:
 
 1. **Data accuracy** — is every currency fact backed by an authoritative source?
 2. **Schema compliance** — does `iso4217.json` validate against `schema.json`?
-3. **Test coverage** — do all 768 tests pass? Are new tests added for new functionality?
+3. **Test coverage** — does the whole suite pass with `--fail-on-skip`? Are new tests added for new functionality?
 4. **Cross-wrapper consistency** — does the change maintain API parity across wrappers?
 5. **Export drift** — do `export_sql.py --check` and `export_csv.py --check` both exit 0?
 6. **CLI behavior** — do all 171 CLI tests pass? Do the three CI smoke tests pass locally?
