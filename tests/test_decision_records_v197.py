@@ -22,7 +22,10 @@ def test_adr_0015_records_the_collection_order_contract():
     assert "was wrong for Go" in amendment
 
 
-def test_adr_0010_answers_the_cuc_question_and_says_the_move_waits():
+def test_adr_0010_answers_the_cuc_question_and_records_the_move():
+    # v1.9.7 second bundle: the move landed (it said "did **not** land" while the first bundle's patch 01 was stopped).
     assert "Open question, not decided here:** whether CUC" not in ADR_0010
     assert "Open question, answered in v1.9.7:** whether CUC" in ADR_0010
-    assert "<WthdrwlDt>2021-06</WthdrwlDt>" in ADR_0010 and "did **not** land in v1.9.7" in ADR_0010
+    assert "<WthdrwlDt>2021-06</WthdrwlDt>" in ADR_0010 and "The move landed in v1.9.7" in ADR_0010
+    assert "did **not** land in v1.9.7" not in ADR_0010
+    assert "amendment 178 (4 February 2025)" in ADR_0010 and "Resolución 177/2020" in ADR_0010

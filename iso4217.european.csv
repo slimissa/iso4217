@@ -35,7 +35,6 @@ CNY;156;Chinese Yuan;2;¥;China;active;true;;;
 COP;170;Colombian Peso;2;$;Colombia;active;true;;;
 COU;970;Unidad de Valor Real;2;COU;Colombia;active;true;;;
 CRC;188;Costa Rican Colon;2;₡;Costa Rica;active;true;;;
-CUC;931;Cuban Convertible Peso;2;CUC$;Cuba;active;false;USD;single;1.0
 CUP;192;Cuban Peso;2;$MN;Cuba;active;true;;;
 CVE;132;Cape Verdean Escudo;2;Esc;Cape Verde;active;false;EUR;single;110.265
 CZK;203;Czech Koruna;2;Kč;Czech Republic;active;true;;;
@@ -200,6 +199,7 @@ CHC;948;WIR Franc (electronic);2;CHC;Switzerland;withdrawn;false;;;
 CSD;891;Serbian Dinar (2003);2;CSD;Yugoslavia;withdrawn;false;;;
 CSJ;203;Czechoslovak Koruna (1993);2;Kčs;Czechoslovakia;withdrawn;false;;;
 CSK;200;Czechoslovak Koruna;2;Kčs;Czechoslovakia;withdrawn;false;;;
+CUC;931;Cuban Convertible Peso;2;CUC$;Cuba;withdrawn;false;;;
 CYP;196;Cypriot Pound;2;£;Cyprus;withdrawn;false;;;
 DDM;278;East German Mark;0;M;German Democratic Republic;withdrawn;false;;;
 DEM;276;German Mark;2;DM;Germany;withdrawn;false;;;

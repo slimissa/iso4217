@@ -82,7 +82,7 @@ Counts: `fix-in-4217` 4, `fix-in-3166` 1, `allow-list-with-reason` 18, `out-of-s
 | 21 | VE Venezuela | VED (4217-only) | `allow-list-with-reason` | 3166 `currency_codes` lists the circulating currency only. The ISO 4217 code is a funds/indexation unit issued for the same country, not a currency of general circulation (registry `classification` = fund or indexation). | registry VED `classification` field; 3166 snapshot v1.8.0 `currency_codes` excludes VED | Allow-list. | [Confirmed] |
 | 22 | XK Kosovo | EUR (4217-only) | `allow-list-with-reason` | XK is a user-assigned code, not an officially assigned ISO 3166-1 code, so 3166 carries `currency_codes`=null. The registry records the unilateral euro adoption. | 3166 snapshot v1.8.0 status `user-assigned`, `currency_codes`=null; registry EUR `adopting` | Allow-list; revisit only if ISO assigns the code. | [Likely] |
 | 23 | ZW Zimbabwe | USD (4217-only) | `allow-list-with-reason` | The registry's `relationship` field records a currency that circulates alongside the country's own currency (`parallel`/`adopting`). 3166 `currency_codes` lists only the territory's own ISO-assigned currency. | registry USD `countries[]` relationship; 3166 snapshot v1.8.0 `currency_codes` excludes USD | Allow-list. | [Confirmed] |
-| 24 | CU Cuba | CUC (4217-only) | `out-of-scope-historical` | CUC was demonetized in January 2021. 3166 lists CUP only. The registry keeps CUC because its own `source_url` still points at the ISO 4217 entry. | registry CUC note ('Demonetized January 2021'); 3166 snapshot `currency_codes`=[CUP]; date 2021-01 | Allow-list with date 2021-01. Whether CUC should move to `withdrawn`: yes, per SIX List Three (2026-01-01: WthdrwlDt 2021-06); the move waits for a source giving the day (see below, v1.9.7). | [Likely] |
+| 24 | CU Cuba | CUC (4217-only) | `out-of-scope-historical` | CUC was demonetized in January 2021. 3166 lists CUP only. The registry keeps CUC because its own `source_url` still points at the ISO 4217 entry. | registry CUC note ('Demonetized January 2021'); 3166 snapshot `currency_codes`=[CUP]; date 2021-01 | Allow-list with date 2021-01. Whether CUC should move to `withdrawn`: yes, per SIX List Three (2026-01-01: WthdrwlDt 2021-06); moved in v1.9.7 per amendment 178 (see below), and the allow-list entry removed. | [Likely] |
 | 25 | SV El Salvador | SVC (4217-only) | `out-of-scope-historical` | El Salvador dollarized in 2001. 3166 lists USD only. The registry keeps SVC because ISO 4217 still lists it; the registry is a snapshot of ISO's list, not of circulation. | registry SVC note ('dollarized to USD in 2001', 'ISO 4217 continues to list as active'); 3166 snapshot `currency_codes`=[USD]; date 2001-01-01 | Allow-list with date 2001-01-01. | [Likely] |
 
 ## Rationale
@@ -100,10 +100,11 @@ names a currency for a territory and the registry says nothing, so a consumer jo
   against OBP before this ADR is Accepted.
 - **Open question, answered in v1.9.7:** whether CUC (demonetized January 2021) belongs in `withdrawn`. Yes: SIX's List
   Three (published 2026-01-01) lists it, `<Ccy>CUC</Ccy>` with `<WthdrwlDt>2021-06</WthdrwlDt>`, and List One (published
-  2026-09-17) no longer does. The move itself did **not** land in v1.9.7: `withdrawn_date` is a full date, List Three gives
-  only the month, and the amendment that gives the day (178) was not among the sources of that release, so patch 01 of
-  v1.9.7 stopped under its rule "never derive a day from the month". CUC stays allow-listed as historical until that
-  source is read; `tests/test_six_list_one_parity.py` carries it as a dated exception (expires 2027-03-31).
+  2026-09-17) no longer does. The move landed in v1.9.7 (its second patch bundle; the first stopped because no source
+  for the day was attached): ISO 4217 amendment 178 (4 February 2025) gives the day the withdrawal was completed, 30 June
+  2021, and Resolución 177/2020 of the Banco Central de Cuba (Gaceta Oficial No. 73 Extraordinaria, 10 December 2020),
+  artículo TERCERO, the rate of 24 CUP per CUC, stored as 1/24 (units of CUC per CUP). The CU/CUC allow-list entry and
+  the parity test's exception for CUC were removed with it.
 
 ## Consequences
 

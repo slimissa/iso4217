@@ -5,7 +5,7 @@
 -- Repository:  https://github.com/slimissa/iso4217
 -- License:     Apache 2.0
 --
--- Contents:    166 active + 136 withdrawn = 302 rows
+-- Contents:    165 active + 137 withdrawn = 302 rows
 --
 -- Note:        Active codes are 3 chars (e.g., USD). Withdrawn codes
 --              may be up to 7 chars (e.g., MXN_OLD) for revaluation cases.
@@ -71,7 +71,6 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('COP', '170', 'Colombian Peso', 2, '$', 'Colombia', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('COU', '970', 'Unidad de Valor Real', 2, 'COU', 'Colombia', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CRC', '188', 'Costa Rican Colon', 2, '₡', 'Costa Rica', 'active');
-INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CUC', '931', 'Cuban Convertible Peso', 2, 'CUC$', 'Cuba', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CUP', '192', 'Cuban Peso', 2, '$MN', 'Cuba', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CVE', '132', 'Cape Verdean Escudo', 2, 'Esc', 'Cape Verde', 'active');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CZK', '203', 'Czech Koruna', 2, 'Kč', 'Czech Republic', 'active');
@@ -236,6 +235,7 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CSD', '891', 'Serbian Dinar (2003)', 2, 'CSD', 'Yugoslavia', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CSJ', '203', 'Czechoslovak Koruna (1993)', 2, 'Kčs', 'Czechoslovakia', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CSK', '200', 'Czechoslovak Koruna', 2, 'Kčs', 'Czechoslovakia', 'withdrawn');
+INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CUC', '931', 'Cuban Convertible Peso', 2, 'CUC$', 'Cuba', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('CYP', '196', 'Cypriot Pound', 2, '£', 'Cyprus', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('DDM', '278', 'East German Mark', 0, 'M', 'German Democratic Republic', 'withdrawn');
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('DEM', '276', 'German Mark', 2, 'DM', 'Germany', 'withdrawn');
@@ -339,6 +339,6 @@ INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, s
 INSERT INTO currencies (code, numeric_code, name, minor_units, symbol, entity, status) VALUES ('ZWR', '935', 'Zimbabwean Dollar (2008)', 2, 'Z$', 'Zimbabwe', 'withdrawn');
 
 -- End of export
--- Active rows:    166
--- Withdrawn rows: 136
+-- Active rows:    165
+-- Withdrawn rows: 137
 -- Total rows:     302

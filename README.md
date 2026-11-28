@@ -1,6 +1,6 @@
 # ISO 4217 Currency Registry
 
-**A canonical, versioned, machine-readable registry of ISO 4217 currency codes — 166 active currencies covering the complete ISO 4217 standard, 136 withdrawn currencies with revaluation chains, and 22 commonly used non-ISO instruments.**
+**A canonical, versioned, machine-readable registry of ISO 4217 currency codes — 165 active currencies covering the complete ISO 4217 standard, 137 withdrawn currencies with revaluation chains, and 22 commonly used non-ISO instruments.**
 
 One JSON file is the source of truth. Everything else — SQL, CSV, Parquet, four language wrappers, a command-line tool, and three analytical tables — is regenerated from it and re-verified on every push.
 
@@ -44,8 +44,8 @@ One JSON file is the source of truth. Everything else — SQL, CSV, Parquet, fou
 
 | | |
 |---|---|
-| **Active ISO 4217 currencies** | 166 — every currently assigned alphabetic code |
-| **Withdrawn ISO 4217 currencies** | 136 — with replacement code, conversion rate, and withdrawal date |
+| **Active ISO 4217 currencies** | 165 — every currently assigned alphabetic code |
+| **Withdrawn ISO 4217 currencies** | 137 — with replacement code, conversion rate, and withdrawal date |
 | **Non-ISO instruments** | 22 — 7 cryptocurrencies, 6 stablecoins, 4 commodities, 5 special-purpose |
 | **ISO amendment applied** | 180 (dated 2025-09-22) |
 | **Source of truth** | [`iso4217.json`](./iso4217.json), validated against [`schema.json`](./schema.json) |
@@ -213,8 +213,8 @@ Regeneration order follows the layers: CURATED first, then AGGREGATED. `export_a
 ```text
 meta        version, updated, amendment, amendment_date, schema_version, license
 source      standard, maintenance agency, last verification date, sources used
-currencies  active[]    166 entries
-            withdrawn[] 136 entries
+currencies  active[]    165 entries
+            withdrawn[] 137 entries
 non_iso     cryptocurrencies[], stablecoins[], commodities[], special_purpose[]
 ```
 
@@ -306,9 +306,9 @@ Non-ISO fields vary by type; [`schema.json`](./schema.json) is the authority.
 
 | Group | Count | Notes |
 |-------|-------|-------|
-| Active ISO currencies | 166 | 155 circulating, 10 fund, 1 indexation |
-| Pegged active currencies | 45 | 43 single-anchor (all with a numeric `peg_rate`), 1 basket (MAD), 1 undisclosed (KWD) |
-| Withdrawn ISO currencies | 136 | Every one has `replaced_by`, `withdrawn_date`, `conversion_rate`, and `code_lifetime.to` |
+| Active ISO currencies | 165 | 154 circulating, 10 fund, 1 indexation |
+| Pegged active currencies | 44 | 42 single-anchor (all with a numeric `peg_rate`), 1 basket (MAD), 1 undisclosed (KWD) |
+| Withdrawn ISO currencies | 137 | Every one has `replaced_by`, `withdrawn_date`, `conversion_rate`, and `code_lifetime.to` |
 | Cryptocurrencies | 7 | Selected from the top 10 by market cap |
 | Stablecoins | 6 | Selected from the top stablecoins by market cap |
 | Commodities | 4 | Precious metals with ISO-compatible codes |
@@ -399,7 +399,7 @@ df = pd.read_csv("iso4217.csv")
 
 ### Parquet
 
-[`iso4217.parquet`](./iso4217.parquet) — columnar, typed, snappy-compressed, readable by pandas, Polars, DuckDB, Spark, and every warehouse loader. 302 rows: 166 active and 136 withdrawn.
+[`iso4217.parquet`](./iso4217.parquet) — columnar, typed, snappy-compressed, readable by pandas, Polars, DuckDB, Spark, and every warehouse loader. 302 rows: 165 active and 137 withdrawn.
 
 Columns, in order: `code`, `numeric_code`, `name`, `minor_units`, `symbol`, `entity`, `status`, `is_independent`, `pegged_to`, `peg_type`, `peg_rate`.
 
@@ -909,7 +909,7 @@ Development setup, including the virtual environment the Python tooling needs on
 
 Stated plainly, because a canonical registry is a claim and claims need their edges drawn.
 
-- **`code_lifetime.from` is null for all 136 withdrawn entries.** None has a documented ISO assignment date. That is a fact about ISO's documentation, not an enrichment failure. If you have a primary source for any of them, open an issue.
+- **`code_lifetime.from` is null for all 137 withdrawn entries.** None has a documented ISO assignment date. That is a fact about ISO's documentation, not an enrichment failure. If you have a primary source for any of them, open an issue.
 - **The registry is a versioned snapshot, not a history.** `coverage_timeline.parquet` counts currencies per release; no artifact says when an individual active currency began. Questions like "did this currency exist in 2012?" cannot be answered from it.
 - **Coverage counts are partial.** `coverage_timeline.parquet` has counts only for the versions the changelog's Version History table lists (1.0.0 through 1.5.0 today); later versions are null rather than inferred.
 - **Two country codes have no region.** `XK` and `TW` are valid codes that the vendored ISO 3166 snapshot does not place in a region. They appear with a null region in `currencies_by_region.parquet`.

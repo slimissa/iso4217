@@ -66,15 +66,6 @@ disagreement, so this file cannot rot.
       "source": "registry COU `classification` field; 3166 snapshot v1.8.0 `currency_codes` excludes COU"
     },
     {
-      "country": "CU",
-      "currency": "CUC",
-      "side": "4217-only",
-      "category": "out-of-scope-historical",
-      "reason": "CUC was demonetized in January 2021. 3166 lists CUP only. The registry keeps CUC because its own `source_url` still points at the ISO 4217 entry.",
-      "source": "registry CUC note ('Demonetized January 2021'); 3166 snapshot `currency_codes`=[CUP]; date 2021-01",
-      "date": "2021-01"
-    },
-    {
       "country": "FK",
       "currency": "GBP",
       "side": "4217-only",

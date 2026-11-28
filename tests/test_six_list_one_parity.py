@@ -51,9 +51,9 @@ EXCEPTIONS = {
     "XUA": ("not_active", DEFERRED, "2027-03-31"),
     "XSU": ("not_active", DEFERRED, "2027-03-31"),
     "XAD": ("not_active", DEFERRED, "2027-03-31"),
-    # The v1.9.7 data corrections that stopped under D2 (SPEC.md of the v1.9.7 bundle): List Three lists CUC (2021-06), USS
-    # (2014-03) and ANG (2025-03) as withdrawn and List One lists XCG, but no attached source gives a day.
-    "CUC": ("not_in_list_one", BLOCKED, "2027-03-31"),
+    # The v1.9.7 data corrections that stopped under D2: List Three lists USS (2014-03) and ANG (2025-03) as withdrawn and List
+    # One lists XCG, but no attached source gives the day. CUC landed in v1.9.7 (amendment 178 gives 30 June 2021); each
+    # data patch removes its own code's exception.
     "USS": ("not_in_list_one", BLOCKED, "2027-03-31"),
     "ANG": ("not_in_list_one", BLOCKED, "2027-03-31"),
     "XCG": ("not_active", BLOCKED, "2027-03-31"),

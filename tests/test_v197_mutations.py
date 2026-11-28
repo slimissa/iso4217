@@ -62,9 +62,11 @@ CW_SNAPSHOT = ('        "alpha_2": "CW",\n        "alpha_3": "CUW",\n        "bo
 
 MUTANTS = [
     # -- 01, 02, 04: the stopped data corrections; the parity guard holds each code's state ---------------------------
-    M("X01-cuc-blocked-exception-dropped", "01", "CUC stays active with no exception: the guard must name it",
-      [(PARITY, '    "CUC": ("not_in_list_one", BLOCKED, "2027-03-31"),\n', "")],
-      PARITY, "every_active_code_is_in_list_one"),
+    # X01 since the second v1.9.7 bundle: CUC landed, so its exception is gone; putting it back must fail as stale.
+    M("X01-cuc-blocked-exception-put-back", "01", "CUC moved to withdrawn but its blocked exception was kept",
+      [(PARITY, '    "USS": ("not_in_list_one", BLOCKED, "2027-03-31"),\n',
+        '    "USS": ("not_in_list_one", BLOCKED, "2027-03-31"),\n    "CUC": ("not_in_list_one", BLOCKED, "2027-03-31"),\n')],
+      PARITY, "each_is_still_needed"),
     M("X02-uss-blocked-exception-dropped", "02", "USS stays active with no exception",
       [(PARITY, '    "USS": ("not_in_list_one", BLOCKED, "2027-03-31"),\n', "")],
       PARITY, "every_active_code_is_in_list_one"),

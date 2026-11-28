@@ -463,10 +463,11 @@ class TestPegsSummaryRealData:
     def real(self, real_outputs):
         return real_outputs
 
-    def test_43_single_pegs_across_8_anchors(self, real):
+    def test_42_single_pegs_across_8_anchors(self, real):
         rows = pq.read_table(real / PEGS_FILE).to_pylist()
         assert len(rows) == 8
-        assert sum(r["currency_count"] for r in rows) == 43
+        # 42 since v1.9.7 (CUC, pegged 1:1 to USD, moved to withdrawn per ISO amendment 178; it was 43).
+        assert sum(r["currency_count"] for r in rows) == 42
         for r in rows:
             assert r["currency_count"] == len(r["currencies"])
             assert r["currencies"] == sorted(r["currencies"])

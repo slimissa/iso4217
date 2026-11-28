@@ -3748,32 +3748,6 @@
         "note": "Pegged 1:1 to INR since 1974. Indian rupee circulates alongside the ngultrum."
       },
       {
-        "code": "CUC",
-        "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CUC",
-        "numeric_reused": false,
-        "classification": "circulating",
-        "numeric": "931",
-        "name": "Cuban Convertible Peso",
-        "minor_units": 2,
-        "symbol": "CUC$",
-        "entity": "Cuba",
-        "central_bank": "Banco Central de Cuba",
-        "pegged_to": "USD",
-        "peg_type": "single",
-        "pegged_since": "1994-01-01",
-        "peg_rate": 1.0,
-        "peg_band_pct": 0.0,
-        "is_independent": false,
-        "countries": [
-          {
-            "code": "CU",
-            "name": "Cuba",
-            "relationship": "issuing"
-          }
-        ],
-        "note": "Pegged 1:1 to USD. Demonetized January 2021 — effectively withdrawn from circulation but still ISO-listed as active. Treat with caution."
-      },
-      {
         "code": "CUP",
         "source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CUP",
         "numeric_reused": false,
@@ -6172,6 +6146,20 @@
         "replaced_by": "ARL",
         "conversion_rate": 100.0,
         "note": "Revalued at 100:1 into the Peso Ley (ARL) on 1970-01-01. Predecessor of the Argentine currency chain: ARM → ARL → ARP → ARA → ARS."
+      },
+      {
+        "code": "CUC",
+        "code_lifetime": {"from": null, "to": "2021-06-30"},
+        "source_url": "https://latablilla.uo.edu.cu/wp-content/uploads/2020/12/goc-2020-ex73.pdf",
+        "numeric": "931",
+        "name": "Cuban Convertible Peso",
+        "minor_units": 2,
+        "symbol": "CUC$",
+        "entity": "Cuba",
+        "withdrawn_date": "2021-06-30",
+        "replaced_by": "CUP",
+        "conversion_rate": 0.041666666666666664,
+        "note": "ISO List Three (SIX, published 2026-01-01): WthdrwlDt 2021-06. ISO 4217 amendment 178 (SIX, 4 February 2025) moved CUC to List Three: withdrawal from circulation began on 1 January 2021 under Resolución 177/2020 of the Banco Central de Cuba and was completed on 30 June 2021. Conversion rate from Resolución 177/2020 (Gaceta Oficial No. 73 Extraordinaria, 10 December 2020; source_url is a mirror of that issue), artículo TERCERO: banks and exchange houses exchanged CUC at \"veinticuatro (24) pesos cubanos por un (1) peso convertible\", hence 1/24 CUC per CUP. Artículo UNDÉCIMO converted the bank balances of state bodies and state enterprises at one CUP per CUC, and other balances at 24."
       },
       {
         "code": "XEU",
