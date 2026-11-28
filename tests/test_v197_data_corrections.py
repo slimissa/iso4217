@@ -90,3 +90,23 @@ def test_conversion_rate_has_one_direction_everywhere():
     # Revaluations store old units per new unit (SLL 1000 per SLE; BGN 1.95583 per EUR). A rate below 1 is legitimate only
     # where the old unit was worth more than the new one; CUC is the one such record v1.9.7 adds.
     assert WITHDRAWN["SLL"]["conversion_rate"] == 1000.0 and WITHDRAWN["BGN"]["conversion_rate"] == 1.95583
+
+
+class TestTheCuratedActiveSet:
+    """tools/parse_source.py's ACTIVE_ISO_CODES follows the registry's active section (v1.9.7, patch 05)."""
+
+    @staticmethod
+    def _curated() -> set[str]:
+        import ast
+        tree = ast.parse((PROJECT_ROOT / "tools" / "parse_source.py").read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.AnnAssign) and getattr(node.target, "id", "") == "ACTIVE_ISO_CODES":
+                return set(ast.literal_eval(node.value))
+        raise AssertionError("ACTIVE_ISO_CODES not found")
+
+    def test_cuc_is_not_in_it(self):
+        assert "CUC" not in self._curated()
+
+    def test_it_is_the_active_section_but_for_uss(self):
+        # USS: absent from the curated set before v1.9.7, still active in the registry (no source yet for its day).
+        assert self._curated() == set(ACTIVE) - {"USS"}

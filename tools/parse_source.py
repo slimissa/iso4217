@@ -23,15 +23,18 @@ SOURCES_DIR = PROJECT_ROOT / "tools" / "sources"
 # Known classifications — ground truth that Wikipedia's table doesn't encode
 # ---------------------------------------------------------------------------
 
-# Currently active ISO 4217 currency codes (per amendment 180)
-# This list is manually curated against the ISO standard.
-# When ISO publishes an amendment, update this list.
+# Currently active ISO 4217 currency codes, curated by hand to match the registry's `active` section (amendment 180; CUC
+# removed in v1.9.7 per ISO 4217 amendment 178, as SIX's List Three, published 2026-01-01, lists it). It differs from SIX's
+# List One (published 2026-09-17) exactly where the registry does: ANG is still listed and XCG is not, pending a primary
+# source for ANG's last legal-tender day (tests/test_six_list_one_parity.py). USS is absent here although the registry
+# still lists it as active; tests/test_v197_data_corrections.py pins that one difference.
+# When ISO publishes an amendment, update this list and the registry together.
 ACTIVE_ISO_CODES: Set[str] = {
     "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN",
     "BAM", "BBD", "BDT", "BHD", "BIF", "BMD", "BND", "BOB", "BOV",
     "BRL", "BSD", "BTN", "BWP", "BYN", "BZD",
     "CAD", "CDF", "CHE", "CHF", "CHW", "CLF", "CLP", "CNY", "COP", "COU",
-    "CRC", "CUC", "CUP", "CVE", "CZK",
+    "CRC", "CUP", "CVE", "CZK",
     "DJF", "DKK", "DOP", "DZD",
     "EGP", "ERN", "ETB", "EUR",
     "FJD", "FKP",
