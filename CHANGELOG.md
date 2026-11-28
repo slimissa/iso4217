@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-## [1.9.6] — Unreleased
+## [1.9.6] — 2026-11-27
 
 One registry, one answer, in every language. This release closes the two items the third audit pass left open (items 6 and 7 of the fourth
 audit's input list in `docs/audits/third-pass.md`): the four wrappers now list every collection in the same order, the lookups that take a
