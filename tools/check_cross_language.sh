@@ -31,6 +31,11 @@
 
 set -u
 
+# v1.9.7: the status marks are written as their UTF-8 bytes. Bash's printf expands \u2713 only under a UTF-8 locale; under
+# C or POSIX (cron, minimal CI images) it printed the six characters "\u2713" instead of the mark.
+MARK_PASS=$'\342\234\223'   # U+2713 CHECK MARK
+MARK_FAIL=$'\342\234\227'   # U+2717 BALLOT X
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
@@ -115,14 +120,14 @@ ALLOWED_NAMES=""      # display names of suites excused by --allow-skip
 # ---------------------------------------------------------------------------
 
 report_pass() {
-    printf '  %-12s \u2713 pass\n' "$1"
+    printf '  %-12s %s pass\n' "$1" "$MARK_PASS"
     PASSED=$((PASSED + 1))
 }
 
 report_fail() {
     local name="$1"
     shift
-    printf '  %-12s \u2717 FAIL\n' "$name"
+    printf '  %-12s %s FAIL\n' "$name" "$MARK_FAIL"
     printf '%s\n' "$@" | tail -20 | sed 's/^/      /'
     FAILED=$((FAILED + 1))
 }

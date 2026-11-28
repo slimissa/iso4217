@@ -51,7 +51,7 @@ BASH = shutil.which("bash")
 LANGS = {"python": "python3", "javascript": "node", "go": "go", "rust": "cargo"}
 
 
-def _run(tmp_path: Path, *args: str, present=("python", "javascript", "go", "rust"), failing=()):
+def _run(tmp_path: Path, *args: str, present=("python", "javascript", "go", "rust"), failing=(), locale=None):
     """Run the real script with only the named toolchain stubs on PATH."""
     assert BASH, "bash not found"
     bin_dir = tmp_path / "bin"
@@ -67,7 +67,7 @@ def _run(tmp_path: Path, *args: str, present=("python", "javascript", "go", "rus
     result = subprocess.run(
         [BASH, str(SCRIPT), *args],
         capture_output=True, text=True, timeout=60, cwd=PROJECT_ROOT,
-        env={"PATH": str(bin_dir), "HOME": str(tmp_path)},
+        env={"PATH": str(bin_dir), "HOME": str(tmp_path), **({"LC_ALL": locale, "LANG": locale} if locale else {})},
     )
     return result.returncode, result.stdout, result.stderr
 
@@ -245,3 +245,19 @@ class TestGateCallsItUnconditionally:
         assert "check_cross_language.sh" in result.stdout
         assert "No such file" in result.stdout
         assert "GATE_FAILED=1" in result.stdout
+
+
+# ---------------------------------------------------------------------------
+# v1.9.7: the status marks do not depend on the locale
+# ---------------------------------------------------------------------------
+
+class TestMarksUnderAnyLocale:
+    """Bash expands printf's \\u escapes only under a UTF-8 locale. Under C or POSIX the script printed the literal
+    "\\u2713"; the marks are now written as their UTF-8 bytes."""
+
+    @pytest.mark.parametrize("locale", ["C", "POSIX", "C.UTF-8"])
+    def test_pass_and_fail_marks_are_the_characters(self, tmp_path, locale):
+        code, out, _ = _run(tmp_path, failing=("go",), locale=locale)
+        assert code == 1
+        assert "Python       \u2713 pass" in out and "Go           \u2717 FAIL" in out, out
+        assert "\\u27" not in out, "a literal escape was printed"
