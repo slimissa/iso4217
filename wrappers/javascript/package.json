@@ -11,7 +11,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node test.js && node numeric_contract.test.js",
+    "test": "node test.js && node numeric_contract.test.js && node lookup_contract.test.js && node collection_order.test.js",
     "lint": "eslint index.js",
     "prepublishOnly": "npm test"
   },
