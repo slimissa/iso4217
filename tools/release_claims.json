@@ -2218,7 +2218,48 @@
     },
     {
       "file": "tests/test_six_list_one_parity.py",
-      "contains": "\"CUC\": (\"not_in_list_one\", BLOCKED, \"2027-03-31\")"
+      "absent": "\"CUC\": (\"not_in_list_one\""
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"withdrawn_date\": \"2021-06-30\",\n        \"replaced_by\": \"CUP\",\n        \"conversion_rate\": 0.041666666666666664,"
+    },
+    {
+      "file": "iso4217.json",
+      "contains": "\"source_url\": \"https://latablilla.uo.edu.cu/wp-content/uploads/2020/12/goc-2020-ex73.pdf\","
+    },
+    {
+      "file": "iso4217.json",
+      "absent": "still ISO-listed as active"
+    },
+    {
+      "file": "docs/COUNTRY_CURRENCY_ALLOWLIST.md",
+      "absent": "\"currency\": \"CUC\""
+    },
+    {
+      "file": "README.md",
+      "contains": "| **Active ISO 4217 currencies** | 165 —"
+    },
+    {
+      "file": "README.md",
+      "contains": "| **Withdrawn ISO 4217 currencies** | 137 —"
+    },
+    {
+      "file": "tests/test_v197_data_corrections.py",
+      "contains": "class TestReadmeCounts"
+    },
+    {
+      "file": "tools/parse_source.py",
+      "contains": "    \"CRC\", \"CUP\", \"CVE\", \"CZK\","
+    },
+    {
+      "file": "docs/decisions/country-currency-taxonomy.md",
+      "contains": "The move landed in v1.9.7",
+      "absent": "did **not** land in v1.9.7"
+    },
+    {
+      "file": "tests/test_v197_mutations.py",
+      "contains": "Y08-the-curated-set-drifts-further"
     },
     {
       "file": "tests/test_six_list_one_parity.py",
