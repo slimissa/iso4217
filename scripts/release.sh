@@ -116,7 +116,7 @@ Flags:
                change that.
   --poll-timeout N
                Seconds to wait for CI after the push (positive integer,
-               default 300). A timeout fails the release; it never tags.
+               default 1200). A timeout fails the release; it never tags.
 
 Prerequisite: the gh CLI, installed and able to list this repository's
 workflow runs. The release refuses to start without it.
@@ -151,7 +151,9 @@ check_poll_timeout() {
 DRY_RUN=false
 FORCE=false
 VERSION=""
-POLL_TIMEOUT=300
+# v1.9.7: 1200 s (was 300). validate.yml took 8m16s on the v1.9.6 release commit (run 46086580455, as reported by the
+# maintainer), so a 300 s wait timed out a green release. tests/test_release_poll_timeout.py keeps it at 900 or more.
+POLL_TIMEOUT=1200
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -557,7 +559,7 @@ poll_ci() {
     #   - a workflow has no run  -> after POLL_GRACE seconds
     #   - still running          -> after POLL_TIMEOUT seconds
     # $SECONDS has whole-second granularity, so a wait can end up to one
-    # second early; that is irrelevant at a 300 s default.
+    # second early; that is irrelevant at a 1200 s default.
     local sha start elapsed wf out errf err id status conclusion
     local missing pending
     sha="$(git rev-parse HEAD)"

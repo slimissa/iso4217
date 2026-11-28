@@ -682,7 +682,7 @@ Releases are cut by [`scripts/release.sh`](./scripts/release.sh):
 bash scripts/release.sh <version> --dry-run   # run the gate and render the verification doc on a throwaway copy
 bash scripts/release.sh <version>             # release
 bash scripts/release.sh <version> --force     # re-run on an existing tag
-bash scripts/release.sh <version> --poll-timeout 900   # wait up to 900 s for CI (default 300)
+bash scripts/release.sh <version> --poll-timeout 1800  # wait up to 1800 s for CI (default 1200)
 ```
 
 The script is deterministic and refuses to start unless the `gh` CLI is installed and can list this repository's workflow runs (CI is polled before anything is tagged, and there is no flag to skip it), the working tree is clean, the branch is `main`, `HEAD` is at `origin/main`, the tag is free, the changelog has a section for the version, and the version-consistency check currently passes. Then it:
