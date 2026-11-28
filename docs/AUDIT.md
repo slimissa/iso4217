@@ -49,7 +49,7 @@ validator that runs nowhere validates nothing. One exception to "read and report
 | `check_doc_paths.py` | — | version-and-hygiene.yml | yes |
 | `check_rules_refs.py` | — | version-and-hygiene.yml | yes |
 | `check_amendments.py` | — | monitor-amendments.yml | — |
-| `check_cross_language.sh` | — | — | yes |
+| `check_cross_language.sh` | — | validate.yml | yes |
 | `check_release_claims.py` | — | version-and-hygiene.yml | yes |
 | `check_js_lint.sh` | — | validate.yml | yes |
 | `check_formatting.sh` | — | validate.yml | yes |
@@ -90,7 +90,7 @@ Producers and enrichment tools missing from CI or the gate (rule 8 scope):
 Validators missing from CI or the gate:
 
 - `check_amendments.py`: not in the gate
-- `check_cross_language.sh`: not in CI
+- `check_cross_language.sh`: not in CI (in CI since v1.9.7: the `cross-language` job of validate.yml)
 - `check_release_claims.py`: not in CI
 
 Tools outside the three categories missing from CI or the gate:

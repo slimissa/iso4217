@@ -94,3 +94,20 @@ def test_rust_is_cached_with_rust_cache_not_a_nonexistent_toolchain_input():
     assert re.search(r"Swatinem/rust-cache@[0-9a-f]{40} # v\d+\.\d+\.\d+", cache[0])
     assert "workspaces: wrappers/rust" in cache[0]
     assert steps.index(cache[0]) > steps.index(toolchain)
+
+
+# v1.9.7: the cross-language check runs in CI, in a job that has all four toolchains.
+def test_the_cross_language_check_runs_in_ci_with_all_four_toolchains():
+    job = _jobs()["cross-language"]
+    run_lines = [s for s in _steps(job) if "run: bash tools/check_cross_language.sh" in s]
+    assert len(run_lines) == 1, "exactly one step runs the check"
+    assert "--allow-skip" not in run_lines[0], "a missing toolchain must fail the check, not skip a suite"
+    for action in ("actions/setup-python@", "actions/setup-node@", "actions/setup-go@", "dtolnay/rust-toolchain@"):
+        assert action in job, f"cross-language has no {action}"
+    assert "if: matrix" not in job, "every toolchain is unconditional in this job"
+
+
+def test_the_cross_language_job_uses_the_wrapper_jobs_pinned_actions():
+    pins = lambda block: set(re.findall(r"uses: (\S+@[0-9a-f]{40})", block))  # noqa: E731
+    jobs = _jobs()
+    assert pins(jobs["cross-language"]) <= pins(jobs["validate-wrappers"])

@@ -323,3 +323,53 @@ jobs:
 
       - name: Audit ${{ matrix.language }} dependencies
         run: ${{ matrix.audit_cmd }}
+
+  # --- Job 4: Cross-language consistency --------------------------------------
+  # v1.9.7: tools/check_cross_language.sh runs the four wrappers' suites against one fixture
+  # (tests/cross_language_consistency.json) and was a gate step only; CI never ran it. This job has
+  # all four toolchains, with the same pinned actions as validate-wrappers.
+  cross-language:
+    name: Cross-language consistency (four wrappers, one fixture)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [check-wrapper-sync]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements-ci.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: wrappers/javascript/package.json
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27'
+          cache: true
+          cache-dependency-path: wrappers/go/go.sum
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+
+      - name: Cache cargo registry and build output
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: wrappers/rust
+
+      - name: Install CI requirements
+        run: pip install -r requirements-ci.txt --quiet
+
+      # Every one of the four suites must run: a missing toolchain fails the check (no --allow-skip here).
+      - name: Run the cross-language check
+        run: bash tools/check_cross_language.sh
