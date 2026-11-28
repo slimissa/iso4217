@@ -56,6 +56,13 @@ REL = "scripts/release.sh"
 ADR15 = "docs/decisions/wrapper-lookup-contract.md"
 ADR10 = "docs/decisions/country-currency-taxonomy.md"
 CONTRIB = "CONTRIBUTING.md"
+DATA_T = "tests/test_v197_data_corrections.py"
+ALLOW = "docs/COUNTRY_CURRENCY_ALLOWLIST.md"
+PARSE = "tools/parse_source.py"
+CUC_NOTE_START = '"note": "ISO List Three (SIX, published 2026-01-01): WthdrwlDt 2021-06. ISO 4217 amendment 178'
+CU_ALLOW = ('    {\n      "country": "CU",\n      "currency": "CUC",\n      "side": "4217-only",\n'
+            '      "category": "out-of-scope-historical",\n      "reason": "CUC was demonetized in January 2021.",\n'
+            '      "source": "registry CUC note",\n      "date": "2021-01"\n    },\n')
 
 CW_SNAPSHOT = ('        "alpha_2": "CW",\n        "alpha_3": "CUW",\n        "borders": [],\n        "calling_codes": [\n'
                '          "599"\n        ],\n        "currency_codes": [\n          "ANG"\n        ],')
@@ -126,6 +133,32 @@ MUTANTS = [
     M("X18-cuc-question-reopened", "11", "ADR 0010 says again that the CUC question is not decided",
       [(ADR10, "Open question, answered in v1.9.7:** whether CUC", "Open question, not decided here:** whether CUC")],
       "tests/test_decision_records_v197.py", ""),
+    # -- the second v1.9.7 bundle: the CUC correction (items b01, b05; b02 to b04 stopped, held by X02, X03, X05, X06) ------
+    M("Y01-cuc-rate-stored-the-wrong-way-round", "b01", "conversion_rate is 24 (CUP per CUC), against the field's direction",
+      [(REG, '"conversion_rate": 0.041666666666666664,', '"conversion_rate": 24.0,')],
+      DATA_T, "TestCUC"),
+    M("Y02-cuc-day-derived-from-the-month", "b01", "withdrawn_date is List Three's month, made a day (2021-06-01)",
+      [(REG, '"withdrawn_date": "2021-06-30",', '"withdrawn_date": "2021-06-01",')],
+      DATA_T, "TestCUC"),
+    M("Y03-cuc-stale-note-kept", "b01", "the moved record still says it is ISO-listed as active",
+      [(REG, CUC_NOTE_START, '"note": "Still ISO-listed as active. ISO List Three (SIX, published 2026-01-01): WthdrwlDt 2021-06. ISO 4217 amendment 178')],
+      DATA_T, "TestCUC"),
+    M("Y04-cuc-source-back-to-the-unread-iso-page", "b01", "source_url points at iso.org/obp, never read",
+      [(REG, '"source_url": "https://latablilla.uo.edu.cu/wp-content/uploads/2020/12/goc-2020-ex73.pdf",',
+        '"source_url": "https://www.iso.org/obp/ui/#iso:code:4217:CUC",')],
+      DATA_T, "TestCUC"),
+    M("Y05-cuc-allowlist-entry-kept", "b01", "the CU/CUC allow-list entry outlives the active record it excused",
+      [(ALLOW, '    {\n      "country": "CO",', CU_ALLOW + '    {\n      "country": "CO",')],
+      "python3 tools/check_country_codes.py --membership", kind="shell"),
+    M("Y06-readme-count-not-updated", "b01", "README still says 166 active after the move",
+      [("README.md", "| **Active ISO 4217 currencies** | 165 —", "| **Active ISO 4217 currencies** | 166 —")],
+      DATA_T, "TestReadmeCounts"),
+    M("Y07-cuc-back-in-the-curated-set", "b05", "ACTIVE_ISO_CODES still lists CUC",
+      [(PARSE, '    "CRC", "CUP", "CVE", "CZK",', '    "CRC", "CUC", "CUP", "CVE", "CZK",')],
+      DATA_T, "TestTheCuratedActiveSet"),
+    M("Y08-the-curated-set-drifts-further", "b05", "a code the registry has is dropped from ACTIVE_ISO_CODES",
+      [(PARSE, '    "CRC", "CUP", "CVE", "CZK",', '    "CRC", "CVE", "CZK",')],
+      DATA_T, "TestTheCuratedActiveSet"),
     M("X19-the-stale-count-is-back", "12", "CONTRIBUTING states a test count again",
       [(CONTRIB, "Every test must pass and none may be skipped", "Expect **768 tests passing**. Every test must pass and none may be skipped")],
       "tests/test_contributing_counts.py", ""),
@@ -174,6 +207,7 @@ def test_every_item_has_a_mutant_and_ids_are_unique():
     ids = [m.id for m in MUTANTS]
     assert len(ids) == len(set(ids))
     assert {m.fix for m in MUTANTS} >= {f"{n:02d}" for n in range(1, 13)}, "items 01 to 12 each need at least one mutant"
+    assert {m.fix for m in MUTANTS} >= {"b01", "b05"}, "the second bundle's landed items each need a mutant"
 
 
 def test_every_target_file_exists():
