@@ -73,9 +73,12 @@ and the gate by design, not by omission. `enrich_field.py` is the exception with
 | Tool | `--check` | CI | Gate |
 |------|-----------|----|------|
 | `parse_source.py` | — | — | — |
+| `six_facts.py` | `--check` | — | — |
 
 `parse_source.py` is the source-table classifier, run by hand; unlike the category C tools, no decision records why it
-runs nowhere.
+runs nowhere. `six_facts.py` (v1.9.7) derives `tests/fixtures/six_list_one_facts.json` from a downloaded copy of SIX's
+List One XML, which is not committed, so neither CI nor the gate can run it; the fixture it writes is what both check,
+through `tests/test_six_list_one_parity.py`.
 
 ## Gaps in this table as of v1.8.4
 
