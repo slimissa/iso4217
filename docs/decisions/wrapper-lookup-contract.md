@@ -84,6 +84,26 @@ missing, so deleting a vector is itself a failure.
   fails today. [Confirmed by reading `rust/src/lib.rs`.] It goes on the fourth-audit input list.
 - The wrapper READMEs and docstrings state the contract in the same words.
 
+## Amendment 1 (v1.9.6): collection order
+
+**Status:** Proposed, like the ADR it amends; accepted with it.
+
+**Decision:** every collection accessor returns its entries in **file order** in all four languages: the order of the entries in
+`iso4217.json`, section by section, one entry per code. `all_currencies()` is active, then withdrawn, then non-ISO
+(cryptocurrencies, stablecoins, commodities, special purpose, in that order). A code listed more than once keeps the position of
+its first entry and holds the entry D3 and D1 name (the last within a section, the earliest section across sections). Every
+filter (`pegged_to`, `independent`, `with_minor_units`, `issued_by`, `used_in`, `by_classification`, Rust's `iter()`) keeps the
+order of `all_active()`. Lookup by code stays O(1): Rust and Go keep their maps and walk an order index beside them.
+
+**Correction to the Consequences above:** "Python, JavaScript and Go return file order" was wrong for Go. Its accessors ranged
+over Go maps, whose iteration order is randomised on every call. [Confirmed by running v1.9.5: three calls of `AllActive()`
+returned three different orders.] v1.9.6 fixed Go together with Rust.
+
+**How it is held:** the `collection_order` group of `tests/cross_language_consistency.json` (the full ordered code lists for the
+shipped registry and a synthetic registry with repeated and overlapping codes), read by `tests/test_wrapper_collection_order.py`,
+`wrappers/javascript/collection_order.test.js`, `wrappers/go/collection_order_test.go` and the `collection_order_fixture` module
+of `wrappers/rust/src/lib.rs`; mutants W01 to W12 of `tests/test_v196_mutations.py`.
+
 ## Verification owed
 
 - Run `tools/check_cross_language.sh` on the maintainer's machine (Go 1.27.3, Rust 1.99.1, Node 22 were used here).
